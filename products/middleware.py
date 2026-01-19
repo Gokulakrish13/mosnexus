@@ -53,9 +53,14 @@ class NoCacheMiddleware(MiddlewareMixin):
         
         # If user is not authenticated and accessing a protected HTML page, redirect to please_login
         allowed_paths = ['/login/', '/register/', '/please_login/', '/']
+        
+        # Allow public access to product detail pages (QR code scanning)
+        is_product_detail = '/stream/' in request.path and '/product/' in request.path
+        
         if (not request.user.is_authenticated and
             response.get('Content-Type', '').startswith('text/html') and
-            request.path not in allowed_paths):
+            request.path not in allowed_paths and
+            not is_product_detail):
             return redirect('/please_login/')
         return response
 

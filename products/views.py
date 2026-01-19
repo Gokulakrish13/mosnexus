@@ -388,6 +388,10 @@ def product_create(request, stream=None):
     })
 
 def product_detail(request, stream, pk):
+    """
+    Public product detail view accessible via QR code.
+    No login required - allows anyone to view basic product information.
+    """
     # Resolve stream name to Stream object (404 if not found)
     stream_obj = get_stream_or_404(stream)
 
@@ -403,8 +407,18 @@ def product_detail(request, stream, pk):
     buffer = BytesIO()
     img.save(buffer, format="PNG")
     qr_image = base64.b64encode(buffer.getvalue()).decode()
-    history = product.history.order_by('-timestamp')
-    return render(request, 'products/product_detail.html', {'product': product, 'qr_image': qr_image, 'history': history, 'stream': stream, 'selected_stream': stream})
+    
+    # Only show history if user is logged in
+    history = product.history.order_by('-timestamp') if request.user.is_authenticated else []
+    
+    return render(request, 'products/product_detail.html', {
+        'product': product, 
+        'qr_image': qr_image, 
+        'history': history, 
+        'stream': stream, 
+        'selected_stream': stream,
+        'is_public_view': not request.user.is_authenticated
+    })
 
 def user_register(request):
     # Get available streams for selection
