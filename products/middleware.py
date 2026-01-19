@@ -55,7 +55,8 @@ class NoCacheMiddleware(MiddlewareMixin):
         allowed_paths = ['/login/', '/register/', '/please_login/', '/']
         
         # Allow public access to product detail pages (QR code scanning)
-        is_product_detail = '/stream/' in request.path and '/product/' in request.path
+        # Pattern: /stream/<stream_name>/products/<product_id>/
+        is_product_detail = '/stream/' in request.path and '/products/' in request.path and request.path.count('/') >= 4
         
         if (not request.user.is_authenticated and
             response.get('Content-Type', '').startswith('text/html') and
