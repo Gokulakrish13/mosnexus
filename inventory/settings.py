@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-g#=(mb2401nl!s-vr3nzjdsjti&6v7#wiu2+m%xfpyjki@bx73
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','0.0.0.0','igtmosnexus.com']
+ALLOWED_HOSTS = ['127.0.0.1','130.141.135.225','14.194.95.251','0.0.0.0','igtmosnexus.com']
 
 
 # Application definition
@@ -135,3 +135,4 @@ MEDIA_ROOT = BASE_DIR / 'product_images'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
