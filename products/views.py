@@ -387,15 +387,7 @@ def product_create(request, stream=None):
         'edit': False
     })
 
-@login_required
 def product_detail(request, stream, pk):
-    # Check user access
-    has_access, error_message, custom_profile = check_user_access(request, stream)
-    if not has_access:
-        logout(request)
-        messages.error(request, error_message)
-        return redirect('please_login')
-    
     # Resolve stream name to Stream object (404 if not found)
     stream_obj = get_stream_or_404(stream)
 
