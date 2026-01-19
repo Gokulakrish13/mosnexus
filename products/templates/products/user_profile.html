@@ -1,0 +1,1300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - IGT Mobile Surgery Portal</title>
+    <meta name="description" content="User Profile Management - Mobile Surgery Management Platform">
+    <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+    
+    <!-- Google Fonts for modern professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'products/style.css' %}">
+    
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-solid: #667eea;
+            --accent: #00d4aa;
+            --accent-secondary: #ff6b6b;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f1419;
+            --glass: rgba(255,255,255,0.95);
+            --glass-dark: rgba(15,20,25,0.95);
+            --card-bg: rgba(255,255,255,0.8);
+            --card-bg-dark: rgba(30,41,59,0.8);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-primary-dark: #f1f5f9;
+            --text-secondary-dark: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 20px;
+            --radius-lg: 32px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.3) 0%, transparent 50%);
+        }
+
+        body.dark-mode .bg-animated {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.15) 0%, transparent 50%);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: var(--border);
+            padding: 1rem 2rem;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .header {
+            background: var(--glass-dark);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-solid);
+        }
+
+        .header-logo img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border: var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        body.dark-mode .notification-bell {
+            background: var(--card-bg-dark);
+        }
+
+        .notification-bell:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .notification-bell.has-notifications::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: var(--border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: var(--card-bg-dark);
+        }
+
+        .theme-indicator {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: var(--transition);
+            left: 4px;
+        }
+
+        body.dark-mode .theme-indicator {
+            left: calc(100% - 36px);
+        }
+
+        .theme-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        /* Main Container */
+        .main-container {
+            min-height: 100vh;
+            padding: 100px 2rem 1rem;
+        }
+
+        .profile-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Profile Sidebar */
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .profile-card {
+            background: var(--card-bg-dark);
+        }
+
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .file-upload-label.uploading {
+            pointer-events: none;
+            opacity: 0.7;
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .file-upload-label.success {
+            border-color: var(--success);
+            background: rgba(38, 222, 129, 0.1);
+            color: var(--success);
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .avatar-edit:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .avatar-edit:active {
+            transform: scale(1.05);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+        }
+
+        body.dark-mode .profile-name {
+            color: var(--text-primary-dark);
+        }
+
+        .profile-role {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-super_admin {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .role-admin {
+            background: linear-gradient(135deg, #a55eea, #8c7ae6);
+            color: white;
+        }
+
+        .role-lab_incharge {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            color: white;
+        }
+
+        .role-user {
+            background: linear-gradient(135deg, #54a0ff, #2e86de);
+            color: white;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-back {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: var(--border);
+        }
+
+        body.dark-mode .btn-back {
+            background: var(--card-bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .btn-back:hover {
+            background: var(--primary-solid);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Profile Content */
+        .profile-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .content-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .content-header {
+            background: var(--card-bg-dark);
+        }
+
+        .content-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.35rem;
+        }
+
+        .content-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        body.dark-mode .content-subtitle {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Profile Info Grid */
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .info-card {
+            background: var(--card-bg-dark);
+        }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .info-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        body.dark-mode .info-label {
+            color: var(--text-secondary-dark);
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        body.dark-mode .info-value {
+            color: var(--text-primary-dark);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .activity-feed {
+            background: var(--card-bg-dark);
+        }
+
+        .activity-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        body.dark-mode .activity-title {
+            color: var(--text-primary-dark);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .activity-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        body.dark-mode .activity-text {
+            color: var(--text-primary-dark);
+        }
+
+        .activity-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode .activity-time {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            border: var(--border);
+        }
+
+        body.dark-mode .modal-content {
+            background: var(--card-bg-dark);
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: var(--radius-lg);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--accent-secondary);
+            transform: scale(1.1);
+        }
+
+        /* Notifications */
+        .notifications-popup {
+            position: fixed;
+            top: 80px;
+            right: 2rem;
+            width: 400px;
+            max-height: 500px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: var(--border);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            overflow: hidden;
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .notifications-popup {
+            background: var(--card-bg-dark);
+        }
+
+        .notifications-popup.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notifications-header {
+            padding: 1.5rem;
+            border-bottom: var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .notifications-title {
+            color: var(--text-primary-dark);
+        }
+
+        .notifications-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notifications-close:hover {
+            color: var(--accent-secondary);
+        }
+
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .notification-item {
+            padding: 1rem 1.5rem;
+            border-bottom: var(--border);
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .notification-item.unread {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid var(--primary-solid);
+        }
+
+        /* File Upload */
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border: 2px dashed var(--primary-solid);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-weight: 600;
+            width: 100%;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        body.dark-mode .file-upload-label {
+            background: var(--card-bg-dark);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--accent);
+            background: rgba(102, 126, 234, 0.05);
+            color: var(--primary-solid);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .file-upload-label:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .theme-toggle {
+                width: 60px;
+            }
+
+            .notifications-popup {
+                right: 1rem;
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+
+            .content-title {
+                font-size: 2rem;
+            }
+
+            .notifications-popup {
+                width: calc(100vw - 2rem);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips" />
+                <span>IGT MoS Portal</span>
+            </div>
+            <div class="header-actions">
+                <div class="notification-bell {% if notifications and notifications.0 and not notifications.0.is_read %}has-notifications{% endif %}" 
+                     id="notificationBell" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <div class="theme-indicator"></div>
+                    <div class="theme-icon">
+                        <i class="fas fa-sun" id="sunIcon"></i>
+                    </div>
+                    <div class="theme-icon">
+                        <i class="fas fa-moon" id="moonIcon"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="profile-container">
+            <!-- Profile Sidebar -->
+            <div class="profile-sidebar">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <div class="avatar-container">
+                            <img id="profileImage" 
+                                 src="{% if custom_profile.profile_image %}{{ custom_profile.profile_image.url }}{% else %}{% static 'products/Philips_NoBG.png' %}{% endif %}" 
+                                 alt="Profile Image" 
+                                 class="profile-image" />
+                            {% if profile_user == user %}
+                                <div class="avatar-edit" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="profile-name">{{ profile_user.get_full_name|default:profile_user.username }}</div>
+                        <div class="profile-role role-{% if custom_profile.is_super_admin %}super_admin{% elif custom_profile.is_admin %}admin{% elif custom_profile.is_lab_incharge %}lab_incharge{% else %}user{% endif %}">
+                            {% if custom_profile.is_super_admin %}
+                                <i class="fas fa-crown"></i> Super Admin
+                            {% elif custom_profile.is_admin %}
+                                <i class="fas fa-user-shield"></i> Admin
+                            {% elif custom_profile.is_lab_incharge %}
+                                <i class="fas fa-user-tie"></i> Lab Incharge
+                            {% else %}
+                                <i class="fas fa-user"></i> User
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if profile_user == user %}
+                        <!-- File Upload Form -->
+                        <form method="post" enctype="multipart/form-data" id="profileImageForm" action="{% url 'user_profile' %}" style="margin-top: 1.5rem;">
+                            {% csrf_token %}
+                            <div class="file-upload">
+                                <input type="file" name="profile_image" accept="image/*" id="fileInput" style="display: none;">
+                                <button type="button" class="file-upload-label" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Change Profile Picture</span>
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                {% if profile_user == user %}
+                <div class="profile-card">
+                    <div class="action-buttons">
+                        <a href="{% url 'password_change' %}" class="btn btn-warning">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                        <a href="/dashboard/" class="btn btn-back">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Content Header -->
+                <div class="content-header">
+                    <h1 class="content-title">User Profile</h1>
+                    <p class="content-subtitle">Manage your account settings and view profile information</p>
+                </div>
+
+                <!-- Profile Information Grid -->
+                <div class="profile-info">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-label">Username</div>
+                        <div class="info-value">{{ profile_user.username }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value">{{ profile_user.email }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">{{ profile_user.last_login|date:'M d, Y H:i' }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value">{{ profile_user.date_joined|date:'M d, Y' }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value">
+                            {% if profile_user.is_active %}
+                                <span style="color: var(--accent);">Active</span>
+                            {% else %}
+                                <span style="color: var(--accent-secondary);">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="info-label">Permissions</div>
+                        <div class="info-value">
+                            {% if custom_profile.is_super_admin %}
+                                Full Access
+                            {% elif custom_profile.is_admin %}
+                                Administrative
+                            {% elif custom_profile.is_lab_incharge %}
+                                Laboratory Management
+                            {% else %}
+                                Standard User
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="activity-feed">
+                    <h2 class="activity-title">
+                        <i class="fas fa-history"></i>
+                        Recent Activity
+                    </h2>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Logged into the system</div>
+                            <div class="activity-time">{{ profile_user.last_login|date:'M d, Y H:i' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Profile accessed</div>
+                            <div class="activity-time">Just now</div>
+                        </div>
+                    </div>
+
+                    {% if custom_profile.profile_image %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Profile picture updated</div>
+                            <div class="activity-time">Recent</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notifications Popup -->
+    <div class="notifications-popup" id="notificationsPopup">
+        <div class="notifications-header">
+            <div class="notifications-title">
+                <i class="fas fa-bell"></i>
+                Notifications
+            </div>
+            <button class="notifications-close" onclick="closeNotifications()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notifications-list">
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                        <strong>{{ notification.get_notification_type_display }}</strong>
+                        <p>{{ notification.message }}</p>
+                        <small>{{ notification.created_at|date:'M d, Y H:i' }}</small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="notification-item">
+                    <p style="color: var(--text-secondary); text-align: center;">No notifications</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeImageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="modalImage" src="" alt="Profile Image" class="modal-image" />
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            setTheme(!document.body.classList.contains('dark-mode'));
+        });
+        
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme(true);
+        }
+
+        // Floating Particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 6000);
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 300);
+
+        // Profile Image Modal
+        const profileImage = document.getElementById('profileImage');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+
+        profileImage.addEventListener('click', () => {
+            modalImage.src = profileImage.src;
+            imageModal.classList.add('show');
+        });
+
+        function closeImageModal() {
+            imageModal.classList.remove('show');
+        }
+
+        // Notifications
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationsPopup = document.getElementById('notificationsPopup');
+
+        notificationBell.addEventListener('click', () => {
+            notificationsPopup.classList.toggle('show');
+            
+            // Mark notifications as read
+            fetch("{% url 'mark_notifications_read' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                }
+            });
+        });
+
+        function closeNotifications() {
+            notificationsPopup.classList.remove('show');
+        }
+
+        // File Upload Functions
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const form = document.getElementById('profileImageForm');
+            
+            if (fileInput && form) {
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        // Validate file type
+                        const file = this.files[0];
+                        if (!file.type.startsWith('image/')) {
+                            alert('Please select an image file.');
+                            this.value = '';
+                            return;
+                        }
+                        
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('File size must be less than 5MB.');
+                            this.value = '';
+                            return;
+                        }
+                        
+                        // Show loading state
+                        const button = form.querySelector('.file-upload-label span');
+                        const originalText = button.textContent;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                        
+                        // Preview image
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('profileImage').src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        
+                        // Submit form
+                        setTimeout(() => {
+                            form.submit();
+                        }, 500);
+                    }
+                });
+            }
+        });
+
+        // Close modals on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                closeImageModal();
+            }
+            if (!notificationBell.contains(e.target) && !notificationsPopup.contains(e.target)) {
+                closeNotifications();
+            }
+        });
+
+        // Debug: Log form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('profileImageForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    console.log('Form submitting to:', form.action);
+                    console.log('Form method:', form.method);
+                    console.log('Form enctype:', form.enctype);
+                });
+            }
+        });
+
+        // Prevent right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+                closeNotifications();
+            }
+        });
+    </script>
+</body>
+</html>

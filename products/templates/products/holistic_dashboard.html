@@ -1,0 +1,2133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holistic Systems Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        /* Philips Logo */
+        .philips-logo {
+            height: 90px;
+            width: auto;
+            position: fixed;
+            top: 27px;
+            right: 30px;
+            z-index: 900;
+        }
+        
+        /* Home Icon */
+        .home-icon {
+            position: fixed;
+            top: 30px;
+            right: 150px;
+            z-index: 901;
+            transition: all 0.3s ease;
+        }
+        .home-icon:hover {
+            transform: scale(1.1);
+        }
+        .home-icon img {
+            height: 45px;
+            width: 45px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            background: white;
+            border-radius: 10px;
+            padding: 8px;
+        }
+    </style>
+    <style>
+        body {
+            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            border-left: 4px solid;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .stats-card.available { border-left-color: #28a745; }
+        .stats-card.allocated { border-left-color: #007bff; }
+        .stats-card.maintenance { border-left-color: #ffc107; }
+        .stats-card.total { border-left-color: #6c757d; }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .badge-available { background: #d4edda; color: #155724; }
+        .badge-allocated { background: #cce5ff; color: #004085; }
+        .badge-maintenance { background: #fff3cd; color: #856404; }
+        .badge-reserved { background: #e2e3e5; color: #383d41; }
+        .badge-offline { background: #f8d7da; color: #721c24; }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-action {
+            padding: 0.375rem 0.75rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .btn-action:hover {
+            transform: scale(1.05);
+        }
+        .week-data-cell {
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .utilization-bar {
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+        .utilization-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .utilization-low { background: #28a745; }
+        .utilization-medium { background: #ffc107; }
+        .utilization-high { background: #dc3545; }
+        .priority-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+        }
+        .priority-low { background: #d1ecf1; color: #0c5460; }
+        .priority-medium { background: #fff3cd; color: #856404; }
+        .priority-high { background: #f8d7da; color: #721c24; }
+        .priority-critical { background: #dc3545; color: white; }
+        .toolbar-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .bulk-actions {
+            display: none;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        .bulk-actions.show {
+            display: block;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .stats-card { break-inside: avoid; }
+        }
+        /* System Card Styling */
+        .system-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 95, 163, 0.2) !important;
+            border-left-color: #005fa3 !important;
+        }
+        /* Graph View Modal Styling */
+        #graphViewModal {
+            display: none !important;
+        }
+        #graphViewModal.show {
+            display: block !important;
+        }
+        #graphViewModal .modal-dialog {
+            max-width: 95%;
+            margin: 1.75rem auto;
+        }
+        #graphViewModal .modal-content {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid #e9ecef;
+        }
+        /* Ensure backdrop is visible */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 9998 !important;
+        }
+        /* Ensure Tag Project Modal is visible when shown */
+        #weeklyProjectModal.show {
+            display: block !important;
+        }
+        </style>
+    </head>
+    <body>
+        <!-- Home Icon -->
+        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
+        </a>
+
+        <!-- Philips Logo -->
+        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
+        
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header shadow-lg">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Holistic Systems Dashboard
+                </h1>
+                <p class="mb-0 mt-2 opacity-75">Advanced System Availability & Allocation Management</p>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end" style="margin-right: 60px;">
+                       <div class="btn-group" role="group" style="margin-top: 35px;">
+                        <a href="{% url 'holistic_system_create' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-plus me-1"></i> Add System
+                        </a>
+                        <button type="button" class="btn btn-light btn-lg dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'holistic_export_excel' %}">
+                                <i class="fas fa-file-excel text-success me-2"></i>Export to Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'holistic_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger me-2"></i>Export to PDF
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="stats-card total">
+                <div class="stats-number text-secondary">{{ total_systems }}</div>
+                <div class="stats-label">Total Systems</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card available">
+                <div class="stats-number text-success">{{ available_count }}</div>
+                <div class="stats-label">Available</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card allocated">
+                <div class="stats-number text-primary">{{ allocated_count }}</div>
+                <div class="stats-label">Allocated</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card maintenance">
+                <div class="stats-number text-warning">{{ maintenance_count }}</div>
+                <div class="stats-label">Maintenance</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card" style="border-left-color: #f8d7da;">
+                <div class="stats-number" style="color: #dc3545;">{{ offline_count }}</div>
+                <div class="stats-label">Offline</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card" style="border-left-color: #e2e3e5;">
+                <div class="stats-number" style="color: #383d41;">{{ reserved_count }}</div>
+                <div class="stats-label">Reserved</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section no-print">
+        <form method="get" id="filterForm" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-search me-1"></i>Search</label>
+                  <input type="text" class="form-control" name="q" value="{{ search_query }}" 
+                      placeholder="Sr No, Owner, STMi, Location...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-filter me-1"></i>Status</label>
+                <select class="form-select" name="status">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label"><i class="fas fa-calendar-week me-1"></i>Week Filter</label>
+                <select class="form-select" name="week">
+                    <option value="">Current Week (W{{ current_week }})</option>
+                    {% for week in recent_weeks %}
+                    <option value="{{ week.value }}" {% if week_filter == week.value %}selected{% endif %}>
+                        {{ week.label }} {{ week.year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="fas fa-filter me-1"></i> Apply Filters
+                </button>
+                <button type="button" class="btn btn-outline-secondary flex-fill" onclick="resetFilters()">
+                    <i class="fas fa-undo me-1"></i> Reset
+                </button>
+            </div>
+        </form>
+        
+        <script>
+            function resetFilters() {
+                // Clear all filter values
+                document.querySelector('input[name="q"]').value = '';
+                document.querySelector('select[name="status"]').value = '';
+                document.querySelector('select[name="week"]').value = '';
+                
+                // Submit form to apply reset (redirect to page without filters)
+                window.location.href = window.location.pathname;
+            }
+        </script>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulkActions">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Bulk Action</label>
+                <select class="form-select" id="bulkActionType">
+                    <option value="">Select Action...</option>
+                    <option value="system_availability">Change Status</option>
+                    <option value="priority">Change Priority</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Value</label>
+                <select class="form-select" id="bulkActionValue">
+                    <option value="">Select Value...</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-primary" onclick="applyBulkAction()">
+                    <i class="fas fa-check me-1"></i> Apply to Selected
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="cancelBulkAction()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="table-container">
+        <div class="toolbar-section no-print">
+            <div>
+                <button type="button" class="btn btn-outline-primary" onclick="toggleBulkSelection()">
+                    <i class="fas fa-check-square me-1"></i> Bulk Select
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="openGraphView()">
+                    <i class="fas fa-chart-pie me-1"></i> Graph View
+                </button>
+            </div>
+            <div>
+                <span class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Showing {{ systems.count }} system{{ systems.count|pluralize }}
+                </span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover" id="holisticTable">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th class="no-print text-center">
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th class="text-center">Sr No</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Allocation to Sl No</th>
+                        <th class="text-center">Location</th>
+                        <th class="text-center">STMi Number</th>
+                        <th class="text-center">System Owner</th>
+                        <th class="text-center">ECR#</th>
+                        <th class="text-center">Test Engineer</th>
+                        <th class="text-center">Priority</th>
+                        <th class="text-center">Current Week</th>
+                        <th class="text-center">Current Week Project</th>
+                        <th class="no-print text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for system in systems %}
+                    <tr>
+                        <td class="no-print">
+                            <input type="checkbox" class="form-check-input row-select" value="{{ system.id }}">
+                        </td>
+                        <td><strong>{{ system.sr_no }}</strong></td>
+                        <td>
+                            <span class="badge-status badge-{{ system.system_availability }}">
+                                {{ system.get_system_availability_display }}
+                            </span>
+                        </td>
+                        <td>{{ system.allocation_to_sl_no|default:"-" }}</td>
+                        <td>{{ system.location_info|default:"-" }}</td>
+                        <td>{{ system.stmi_number|default:"-" }}</td>
+                        <td>{{ system.system_owner|default:"-" }}</td>
+                        <td>{{ system.ecr_number|default:"-" }}</td>
+                        <td>{{ system.test_engineer|default:"-" }}</td>
+                        <td>
+                            <span class="priority-badge priority-{{ system.priority }}">
+                                {{ system.get_priority_display }}
+                            </span>
+                        </td>
+                        <td class="week-data-cell">
+                            {% if system.current_week_data %}
+                                <div>{{ system.current_week_data.allocation_status|truncatewords:3 }}</div>
+                                <div class="utilization-bar">
+                                    {% if system.current_week_data.utilization_percentage < 60 %}
+                                    <div class="utilization-fill utilization-low" 
+                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
+                                    {% elif system.current_week_data.utilization_percentage < 85 %}
+                                    <div class="utilization-fill utilization-medium" 
+                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
+                                    {% else %}
+                                    <div class="utilization-fill utilization-high" 
+                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">{{ system.current_week_data.utilization_percentage }}%</small>
+                            {% else %}
+                                <span class="text-muted">No data</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if system.current_week_data.project %}
+                                <div class="mb-1">
+                                    <span class="badge bg-primary">{{ system.current_week_data.project.name }}</span>
+                                    <small class="text-muted d-block mt-1">W{{ system.current_week_data.week_number }} {{ system.current_week_data.year }}</small>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">No project assigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="no-print">
+                            <div class="action-buttons">
+                                <a href="{% url 'holistic_system_detail' system.id %}" 
+                                   class="btn btn-sm btn-info btn-action" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'holistic_system_edit' system.id %}" 
+                                   class="btn btn-sm btn-warning btn-action" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success btn-action" 
+                                        onclick="updateWeekData({{ system.id }})" title="Update Week Data">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </button>
+                                <a href="{% url 'holistic_system_delete' system.id %}" 
+                                   class="btn btn-sm btn-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                <!-- Weekly Project Assignment Button -->
+                                <button type="button" class="btn btn-sm btn-secondary btn-action" title="Assign Weekly Projects" onclick="assignWeeklyProjects('{{ system.id|escapejs }}')">
+                                    <i class="fas fa-calendar-alt"></i> Weekly Projects
+                                </button>
+                                <!-- Graph View Button -->
+                                <button type="button" class="btn btn-sm btn-info btn-action" title="View Allocation Graph" onclick="showSystemGraph('{{ system.id|escapejs }}', '{{ system.sr_no|escapejs }}')">
+                                    <i class="fas fa-chart-pie"></i>
+                                </button>
+                                <script type="application/json" id="system-current-project-{{ system.id }}">{{ system.current_project_id_json|safe }}</script>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="12" class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No systems found. Create your first system to get started.</p>
+                            <a href="{% url 'holistic_system_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add System
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Weekly Data Modal -->
+<div class="modal fade" id="weekDataModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-week me-2"></i>Update Weekly Data
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="weekDataForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="week_system_id" name="system_id">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Week Number</label>
+                            <input type="number" class="form-control" name="week_number" 
+                                   value="{{ current_week }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Year</label>
+                            <input type="number" class="form-control" name="year" 
+                                   value="{{ current_year }}" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Allocation Status</label>
+                            <input type="text" class="form-control" name="allocation_status" 
+                                   placeholder="e.g., Testing Phase A">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Utilization %</label>
+                            <input type="number" class="form-control" name="utilization_percentage" 
+                                   min="0" max="100" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned To</label>
+                            <input type="text" class="form-control" name="assigned_to">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hours Used</label>
+                            <input type="number" class="form-control" name="hours_used" 
+                                   min="0" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Available Hours</label>
+                            <input type="number" class="form-control" name="availability_hours" 
+                                   min="0" step="0.01" value="40">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Task Description</label>
+                            <textarea class="form-control" name="task_description" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveWeekData()">
+                    <i class="fas fa-save me-1"></i> Save Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- Graph View Modal -->
+<div class="modal fade" id="graphViewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #005fa3;">
+                <div>
+                    <h5 class="modal-title" id="graphModalTitle">
+                        <i class="fas fa-chart-pie me-2" style="color: #005fa3;"></i>System Allocation Analytics
+                    </h5>
+                    <small class="text-muted" id="graphModalSubtitle">Weekly allocation and project distribution</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="graphLoadingSpinner" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading allocation data...</p>
+                </div>
+
+                <!-- Comparative Utilization Bar Chart -->
+                <div id="allSystemsUtilizationSection" style="display: none; margin-bottom: 2rem;">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>System Utilization Comparison</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="allSystemsUtilizationChart" style="max-height: 320px;"></canvas>
+                        </div>
+                        <div class="card-footer bg-light small">
+                            <span class="text-muted">Average utilization (%) for all systems</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Selector Section -->
+                <div id="systemSelectorSection" style="display: none;">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-cube me-2"></i>Select System</label>
+                            <select class="form-select form-select-lg" id="systemSelector" onchange="selectSystemFromDropdown()">
+                                <option value="">-- Choose a System --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="fas fa-filter me-2"></i>Status</label>
+                            <select class="form-select" id="statusFilter" onchange="filterSystemsList()">
+                                <option value="">All Status</option>
+                                <option value="available">Available</option>
+                                <option value="allocated">Allocated</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="reserved">Reserved</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="fas fa-search me-2"></i>Search</label>
+                            <input type="text" class="form-control" id="systemSearch" placeholder="Sr No, Owner..." onkeyup="filterSystemsList()">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="loadSelectedSystemBtn" onclick="loadSelectedSystem()" disabled>
+                                <i class="fas fa-chart-line me-1"></i>Load Analytics
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetSystemSelector()">
+                                <i class="fas fa-redo me-1"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Systems Grid View -->
+                    <div id="systemsGrid" class="row g-3">
+                        <!-- Systems will be loaded here -->
+                    </div>
+                </div>
+
+                <div id="graphContent" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 id="selectedSystemName" class="mb-0">System Name</h5>
+                            <small class="text-muted" id="selectedSystemInfo">System Information</small>
+                        </div>
+                        <!-- <button type="button" class="btn btn-outline-secondary btn-sm" onclick="backToSystemSelector()">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Systems
+                        </button> -->
+                    </div>
+                    <hr>
+                    <div class="row g-4">
+                        <!-- Weekly Allocation Chart -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Weekly Distribution</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <canvas id="weeklyChart" style="max-height: 300px;"></canvas>
+                                </div>
+                                <div class="card-footer bg-light small">
+                                    <span class="text-muted">Last 12 weeks allocation status</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Distribution Chart -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Project Distribution</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <canvas id="projectChart" style="max-height: 300px;"></canvas>
+                                </div>
+                                <div class="card-footer bg-light small">
+                                    <span class="text-muted">Time allocation by project</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Distribution Pie Chart -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Status Distribution</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <canvas id="statusPieChart" style="max-height: 300px;"></canvas>
+                                </div>
+                                <div class="card-footer bg-light small">
+                                    <span class="text-muted">Proportion of each status in selected period</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cumulative Hours Usage Chart -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-chart-area me-2"></i>Cumulative Hours Usage</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <canvas id="cumulativeUtilChart" style="max-height: 300px;"></canvas>
+                                </div>
+                                <div class="card-footer bg-light small">
+                                    <span class="text-muted">Total hours used vs available over time</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Utilization Summary -->
+                    <div class="row g-4 mt-3">
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Utilization</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 id="avgUtilization" class="text-primary">0%</h3>
+                                    <div class="progress mt-3" style="height: 25px;">
+                                        <div id="utilizationBar" class="progress-bar progress-bar-striped bg-success" 
+                                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Average over selected period</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-list-check me-2"></i>Status</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm mb-0">
+                                        <tbody id="statusTable">
+                                            <tr>
+                                                <td><small>Current Status:</small></td>
+                                                <td class="text-end"><span id="currentStatus" class="badge">-</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small>System Owner:</small></td>
+                                                <td class="text-end"><small id="systemOwner">-</small></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small>Location:</small></td>
+                                                <td class="text-end"><small id="systemLocation">-</small></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i>Summary</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm mb-0">
+                                        <tbody id="summaryTable">
+                                            <tr>
+                                                <td><small>Total Weeks Tracked:</small></td>
+                                                <td class="text-end"><small><strong id="totalWeeks">0</strong></small></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small>Highest Utilization:</small></td>
+                                                <td class="text-end"><small><strong id="maxUtilization">0%</strong></small></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small>Projects Allocated:</small></td>
+                                                <td class="text-end"><small><strong id="projectCount">0</strong></small></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Weekly Table -->
+                    <div class="row g-4 mt-3">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-table me-2"></i>Weekly Breakdown</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-hover table-sm mb-0" id="weeklyBreakdownTable">
+                                            <thead class="table-light" style="position: sticky; top: 0;">
+                                                <tr>
+                                                    <th>Week</th>
+                                                    <th>Status</th>
+                                                    <th>Project</th>
+                                                    <th>Utilization</th>
+                                                    <th>Hours Used</th>
+                                                    <th>Assigned To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="weeklyTableBody">
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">Loading data...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 2px solid #f0f0f0;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Close
+                </button>
+                <button type="button" class="btn btn-primary" onclick="downloadGraphData()">
+                    <i class="fas fa-download me-1"></i>Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Move all scripts to just before </body> -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script>
+// Weekly Project Assignment Modal logic
+function assignWeeklyProjects(systemId) {
+    console.log('[DEBUG] assignWeeklyProjects called with systemId:', systemId);
+    
+    // Set system id
+    document.getElementById('weekly_project_system_id').value = systemId;
+    
+    // Get system sr_no for display
+    const systemRow = document.querySelector(`script[id="system-current-project-${systemId}"]`).closest('tr');
+    const srNo = systemRow.querySelector('td:nth-child(2) strong').textContent;
+    document.getElementById('selectedSystemSrNo').textContent = srNo;
+    
+    // Set current week/year
+    const today = new Date();
+    const currentWeek = getWeekNumber(today);
+    const currentYear = today.getFullYear();
+    document.getElementById('currentWeekNumber').value = currentWeek;
+    document.getElementById('currentYear').value = currentYear;
+    
+    // Get current project assignment
+    let currentProjectId = null;
+    try {
+        currentProjectId = JSON.parse(document.getElementById('system-current-project-' + systemId).textContent);
+    } catch (e) {
+        console.error('[DEBUG] Could not parse current project for systemId', systemId, e);
+    }
+    
+    // Set current project in dropdown
+    document.getElementById('currentWeekProject').value = currentProjectId || '';
+    
+    // Load assignment history
+    loadAssignmentHistory(systemId);
+    
+    // Show modal
+    var modalEl = document.getElementById('weeklyProjectModal');
+    if (!modalEl) {
+        console.error('[DEBUG] weeklyProjectModal element not found!');
+        return;
+    }
+    if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl);
+    var modal = new bootstrap.Modal(modalEl, {backdrop: 'static', keyboard: false});
+    modal.show();
+    
+    // Force modal and backdrop z-index after show
+    setTimeout(() => {
+        const backdrops = document.getElementsByClassName('modal-backdrop');
+        for (let i = 0; i < backdrops.length; i++) {
+            backdrops[i].style.zIndex = '9998';
+        }
+        modalEl.style.zIndex = '9999';
+    }, 50);
+}
+
+function saveWeeklyProjectAssignment() {
+    const systemId = document.getElementById('weekly_project_system_id').value;
+    const projectId = document.getElementById('currentWeekProject').value;
+    const weekNumber = document.getElementById('currentWeekNumber').value;
+    const year = document.getElementById('currentYear').value;
+    
+    fetch('/holistic-dashboard/assign-project-to-week/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ 
+            system_id: systemId, 
+            project_id: projectId || null,
+            week_number: parseInt(weekNumber),
+            year: parseInt(year)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Project assignment saved successfully!');
+            loadAssignmentHistory(systemId);
+            // Optionally refresh the page to show updated data
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Error: ' + err);
+    });
+}
+
+function loadAssignmentHistory(systemId) {
+    fetch('/holistic-dashboard/get-project-assignments/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ system_id: systemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tableBody = document.getElementById('assignmentHistoryTable');
+            tableBody.innerHTML = '';
+            
+            if (data.assignments.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No assignment history</td></tr>';
+                return;
+            }
+            
+            data.assignments.forEach(assignment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>W${assignment.week_number} ${assignment.year}</td>
+                    <td>${assignment.project_name || '<span class="text-muted">No project</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" 
+                                onclick="assignToWeek(${systemId}, ${assignment.week_number}, ${assignment.year}, ${assignment.project_id || 'null'})"
+                                title="Edit this week">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            console.error('Error loading assignment history:', data.error);
+        }
+    })
+    .catch(err => {
+        console.error('Error loading assignment history:', err);
+    });
+}
+
+function assignToWeek(systemId, weekNumber, year, projectId) {
+    // Set the week/year in the current assignment form
+    document.getElementById('currentWeekNumber').value = weekNumber;
+    document.getElementById('currentYear').value = year;
+    document.getElementById('currentWeekProject').value = projectId || '';
+}
+
+// Helper function to get week number
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize DataTable
+        if (window.jQuery) {
+            var table = $('#holisticTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'print'
+                ],
+                pageLength: 25,
+                order: [[1, 'asc']],
+                columnDefs: [
+                    { orderable: false, targets: [0, -1] }
+                ]
+            });
+            // Select all checkbox
+            $('#selectAll').on('change', function() {
+                $('.row-select').prop('checked', this.checked);
+                toggleBulkActions();
+            });
+            // Individual row checkboxes
+            $('.row-select').on('change', function() {
+                toggleBulkActions();
+            });
+            // Refresh button
+            $('#refreshBtn').on('click', function() {
+                location.reload();
+            });
+        }
+        // Bulk action type change (use vanilla JS for reliability)
+        var bulkActionType = document.getElementById('bulkActionType');
+        if (bulkActionType) {
+            bulkActionType.addEventListener('change', function() {
+                updateBulkActionValues(this.value);
+            });
+            // Trigger update on page load if a value is preselected
+            if (bulkActionType.value) {
+                updateBulkActionValues(bulkActionType.value);
+            }
+        }
+    });
+    function toggleBulkSelection() {
+        const checkboxes = document.querySelectorAll('.row-select');
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        checkboxes.forEach(cb => {
+            cb.checked = !anyChecked;
+        });
+        document.getElementById('selectAll').checked = !anyChecked;
+        toggleBulkActions();
+    }
+    function toggleBulkActions() {
+        const checked = document.querySelectorAll('.row-select:checked').length;
+        const bulkActions = document.getElementById('bulkActions');
+        if (checked > 0) {
+            bulkActions.classList.add('show');
+        } else {
+            bulkActions.classList.remove('show');
+        }
+    }
+    function updateBulkActionValues(action) {
+        const valueSelect = document.getElementById('bulkActionValue');
+        valueSelect.innerHTML = '<option value="">Select Value...</option>';
+        if (action === 'system_availability') {
+            const statuses = [
+                {value: 'available', label: 'Available'},
+                {value: 'allocated', label: 'Allocated'},
+                {value: 'maintenance', label: 'Maintenance'},
+                {value: 'reserved', label: 'Reserved'},
+                {value: 'offline', label: 'Offline'}
+            ];
+            statuses.forEach(status => {
+                valueSelect.innerHTML += `<option value="${status.value}">${status.label}</option>`;
+            });
+        } else if (action === 'priority') {
+            const priorities = [
+                {value: 'low', label: 'Low'},
+                {value: 'medium', label: 'Medium'},
+                {value: 'high', label: 'High'},
+                {value: 'critical', label: 'Critical'}
+            ];
+            priorities.forEach(priority => {
+                valueSelect.innerHTML += `<option value="${priority.value}">${priority.label}</option>`;
+            });
+        }
+    }
+    function applyBulkAction() {
+        const action = document.getElementById('bulkActionType').value;
+        const value = document.getElementById('bulkActionValue').value;
+        const selectedIds = Array.from(document.querySelectorAll('.row-select:checked'))
+            .map(cb => cb.value);
+        if (!action || !value) {
+            alert('Please select both action and value');
+            return;
+        }
+        if (selectedIds.length === 0) {
+            alert('Please select at least one system');
+            return;
+        }
+        if (!confirm(`Apply ${action} = ${value} to ${selectedIds.length} system(s)?`)) {
+            return;
+        }
+        fetch("{% url 'holistic_bulk_update' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({
+                'system_ids[]': selectedIds,
+                'action': action,
+                'value': value
+            })
+        })
+        .then(async response => {
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                alert('Server error: ' + response.status + ' ' + response.statusText);
+                console.error('Raw response:', response);
+                return;
+            }
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Backend error: ' + (data.error || JSON.stringify(data)));
+                console.error('Backend error:', data);
+            }
+        })
+        .catch(error => {
+            alert('JS error: ' + error);
+            console.error('JS error:', error);
+        });
+    }
+    function cancelBulkAction() {
+        document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
+        document.getElementById('selectAll').checked = false;
+        toggleBulkActions();
+    }
+    function updateWeekData(systemId) {
+        document.getElementById('week_system_id').value = systemId;
+        
+        // Get the displayed week from the week filter or default to current week
+        const weekFilterSelect = document.querySelector('select[name="week"]');
+        const weekFilterValue = weekFilterSelect ? weekFilterSelect.value : '';
+        
+        let displayedWeek, displayedYear;
+        
+        if (weekFilterValue && weekFilterValue.includes('-')) {
+            // Parse week filter value like "W46-2025"
+            const [weekPart, yearPart] = weekFilterValue.split('-');
+            displayedWeek = parseInt(weekPart.replace('W', ''));
+            displayedYear = parseInt(yearPart);
+        } else {
+            // Default to current week
+            displayedWeek = {{ current_week }};
+            displayedYear = {{ current_year }};
+        }
+        
+        // Fetch week data for the displayed week
+        fetch('/holistic-dashboard/get-week-data/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 
+                system_id: systemId,
+                week_number: displayedWeek,
+                year: displayedYear
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Pre-populate form fields with existing data
+                const weekData = data.week_data;
+                document.querySelector('input[name="week_number"]').value = weekData.week_number || displayedWeek;
+                document.querySelector('input[name="year"]').value = weekData.year || displayedYear;
+                document.querySelector('input[name="allocation_status"]').value = weekData.allocation_status || '';
+                document.querySelector('input[name="utilization_percentage"]').value = weekData.utilization_percentage || 0;
+                document.querySelector('input[name="assigned_to"]').value = weekData.assigned_to || '';
+                document.querySelector('input[name="hours_used"]').value = weekData.hours_used || 0;
+                document.querySelector('input[name="availability_hours"]').value = weekData.availability_hours || 40;
+                document.querySelector('textarea[name="task_description"]').value = weekData.task_description || '';
+                document.querySelector('textarea[name="notes"]').value = weekData.notes || '';
+            } else {
+                // Use data from response even if success is false (means no existing data)
+                const weekData = data.week_data || {};
+                document.querySelector('input[name="week_number"]').value = weekData.week_number || displayedWeek;
+                document.querySelector('input[name="year"]').value = weekData.year || displayedYear;
+                document.querySelector('input[name="allocation_status"]').value = weekData.allocation_status || '';
+                document.querySelector('input[name="utilization_percentage"]').value = weekData.utilization_percentage || 0;
+                document.querySelector('input[name="assigned_to"]').value = weekData.assigned_to || '';
+                document.querySelector('input[name="hours_used"]').value = weekData.hours_used || 0;
+                document.querySelector('input[name="availability_hours"]').value = weekData.availability_hours || 40;
+                document.querySelector('textarea[name="task_description"]').value = weekData.task_description || '';
+                document.querySelector('textarea[name="notes"]').value = weekData.notes || '';
+            }
+            
+            // Show the modal after populating data
+            showWeekDataModal();
+        })
+        .catch(error => {
+            console.error('Error fetching week data:', error);
+            // Clear form for new data
+            document.querySelector('input[name="week_number"]').value = currentWeek;
+            document.querySelector('input[name="year"]').value = currentYear;
+            document.querySelector('input[name="allocation_status"]').value = '';
+            document.querySelector('input[name="utilization_percentage"]').value = 0;
+            document.querySelector('input[name="assigned_to"]').value = '';
+            document.querySelector('input[name="hours_used"]').value = 0;
+            document.querySelector('input[name="availability_hours"]').value = 40;
+            document.querySelector('textarea[name="task_description"]').value = '';
+            document.querySelector('textarea[name="notes"]').value = '';
+            
+            // Show the modal even if data fetch failed
+            showWeekDataModal();
+        });
+    }
+    
+    function showWeekDataModal() {
+        const modalElement = document.getElementById('weekDataModal');
+        // Move modal to body to avoid z-index/context issues
+        document.body.appendChild(modalElement);
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+        // Force modal and backdrop z-index after show
+        setTimeout(() => {
+            const backdrops = document.getElementsByClassName('modal-backdrop');
+            for (let i = 0; i < backdrops.length; i++) {
+                backdrops[i].style.zIndex = '9998';
+            }
+            modalElement.style.zIndex = '9999';
+        }, 50);
+    }
+    function saveWeekData() {
+        console.log('[DEBUG] saveWeekData() called');
+        const form = document.getElementById('weekDataForm');
+        const formData = new FormData(form);
+        // Log all form data
+        for (let [key, value] of formData.entries()) {
+            console.log(`[DEBUG] FormData: ${key} = ${value}`);
+        }
+        fetch("{% url 'holistic_weekly_data_update' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        })
+        .then(async response => {
+            console.log('[DEBUG] Response status:', response.status, response.statusText);
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                alert('Server error: ' + response.status + ' ' + response.statusText);
+                console.error('Raw response:', response);
+                return;
+            }
+            console.log('[DEBUG] Response data:', data);
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+                console.error('[DEBUG] Backend error:', data);
+            }
+        })
+        .catch(error => {
+            alert('JS error: ' + error);
+            console.error('[DEBUG] JS error:', error);
+        });
+    }
+
+    // ======================= Graph View Functions =======================
+    
+    let currentGraphSystemId = null;
+    let allSystemsData = null;
+    let weeklyChartInstance = null;
+    let projectChartInstance = null;
+    let statusPieChartInstance = null;
+    let cumulativeUtilChartInstance = null;
+    let allSystemsUtilizationChartInstance = null;
+
+    function openGraphView() {
+        // Load all systems and show system selector
+        console.log('Opening Graph View Modal');
+        
+        const modalElement = document.getElementById('graphViewModal');
+        const graphModal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        
+        document.getElementById('graphModalTitle').innerHTML = 
+            '<i class="fas fa-chart-pie me-2" style="color: #005fa3;"></i>System Allocation Analytics';
+        document.getElementById('graphModalSubtitle').textContent = 'Select a system to view detailed allocation data';
+        
+        const loadingSpinner = document.getElementById('graphLoadingSpinner');
+        const graphContent = document.getElementById('graphContent');
+        
+        loadingSpinner.style.display = 'block';
+        graphContent.style.display = 'none';
+        
+        // Move modal to body to avoid z-index/context issues and show
+        document.body.appendChild(modalElement);
+        // Show modal
+        graphModal.show();
+        forceModalFront('graphViewModal');
+        // Force backdrop and modal z-index after show
+        setTimeout(() => {
+            const backdrops = document.getElementsByClassName('modal-backdrop');
+            for (let i = 0; i < backdrops.length; i++) {
+                backdrops[i].style.zIndex = '9998';
+            }
+            modalElement.style.zIndex = '9999';
+        }, 50);
+        console.log('Modal shown, fetching systems...');
+        
+        // Fetch all systems list
+        setTimeout(() => {
+            fetch('/holistic-dashboard/all-systems-list/', {
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Systems data received:', data);
+                if (data.success) {
+                    loadingSpinner.style.display = 'none';
+                    showSystemSelector(data.systems);
+                } else {
+                    loadingSpinner.innerHTML = '<div class="alert alert-danger">Failed to load systems: ' + data.error + '</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                loadingSpinner.innerHTML = '<div class="alert alert-danger">Error loading systems: ' + error + '</div>';
+            });
+        }, 500);
+    }
+
+    // Helper: ensure the graph modal and backdrop are on top
+    function forceModalFront(modalId) {
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+        // Move modal to body
+        if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl);
+        // Find backdrops and set z-index
+        const backdrops = document.getElementsByClassName('modal-backdrop');
+        for (let i = 0; i < backdrops.length; i++) {
+            backdrops[i].style.zIndex = '9998';
+        }
+        modalEl.style.zIndex = '9999';
+    }
+
+    function showSystemGraph(systemId, systemName) {
+        currentGraphSystemId = systemId;
+        document.getElementById('graphModalTitle').innerHTML = 
+            '<i class="fas fa-chart-pie me-2" style="color: #005fa3;"></i>System Allocation Analytics - ' + systemName;
+        document.getElementById('graphModalSubtitle').textContent = 'Weekly allocation and project distribution';
+        
+        const modalElement = document.getElementById('graphViewModal');
+        // Move modal to body to avoid z-index/context issues
+        document.body.appendChild(modalElement);
+        const graphModal = new bootstrap.Modal(modalElement);
+        graphModal.show();
+        // Force modal to front
+        setTimeout(() => forceModalFront('graphViewModal'), 50);
+        
+        // Hide system selector, show loading
+        document.getElementById('systemSelectorSection').style.display = 'none';
+        document.getElementById('graphLoadingSpinner').style.display = 'block';
+        document.getElementById('graphContent').style.display = 'none';
+        
+        // Load data after modal is shown
+        setTimeout(() => fetchGraphData(systemId), 300);
+    }
+
+    function showSystemSelector(systems) {
+        allSystemsData = systems;
+        populateSystemSelector(systems);
+        // Render comparative utilization chart
+        renderAllSystemsUtilizationChart(systems);
+        document.getElementById('allSystemsUtilizationSection').style.display = 'block';
+        document.getElementById('systemSelectorSection').style.display = 'block';
+        document.getElementById('graphLoadingSpinner').style.display = 'none';
+        document.getElementById('graphContent').style.display = 'none';
+    }
+    // Render a bar chart comparing average utilization of all systems
+    function renderAllSystemsUtilizationChart(systems) {
+        const ctx = document.getElementById('allSystemsUtilizationChart').getContext('2d');
+        if (allSystemsUtilizationChartInstance) {
+            allSystemsUtilizationChartInstance.destroy();
+        }
+        if (!systems || systems.length === 0) {
+            ctx.canvas.parentElement.innerHTML = '<p class="text-muted text-center py-4">No system data available</p>';
+            return;
+        }
+        // Each system should have avg_utilization or similar; fallback to 0 if missing
+        const labels = systems.map(s => s.sr_no || s.name || 'System');
+        const data = systems.map(s => parseFloat(s.avg_utilization || s.utilization || 0));
+        allSystemsUtilizationChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Avg Utilization %',
+                    data: data,
+                    backgroundColor: '#007bff',
+                    borderColor: '#005fa3',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function populateSystemSelector(systems) {
+        const selector = document.getElementById('systemSelector');
+        const grid = document.getElementById('systemsGrid');
+        
+        // Clear and populate dropdown
+        selector.innerHTML = '<option value="">-- Choose a System --</option>';
+        systems.forEach(system => {
+            const option = document.createElement('option');
+            option.value = system.id;
+            option.textContent = system.sr_no + ' - ' + system.status + ' (' + system.owner + ')';
+            selector.appendChild(option);
+        });
+
+        // Populate grid cards
+        populateSystemsGrid(systems);
+    }
+
+    function populateSystemsGrid(systems) {
+        const grid = document.getElementById('systemsGrid');
+        grid.innerHTML = '';
+
+        systems.forEach(system => {
+            const statusClass = getStatusBadgeClass(system.status);
+            const card = document.createElement('div');
+            card.className = 'col-md-6 col-lg-4';
+            card.innerHTML = `
+                <div class="card h-100 shadow-sm cursor-pointer system-card" onclick="selectSystemCard(${system.id})" 
+                     style="cursor: pointer; transition: all 0.3s; border-left: 4px solid #005fa3;">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">${system.sr_no}</h6>
+                        <span class="badge ${statusClass}">${system.status}</span>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <td style="font-size: 0.85rem;"><strong>Owner:</strong></td>
+                                <td style="font-size: 0.85rem; text-align: right;">${system.owner || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 0.85rem;"><strong>Location:</strong></td>
+                                <td style="font-size: 0.85rem; text-align: right;">${system.location || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 0.85rem;"><strong>Priority:</strong></td>
+                                <td style="font-size: 0.85rem; text-align: right;">
+                                    <span class="badge bg-secondary">${system.priority || '-'}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 0.85rem;"><strong>STMi:</strong></td>
+                                <td style="font-size: 0.85rem; text-align: right;">${system.stmi || '-'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-light small text-center">
+                        <button type="button" class="btn btn-sm btn-primary w-100" onclick="event.stopPropagation(); selectSystemCard(${system.id}, true)">
+                            <i class="fas fa-chart-bar me-1"></i>View Analytics
+                        </button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectSystemCard(systemId, loadData = false) {
+        const selector = document.getElementById('systemSelector');
+        selector.value = systemId;
+        document.getElementById('loadSelectedSystemBtn').disabled = false;
+        
+        if (loadData) {
+            loadSelectedSystem();
+        }
+    }
+
+    function selectSystemFromDropdown() {
+        const selector = document.getElementById('systemSelector');
+        document.getElementById('loadSelectedSystemBtn').disabled = !selector.value;
+    }
+
+    function loadSelectedSystem() {
+        const systemId = document.getElementById('systemSelector').value;
+        if (!systemId) {
+            alert('Please select a system');
+            return;
+        }
+
+        const system = allSystemsData.find(s => s.id == systemId);
+        if (system) {
+            document.getElementById('graphModalTitle').innerHTML = 
+                '<i class="fas fa-chart-pie me-2" style="color: #005fa3;"></i>System Allocation Analytics - ' + system.sr_no;
+            document.getElementById('graphModalSubtitle').textContent = system.owner + ' | ' + system.location;
+            currentGraphSystemId = systemId;
+            
+            document.getElementById('systemSelectorSection').style.display = 'none';
+            document.getElementById('allSystemsUtilizationSection').style.display = 'none'; // Hide the comparison chart
+            document.getElementById('graphLoadingSpinner').style.display = 'block';
+            document.getElementById('graphContent').style.display = 'none';
+            
+            setTimeout(() => fetchGraphData(systemId), 100);
+        }
+    }
+
+    function filterSystemsList() {
+        const searchTerm = document.getElementById('systemSearch').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        
+        if (!allSystemsData) return;
+
+        const filtered = allSystemsData.filter(system => {
+            const matchesSearch = !searchTerm || 
+                system.sr_no.toLowerCase().includes(searchTerm) ||
+                (system.owner && system.owner.toLowerCase().includes(searchTerm)) ||
+                (system.stmi && system.stmi.toLowerCase().includes(searchTerm));
+            
+            const matchesStatus = !statusFilter || system.status.toLowerCase() === statusFilter;
+            
+            return matchesSearch && matchesStatus;
+        });
+
+        populateSystemsGrid(filtered);
+    }
+
+    function resetSystemSelector() {
+        document.getElementById('systemSearch').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('systemSelector').value = '';
+        document.getElementById('loadSelectedSystemBtn').disabled = true;
+        
+        if (allSystemsData) {
+            populateSystemsGrid(allSystemsData);
+        }
+    }
+
+    function backToSystemSelector() {
+        document.getElementById('systemSelectorSection').style.display = 'block';
+        document.getElementById('graphContent').style.display = 'none';
+        document.getElementById('graphLoadingSpinner').style.display = 'none';
+    }
+
+    function fetchGraphData(systemId) {
+        const loadingSpinner = document.getElementById('graphLoadingSpinner');
+        const graphContent = document.getElementById('graphContent');
+        
+        loadingSpinner.style.display = 'block';
+        graphContent.style.display = 'none';
+
+        fetch(`/holistic-dashboard/graph-data/${systemId}/`, {
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderGraphs(data);
+                loadingSpinner.style.display = 'none';
+                graphContent.style.display = 'block';
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+                loadingSpinner.innerHTML = '<div class="alert alert-danger">Failed to load data</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Error fetching data: ' + error);
+            loadingSpinner.innerHTML = '<div class="alert alert-danger">Error: ' + error + '</div>';
+        });
+    }
+
+    function renderGraphs(data) {
+        // Update header info
+        document.getElementById('selectedSystemName').textContent = data.system.name;
+        document.getElementById('selectedSystemInfo').textContent = (data.system.owner || '-') + ' • ' + (data.system.location || '-');
+        
+        // Update summary info
+        document.getElementById('currentStatus').textContent = data.system.status;
+        document.getElementById('systemOwner').textContent = data.system.owner || '-';
+        document.getElementById('systemLocation').textContent = data.system.location || '-';
+        
+        const avgUtil = data.statistics.avg_utilization;
+        document.getElementById('avgUtilization').textContent = avgUtil.toFixed(1) + '%';
+        document.getElementById('utilizationBar').style.width = avgUtil + '%';
+        
+        // Color the bar based on utilization
+        const bar = document.getElementById('utilizationBar');
+        if (avgUtil < 50) {
+            bar.className = 'progress-bar progress-bar-striped bg-success';
+        } else if (avgUtil < 75) {
+            bar.className = 'progress-bar progress-bar-striped bg-warning';
+        } else {
+            bar.className = 'progress-bar progress-bar-striped bg-danger';
+        }
+        
+        document.getElementById('totalWeeks').textContent = data.statistics.total_weeks;
+        document.getElementById('maxUtilization').textContent = data.statistics.max_utilization.toFixed(1) + '%';
+        document.getElementById('projectCount').textContent = data.statistics.unique_projects;
+
+        // Render Weekly Distribution Chart
+        renderWeeklyChart(data.weekly_data);
+        // Render Project Distribution Chart
+        renderProjectChart(data.project_distribution);
+        // Render Status Distribution Pie Chart
+        renderStatusPieChart(data.weekly_data);
+        // Render Cumulative Utilization Chart
+        renderCumulativeUtilChart(data.weekly_data);
+        // Render Weekly Breakdown Table
+        renderWeeklyTable(data.weekly_data);
+            // Render a chart for actual cumulative hours utilization
+            function renderCumulativeUtilChart(weeklyData) {
+                const ctx = document.getElementById('cumulativeUtilChart').getContext('2d');
+                if (cumulativeUtilChartInstance) {
+                    cumulativeUtilChartInstance.destroy();
+                }
+                if (!weeklyData || weeklyData.length === 0) {
+                    ctx.canvas.parentElement.innerHTML = '<p class="text-muted text-center py-4">No utilization data available</p>';
+                    return;
+                }
+                // Sort and calculate cumulative total hours used
+                const sortedData = weeklyData.slice().sort((a, b) => {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.week - b.week;
+                });
+                const labels = sortedData.map(w => `W${w.week}`);
+                let cumulativeHours = 0;
+                let cumulativeAvailableHours = 0;
+                const cumulativeData = sortedData.map((w, i) => {
+                    cumulativeHours += parseFloat(w.hours_used) || 0;
+                    cumulativeAvailableHours += parseFloat(w.availability_hours) || 40; // Default 40 hours per week
+                    return cumulativeHours;
+                });
+                
+                // Calculate cumulative available hours for comparison
+                let cumulativeAvailable = 0;
+                const availableHoursData = sortedData.map((w, i) => {
+                    cumulativeAvailable += parseFloat(w.availability_hours) || 40;
+                    return cumulativeAvailable;
+                });
+
+                cumulativeUtilChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Cumulative Hours Used',
+                                data: cumulativeData,
+                                borderColor: '#17a2b8',
+                                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#17a2b8',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2
+                            },
+                            {
+                                label: 'Cumulative Available Hours',
+                                data: availableHoursData,
+                                borderColor: '#6c757d',
+                                backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#6c757d',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 14 },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' hours';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + 'h';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        // Render a pie chart for status distribution
+        function renderStatusPieChart(weeklyData) {
+            const ctx = document.getElementById('statusPieChart').getContext('2d');
+            if (statusPieChartInstance) {
+                statusPieChartInstance.destroy();
+            }
+            if (!weeklyData || weeklyData.length === 0) {
+                ctx.canvas.parentElement.innerHTML = '<p class="text-muted text-center py-4">No status data available</p>';
+                return;
+            }
+            // Count occurrences of each status
+            const statusCounts = {};
+            weeklyData.forEach(w => {
+                const status = w.status || 'Unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            const labels = Object.keys(statusCounts);
+            const data = Object.values(statusCounts);
+            const colors = ['#28a745', '#007bff', '#ffc107', '#dc3545', '#6c757d', '#17a2b8', '#6610f2', '#fd7e14'];
+            statusPieChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + ' weeks';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function renderWeeklyChart(weeklyData) {
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+        
+        if (weeklyChartInstance) {
+            weeklyChartInstance.destroy();
+        }
+
+        const sortedData = weeklyData.sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.week - b.week;
+        });
+
+        const labels = sortedData.map(w => `W${w.week}`);
+        const utilizationData = sortedData.map(w => parseFloat(w.utilization) || 0);
+        
+        // Group by status for stacked visualization
+        const statusMap = {};
+        sortedData.forEach(w => {
+            const status = w.status || 'Unknown';
+            if (!statusMap[status]) {
+                statusMap[status] = [];
+            }
+            statusMap[status].push(parseFloat(w.utilization) || 0);
+        });
+
+        const colors = ['#28a745', '#007bff', '#ffc107', '#dc3545', '#6c757d'];
+        const datasets = Object.keys(statusMap).map((status, idx) => ({
+            label: status.charAt(0).toUpperCase() + status.slice(1),
+            data: statusMap[status].map((val, i) => i < labels.length ? val : 0),
+            borderColor: colors[idx % colors.length],
+            backgroundColor: colors[idx % colors.length],
+            borderWidth: 2,
+            tension: 0.1,
+            fill: false
+        }));
+
+        weeklyChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Utilization %',
+                    data: utilizationData,
+                    borderColor: '#005fa3',
+                    backgroundColor: 'rgba(0, 95, 163, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#005fa3',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 12 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderProjectChart(projectData) {
+        const ctx = document.getElementById('projectChart').getContext('2d');
+        
+        if (projectChartInstance) {
+            projectChartInstance.destroy();
+        }
+
+        if (!projectData || projectData.length === 0) {
+            ctx.canvas.parentElement.innerHTML = '<p class="text-muted text-center py-4">No project data available</p>';
+            return;
+        }
+
+        const labels = projectData.map(p => p.project_name || 'Unassigned');
+        const data = projectData.map(p => p.weeks_count);
+        
+        const colors = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+        ];
+
+        projectChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' weeks';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderWeeklyTable(weeklyData) {
+        const tbody = document.getElementById('weeklyTableBody');
+        tbody.innerHTML = '';
+
+        if (!weeklyData || weeklyData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No weekly data available</td></tr>';
+            return;
+        }
+
+        const sortedData = weeklyData.sort((a, b) => {
+            if (a.year !== b.year) return a.year - b.year;
+            return a.week - b.week;
+        });
+
+        sortedData.forEach(week => {
+            const row = tbody.insertRow();
+            
+            const weekCell = row.insertCell(0);
+            weekCell.innerHTML = `<strong>W${week.week}</strong>`;
+            
+            const statusCell = row.insertCell(1);
+            const statusClass = getStatusBadgeClass(week.status);
+            statusCell.innerHTML = `<span class="badge ${statusClass}">${week.status || '-'}</span>`;
+            
+            const projectCell = row.insertCell(2);
+            projectCell.textContent = week.project_name || 'Unassigned';
+            projectCell.style.maxWidth = '200px';
+            projectCell.style.whiteSpace = 'nowrap';
+            projectCell.style.overflow = 'hidden';
+            projectCell.style.textOverflow = 'ellipsis';
+            
+            const utilCell = row.insertCell(3);
+            const util = parseFloat(week.utilization) || 0;
+            utilCell.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <small>${util.toFixed(1)}%</small>
+                    <div class="progress" style="flex: 1; height: 8px; min-width: 40px;">
+                        <div class="progress-bar" style="width: ${util}%; background-color: ${getUtilizationColor(util)};"></div>
+                    </div>
+                </div>
+            `;
+            
+            const hoursCell = row.insertCell(4);
+            hoursCell.textContent = week.hours_used ? week.hours_used.toFixed(1) + 'h' : '-';
+            hoursCell.className = 'text-end';
+            
+            const assignCell = row.insertCell(5);
+            assignCell.textContent = week.assigned_to || '-';
+            assignCell.style.maxWidth = '150px';
+            assignCell.style.whiteSpace = 'nowrap';
+            assignCell.style.overflow = 'hidden';
+            assignCell.style.textOverflow = 'ellipsis';
+        });
+    }
+
+    function getStatusBadgeClass(status) {
+        const statusMap = {
+            'available': 'bg-success',
+            'allocated': 'bg-primary',
+            'maintenance': 'bg-warning',
+            'reserved': 'bg-secondary',
+            'offline': 'bg-danger'
+        };
+        return statusMap[status?.toLowerCase()] || 'bg-secondary';
+    }
+
+    function getUtilizationColor(utilization) {
+        if (utilization < 50) return '#28a745';
+        if (utilization < 75) return '#ffc107';
+        return '#dc3545';
+    }
+
+    function downloadGraphData() {
+        if (!currentGraphSystemId) {
+            alert('No system selected');
+            return;
+        }
+        
+        fetch(`/holistic-dashboard/export-graph-data/${currentGraphSystemId}/`, {
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system_${currentGraphSystemId}_allocation.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => alert('Error downloading: ' + error));
+    }
+    </script>
+    <!-- Weekly Project Assignment Modal -->
+    <div class="modal fade" id="weeklyProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i>Weekly Project Assignments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="weekly_project_system_id" name="system_id">
+                    <div class="mb-4">
+                        <h6>System: <span id="selectedSystemSrNo"></span></h6>
+                    </div>
+                    
+                    <!-- Current Week Assignment -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">Current Week Assignment</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Week Number</label>
+                                    <input type="number" class="form-control" id="currentWeekNumber" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Year</label>
+                                    <input type="number" class="form-control" id="currentYear" readonly>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Project Assignment</label>
+                                    <select class="form-select" id="currentWeekProject">
+                                        <option value="">No project assigned</option>
+                                        {% for project in projects %}
+                                            <option value="{{ project.id }}">{{ project.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-primary" onclick="saveWeeklyProjectAssignment()">
+                                        <i class="fas fa-save me-1"></i> Save Current Week
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Assignment History -->
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">Assignment History</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Week</th>
+                                            <th>Project</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assignmentHistoryTable">
+                                        <!-- Will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>

@@ -1,0 +1,783 @@
+{% load static %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<title>Build Servers Management Dashboard</title>
+<style>
+    /* Philips Logo */
+    .philips-logo {
+        height: 90px;
+        width: auto;
+        position: absolute;
+        top: 45px;
+        right: 30px;
+        z-index: 900;
+    }
+    
+    /* Home Icon */
+    .home-icon {
+        position: absolute;
+        top: 50px;
+        right: 130px;
+        z-index: 901;
+        transition: all 0.3s ease;
+    }
+    .home-icon:hover {
+        transform: scale(1.1);
+    }
+    .home-icon img {
+        height: 45px;
+        width: 45px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        background: white;
+        border-radius: 10px;
+        padding: 8px;
+    }
+
+    body {
+        background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+        min-height: 100vh;
+        padding-top: 0px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 95, 163, 0.2);
+    }
+    
+    .stream-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.2rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid #e9ecef;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stream-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(45deg, #005fa3, #0066cc, #0080ff);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .stream-card:hover::before {
+        opacity: 1;
+    }
+    
+    .stream-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 95, 163, 0.2);
+        border-color: #005fa3;
+    }
+    
+    .stream-card .card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #005fa3 0%, #0066cc 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 4px 15px rgba(0, 95, 163, 0.3);
+    }
+    
+    .stream-card .card-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .stream-card h4 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .stream-card p {
+        color: #6c757d;
+        margin-bottom: 1.2rem;
+        line-height: 1.6;
+        font-size: 0.9rem;
+    }
+    
+    .stream-card .btn-access {
+        background: linear-gradient(135deg, #005fa3 0%, #0066cc 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 15px rgba(0, 95, 163, 0.3);
+    }
+    
+    .stream-card .btn-access:hover {
+        background: linear-gradient(135deg, #004080 0%, #0056b3 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 95, 163, 0.4);
+    }
+    
+    .stats-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-top: 3rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card.primary { border-left: 4px solid #005fa3; }
+    .stats-card.success { border-left: 4px solid #28a745; }
+    .stats-card.info { border-left: 4px solid #17a2b8; }
+    .stats-card.warning { border-left: 4px solid #ffc107; }
+    
+    .stats-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .stats-icon.primary { background: rgba(0, 95, 163, 0.1); color: #005fa3; }
+    .stats-icon.success { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+    .stats-icon.info { background: rgba(23, 162, 184, 0.1); color: #17a2b8; }
+    .stats-icon.warning { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    
+    .stats-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+        line-height: 1;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.75rem;
+    }
+    
+    /* Info Button Styles */
+    .info-icon {
+        position: absolute;
+        top: 50px;
+        right: 200px;
+        z-index: 901;
+        transition: all 0.3s ease;
+    }
+    
+    .info-icon:hover {
+        transform: scale(1.1);
+    }
+    
+    .info-icon img {
+        height: 45px;
+        width: 45px;
+        background: white;
+        border-radius: 50%;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .info-icon img:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Modal Styles */
+    .info-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        animation: fadeIn 0.3s;
+        backdrop-filter: blur(2px);
+    }
+    
+    .info-modal-content {
+        background: white;
+        color: #333;
+        margin: 2% auto;
+        padding: 2.5rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 850px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s;
+        position: relative;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-modal-close {
+        color: #333;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .info-modal-close:hover {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    
+    @keyframes slideIn {
+        from {transform: translateY(-50px); opacity: 0;}
+        to {transform: translateY(0); opacity: 1;}
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-3px);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+    
+    .feature-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+    }
+    
+    .feature-description {
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+    
+    /* Popup Feature Grid */
+    .features-grid-popup {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .feature-card-popup {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(0, 95, 163, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 95, 163, 0.2);
+    }
+    
+    .feature-card-popup:hover {
+        background: rgba(0, 95, 163, 0.15);
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon-popup {
+        width: 60px;
+        height: 60px;
+        background: rgba(0, 95, 163, 0.2);
+        color: #005fa3;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .feature-title-popup {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .feature-description-popup {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.4;
+    }
+    
+    /* System Overview Styles */
+    .system-overview-section {
+        margin-top: 2rem;
+    }
+    
+    .overview-card {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .overview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(40, 167, 69, 0.3);
+    }
+    
+    .overview-stats {
+        text-align: center;
+    }
+    
+    .metric-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 1rem 0.8rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .metric-card:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+    }
+    
+    .metric-number {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        opacity: 0.95;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+    
+    .no-streams {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: #6c757d;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .no-streams i {
+        font-size: 5rem;
+        margin-bottom: 2rem;
+        opacity: 0.5;
+        color: #005fa3;
+    }
+    
+    .no-streams h3 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        
+        .stream-card {
+            margin-bottom: 1.5rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header shadow-lg">
+        <!-- Info Icon -->
+        <div class="info-icon" id="infoButton" title="About Build Servers Management">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/info-circle-fill.svg" alt="Info">
+        </div>
+
+        <!-- Home Icon -->
+        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
+        </a>
+
+        <!-- Philips Logo -->
+        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
+        
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-0">
+                    <i class="fas fa-server me-3"></i>
+                    Build Servers Management
+                </h1>
+                <p class="mb-0 mt-2 opacity-75">Advanced Build Server Infrastructure Management System</p>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    
+
+    <!-- Info Popup Modal -->
+    <div id="infoModal" class="info-modal">
+        <div class="info-modal-content">
+            <span class="info-modal-close">&times;</span>
+            <h3 class="mb-3">
+                <i class="fas fa-info-circle me-2"></i>About Build Servers Management
+            </h3>
+            <p class="mb-3 lead">
+                Comprehensive infrastructure management platform for build servers with real-time monitoring, 
+                detailed tracking, and advanced analytics across multiple streams.
+            </p>
+            
+            <div class="features-grid-popup">
+                <div class="feature-card-popup">
+                    <div class="feature-icon-popup">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="feature-title-popup">Server Tracking</div>
+                    <div class="feature-description-popup">
+                        Complete hostname, IP address, and location management with detailed specifications
+                    </div>
+                </div>
+                
+                <div class="feature-card-popup">
+                    <div class="feature-icon-popup">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="feature-title-popup">Ownership Management</div>
+                    <div class="feature-description-popup">
+                        Track owners, contacts, and responsible teams for each build server
+                    </div>
+                </div>
+                
+                <div class="feature-card-popup">
+                    <div class="feature-icon-popup">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-title-popup">Stream Separation</div>
+                    <div class="feature-description-popup">
+                        Organized by PIC/HIC streams for better access control and management
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+        <div class="stats-section">
+            <div class="row align-items-center mb-4">
+                <div class="col-md-8">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>System Overview
+                    </h3>
+                    <p class="text-muted mb-0">Key metrics and capabilities of the build servers management system</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stats-card primary">
+                        <div class="stats-icon primary">
+                            <i class="fas fa-stream"></i>
+                        </div>
+                        <div class="stats-number text-primary">{{ streams|length }}</div>
+                        <div class="stats-label">Available Streams</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card success">
+                        <div class="stats-icon success">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="stats-number text-success">100%</div>
+                        <div class="stats-label">Secure Access</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card info">
+                        <div class="stats-icon info">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="stats-number text-info">∞</div>
+                        <div class="stats-label">Search & Filter</div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stats-card warning">
+                        <div class="stats-icon warning">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stats-number text-warning">24/7</div>
+                        <div class="stats-label">Export Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </br>
+    </br>
+
+    {% if streams %}
+        <!-- Stream Selection -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <!-- <h2 class="display-6 mb-4 text-dark">Select a Stream</h2> -->
+                <p class="lead text-muted mb-5">Choose a stream to access and manage its build servers</p>
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% for stream in streams %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="stream-card text-center">
+                        <div class="card-icon">
+                            <i class="fas fa-stream"></i>
+                        </div>
+                        <h4>{{ stream.name }} Stream</h4>
+                        <a href="{% url 'build_servers_list' stream=stream.name %}" class="btn btn-access">
+                            <i class="fas fa-arrow-right me-2"></i>Access Servers
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        
+    {% else %}
+        <div class="no-streams">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>No Streams Available</h3>
+            <p class="lead">You don't have access to any streams or no streams are configured.</p>
+            <p>Contact your administrator to get access to build servers management.</p>
+            <button class="btn btn-primary btn-lg mt-3">
+                <i class="fas fa-envelope me-2"></i>Contact Administrator
+            </button>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Animate cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.stream-card, .stats-card').forEach((card) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Add hover effects to stream cards
+        $('.stream-card').hover(
+            function() {
+                $(this).find('.btn-access').addClass('animate__pulse');
+            },
+            function() {
+                $(this).find('.btn-access').removeClass('animate__pulse');
+            }
+        );
+
+        // Smooth scrolling for anchors
+        $('a[href^="#"]').on('click', function(event) {
+            var target = $(this.getAttribute('href'));
+            if( target.length ) {
+                event.preventDefault();
+                $('html, body').stop().animate({
+                    scrollTop: target.offset().top - 100
+                }, 1000);
+            }
+        });
+        
+        // Info Modal functionality
+        const infoButton = document.getElementById('infoButton');
+        const infoModal = document.getElementById('infoModal');
+        const closeModal = document.querySelector('.info-modal-close');
+        
+        console.log('Info button:', infoButton);
+        console.log('Info modal:', infoModal);
+        console.log('Close modal:', closeModal);
+        
+        // Open modal when info button is clicked
+        if (infoButton && infoModal) {
+            infoButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Info button clicked');
+                infoModal.style.display = 'block';
+                infoModal.style.visibility = 'visible';
+                infoModal.style.opacity = '1';
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                console.log('Modal should be visible now');
+            });
+        }
+        
+        // Close modal when close button is clicked
+        if (closeModal && infoModal) {
+            closeModal.addEventListener('click', function() {
+                console.log('Close button clicked');
+                infoModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            });
+        }
+        
+        // Close modal when clicking outside of it
+        if (infoModal) {
+            window.addEventListener('click', function(event) {
+                if (event.target === infoModal) {
+                    console.log('Clicked outside modal');
+                    infoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Restore scrolling
+                }
+            });
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && infoModal && infoModal.style.display === 'block') {
+                console.log('Escape key pressed');
+                infoModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+        });
+        
+        // Function to handle stream selection for floor management
+        window.selectStreamForFloors = function() {
+            {% if streams %}
+                if ({{ streams|length }} === 1) {
+                    // If only one stream, go directly to that stream's floor management
+                    window.location.href = "{% url 'floor_list' stream=streams.0.name %}";
+                } else {
+                    // Show stream selection if multiple streams
+                    alert('Please select a stream first by clicking on a stream card below.');
+                }
+            {% else %}
+                alert('No streams available for floor management.');
+            {% endif %}
+        }
+    });
+</script>
+{% endblock %}

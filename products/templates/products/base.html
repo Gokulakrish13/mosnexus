@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}IGT MoS Inventory{% endblock %}</title>
+    {% load static %}
+    {% load product_filters %}
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NOBG.png' %}" />
+    <link rel="stylesheet" href="/static/products/style.css">
+    <style>
+        body, html {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 1rem;
+            color: #222;
+            background: #f4f6f8;
+            margin: 0;
+        }
+        .top-bar {
+            color: #222;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 2.5rem;
+            background: #fff;
+            border-bottom: 1px solid #e0e3e7;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+        
+        .top-bar .logout-btn {
+            margin-left: 1.2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Smooth navigation link hover effects */
+        .top-left a {
+            position: relative;
+        }
+
+        .top-left a:hover {
+            color: #003d7a !important;
+            transform: translateY(-1px);
+        }
+
+        .top-left a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #005fa3;
+            transition: width 0.3s ease;
+        }
+
+        .top-left a:hover::after {
+            width: 100%;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% with stream=stream|default:selected_stream|default:' ' %}
+    <div class="top-bar">
+        <div class="top-left">
+            <img src="/static/products/philips.png" alt="Philips Logo" style="height:32px;width:auto;margin-right:1.2rem;vertical-align:middle;">
+            <a href="/dashboard/" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">Home</a>
+            <a href="{% url 'category_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Categories</a>
+            <a href="{% url 'product_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Products</a>
+            {% if user|is_admin %}
+            <a href="{% url 'sub_level_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Sub-Level Data</a>
+            <a href="{% url 'sub_level_tool_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Sub-Level Tools</a>
+            {% endif %}
+            <a href="{% url 'location_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Location</a>
+            <a href="{% url 'system_allocation_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} System Allocation</a>
+            
+            <!-- More dropdown for additional navigation items -->
+            {% if '/notes' not in request.path %}
+            <div style="position:relative;display:inline-block;">
+                <button id="moreNavBtn" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;">
+                    More <span style="font-size:0.8rem;">▼</span>
+                </button>
+                <div id="moreNavDropdown" style="display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #e0e3e7;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:200px;z-index:1001;margin-top:0.5rem;">
+                    <a href="{% url 'allocation_tree_stream' stream %}" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;border-bottom:1px solid #f0f0f0;">{{ stream }} Allocation Tree</a>
+                    {% if user|can_manage_users %}
+                    <!-- <a href="/users/" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;border-bottom:1px solid #f0f0f0;">Users</a> -->
+                    {% endif %}
+                    <!-- <a href="{% url 'faq_stream' stream %}" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;">Help / FAQ</a> -->
+                </div>
+
+            </div>
+            {% endif %}
+        </div>
+        <div class="top-right">
+            {% if user.is_authenticated %}
+                <strong>{{ user.username }}</strong> | Last login: <strong>{{ user.last_login|date:'Y-m-d H:i:s' }}</strong>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+    {% block content %}{% endblock %}
+    {% block extra_body %}{% endblock %}
+    
+    <script>
+// Inactivity logout logic for all pages
+let inactivityTimeout, countdownInterval;
+let countdownModal;
+let countdown = 60;
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimeout);
+  clearInterval(countdownInterval);
+  if (countdownModal) countdownModal.style.display = 'none';
+  countdown = 60;
+  inactivityTimeout = setTimeout(showCountdown, 10 * 60 * 1000); // 4 min
+}
+
+function showCountdown() {
+  if (!countdownModal) {
+    countdownModal = document.createElement('div');
+    countdownModal.id = 'countdown-modal';
+    countdownModal.style.position = 'fixed';
+    countdownModal.style.top = '0';
+    countdownModal.style.left = '0';
+    countdownModal.style.width = '100vw';
+    countdownModal.style.height = '100vh';
+    countdownModal.style.background = 'rgba(0,0,0,0.35)';
+    countdownModal.style.display = 'flex';
+    countdownModal.style.alignItems = 'center';
+    countdownModal.style.justifyContent = 'center';
+    countdownModal.style.zIndex = '99999';
+    countdownModal.innerHTML = `<div style=\"background:#fff;padding:2.5rem 3rem;border-radius:16px;box-shadow:0 4px 32px #007bff;text-align:center;\">
+      <h2 style='color:#dc3545;font-size:2rem;margin-bottom:1rem;'>Session Expiring</h2>
+      <div style='font-size:1.5rem;color:#007bff;font-weight:700;'>Logging out in <span id='countdown-timer'>60</span> seconds...</div>
+      <div style='margin-top:1.2rem;color:#888;'></div>
+    </div>`;
+    document.body.appendChild(countdownModal);
+  } else {
+    countdownModal.style.display = 'flex';
+  }
+  document.getElementById('countdown-timer').textContent = countdown;
+  countdownInterval = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown-timer').textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+      window.location.href = "{% url 'logout' %}";
+    }
+  }, 1000);
+  inactivityTimeout = setTimeout(() => {
+    clearInterval(countdownInterval);
+    window.location.href = "{% url 'logout' %}";
+  }, 60 * 1000);
+}
+
+['mousemove', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+  document.addEventListener(evt, resetInactivityTimer, true);
+});
+
+resetInactivityTimer();
+
+// More navigation dropdown
+document.addEventListener('DOMContentLoaded', function() {
+    const moreNavBtn = document.getElementById('moreNavBtn');
+    const moreNavDropdown = document.getElementById('moreNavDropdown');
+    
+    if (moreNavBtn && moreNavDropdown) {
+        moreNavBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            moreNavDropdown.style.display = moreNavDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!moreNavBtn.contains(e.target) && !moreNavDropdown.contains(e.target)) {
+                moreNavDropdown.style.display = 'none';
+            }
+        });
+        
+        // Add hover effect to dropdown items
+        const dropdownItems = moreNavDropdown.querySelectorAll('a');
+        dropdownItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.background = '#f4f6f8';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.background = '#fff';
+            });
+        });
+    }
+});
+
+</script>
+
+<style>
+#countdown-modal {
+  animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+</body>
+<!-- <footer style="width:100%;background:#f8fafc;color:#888;text-align:center;padding:0.5rem 0;font-size:1rem;position:fixed;bottom:0;left:0;z-index:999;box-shadow:0 -2px 8px #e0e3e7;">
+    &copy; Koninklijke Philips N.V., 2025. All rights reserved.
+</footer> -->
+</html>

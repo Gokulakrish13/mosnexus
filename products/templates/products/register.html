@@ -1,0 +1,1518 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Philips Platform</title>
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NOBG.png' %}" />
+    <link rel="stylesheet" href="/static/products/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004499;
+            --primary-light: #e6f2ff;
+            --accent-color: #00a8cc;
+            --success-color: #00c851;
+            --warning-color: #ffbb33;
+            --error-color: #ff4444;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-color: #e1e5e9;
+            --border-focus: #0066cc;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-secondary) 50%, #f0f9ff 100%);
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .top-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .auth-container {
+            max-width: 1200px;
+            margin: 80px auto 40px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            position: relative;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 250px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .left-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            padding: 1rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 20s linear infinite;
+        }
+
+        .right-container {
+            padding: 0.5rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-header {
+            background: transparent;
+            padding: 0;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: visible;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header::before {
+            display: none;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .logo-auth {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-form {
+            padding: 0;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 0.5rem;
+        }
+
+        .progress-step {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            background: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            background: var(--bg-primary);
+        }
+
+        .form-input:valid {
+            border-color: var(--success-color);
+        }
+
+        .form-input.error {
+            border-color: var(--error-color);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+
+
+        .password-strength {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            font-size: 0.85rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            margin: 0.5rem 0;
+            background: var(--border-color);
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            width: 0%;
+        }
+
+        .strength-weak .strength-fill { background: var(--error-color); width: 25%; }
+        .strength-fair .strength-fill { background: var(--warning-color); width: 50%; }
+        .strength-good .strength-fill { background: var(--accent-color); width: 75%; }
+        .strength-strong .strength-fill { background: var(--success-color); width: 100%; }
+
+        .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown-header {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: inherit;
+        }
+
+        .dropdown-header:focus,
+        .dropdown-header.active {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 1002;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+
+        .dropdown-options.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .stream-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .stream-option:last-child {
+            border-bottom: none;
+        }
+
+        .stream-option:hover {
+            background: var(--bg-secondary);
+        }
+
+        .stream-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .stream-option label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .checkbox-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .checkbox-label a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .auth-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .auth-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-loading {
+            position: relative;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .social-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .social-divider span {
+            padding: 0 1rem;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .social-btn svg {
+            margin-right: 0.5rem;
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .auth-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .error-message,
+        .success-message {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: var(--error-color);
+        }
+
+        .success-message {
+            background: rgba(0, 200, 81, 0.1);
+            border: 1px solid rgba(0, 200, 81, 0.3);
+            color: var(--success-color);
+        }
+
+        .field-error {
+            font-size: 0.8rem;
+            color: var(--error-color);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 100px 1rem 40px;
+                border-radius: var(--radius-lg);
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .left-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .right-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .auth-container {
+                margin: 100px 1rem 40px;
+                border-radius: var(--radius-lg);
+            }
+
+            .auth-header {
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .auth-form {
+                padding: 1.5rem;
+            }
+
+            .auth-footer {
+                padding: 1.5rem;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .social-login {
+                flex-direction: column;
+            }
+
+            .social-btn {
+                justify-content: center;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #ffffff;
+                --text-secondary: #cccccc;
+                --text-muted: #888888;
+                --bg-primary: #1a1a1a;
+                --bg-secondary: #2a2a2a;
+                --bg-tertiary: #3a3a3a;
+                --border-color: #404040;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .form-input:focus {
+                box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.5);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<body>
+    <div class="top-bar">
+        <div class="top-left">
+            <img src="{% static 'products/philips.png' %}" alt="Philips Logo" style="height: 32px; width: auto;">
+        </div>
+        <div class="top-right">
+            <a href="{% url 'login' %}" class="auth-link">Already have an account?</a>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <!-- Left Container -->
+        <div class="left-container">
+            <div class="auth-header">
+                <img src="{% static 'products/philips.png' %}" alt="Philips Logo" class="logo-auth">
+                <h1 class="auth-title">Join IGT MoS Nexus</h1>
+                <p class="auth-subtitle">Create your account to access the platform</p>
+            </div>
+        </div>
+
+        <!-- Right Container -->
+        <div class="right-container">
+            <form method="post" class="auth-form" id="registrationForm" novalidate>
+                {% csrf_token %}
+                
+                <!-- Progress Indicator -->
+                <div class="progress-indicator">
+                    <div class="progress-step active"></div>
+                    <div class="progress-step"></div>
+                    <div class="progress-step"></div>
+                </div>
+
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step-1">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username *</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input" 
+                            placeholder="Choose a unique username"
+                            required 
+                            autofocus
+                            autocomplete="username"
+                            minlength="3"
+                            pattern="[a-zA-Z0-9_]+"
+                            title="Username must contain only letters, numbers, and underscores"
+                        >
+                        <span class="field-error" id="username-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input" 
+                            placeholder="your.name@philips.com"
+                            required
+                            autocomplete="email"
+                            pattern="[a-zA-Z0-9._%+-]+@philips\.com"
+                            title="Must be a valid @philips.com email address"
+                        >
+                        <span class="field-error" id="email-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password *</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Create a strong password"
+                            required
+                            autocomplete="new-password"
+                            minlength="8"
+                        >
+                        <div class="password-strength" id="password-strength" style="display: none;">
+                            <div class="strength-bar">
+                                <div class="strength-fill"></div>
+                            </div>
+                            <span class="strength-text">Password strength: <strong id="strength-level">Weak</strong></span>
+                            <ul id="password-requirements" style="margin: 0.5rem 0 0 0; padding-left: 1.2rem; font-size: 0.8rem;">
+                                <li id="req-length">At least 8 characters</li>
+                                <li id="req-uppercase">One uppercase letter</li>
+                                <li id="req-lowercase">One lowercase letter</li>
+                                <li id="req-number">One number</li>
+                                <li id="req-special">One special character</li>
+                            </ul>
+                        </div>
+                        <span class="field-error" id="password-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password" class="form-label">Confirm Password *</label>
+                        <input 
+                            type="password" 
+                            id="confirm-password" 
+                            name="confirm-password" 
+                            class="form-input" 
+                            placeholder="Re-enter your password"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <span class="field-error" id="confirm-password-error"></span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Stream Selection -->
+                <div class="form-step" id="step-2" style="display: none;">
+                    <div class="form-group">
+                        <label for="streams" class="form-label">Select Streams *</label>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                            Choose the streams you'd like to access. You can select multiple streams.
+                        </p>
+                        <div class="dropdown-container">
+                            <div class="dropdown-header" id="stream-dropdown" tabindex="0" role="button" aria-expanded="false">
+                                <span id="stream-selection-text">Select streams...</span>
+                                <i data-lucide="chevron-down" class="dropdown-arrow"></i>
+                            </div>
+                            <div class="dropdown-options" id="stream-options">
+                                {% for stream in available_streams %}
+                                <div class="stream-option">
+                                    <input 
+                                        type="checkbox" 
+                                        name="streams" 
+                                        value="{{ stream.id }}" 
+                                        id="stream_{{ stream.id }}"
+                                        aria-describedby="stream_desc_{{ stream.id }}"
+                                    >
+                                    <label for="stream_{{ stream.id }}">
+                                        <strong>{{ stream.name }}</strong>
+                                        {% if stream.description %}
+                                            <br><small id="stream_desc_{{ stream.id }}" style="color: var(--text-muted);">{{ stream.description }}</small>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <div style="padding: 1rem; text-align: center; color: var(--text-muted);">
+                                    <i data-lucide="info"></i>
+                                    <p style="margin: 0.5rem 0 0;">No streams available for public registration.</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <span class="field-error" id="streams-error"></span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Terms & Conditions -->
+                <div class="form-step" id="step-3" style="display: none;">
+                    <div class="form-group">
+                        <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Terms & Conditions</h3>
+                        
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <label for="terms" class="checkbox-label">
+                                I agree to the <a href="#" onclick="openModal('terms-modal')">Terms of Service</a> and 
+                                <a href="#" onclick="openModal('privacy-modal')">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="notifications" name="notifications">
+                            <label for="notifications" class="checkbox-label">
+                                I would like to receive email notifications about platform updates and announcements
+                            </label>
+                        </div>
+
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="marketing" name="marketing">
+                            <label for="marketing" class="checkbox-label">
+                                I consent to receive marketing communications from Philips (optional)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" id="prev-btn" class="auth-btn" style="background: var(--bg-tertiary); color: var(--text-primary); flex: 1; display: none;">
+                        Previous
+                    </button>
+                    <button type="button" id="next-btn" class="auth-btn" style="flex: 1;">
+                        NEXT
+                    </button>
+                    <button type="submit" id="submit-btn" class="auth-btn" style="flex: 1; display: none;">
+                        <span id="submit-text">Create Account</span>
+                        <div id="submit-loading" style="display: none;"></div>
+                    </button>
+                </div>
+
+                <!-- Alternative Registration Options -->
+                <div class="social-divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <div class="social-login">
+                    <button type="button" class="social-btn" onclick="alert('SSO integration coming soon!')">
+                        <i data-lucide="building"></i>
+                        Philips SSO
+                    </button>
+                    <button type="button" class="social-btn" onclick="alert('Microsoft integration coming soon!')">
+                        <i data-lucide="microsoft"></i>
+                        Microsoft
+                    </button>
+                </div>
+            </form>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                        {% if message.tags == 'error' %}
+                            <i data-lucide="alert-circle"></i>
+                        {% else %}
+                            <i data-lucide="check-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="auth-footer">
+                <p style="margin: 0; color: var(--text-secondary);">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="auth-link">Sign in here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Terms of Service</h2>
+                <button type="button" onclick="closeModal('terms-modal')" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>By using this platform, you agree to comply with all applicable policies and guidelines...</p>
+                <!-- Add actual terms content here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacy-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Privacy Policy</h2>
+                <button type="button" onclick="closeModal('privacy-modal')" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This privacy policy describes how we collect, use, and protect your personal information...</p>
+                <!-- Add actual privacy policy content here -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            initializeForm();
+        });
+
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function initializeForm() {
+            // Real-time validation
+            setupRealTimeValidation();
+            
+            // Multi-step navigation
+            setupStepNavigation();
+            
+            // Password strength checker
+            setupPasswordStrength();
+            
+            // Stream selection
+            setupStreamSelection();
+            
+            // Form submission
+            setupFormSubmission();
+
+            // Disable right-click context menu
+            document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            });
+        }
+
+        function setupRealTimeValidation() {
+            const username = document.getElementById('username');
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+
+            // Username validation
+            username.addEventListener('input', function() {
+                validateUsername();
+            });
+
+            username.addEventListener('blur', function() {
+                checkUsernameAvailability();
+            });
+
+            // Email validation
+            email.addEventListener('input', function() {
+                validateEmail();
+            });
+
+            // Password validation
+            password.addEventListener('input', function() {
+                validatePassword();
+                validateConfirmPassword();
+            });
+
+            // Confirm password validation
+            confirmPassword.addEventListener('input', function() {
+                validateConfirmPassword();
+            });
+        }
+
+        function setupStepNavigation() {
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            nextBtn.addEventListener('click', function() {
+                if (validateCurrentStep()) {
+                    goToStep(currentStep + 1);
+                }
+            });
+
+            prevBtn.addEventListener('click', function() {
+                goToStep(currentStep - 1);
+            });
+        }
+
+        function setupPasswordStrength() {
+            const password = document.getElementById('password');
+            const strengthIndicator = document.getElementById('password-strength');
+            
+            password.addEventListener('focus', function() {
+                strengthIndicator.style.display = 'block';
+            });
+
+            password.addEventListener('input', function() {
+                updatePasswordStrength();
+            });
+
+
+        }
+
+
+
+        function setupStreamSelection() {
+            const dropdown = document.getElementById('stream-dropdown');
+            const options = document.getElementById('stream-options');
+            const arrow = dropdown.querySelector('.dropdown-arrow');
+
+            dropdown.addEventListener('click', function() {
+                const isOpen = options.classList.contains('show');
+                
+                if (isOpen) {
+                    closeStreamDropdown();
+                } else {
+                    openStreamDropdown();
+                }
+            });
+
+            // Handle keyboard navigation
+            dropdown.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dropdown.click();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && !options.contains(e.target)) {
+                    closeStreamDropdown();
+                }
+            });
+
+            // Update selection text when checkboxes change
+            const checkboxes = options.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateStreamSelection);
+            });
+        }
+
+        function setupFormSubmission() {
+            const form = document.getElementById('registrationForm');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (validateAllSteps()) {
+                    submitForm();
+                }
+            });
+        }
+
+        function validateCurrentStep() {
+            switch(currentStep) {
+                case 1:
+                    return validateUsername() && validateEmail() && validatePassword() && validateConfirmPassword();
+                case 2:
+                    return validateStreams();
+                case 3:
+                    return validateTerms();
+                default:
+                    return false;
+            }
+        }
+
+        function validateAllSteps() {
+            let isValid = true;
+            
+            // Validate all steps
+            for (let step = 1; step <= totalSteps; step++) {
+                const originalStep = currentStep;
+                currentStep = step;
+                if (!validateCurrentStep()) {
+                    isValid = false;
+                    goToStep(step);
+                    break;
+                }
+                currentStep = originalStep;
+            }
+            
+            return isValid;
+        }
+
+        function validateUsername() {
+            const username = document.getElementById('username');
+            const error = document.getElementById('username-error');
+            const value = username.value.trim();
+
+            if (value.length < 3) {
+                showFieldError(username, error, 'Username must be at least 3 characters long.');
+                return false;
+            }
+
+            if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                showFieldError(username, error, 'Username can only contain letters, numbers, and underscores.');
+                return false;
+            }
+
+            clearFieldError(username, error);
+            return true;
+        }
+
+        function validateEmail() {
+            const email = document.getElementById('email');
+            const error = document.getElementById('email-error');
+            const value = email.value.trim();
+
+            if (!value) {
+                showFieldError(email, error, 'Email is required.');
+                return false;
+            }
+
+            if (!value.endsWith('@philips.com')) {
+                showFieldError(email, error, 'Email must be a valid @philips.com address.');
+                return false;
+            }
+
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@philips\.com$/;
+            if (!emailRegex.test(value)) {
+                showFieldError(email, error, 'Please enter a valid email address.');
+                return false;
+            }
+
+            clearFieldError(email, error);
+            return true;
+        }
+
+        function validatePassword() {
+            const password = document.getElementById('password');
+            const error = document.getElementById('password-error');
+            const value = password.value;
+
+            if (value.length < 8) {
+                showFieldError(password, error, 'Password must be at least 8 characters long.');
+                return false;
+            }
+
+            const strength = calculatePasswordStrength(value);
+            if (strength < 3) {
+                showFieldError(password, error, 'Please choose a stronger password.');
+                return false;
+            }
+
+            clearFieldError(password, error);
+            return true;
+        }
+
+        function validateConfirmPassword() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const error = document.getElementById('confirm-password-error');
+
+            if (confirmPassword.value !== password.value) {
+                showFieldError(confirmPassword, error, 'Passwords do not match.');
+                return false;
+            }
+
+            clearFieldError(confirmPassword, error);
+            return true;
+        }
+
+        function validateStreams() {
+            const checkboxes = document.querySelectorAll('input[name="streams"]:checked');
+            const error = document.getElementById('streams-error');
+
+            if (checkboxes.length === 0) {
+                error.textContent = 'Please select at least one stream.';
+                error.style.display = 'block';
+                return false;
+            }
+
+            error.style.display = 'none';
+            return true;
+        }
+
+        function validateTerms() {
+            const terms = document.getElementById('terms');
+            const termsContainer = terms.closest('.checkbox-container');
+
+            if (!terms.checked) {
+                termsContainer.style.border = '1px solid var(--error-color)';
+                termsContainer.style.borderRadius = 'var(--radius-sm)';
+                termsContainer.style.padding = '0.5rem';
+                termsContainer.style.background = 'rgba(255, 68, 68, 0.05)';
+                return false;
+            }
+
+            termsContainer.style.border = 'none';
+            termsContainer.style.background = 'transparent';
+            termsContainer.style.padding = '0';
+            return true;
+        }
+
+        function showFieldError(field, errorElement, message) {
+            field.classList.add('error');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function clearFieldError(field, errorElement) {
+            field.classList.remove('error');
+            errorElement.style.display = 'none';
+        }
+
+        function checkUsernameAvailability() {
+            // This would typically make an AJAX call to check username availability
+            // For now, we'll simulate it
+            const username = document.getElementById('username');
+            const error = document.getElementById('username-error');
+            
+            if (username.value.trim() && validateUsername()) {
+                // Simulate API call delay
+                setTimeout(() => {
+                    // You would implement actual username checking here
+                    console.log('Checking username availability:', username.value);
+                }, 500);
+            }
+        }
+
+        function updatePasswordStrength() {
+            const password = document.getElementById('password');
+            const strengthBar = document.querySelector('.strength-fill');
+            const strengthText = document.getElementById('strength-level');
+            const strengthContainer = document.getElementById('password-strength');
+            
+            const strength = calculatePasswordStrength(password.value);
+            const requirements = checkPasswordRequirements(password.value);
+            
+            // Update strength bar
+            strengthContainer.className = 'password-strength';
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    strengthContainer.classList.add('strength-weak');
+                    strengthText.textContent = 'Weak';
+                    strengthText.style.color = 'var(--error-color)';
+                    break;
+                case 2:
+                    strengthContainer.classList.add('strength-fair');
+                    strengthText.textContent = 'Fair';
+                    strengthText.style.color = 'var(--warning-color)';
+                    break;
+                case 3:
+                    strengthContainer.classList.add('strength-good');
+                    strengthText.textContent = 'Good';
+                    strengthText.style.color = 'var(--accent-color)';
+                    break;
+                case 4:
+                case 5:
+                    strengthContainer.classList.add('strength-strong');
+                    strengthText.textContent = 'Strong';
+                    strengthText.style.color = 'var(--success-color)';
+                    break;
+            }
+
+            // Update requirement indicators
+            updatePasswordRequirements(requirements);
+        }
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            return Math.min(strength, 5);
+        }
+
+        function checkPasswordRequirements(password) {
+            return {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[^A-Za-z0-9]/.test(password)
+            };
+        }
+
+        function updatePasswordRequirements(requirements) {
+            const reqElements = {
+                length: document.getElementById('req-length'),
+                uppercase: document.getElementById('req-uppercase'),
+                lowercase: document.getElementById('req-lowercase'),
+                number: document.getElementById('req-number'),
+                special: document.getElementById('req-special')
+            };
+
+            Object.keys(requirements).forEach(key => {
+                const element = reqElements[key];
+                if (requirements[key]) {
+                    element.style.color = 'var(--success-color)';
+                    element.style.textDecoration = 'line-through';
+                } else {
+                    element.style.color = 'var(--text-secondary)';
+                    element.style.textDecoration = 'none';
+                }
+            });
+        }
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+
+            // Hide current step
+            document.getElementById(`step-${currentStep}`).style.display = 'none';
+            
+            // Show new step
+            document.getElementById(`step-${step}`).style.display = 'block';
+            
+            // Update progress indicator
+            updateProgressIndicator(step);
+            
+            // Update navigation buttons
+            updateNavigationButtons(step);
+            
+            currentStep = step;
+        }
+
+        function updateProgressIndicator(step) {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach((stepEl, index) => {
+                if (index < step) {
+                    stepEl.classList.add('active');
+                } else {
+                    stepEl.classList.remove('active');
+                }
+            });
+        }
+
+        function updateNavigationButtons(step) {
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            prevBtn.style.display = step === 1 ? 'none' : 'block';
+            
+            if (step === totalSteps) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function openStreamDropdown() {
+            const options = document.getElementById('stream-options');
+            const arrow = document.querySelector('.dropdown-arrow');
+            const dropdown = document.getElementById('stream-dropdown');
+
+            options.classList.add('show');
+            arrow.classList.add('open');
+            dropdown.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeStreamDropdown() {
+            const options = document.getElementById('stream-options');
+            const arrow = document.querySelector('.dropdown-arrow');
+            const dropdown = document.getElementById('stream-dropdown');
+
+            options.classList.remove('show');
+            arrow.classList.remove('open');
+            dropdown.setAttribute('aria-expanded', 'false');
+        }
+
+        function updateStreamSelection() {
+            const checkboxes = document.querySelectorAll('input[name="streams"]:checked');
+            const selectionText = document.getElementById('stream-selection-text');
+            
+            if (checkboxes.length === 0) {
+                selectionText.textContent = 'Select streams...';
+            } else if (checkboxes.length === 1) {
+                const label = document.querySelector(`label[for="${checkboxes[0].id}"]`);
+                const streamName = label.querySelector('strong').textContent;
+                selectionText.textContent = streamName;
+            } else {
+                selectionText.textContent = `${checkboxes.length} streams selected`;
+            }
+        }
+
+        function submitForm() {
+            const submitBtn = document.getElementById('submit-btn');
+            const submitText = document.getElementById('submit-text');
+            const submitLoading = document.getElementById('submit-loading');
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitText.style.display = 'none';
+            submitLoading.style.display = 'block';
+
+            // Submit the form
+            document.getElementById('registrationForm').submit();
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target.id);
+            }
+        });
+    </script>
+
+    <style>
+        /* Additional styles for modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .form-step {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Accessibility improvements */
+        .form-input:focus,
+        .dropdown-header:focus,
+        .auth-btn:focus,
+        .social-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Product Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <style>
+        /* Modern CSS Variables for consistent theming */
+        :root {
+            --primary-color: #005fa3;
+            --primary-light: #0077c8;
+            --primary-gradient: linear-gradient(135deg, #005fa3 0%, #0077c8 100%);
+            --secondary-color: #6366f1;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --border-radius-sm: 0.375rem;
+            --border-radius-md: 0.5rem;
+            --border-radius-lg: 0.75rem;
+            --border-radius-xl: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .page-container {
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+
+
+        .header-section {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .product-title-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .product-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .product-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .status-badge-container {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+
+        .status-active { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .status-notactive { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .status-scraped { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .status-handovered { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .status-issue { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            transform: translateY(-1px);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .main-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .qr-section {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .qr-code:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .assignment-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .assignment-card {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .system-card {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .system-card .card-header {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        }
+
+        .project-card {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .project-card .card-header {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        }
+
+        .assignment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .assignment-item {
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius-md);
+            border-left: 3px solid var(--primary-light);
+        }
+
+        .project-item {
+            border-left-color: var(--warning-color);
+        }
+
+        .image-gallery {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: var(--shadow-xl);
+        }
+
+
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: var(--gray-100);
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--gray-200);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .handover-details {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #0ea5e9;
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .issue-details {
+            background: linear-gradient(135deg, #fff7ed, #fed7aa);
+            border: 1px solid #f97316;
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: var(--gray-100);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1rem 0.5rem;
+                padding-top: 20px;
+            }
+
+            .product-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .product-title {
+                font-size: 1.75rem;
+            }
+
+            .action-buttons {
+                justify-content: stretch;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* Make images responsive on mobile */
+            .card-content .info-grid {
+                margin-right: 0 !important;
+            }
+            
+            .card-content > div:first-child {
+                position: static !important;
+                width: 100% !important;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Animation for interactive elements */
+        .info-card, .assignment-card, .gallery-item {
+            transform: translateY(0);
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-xl);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        /* Advanced micro-interactions */
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .info-card:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Print styles */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+            
+            .floating-action,
+            .action-buttons,
+            button,
+            .back-link {
+                display: none !important;
+            }
+            
+            .page-container {
+                padding: 10px !important;
+                background: white !important;
+                min-height: auto !important;
+                max-width: 100% !important;
+            }
+            
+            .main-content {
+                max-width: 100% !important;
+                margin: 0 !important;
+                gap: 15px !important;
+                animation: none !important;
+            }
+            
+            .content-grid {
+                display: block !important;
+                grid-template-columns: none !important;
+                gap: 10px !important;
+            }
+            
+            .sidebar {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 20px !important;
+                margin-top: 15px !important;
+                page-break-inside: avoid;
+            }
+            
+            .qr-section {
+                flex: 1;
+                margin-right: 20px;
+                page-break-inside: avoid;
+            }
+            
+            .assignment-cards {
+                flex: 2;
+                gap: 10px !important;
+            }
+            
+            .info-card,
+            .assignment-card,
+            .header-section,
+            .qr-section {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 10px !important;
+            }
+            
+            .header-section {
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .product-header {
+                flex-direction: row !important;
+                align-items: flex-start !important;
+                gap: 20px !important;
+            }
+            
+            .product-title {
+                font-size: 24px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            .product-subtitle {
+                font-size: 14px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .card-header {
+                padding: 10px 15px !important;
+                background: #f5f5f5 !important;
+                border-bottom: 1px solid #ddd !important;
+            }
+            
+            .card-title {
+                font-size: 16px !important;
+                font-weight: 700 !important;
+            }
+            
+            .card-content {
+                padding: 15px !important;
+                position: relative !important;
+            }
+            
+            .info-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px 20px !important;
+                margin-right: 0 !important;
+            }
+            
+            .info-item {
+                break-inside: avoid;
+            }
+            
+            .info-label {
+                font-size: 10px !important;
+                font-weight: 600 !important;
+                color: #666 !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .info-value {
+                font-size: 12px !important;
+                color: #333 !important;
+                font-weight: 500 !important;
+            }
+            
+            /* Product Images for Print */
+            .card-content > div:first-child {
+                position: static !important;
+                width: 100% !important;
+                text-align: center !important;
+                margin-bottom: 15px !important;
+                border: 1px solid #ddd !important;
+                padding: 10px !important;
+                background: #f9f9f9 !important;
+            }
+            
+            .card-content > div:first-child > div:first-child span {
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                color: #333 !important;
+            }
+            
+            .card-content > div:first-child > div:last-child {
+                display: flex !important;
+                justify-content: center !important;
+                gap: 10px !important;
+                flex-wrap: wrap !important;
+            }
+            
+            .gallery-item {
+                width: 80px !important;
+                height: 80px !important;
+                border: 1px solid #ccc !important;
+                border-radius: 4px !important;
+            }
+            
+            .qr-code {
+                width: 120px !important;
+                height: 120px !important;
+                margin: 0 auto 10px !important;
+                border: 1px solid #ddd !important;
+            }
+            
+            .qr-section h3 {
+                font-size: 14px !important;
+                margin-bottom: 10px !important;
+                text-align: center !important;
+            }
+            
+            .qr-section p {
+                font-size: 10px !important;
+                margin-bottom: 0 !important;
+                text-align: center !important;
+            }
+            
+            .assignment-item {
+                padding: 8px !important;
+                margin-bottom: 5px !important;
+                background: #f8f8f8 !important;
+                border-left: 2px solid #005fa3 !important;
+                border-radius: 3px !important;
+            }
+            
+            .assignment-item div {
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+            }
+            
+            .status-badge-container {
+                margin-bottom: 10px !important;
+            }
+            
+            .status-badge {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                margin-right: 8px !important;
+                background: #e5e7eb !important;
+                color: #374151 !important;
+                border: 1px solid #d1d5db !important;
+                border-radius: 12px !important;
+            }
+            
+            .handover-details,
+            .issue-details {
+                background: #f8f9fa !important;
+                border: 1px solid #ddd !important;
+                padding: 10px !important;
+                margin: 10px 0 !important;
+                border-radius: 4px !important;
+            }
+            
+            /* Page break control */
+            .main-info-section {
+                page-break-inside: avoid;
+            }
+            
+            .assignment-card {
+                page-break-inside: avoid;
+                margin-bottom: 8px !important;
+            }
+            
+            /* Ensure single page layout */
+            @page {
+                size: A4;
+                margin: 0.5in;
+            }
+            
+            html, body {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+
+    <div class="page-container" style="padding-top: 20px;">
+        <div class="main-content">
+            <!-- Stream Name Display -->
+            <div style="background: var(--primary-gradient); color: white; padding: 1rem 2rem; border-radius: var(--border-radius-xl); margin-bottom: 0; text-align: center; box-shadow: var(--shadow-lg);">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">
+                    <i class="fas fa-stream"></i>
+                    Stream: {{ stream|upper }}
+                </h3>
+            </div>
+            
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="product-header">
+                    <div class="product-title-section">
+                        <h1 class="product-title">{{ product.name }}</h1>
+                        <p class="product-subtitle">Product ID: {{ product.serial_number }}</p>
+                        
+                        <div class="status-badge-container">
+                            <span class="status-badge status-{% if product.status == 'Active' %}active{% elif product.status == 'Not Active' %}notactive{% elif product.status == 'Scraped' %}scraped{% elif product.status == 'Hand-Overed' %}handovered{% elif product.status == 'Issue' %}issue{% endif %}">
+                                <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                                {% if product.status == 'Issue' %}Issue in System{% else %}{{ product.status }}{% endif %}
+                            </span>
+                            <span class="status-badge" style="background: var(--gray-200); color: var(--gray-700);">
+                                <i class="fas fa-tag"></i>
+                                {{ product.category.name }}
+                            </span>
+                        </div>
+
+                        <a href="{% url 'product_list_stream' stream %}?category={{ product.category.id }}" class="btn btn-secondary" style="margin-top: 1rem; display: inline-flex;">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Products
+                        </a>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="{% url 'product_edit_stream' stream product.pk %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i>
+                            Edit Product
+                        </a>
+                        <button class="btn btn-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            Print
+                        </button>
+                        <!-- <button class="btn btn-secondary" onclick="downloadQR()">
+                            <i class="fas fa-download"></i>
+                            Download QR
+                        </button> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="content-grid">
+                <!-- Main Information Section -->
+                <div class="main-info-section">
+                    <!-- Product Details Card -->
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                Product Information
+                            </h2>
+                        </div>
+                        <div class="card-content" style="position: relative;">
+                            <!-- Product Images in Right Corner -->
+                            {% if product.images.all %}
+                            <div style="position: absolute; top: 0; right: 54px; width: 200px; z-index: 10; text-align: center;">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em;">Product Images</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 0.5rem; justify-items: center;">
+                                    {% for img in product.images.all %}
+                                    <div class="gallery-item" onclick="showImageModal('{{ img.image.url }}')" style="aspect-ratio: 1; border-radius: var(--border-radius-md); overflow: hidden; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.3s ease; border: 2px solid white;">
+                                        <img src="{{ img.image.url }}" alt="Product Image" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Product Information Content -->
+                            <div class="info-grid" style="{% if product.images.all %}margin-right: 220px;{% endif %}">
+                                <div class="info-item">
+                                    <span class="info-label">Description</span>
+                                    <span class="info-value">{{ product.description|linebreaksbr }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">12NC Information</span>
+                                    <span class="info-value">{{ product.twelve_nc|default:"Not specified" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Location</span>
+                                    <span class="info-value">
+                                        {{ product.location.name }}
+                                        {% if product.location.address %} - {{ product.location.address }}{% endif %}
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date Added</span>
+                                    <span class="info-value">{{ product.created_at|date:"F d, Y \a\t H:i" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Category</span>
+                                    <span class="info-value">{{ product.category.name }} ({{ product.category.serial_number }})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Handover Details (if applicable) -->
+                    {% if product.status == 'Hand-Overed' %}
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-exchange-alt"></i>
+                                Handover Information
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="handover-details">
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Team Type</span>
+                                        <span class="info-value">{{ product.handover_team_type }}</span>
+                                    </div>
+                                    {% if product.handover_team_type == 'External' and product.handover_external_team %}
+                                    <div class="info-item">
+                                        <span class="info-label">External Team</span>
+                                        <span class="info-value">{{ product.handover_external_team }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div class="info-item">
+                                        <span class="info-label">Assignee/Owner</span>
+                                        <span class="info-value">{{ product.handover_owner|default:"Store" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Issue Details (if applicable) -->
+                    {% if product.status == 'Issue' and product.issue_description %}
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Issue Details
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="issue-details">
+                                <div class="info-item">
+                                    <span class="info-label">Issue Description</span>
+                                    <span class="info-value">{{ product.issue_description|linebreaksbr }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- QR Code Section -->
+                    <div class="qr-section">
+                        <h3 style="margin-bottom: 1rem; color: var(--gray-800); font-weight: 600;">
+                            <i class="fas fa-qrcode"></i>
+                            Quick Access QR Code
+                        </h3>
+                        <div class="qr-code">
+                            <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1rem;">
+                            Scan this QR code to view product details instantly on any device.
+                        </p>
+                        <a href="{% url 'download_qr_with_details_stream' stream product.pk %}" 
+                           class="btn btn-primary" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-download"></i>
+                            Download QR with Details
+                        </a>
+                    </div>
+
+                    <!-- System & Project Assignments -->
+                    {% if product.system_tags.exists %}
+                    <div class="assignment-cards">
+                        <!-- System Assignment Card -->
+                        <div class="assignment-card system-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-server"></i>
+                                    System Assigned
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="assignment-list">
+                                    {% for system_tag in product.system_tags.all %}
+                                    <div class="assignment-item">
+                                        <div style="font-weight: 600; color: var(--primary-color);">
+                                            {{ system_tag.system.name }}
+                                        </div>
+                                        <div style="font-size: 0.875rem; color: var(--gray-600);">
+                                            {{ system_tag.tag_name }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Assignment Cards -->
+                        {% for system_tag in product.system_tags.all %}
+                            {% if system_tag.projects.exists %}
+                            <div class="assignment-card project-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-project-diagram"></i>
+                                        Project Aligned
+                                    </h3>
+                                </div>
+                                <div class="card-content">
+                                    <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 0.75rem;">
+                                        {{ system_tag.system.name }}
+                                    </div>
+                                    <div class="assignment-list">
+                                        {% for project in system_tag.projects.all %}
+                                        <div class="assignment-item project-item">
+                                            <div style="font-weight: 500;">{{ project.name }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imgModal" class="modal" onclick="if(event.target==this)this.style.display='none'">
+        <div class="modal-content" style="max-width: 80vw; max-height: 80vh; padding: 0; border-radius: var(--border-radius-xl); overflow: hidden;">
+            <div class="modal-header">
+                <h3 style="color: var(--gray-800);">Product Image</h3>
+                <button class="modal-close" onclick="document.getElementById('imgModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="text-align: center; padding: 1rem;">
+                <img id="modalImg" src="" alt="Zoomed Product Image" style="max-width: 100%; max-height: 70vh; border-radius: var(--border-radius-md);">
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="floating-action" onclick="scrollToTop()" title="Scroll to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Image modal functionality
+        function showImageModal(url) {
+            document.getElementById('modalImg').src = url;
+            document.getElementById('imgModal').style.display = 'flex';
+        }
+
+        // Download QR functionality
+        function downloadQR() {
+            window.location.href = "{% url 'download_qr_with_details_stream' stream product.pk %}";
+        }
+
+        // Scroll to top functionality
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('imgModal').style.display = 'none';
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        // Show/hide floating action button based on scroll
+        window.addEventListener('scroll', function() {
+            const floatingAction = document.querySelector('.floating-action');
+            if (window.scrollY > 200) {
+                floatingAction.style.display = 'flex';
+            } else {
+                floatingAction.style.display = 'none';
+            }
+        });
+
+        // Initialize floating action button visibility
+        document.querySelector('.floating-action').style.display = 'none';
+
+        // Add loading states for images
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+            img.addEventListener('load', function() {
+                this.style.opacity = '1';
+            });
+            img.style.opacity = '0';
+            img.style.transition = 'opacity 0.3s ease';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,676 @@
+{% extends 'products/base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Categories</title>
+    <link rel="stylesheet" href="/static/products/style.css">
+    <style>
+        body, html {
+            color: #222;
+            font-size: 1rem;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .top-bar {
+            color: #222;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2.5rem;
+            background: #fff;
+            border-bottom: 1px solid #e0e3e7;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .category-bg {
+            padding-top: 80px;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .category-list-container {
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #e0e3e7;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #005fa3;
+            outline: none;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .sort-control {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            min-width: 250px;
+            margin-left: 2.5rem; /* Move sort and dropdown to the right */
+        }
+
+        .sort-control label {
+            font-size: 1.35rem;
+            color: #444;
+            white-space: nowrap;
+            position: relative;
+            top: -4px; /* Move sort label font a little up */
+        }
+
+        .sort-select {
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #e0e3e7;
+            background: #fff;
+            min-width: 180px;
+            font-size: 1.15rem;
+            color: #333;
+        }
+
+        .checkbox-control {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 0;
+            font-size: 1.25rem;
+            color: #222;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .checkbox-control input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid #e0e3e7;
+            cursor: pointer;
+        }
+
+        .checkbox-control label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            position: relative;
+            top: -5px; /* Move 'Select All' label font a little up */
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1.5rem;
+        }
+
+        .bulk-btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bulk-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .bulk-btn.delete {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .bulk-btn.export {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .add-btn {
+            display: inline-block;
+            padding: 0.7rem 1.5rem; /* Reduced size */
+            background: #005fa3;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.95rem; /* Reduced font size */
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
+        }
+
+        .add-btn:hover {
+            background: #004c82;
+            transform: translateY(-2px);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* updated to match card width */
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .category-card {
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 280px; /* increased height for wrapping text */
+            max-width: 220px; /* increased width to accommodate longer text */
+            width: 220px; /* fixed width for consistency */
+            position: relative;
+            box-sizing: border-box; /* ensure padding is included in width */
+            overflow: hidden; /* prevent content overflow outside card */
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .category-icon {
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .category-icon img {
+            height: 40px;
+            width: auto;
+            transition: transform 0.2s;
+        }
+
+        .category-card:hover .category-icon img {
+            transform: scale(1.05);
+        }
+
+        .category-name {
+            font-size: 1.2rem; /* slightly smaller for better fit */
+            font-weight: 700;
+            color: #005fa3;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            overflow: visible; /* allow text to wrap */
+            text-overflow: clip; /* no truncation */
+            white-space: normal; /* allow wrapping */
+            word-break: break-word; /* break long words if needed */
+            overflow-wrap: break-word; /* wrap long words */
+            line-height: 1.2; /* better line spacing */
+            max-width: 100%;
+            padding: 0 4px; /* small padding for better appearance */
+        }
+
+        .category-serial {
+            font-size: 0.85rem; /* slightly smaller for better fit */
+            color: #666;
+            text-align: center;
+            overflow: visible; /* show all text */
+            text-overflow: clip; /* no truncation */
+            white-space: normal; /* allow wrapping */
+            word-break: break-all; /* break long words/numbers aggressively */
+            overflow-wrap: break-word; /* wrap long words */
+            hyphens: none; /* don't hyphenate numbers */
+            width: 100%; /* ensure full width usage */
+            margin: 0.5rem 0; /* add some margin for spacing */
+            padding: 0 8px; /* padding to avoid touching edges */
+            line-height: 1.1; /* better line spacing */
+            box-sizing: border-box;
+        }
+
+        /* Responsive adjustments for larger screens */
+        @media (min-width: 1200px) {
+            .category-card {
+                min-height: 210px; /* even taller on larger screens for more text */
+            }
+        }
+
+        .product-count {
+            position: absolute;
+            left: 1rem;
+            bottom: 1rem;
+            font-size: 0.8rem;
+            color: #fff;
+            background: #005fa3;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: none;
+            gap: 0.5rem;
+        }
+
+        .category-card:hover .card-actions {
+            display: flex;
+        }
+
+        .card-actions a {
+            color: #005fa3;
+            background: #e3eefd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .card-actions a:hover {
+            background: #cce0fb;
+        }
+
+        .card-actions a.delete {
+            background: #ffeaea;
+            color: #dc3545;
+            font-size: 0.85rem;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .card-actions a.delete:hover {
+            background: #ffd5d5;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        .pagination a {
+            padding: 0.7rem 1.2rem;
+            background: #fff;
+            color: #005fa3;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .pagination a:hover {
+            background: #f0f7ff;
+        }
+
+        @media (max-width: 768px) {
+            .search-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .sort-control {
+                min-width: auto;
+            }
+
+            .sort-select {
+                min-width: 150px;
+                flex: 1;
+            }
+
+            .checkbox-control {
+                padding: 0.4rem 0;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* slightly smaller on mobile */
+                gap: 1rem;
+            }
+
+            .category-card {
+                padding: 0.7rem;
+                min-height: 240px; /* increased height for mobile wrapping */
+                max-width: 95%;
+                width: auto; /* allow flexibility on mobile */
+            }
+
+            .category-icon img {
+                height: 30px;
+            }
+
+            .checkbox-control, .bulk-actions {
+                margin-left: 0;
+            }
+
+            .card-actions a, .card-actions a.delete {
+                font-size: 0.8rem;
+                padding: 0.15rem 0.4rem;
+            }
+        }
+
+        /* On very small screens allow the serial to wrap instead of truncating */
+        @media (max-width: 420px) {
+            .category-serial {
+                -webkit-line-clamp: unset;
+                line-clamp: unset;
+                max-height: none;
+                overflow: visible;
+                text-overflow: clip;
+                font-size: 0.9rem;
+                white-space: normal;
+            }
+            .category-card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="category-bg">
+        <div class="category-list-container">
+            <div class="search-toolbar">
+                <form method="get" action="" class="search-form" id="categorylist-search-form">
+                    <input type="text" name="q" id="category-search-input" value="{{ q|default:'' }}" placeholder="Search categories..." class="search-input" autocomplete="off">
+                    <button type="submit" class="add-btn" style="margin: 0;">Search</button>
+                </form>
+
+                <div class="toolbar-actions">
+                    <div class="sort-control">
+                        <label>Sort:</label>
+                        <select id="category-sort" class="sort-select">
+                            <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest</option>
+                            <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
+                            <option value="product_count" {% if selected_sort == 'product_count' %}selected{% endif %}>Most products</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-control">
+                        <input type="checkbox" id="select-all-checkbox">
+                        <label for="select-all-checkbox">Select All</label>
+                    </div>
+
+                    <div class="bulk-actions">
+                        <button id="bulk-delete-btn" class="bulk-btn delete" disabled>Delete Selected</button>
+                        <button id="bulk-export-btn" class="bulk-btn export" disabled>Export Selected</button>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+
+            <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn">+ Add Category</a>
+            {% endif %}
+
+            <div class="category-grid" id="category-grid">
+                {% for category in categories %}
+                <div class="category-card" data-name="{{ category.name|lower }}" data-serial="{{ category.serial_number|lower }}" data-id="{{ category.id }}">
+                    <input type="checkbox" class="card-checkbox" value="{{ category.id }}" style="position:absolute; left:1rem; top:1rem; transform:scale(1.2);">
+                    <a href="/stream/{{ selected_stream }}/products/?category={{ category.id }}" style="text-decoration: none; color: inherit; display:block;">
+                        <div class="category-icon">
+                            <img src="/static/products/philips.png" alt="Philips Logo">
+                        </div>
+                        <div class="category-name">{{ category.name }}</div>
+                        <div class="category-serial">{{ category.serial_number }}</div>
+                    </a>
+                    <div class="product-count">{{ category.product_count|default:0 }}</div>
+                    <div class="card-actions">
+                        <a href="{% url 'category_edit_stream' selected_stream category.id %}" title="Edit Category">✎</a>
+                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                        <a href="{% url 'category_delete_stream' selected_stream category.id %}" title="Delete Category" class="delete">🗑</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; color: #666; grid-column: 1/-1; padding: 3rem;">No categories found.</div>
+                {% endfor %}
+            </div>
+
+            {% if page_obj %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">← Previous</a>
+                {% endif %}
+                <span style="color: #666;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Helper: debounce
+        function debounce(fn, delay){
+            let t;
+            return function(){
+                const args = arguments;
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // Client-side live fuzzy filter (works on current page cards)
+        function liveFilter() {
+            const q = document.getElementById('category-search-input').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('#category-grid .category-card');
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                const serial = card.dataset.serial || '';
+                if (!q || name.includes(q) || serial.includes(q)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('category-search-input');
+            const sortSelect = document.getElementById('category-sort');
+            const selectAll = document.getElementById('select-all-checkbox');
+            const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+            const bulkExportBtn = document.getElementById('bulk-export-btn');
+
+            if (searchInput) {
+                // Debounced live filter for client-side experience
+                searchInput.addEventListener('input', debounce(function(e){
+                    liveFilter();
+                    // If user clears, also submit to server to reset filter
+                    if (this.value.trim() === '') {
+                        // Keep short-circuit to avoid navigation if on page>1
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('q');
+                        url.searchParams.delete('page');
+                        window.history.replaceState({}, '', url);
+                    }
+                }, 200));
+
+                // Submit form on Enter to perform server-side search (for full dataset)
+                document.getElementById('categorylist-search-form').addEventListener('submit', function(e){
+                    // allow normal submit
+                });
+
+                // Focus search with '/'
+                document.addEventListener('keydown', function(e){
+                    if (e.key === '/'){
+                        e.preventDefault();
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                });
+            }
+
+            if (sortSelect){
+                sortSelect.addEventListener('change', function(){
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('sort', this.value);
+                    url.searchParams.delete('page');
+                    window.location.href = url.toString();
+                });
+            }
+
+            // Checkbox selection logic
+            function updateBulkState(){
+                const checked = document.querySelectorAll('.card-checkbox:checked');
+                const any = checked.length > 0;
+                bulkDeleteBtn.disabled = !any;
+                bulkExportBtn.disabled = !any;
+            }
+
+            document.querySelectorAll('.card-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateBulkState);
+                // Prevent card click navigating when clicking on checkbox
+                cb.addEventListener('click', function(e){ e.stopPropagation(); });
+            });
+
+            if (selectAll){
+                selectAll.addEventListener('change', function(){
+                    const all = document.querySelectorAll('.card-checkbox');
+                    all.forEach(cb => cb.checked = selectAll.checked);
+                    updateBulkState();
+                });
+            }
+
+            // CSRF helper
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            // Bulk delete
+            bulkDeleteBtn.addEventListener('click', function(){
+                const ids = Array.from(document.querySelectorAll('.card-checkbox:checked')).map(c=>c.value);
+                if (!ids.length) return;
+                if (!confirm('Delete '+ids.length+' categories? This cannot be undone.')) return;
+                if (!confirm('Note: Deleting the categories will delete all its belonging products as well.')) return;
+                fetch(`/stream/${encodeURIComponent('{{ selected_stream }}')}/categories/bulk-delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ids: ids})
+                }).then(r=>r.json()).then(data=>{
+                    if (data.success){
+                        // remove deleted cards from DOM
+                        ids.forEach(id => {
+                            const card = document.querySelector('.category-card[data-id="'+id+'"]');
+                            if (card) card.remove();
+                        });
+                        alert('Deleted '+data.deleted+' categories.');
+                    } else {
+                        alert('Error: '+(data.error||'Unable to delete'));
+                    }
+                }).catch(err=>{ alert('Request failed'); });
+            });
+
+            // Bulk export CSV
+            bulkExportBtn.addEventListener('click', function(){
+                const ids = Array.from(document.querySelectorAll('.card-checkbox:checked')).map(c=>c.value);
+                if (!ids.length) return;
+                // Submit to export endpoint and download
+                fetch(`/stream/${encodeURIComponent('{{ selected_stream }}')}/categories/export-csv/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ids: ids})
+                }).then(resp=>{
+                    if (!resp.ok) throw new Error('Export failed');
+                    return resp.blob();
+                }).then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `categories_{{ selected_stream }}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }).catch(err=>{ alert('Export failed'); });
+            });
+
+            // Keyboard shortcut: N -> new category (admins only)
+            document.addEventListener('keydown', function(e){
+                if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey){
+                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+
+                    window.location.href = '/stream/{{ selected_stream }}/categories/add/';
+                    {% endif %}
+                }
+            });
+
+        });
+    </script>
+
+    <script>
+    //   document.addEventListener('contextmenu', function (e) {
+    //     e.preventDefault();
+    //   });
+    </script>
+  </body>
+</html>
+{% endblock %}

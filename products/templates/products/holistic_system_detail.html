@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Details - {{ system.sr_no }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,95,163,0.08);
+            margin-top: 2rem;
+        }
+        .card-header.bg-primary {
+            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%) !important;
+        }
+        .card-header.bg-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+        }
+        .btn-warning {
+            background: #ffc107;
+            border: none;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+            color: #212529;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background: #495057;
+        }
+        .badge.bg-success, .badge.bg-primary, .badge.bg-warning, .badge.bg-danger, .badge.bg-info {
+            font-size: 1rem;
+            padding: 0.5em 1em;
+            border-radius: 1em;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <!-- System Information Card -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-server me-2"></i>System: {{ system.sr_no }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <span class="badge bg-{% if system.system_availability == 'available' %}success{% elif system.system_availability == 'allocated' %}primary{% else %}warning{% endif %} ms-2">
+                                {{ system.get_system_availability_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Priority:</strong>
+                            <span class="badge bg-{% if system.priority == 'critical' %}danger{% elif system.priority == 'high' %}warning{% else %}info{% endif %} ms-2">
+                                {{ system.get_priority_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Allocation to Sl No:</strong> {{ system.allocation_to_sl_no|default:"-" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Location:</strong> {{ system.location_info|default:"-" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>STMi Number:</strong> {{ system.stmi_number|default:"-" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>System Owner:</strong> {{ system.system_owner|default:"-" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>ECR Number:</strong> {{ system.ecr_number|default:"-" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Test Engineer:</strong> {{ system.test_engineer|default:"-" }}
+                        </div>
+                        {% if system.description %}
+                        <div class="col-12">
+                            <strong>Description:</strong>
+                            <p class="mt-2">{{ system.description }}</p>
+                        </div>
+                        {% endif %}
+                        {% if system.notes %}
+                        <div class="col-12">
+                            <strong>Notes:</strong>
+                            <p class="mt-2">{{ system.notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'holistic_system_edit' system.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'holistic_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Weekly Data -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Weekly Data</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Week</th>
+                                    <th>Status</th>
+                                    <th>Utilization</th>
+                                    <th>Assigned To</th>
+                                    <th>Hours Used</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for week in weekly_data %}
+                                <tr>
+                                    <td><strong>W{{ week.week_number }} {{ week.year }}</strong></td>
+                                    <td>{{ week.allocation_status|default:"-" }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if week.utilization_percentage < 60 %}bg-success{% elif week.utilization_percentage < 85 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                 style="width: {{ week.utilization_percentage }}%">
+                                                {{ week.utilization_percentage }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ week.assigned_to|default:"-" }}</td>
+                                    <td>{{ week.hours_used }}/{{ week.availability_hours }} hrs</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No weekly data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>History</h5>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    {% for record in history %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <small class="text-muted">{{ record.timestamp|date:"Y-m-d H:i" }}</small>
+                        <p class="mb-0"><strong>{{ record.action|title }}</strong></p>
+                        <small>{{ record.user.username }}</small>
+                        {% if record.details %}
+                        <p class="mb-0 small text-muted">{{ record.details }}</p>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">No history available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

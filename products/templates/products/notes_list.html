@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoS Notes - IGT MoS Inventory</title>
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    
+    <!-- Modern CSS Framework and Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --danger: #ef4444;
+            --warning: #f59e42;
+            --info: #3b82f6;
+            --success: #22c55e;
+            --bg: #fff;
+            --bg-card: #f8fafc;
+            --text: #18181b;
+            --text-secondary: #475569;
+            --border: #e5e7eb;
+            --icon: #2563eb;
+            --shadow: 0 4px 24px rgba(0,0,0,0.07);
+            --border-radius: 18px;
+        }
+        .dark-mode {
+            --primary: #60a5fa;
+            --primary-dark: #2563eb;
+            --secondary: #334155;
+            --accent: #22d3ee;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --info: #38bdf8;
+            --success: #4ade80;
+            --bg: #18181b;
+            --bg-card: #23272f;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --icon: #60a5fa;
+            --shadow: 0 4px 24px rgba(0,0,0,0.25);
+            --border-radius: 18px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        /* Glassmorphism Effects */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .glass-heavy {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        /* Header Styles */
+        .dashboard-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            margin: 5px 15px 10px;
+            border-radius: var(--border-radius);
+            padding: 20px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .philips-logo {
+            height: 70px;
+            width: auto;
+            position: absolute;
+            top: 10px;
+            right: 40px;
+            z-index: 900;
+        }
+        
+        .home-icon {
+            position: absolute;
+            top: 18px;
+            right: 120px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .home-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .home-icon img {
+            height: 45px;
+            width: 45px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            background: white;
+            border-radius: 10px;
+            padding: 8px;
+        }
+        
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            background: #fbbf24;
+            color: #18181b;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        
+        .theme-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+    /* Enhanced Header with Statistics */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .page-header h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 40px 20px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .stat-card.primary::before { background: var(--primary); }
+        .stat-card.success::before { background: var(--success); }
+        .stat-card.warning::before { background: var(--warning); }
+        .stat-card.secondary::before { background: var(--secondary); }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--icon);
+        }
+        
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+            transition: color 0.3s ease;
+        }
+        
+        .stat-card .label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 20px 30px;
+            margin: 0 20px 30px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: background 0.3s ease;
+        }
+        
+        .btn-export {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            color: #fff;
+        }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .controls-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .create-btn, .action-btn-secondary, .theme-toggle {
+        padding: 0.8rem 1.8rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .create-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .create-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .create-btn:hover::before {
+        left: 100%;
+    }
+
+    .create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+    }
+
+    .action-btn-secondary {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    [data-theme="dark"] .action-btn-secondary {
+        background: #2d2d2d;
+        color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .action-btn-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .theme-toggle {
+        background: white;
+        color: #18181b;
+        border: 2px solid var(--border);
+    }
+
+    .theme-toggle:hover {
+        background: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    /* Advanced Search and Filter Container */
+    .search-filter-container {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        animation: slideUp 0.5s ease-out;
+        border: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] .search-filter-container {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .search-filter-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 1.5rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-bar {
+        position: relative;
+        min-width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: white;
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .search-input {
+        background: #1a1a1a;
+        border-color: #444;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 95, 163, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+        font-size: 1.1rem;
+    }
+
+    .view-toggle {
+        display: flex;
+        background: var(--secondary-color);
+        border-radius: var(--border-radius);
+        padding: 4px;
+        border: 1px solid var(--border-color);
+    }
+
+    .view-toggle button {
+        background: transparent;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text-secondary);
+    }
+
+    .view-toggle button.active {
+        background: white;
+        color: var(--primary-color);
+        box-shadow: var(--shadow-light);
+    }
+
+    [data-theme="dark"] .view-toggle button.active {
+        background: #333;
+        color: var(--accent-color);
+    }
+
+    .sort-dropdown {
+        position: relative;
+    }
+
+    .sort-btn {
+        background: white;
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    [data-theme="dark"] .sort-btn {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .sort-btn:hover {
+        border-color: var(--primary-color);
+    }
+
+    /* Advanced Filters */
+    .advanced-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-btn {
+        background: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .filter-btn:hover {
+        background: #e0e0e0;
+        transform: translateY(-1px);
+    }
+
+    [data-theme="dark"] .filter-btn:hover {
+        background: #333;
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-light);
+    }
+
+    .filter-btn.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .filter-btn.active:hover::before {
+        left: 100%;
+    }
+
+    /* Tag Input */
+    .tag-input-container {
+        position: relative;
+    }
+
+    .tag-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        background: white;
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .tag-input {
+        background: #1a1a1a;
+        border-color: #444;
+    }
+
+    /* Sort Menu Styles */
+    .sort-menu {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-medium);
+        overflow: hidden;
+    }
+
+    [data-theme="dark"] .sort-menu {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .sort-option {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sort-option:last-child {
+        border-bottom: none;
+    }
+
+    .sort-option:hover {
+        background: var(--secondary-color);
+    }
+
+    [data-theme="dark"] .sort-option:hover {
+        background: #333;
+    }
+
+    .sort-option.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .sort-option.active:hover {
+        background: var(--primary-dark);
+    }
+
+    /* Enhanced Notes Grid */
+    .notes-grid {
+        display: grid;
+        gap: 1.5rem;
+        animation: fadeIn 0.6s ease-out 0.3s both;
+        transition: var(--transition);
+    }
+
+    .notes-grid.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+
+    .notes-grid.list-view {
+        grid-template-columns: 1fr;
+    }
+
+    .notes-grid.compact-view {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    /* Enhanced Note Cards */
+    .note-card {
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .note-card {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .note-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+        transition: var(--transition);
+    }
+
+    .note-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .note-card:hover::before {
+        width: 6px;
+    }
+
+    .note-card.priority-high::before {
+        background: linear-gradient(180deg, var(--danger-color), #e74c3c);
+    }
+
+    .note-card.priority-medium::before {
+        background: linear-gradient(180deg, var(--warning-color), #e67e22);
+    }
+
+    .note-card.priority-low::before {
+        background: linear-gradient(180deg, var(--accent-color), #16a085);
+    }
+
+    .note-header {
+        background: linear-gradient(135deg, rgba(0, 95, 163, 0.05), rgba(0, 95, 163, 0.02));
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    [data-theme="dark"] .note-header {
+        background: linear-gradient(135deg, rgba(26, 188, 156, 0.05), rgba(26, 188, 156, 0.02));
+    }
+
+    .note-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.5rem 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+        line-height: 1.4;
+    }
+
+    .note-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        background: var(--accent-color);
+        color: white;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+    }
+
+    .tag:hover {
+        background: #16a085;
+        transform: scale(1.05);
+    }
+
+    .priority-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: var(--shadow-light);
+    }
+
+    .priority-high {
+        background: var(--danger-color);
+    }
+
+    .priority-medium {
+        background: var(--warning-color);
+    }
+
+    .priority-low {
+        background: var(--accent-color);
+    }
+
+    .note-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .note-content {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        flex: 1;
+    }
+
+    .note-content.expanded {
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        display: block;
+    }
+
+    .expand-btn {
+        color: var(--primary-color);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .expand-btn:hover {
+        text-decoration: underline;
+    }
+
+    .note-attachments {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .attachment-badge {
+        background: var(--secondary-color);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .attachment-badge:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .note-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: auto;
+    }
+
+    .note-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .note-avatar::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: transform 0.6s;
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+
+    .note-avatar:hover::before {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+
+    .note-author-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .note-author {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .note-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .note-badges {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid transparent;
+        transition: var(--transition);
+    }
+
+    .badge:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-light);
+    }
+
+    .badge-private {
+        background: linear-gradient(135deg, var(--warning-color) 0%, #e67e22 100%);
+        color: white;
+    }
+
+    .badge-public {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #16a085 100%);
+        color: white;
+    }
+
+    .badge-collaborating {
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* Enhanced Note Footer */
+    .note-footer {
+        padding: 1rem 1.5rem;
+        background: var(--secondary);
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    [data-theme="dark"] .note-footer {
+        background: #1a1a1a;
+    }
+
+    /* Dark mode visibility fixes for hardcoded colors */
+    body.dark-mode #selectedCount,
+    body.dark-mode .fw-bold[style*="color: #2c3e50"],
+    body.dark-mode h3[style*="color: #2c3e50"],
+    body.dark-mode h5[style*="color: #2c3e50"],
+    body.dark-mode .card-title[style*="color: #2c3e50"],
+    body.dark-mode div[style*="color: #2c3e50"] {
+        color: white !important;
+    }
+
+    body.dark-mode .card-text[style*="color: #666"],
+    body.dark-mode p[style*="color: #666"],
+    body.dark-mode div[style*="color: #666"],
+    body.dark-mode .small[style*="color: #666"] {
+        color: white !important;
+    }
+
+    body.dark-mode .fas.fa-search[style*="color: #666"] {
+        color: white !important;
+    }
+
+    body.dark-mode .btn[style*="color: #2c3e50"] {
+        color: white !important;
+    }
+
+    body.dark-mode [style*="background: rgba(255, 255, 255, 0.95)"] {
+        background: rgba(20, 20, 30, 0.95) !important;
+        color: white !important;
+    }
+
+    /* Dark mode container borders and general styling */
+    body.dark-mode .dashboard-header,
+    body.dark-mode .stat-card,
+    body.dark-mode .note-card,
+    body.dark-mode .search-filter-container,
+    body.dark-mode .bulk-actions > div,
+    body.dark-mode .alert-container,
+    body.dark-mode .glass,
+    body.dark-mode .glass-heavy {
+        border: 1px solid white !important;
+        color: white !important;
+    }
+
+    body.dark-mode .btn,
+    body.dark-mode .form-control,
+    body.dark-mode .form-select,
+    body.dark-mode input,
+    body.dark-mode textarea {
+        color: white !important;
+        border-color: white !important;
+    }
+
+    body.dark-mode #searchInput[style*="color: #2c3e50"],
+    body.dark-mode .form-control[style*="color: #2c3e50"] {
+        color: white !important;
+    }
+
+    body.dark-mode #searchInput::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* Dark mode search container fix */
+    body.dark-mode .input-group div[style*="background: #fff"] {
+        background: var(--bg-card) !important;
+        border-color: var(--border) !important;
+    }
+
+    body.dark-mode .input-group .fas.fa-search {
+        color: var(--text) !important;
+    }
+
+    body.dark-mode .text-muted,
+    body.dark-mode .text-secondary {
+        color: white !important;
+    }
+
+    .note-stats {
+        margin-right: auto;
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        border: none;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn-view {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .action-btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+    }
+
+    .action-btn-edit {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .action-btn-edit:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .action-btn-delete {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .action-btn-delete:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .action-btn-share {
+        background: var(--accent-color);
+        color: white;
+    }
+
+    .action-btn-share:hover {
+        background: #16a085;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Enhanced Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    [data-theme="dark"] .empty-state {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+    }
+
+    .empty-text {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .empty-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .empty-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .empty-btn:hover::before {
+        left: 100%;
+    }
+
+    .empty-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+    }
+
+    /* Enhanced Alerts */
+    .alerts-container {
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .alert {
+        padding: 1.25rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border-left: 4px solid;
+        background: var(--bg-card);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        opacity: 0.3;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+        color: #155724;
+    }
+
+    .alert-success::before {
+        background: #28a745;
+    }
+
+    .alert-danger {
+        border-left-color: var(--danger-color);
+        color: #721c24;
+    }
+
+    .alert-danger::before {
+        background: var(--danger-color);
+    }
+
+    .alert-warning {
+        border-left-color: var(--warning-color);
+        color: #856404;
+    }
+
+    .alert-warning::before {
+        background: var(--warning-color);
+    }
+
+    .alert-icon {
+        font-size: 1.1rem;
+        margin-top: 0.1rem;
+    }
+
+    /* Bulk Actions */
+    .bulk-actions {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: none;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: var(--shadow-light);
+        animation: slideDown 0.3s ease-out;
+    }
+
+    [data-theme="dark"] .bulk-actions {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .bulk-actions.visible {
+        display: flex;
+    }
+
+    .bulk-select {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .bulk-actions-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .bulk-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .bulk-btn-export {
+        background: var(--accent-color);
+        color: white;
+    }
+
+    .bulk-btn-delete {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .bulk-btn-archive {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .bulk-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-light);
+    }
+
+    /* Checkbox Styles */
+    .note-checkbox {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 20px;
+        height: 20px;
+        appearance: none;
+        border: 2px solid var(--border-color);
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    [data-theme="dark"] .note-checkbox {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .note-checkbox:checked {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .note-checkbox:checked::after {
+        content: '✓';
+        color: white;
+        font-size: 0.8rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .notes-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .search-filter-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .advanced-filters {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .notes-main-container {
+            padding: 1rem;
+        }
+
+        .notes-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+        }
+
+        .stats-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .controls-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .action-buttons {
+            justify-content: center;
+        }
+
+        .filter-buttons {
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-btn {
+            flex-shrink: 0;
+        }
+
+        .note-footer {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .note-stats {
+            margin-right: 0;
+            justify-content: center;
+        }
+
+        .bulk-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+        }
+
+        .bulk-actions-buttons {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .note-card {
+            margin: 0 -0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .search-input {
+            font-size: 16px; /* Prevent zoom on iOS */
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .controls-section,
+        .note-footer,
+        .bulk-actions {
+            display: none !important;
+        }
+
+        .note-card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            break-inside: avoid;
+            margin-bottom: 1rem !important;
+        }
+
+        .notes-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Focus Styles for Accessibility */
+    .create-btn:focus,
+    .action-btn:focus,
+    .filter-btn:focus,
+    .search-input:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    /* High Contrast Mode */
+    @media (prefers-contrast: high) {
+        :root {
+            --shadow-light: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-medium: 0 4px 8px rgba(0,0,0,0.3);
+            --shadow-strong: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .note-card {
+            border: 2px solid var(--text-primary);
+        }
+
+        .filter-btn,
+        .action-btn {
+            border: 2px solid currentColor;
+        }
+    }
+
+    /* Reduce Motion */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+
+        .note-card:hover {
+            transform: none;
+        }
+
+        .action-btn:hover,
+        .create-btn:hover {
+            transform: none;
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header fade-in-up">
+        <!-- Philips Logo -->
+        <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo" class="philips-logo">
+        
+        <!-- Theme Toggle -->
+        <div class="theme-toggle" id="themeToggle" title="Toggle Dark Mode" style="position: absolute; top: 15px; right: 140px; z-index: 10;">
+            <i class="bi bi-moon-fill" style="color: var(--primary);"></i>
+        </div>
+        <!-- Home Icon -->
+        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
+        </a>
+        <!-- Move theme toggle a bit more left -->
+        <script>
+        // Move theme toggle left by updating its style
+        document.addEventListener('DOMContentLoaded', function() {
+            var themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.style.right = '190px';
+            }
+        });
+        </script>
+        <h3 class="h2 fw-bold mb-0" style="background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: var(--primary);">
+            <i class="fas fa-sticky-note me-3" style="color: var(--primary);"></i>MoS Notes Management
+        </h3>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="stats-grid fade-in-up" style="animation-delay: 0.2s;">
+        <div class="stat-card primary">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-sticky-note"></i></div>
+            <div class="value" id="totalNotes">{{ notes|length }}</div>
+            <div class="label">Total Notes</div>
+        </div>
+        <div class="stat-card success">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-globe"></i></div>
+            <div class="value" id="publicNotes">0</div>
+            <div class="label">Public Notes</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-lock"></i></div>
+            <div class="value" id="privateNotes">0</div>
+            <div class="label">Private Notes</div>
+        </div>
+        <div class="stat-card secondary">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-user-edit"></i></div>
+            <div class="value" id="myNotes">0</div>
+            <div class="label">My Notes</div>
+        </div>
+        <div class="stat-card primary">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-share"></i></div>
+            <div class="value" id="sharedNotes">{{ shared_notes_count }}</div>
+            <div class="label">Shared with Me</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="icon" style="color: var(--icon);"><i class="fas fa-calendar-week"></i></div>
+            <div class="value" id="recentNotes">0</div>
+            <div class="label">This Week</div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel fade-in-up" style="animation-delay: 0.3s;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-filter me-2 text-primary"></i>
+            <span class="fw-bold">Notes Controls</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <a href="{% url 'note_create' %}" class="btn-export me-2">
+                <i class="fas fa-plus me-2"></i>Create New Note
+            </a>
+            <button class="btn-export me-2" id="bulkSelectBtn">
+                <i class="fas fa-check-square me-2"></i>Bulk Actions
+            </button>
+            <button class="btn-export" id="exportBtn">
+                <i class="fas fa-download me-2"></i>Export Notes
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Notes Container -->
+    <div class="container-fluid px-4">
+        <!-- Bulk Actions Panel -->
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+            <div class="d-flex align-items-center justify-content-between p-3 mb-3" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);">
+                <div class="d-flex align-items-center">
+                    <input type="checkbox" id="selectAll" class="me-2"> 
+                    <span id="selectedCount" class="fw-bold" style="color: #2c3e50;">0 selected</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" id="bulkExport">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" id="bulkArchive">
+                        <i class="fas fa-archive me-1"></i>Archive
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" id="bulkDelete">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Panel -->
+        <div class="p-4 mb-4" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 25px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <div style="display: flex; align-items: center; border: 2px solid var(--primary); border-radius: 10px; background: #fff; padding: 2px 8px; width: 100%;">
+                            <span class="input-group-text bg-transparent border-0" style="border: none; background: transparent;">
+                                <i class="fas fa-search" style="color: #666;"></i>
+                            </span>
+                            <input type="text" class="form-control border-0 bg-transparent" 
+                                   id="searchInput" 
+                                   placeholder="Search notes by title, content, or author..."
+                                   style="color: #2c3e50; background: transparent; box-shadow: none; border: none; outline: none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="btn-group me-2" role="group">
+                        
+                    </div>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" 
+                                id="sortBtn" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort-amount-down me-1"></i>Sort by Date
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" data-sort="date-desc">
+                                <i class="fas fa-calendar-alt me-1"></i>Newest First</a></li>
+                            <li><a class="dropdown-item" data-sort="date-asc">
+                                <i class="fas fa-calendar-alt me-1"></i>Oldest First</a></li>
+                            <li><a class="dropdown-item" data-sort="title-asc">
+                                <i class="fas fa-font me-1"></i>Title A-Z</a></li>
+                            <li><a class="dropdown-item" data-sort="title-desc">
+                                <i class="fas fa-font me-1"></i>Title Z-A</a></li>
+                            <li><a class="dropdown-item" data-sort="author-asc">
+                                <i class="fas fa-user me-1"></i>Author A-Z</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="btn btn-primary btn-sm active filter-btn" data-filter="all" 
+                        style="background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%); border: none; color: white; font-weight: 600; border-color: transparent;">
+                    All Notes
+                </button>
+                <button class="btn btn-outline-success btn-sm filter-btn" data-filter="public"
+                        style="background: transparent; color: #2c3e50; border-color: #28a745; font-weight: 500;">
+                    <i class="fas fa-globe me-1"></i>Public
+                </button>
+                <button class="btn btn-outline-warning btn-sm filter-btn" data-filter="private"
+                        style="background: transparent; color: #2c3e50; border-color: #ffc107; font-weight: 500;">
+                    <i class="fas fa-lock me-1"></i>Private
+                </button>
+                <button class="btn btn-outline-info btn-sm filter-btn" data-filter="myNotes"
+                        style="background: transparent; color: #2c3e50; border-color: #17a2b8; font-weight: 500;">
+                    <i class="fas fa-user me-1"></i>My Notes
+                </button>
+                <a href="{% url 'shared_notes' %}" class="btn btn-outline-secondary btn-sm"
+                   style="background: transparent; color: #2c3e50; border: none; font-weight: 500; text-decoration: none;">
+                    <i class="fas fa-share me-1"></i>Shared with Me
+                </a>
+            </div>
+        </div>
+
+        <!-- Alerts Container -->
+        {% if messages %}
+        <div class="alert-container mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
+                 style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #2c3e50;">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Notes Grid -->
+        {% if notes %}
+        <div class="row" id="notesContainer">
+            {% for note in notes %}
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4 note-item"
+                 data-filter="{% if note.is_public %}public{% else %}private{% endif %}{% if note.created_by == request.user %} myNotes{% endif %}"
+                 data-date="{{ note.created_at|date:'Y-m-d' }}"
+                 data-author="{{ note.created_by.username }}"
+                 data-title="{{ note.title|lower }}"
+                 data-content="{{ note.content|lower }}"
+                 data-attachments="{% if note.attachments.count > 0 %}true{% else %}false{% endif %}"
+                 data-note-id="{{ note.pk }}">
+                
+                <div class="card h-100 border-0 position-relative note-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 25px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);">
+                    <!-- Bulk Selection Checkbox -->
+                    <input type="checkbox" class="position-absolute top-0 start-0 m-3 bulk-checkbox d-none" 
+                           data-note-id="{{ note.pk }}" style="z-index: 10;">
+                    
+
+
+                    <div class="card-body p-4">
+                        <!-- Note Header -->
+                        <h5 class="card-title fw-bold mb-3 text-truncate" title="{{ note.title }}" style="color: #2c3e50;">
+                            <span style="color: var(--text);">{{ note.title }}</span>
+                        </h5>
+                        
+                        <!-- Note Content -->
+                        <p class="card-text mb-3" style="display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; color: #666;">
+                            <span style="color: var(--text-secondary);">{{ note.content|truncatewords:25 }}</span>
+                        </p>
+
+                        <!-- Attachments -->
+                        {% if note.attachments.count > 0 %}
+                        <div class="mb-3">
+                            <span class="badge bg-secondary rounded-pill">
+                                <i class="fas fa-paperclip me-1"></i>
+                                {{ note.attachments.count }} attachment{{ note.attachments.count|pluralize }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Author Info -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-3" 
+                                 style="width: 40px; height: 40px; font-weight: bold;">
+                                {{ note.created_by.username|first|upper }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small" style="color: var(--text);">{{ note.created_by.get_full_name|default:note.created_by.username }}</div>
+                                <div class="small" style="color: #666;">
+                                    <i class="fas fa-clock me-1" style="color: var(--icon);"></i><span style="color: var(--text-secondary);">{{ note.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+                            <div>
+                                {% if note.is_public %}
+                                <span class="badge bg-success rounded-pill">
+                                    <i class="fas fa-globe"></i>
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning rounded-pill">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="d-flex justify-content-between small mb-3" style="color: #666;">
+                            <span><i class="fas fa-align-left me-1" style="color: var(--icon);"></i><span style="color: var(--text-secondary);">{{ note.content|wordcount }} words</span></span>
+                            <span><i class="fas fa-font me-1" style="color: var(--icon);"></i><span style="color: var(--text-secondary);">{{ note.content|length }} chars</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'note_detail' note.pk %}" class="btn btn-primary btn-sm flex-fill">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            {% if note.is_public or note.created_by == request.user %}
+                            <a href="{% url 'share_note' note.pk %}" class="btn btn-outline-info btn-sm" title="Share with Users">
+                                <i class="fas fa-share-alt"></i>
+                            </a>
+                            {% endif %}
+                            {% if note.created_by == request.user %}
+                            <a href="{% url 'note_edit' note.pk %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'note_delete' note.pk %}" class="btn btn-outline-danger btn-sm" 
+                               onclick="return confirm('Are you sure you want to delete this note?')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="p-5 d-inline-block" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 25px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);">
+                <i class="fas fa-sticky-note fa-4x text-muted mb-4"></i>
+                <h3 class="fw-bold mb-3" style="color: #2c3e50;">No Notes Found</h3>
+                <p class="mb-4" style="color: #666;">
+                    {% if request.GET.search %}
+                        No notes match your search criteria. Try adjusting your filters or search terms.
+                    {% else %}
+                        You don't have any notes yet. Start creating your first note to organize thoughts and ideas.
+                    {% endif %}
+                </p>
+                {% if not request.GET.search %}
+                <a href="{% url 'note_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Your First Note
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const notesContainer = document.getElementById('notesContainer');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const viewToggleButtons = document.querySelectorAll('.view-toggle-btn');
+        const themeToggle = document.getElementById('themeToggle');
+        const bulkSelectBtn = document.getElementById('bulkSelectBtn');
+        const bulkActions = document.getElementById('bulkActions');
+        const selectAll = document.getElementById('selectAll');
+        const selectedCount = document.getElementById('selectedCount');
+        
+        // Initialize variables
+        let currentFilter = 'all';
+        let currentSort = 'date-desc';
+        let currentView = 'grid';
+        let bulkMode = false;
+        
+        // Debug log to check if elements are found
+        console.log('Filter buttons found:', filterButtons.length);
+        console.log('View toggle buttons found:', viewToggleButtons.length);
+        
+        // Initialize statistics
+        updateStatistics();
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                filterNotes();
+            });
+        }
+
+        // Filter functionality
+        if (filterButtons.length > 0) {
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active state from all buttons
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.remove('btn-primary', 'btn-success', 'btn-warning', 'btn-info');
+                        
+                        const filter = btn.getAttribute('data-filter');
+                        if (filter === 'all') {
+                            btn.classList.add('btn-outline-primary');
+                            btn.style.background = 'transparent';
+                            btn.style.color = '#2c3e50';
+                            btn.style.borderColor = '#005fa3';
+                        } else if (filter === 'public') {
+                            btn.classList.add('btn-outline-success');
+                            btn.style.background = 'transparent';
+                            btn.style.color = '#2c3e50';
+                            btn.style.borderColor = '#28a745';
+                        } else if (filter === 'private') {
+                            btn.classList.add('btn-outline-warning');
+                            btn.style.background = 'transparent';
+                            btn.style.color = '#2c3e50';
+                            btn.style.borderColor = '#ffc107';
+                        } else if (filter === 'myNotes') {
+                            btn.classList.add('btn-outline-info');
+                            btn.style.background = 'transparent';
+                            btn.style.color = '#2c3e50';
+                            btn.style.borderColor = '#17a2b8';
+                        }
+                        
+                        btn.style.removeProperty('background');
+                        btn.style.removeProperty('color');
+                        btn.style.removeProperty('border-color');
+                    });
+                    
+                    // Add active state to clicked button
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    if (filter === 'all') {
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('btn-primary');
+                        this.style.background = 'linear-gradient(135deg, #005fa3 0%, #003d7a 100%)';
+                        this.style.color = 'white';
+                        this.style.borderColor = 'transparent';
+                    } else if (filter === 'public') {
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success');
+                        this.style.background = '#28a745';
+                        this.style.color = 'white';
+                        this.style.borderColor = '#28a745';
+                    } else if (filter === 'private') {
+                        this.classList.remove('btn-outline-warning');
+                        this.classList.add('btn-warning');
+                        this.style.background = '#ffc107';
+                        this.style.color = '#2c3e50';
+                        this.style.borderColor = '#ffc107';
+                    } else if (filter === 'myNotes') {
+                        this.classList.remove('btn-outline-info');
+                        this.classList.add('btn-info');
+                        this.style.background = '#17a2b8';
+                        this.style.color = 'white';
+                        this.style.borderColor = '#17a2b8';
+                    }
+                    
+                    currentFilter = this.getAttribute('data-filter');
+                    filterNotes();
+                    updateStatistics();
+                });
+            });
+        }
+
+        // View toggle functionality
+        if (viewToggleButtons.length > 0) {
+            viewToggleButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active state from all view buttons
+                    viewToggleButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                        btn.style.removeProperty('background');
+                        btn.style.removeProperty('color');
+                        btn.style.removeProperty('border-color');
+                    });
+                    
+                    // Add active state to clicked button
+                    this.classList.add('active');
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
+                    this.style.background = 'linear-gradient(135deg, #005fa3 0%, #003d7a 100%)';
+                    this.style.color = 'white';
+                    this.style.borderColor = 'transparent';
+                    
+                    currentView = this.getAttribute('data-view');
+                    updateViewMode();
+                });
+            });
+        }
+
+        // Theme toggle functionality
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                this.innerHTML = isDark ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+                localStorage.setItem('notesTheme', isDark ? 'dark' : 'light');
+            });
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('notesTheme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            if (themeToggle) {
+                themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+            }
+        }
+
+        // Bulk actions functionality
+        bulkSelectBtn?.addEventListener('click', function() {
+            bulkMode = !bulkMode;
+            bulkActions.style.display = bulkMode ? 'block' : 'none';
+            
+            const checkboxes = document.querySelectorAll('.bulk-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.classList.toggle('d-none', !bulkMode);
+            });
+            
+            this.innerHTML = bulkMode ? 
+                '<i class="fas fa-times me-2"></i>Cancel Bulk' : 
+                '<i class="fas fa-check-square me-2"></i>Bulk Actions';
+            
+            if (!bulkMode) {
+                selectAll.checked = false;
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+                updateSelectedCount();
+            }
+        });
+
+        // Select all functionality
+        selectAll?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.bulk-checkbox:not(.d-none)');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+
+        // Individual checkbox handling
+        document.querySelectorAll('.bulk-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCount);
+        });
+
+        // Filter notes function
+        function filterNotes() {
+            const notes = document.querySelectorAll('.note-item');
+            console.log('Filtering', notes.length, 'notes with filter:', currentFilter);
+            
+            notes.forEach(noteItem => {
+                let shouldShow = true;
+                
+                // Apply filter
+                if (currentFilter !== 'all') {
+                    const cardFilters = noteItem.getAttribute('data-filter');
+                    if (cardFilters) {
+                        const filters = cardFilters.split(' ');
+                        shouldShow = filters.includes(currentFilter);
+                    } else {
+                        shouldShow = false;
+                    }
+                }
+                
+                // Apply search
+                if (shouldShow && searchInput && searchInput.value.trim()) {
+                    const searchTerm = searchInput.value.toLowerCase().trim();
+                    const title = noteItem.getAttribute('data-title') || '';
+                    const content = noteItem.getAttribute('data-content') || '';
+                    const author = noteItem.getAttribute('data-author') || '';
+                    
+                    shouldShow = title.includes(searchTerm) || 
+                               content.includes(searchTerm) || 
+                               author.toLowerCase().includes(searchTerm);
+                }
+                
+                noteItem.style.display = shouldShow ? '' : 'none';
+            });
+            
+            console.log('Filter applied');
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const notes = document.querySelectorAll('.note-item');
+            let publicCount = 0;
+            let privateCount = 0;
+            let myNotesCount = 0;
+            let recentCount = 0;
+            
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            notes.forEach(note => {
+                const filters = note.getAttribute('data-filter').split(' ');
+                
+                if (filters.includes('public')) publicCount++;
+                if (filters.includes('private')) privateCount++;
+                if (filters.includes('myNotes')) myNotesCount++;
+                
+                const noteDate = new Date(note.getAttribute('data-date'));
+                if (noteDate >= oneWeekAgo) recentCount++;
+            });
+            
+            document.getElementById('totalNotes').textContent = notes.length;
+            document.getElementById('publicNotes').textContent = publicCount;
+            document.getElementById('privateNotes').textContent = privateCount;
+            document.getElementById('myNotes').textContent = myNotesCount;
+            document.getElementById('recentNotes').textContent = recentCount;
+        }
+
+        // Update view mode
+        function updateViewMode() {
+            const container = document.getElementById('notesContainer');
+            if (!container) return;
+            
+            // Reset all classes
+            container.className = '';
+            
+            if (currentView === 'list') {
+                container.className = 'row row-cols-1';
+                console.log('Applied list view');
+            } else if (currentView === 'compact') {
+                container.className = 'row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1';
+                console.log('Applied compact view');
+            } else { // grid view
+                container.className = 'row';
+                console.log('Applied grid view');
+            }
+        }
+
+        // Update selected count
+        function updateSelectedCount() {
+            const checkedBoxes = document.querySelectorAll('.bulk-checkbox:checked');
+            const count = checkedBoxes.length;
+            
+            if (selectedCount) {
+                selectedCount.textContent = `${count} selected`;
+            }
+            
+            const allCheckboxes = document.querySelectorAll('.bulk-checkbox:not(.d-none)');
+            if (selectAll) {
+                selectAll.indeterminate = count > 0 && count < allCheckboxes.length;
+                selectAll.checked = count === allCheckboxes.length && count > 0;
+            }
+        }
+
+        // Sort functionality
+        const sortButtons = document.querySelectorAll('[data-sort]');
+        console.log('Sort buttons found:', sortButtons.length);
+        
+        sortButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sortType = this.getAttribute('data-sort');
+                sortNotes(sortType);
+                
+                // Update active state
+                sortButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update button text
+                const sortBtn = document.getElementById('sortBtn');
+                if (sortBtn) {
+                    sortBtn.innerHTML = `<i class="fas fa-sort-amount-down me-1"></i>${this.textContent.trim()}`;
+                }
+                
+                currentSort = sortType;
+                console.log('Sorted by:', sortType);
+            });
+        });
+
+        function sortNotes(sortType) {
+            const container = document.getElementById('notesContainer');
+            if (!container) return;
+            
+            const notes = Array.from(container.children);
+            
+            notes.sort((a, b) => {
+                switch (sortType) {
+                    case 'date-desc':
+                        return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+                    case 'date-asc':
+                        return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+                    case 'title-asc':
+                        return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+                    case 'title-desc':
+                        return b.getAttribute('data-title').localeCompare(a.getAttribute('data-title'));
+                    case 'author-asc':
+                        return a.getAttribute('data-author').localeCompare(b.getAttribute('data-author'));
+                    default:
+                        return 0;
+                }
+            });
+            
+            notes.forEach(note => container.appendChild(note));
+        }
+        
+        // Debug: Add click handlers for all buttons to test
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('view-toggle-btn')) {
+                console.log('View toggle button clicked:', e.target.getAttribute('data-view'));
+            }
+            if (e.target.classList.contains('filter-btn')) {
+                console.log('Filter button clicked:', e.target.getAttribute('data-filter'));
+            }
+        });
+        
+        // Initialize view state
+        updateViewMode();
+        
+        console.log('Script initialization complete');
+    });
+    </script>
+</body>
+</html>

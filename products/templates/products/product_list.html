@@ -1,0 +1,803 @@
+{% extends 'products/base.html' %}
+{% load product_filters %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+  <meta charset="UTF-8" />
+  <title>Product List</title>
+  <link rel="stylesheet" href="/static/products/style.css" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      color: #222;
+      font-size: 1rem;
+      background: #fff;
+    }
+    a { text-decoration: none; }
+    img { vertical-align: middle; }
+
+    .top-bar {
+      color: #222;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 2.5rem;
+      background: #fff;
+      border-bottom: 1px solid #e0e3e7;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      box-sizing: border-box;
+      z-index: 1000;
+  }
+    .top-bar a {
+      color: #005fa3;
+      font-weight: 600;
+      margin-right: 1.5rem;
+    }
+    .top-bar a:hover {
+      text-decoration: underline;
+    }
+    .logout-btn {
+      padding: 0.4rem 1.2rem;
+      background: #005fa3;
+      color: #fff;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .logout-btn:hover {
+      background: #003e6b;
+    }
+
+    .product-bg {
+      padding-top: 90px;
+    }
+    .container {
+      max-width: 1700px;
+      margin: 1rem auto 0;
+      padding: 2.5rem 0.5rem 1rem;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-left: 1rem;
+    }
+    .add-btn-text {
+      padding: 0.5rem 1.2rem;
+      background: #005fa3;
+      color: #fff;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .add-btn-text:hover {
+      background: #003e6b;
+    }
+
+    .search-bar input {
+      padding: 0.5rem 1rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 6px;
+      width: 220px;
+      font-size: 1rem;
+    }
+    .search-bar button {
+      padding: 0.5rem 1.2rem;
+      margin-left: 0.5rem;
+      background: #0077c8;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .search-bar button:hover {
+      background: #005fa3;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    @media (max-width: 1200px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 800px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .product-card {
+      background: #fff;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box; /* Include padding in width calculation */
+      overflow-wrap: break-word; /* Handle very long words */
+      word-wrap: break-word; /* Legacy support */
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .product-card h3 {
+      margin: 0 0 0.5rem;
+      color: #005fa3;
+      font-size: 1.25rem;
+      font-weight: 600;
+      word-break: break-word; /* Allow long text to break */
+      overflow-wrap: break-word; /* Wrap long words */
+      white-space: normal; /* Allow text to wrap to multiple lines */
+      line-height: 1.3; /* Better line spacing for wrapped text */
+    }
+    .serial, .desc, .created {
+      margin: 0.4rem 0;
+      font-size: 1rem;
+      word-break: break-word; /* Allow long text to break */
+      overflow-wrap: break-word; /* Wrap long words */
+      white-space: normal; /* Allow text to wrap to multiple lines */
+      line-height: 1.4; /* Better line spacing for wrapped text */
+    }
+    .serial { 
+      color: #005fa3; 
+      font-weight: 500;
+      word-break: break-all; /* Break long IDs/serial numbers aggressively */
+    }
+    .desc { 
+      color: #333;
+      max-width: 100%; /* Ensure description doesn't overflow */
+    }
+    .created { 
+      color: #888; 
+      font-size: 0.95rem;
+    }
+    
+    /* Additional styles for 12NC and location fields */
+    .twelve-nc, .location {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+      max-width: 100%;
+    }
+    
+    .twelve-nc {
+      word-break: break-all; /* Break long 12NC numbers aggressively */
+    }
+
+    .action-links {
+      display: flex;
+      gap: 0.7rem;
+      margin-top: 0.8rem;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .edit-btn, .delete-btn, .history-btn {
+      padding: 0.35rem 1.1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+    .edit-btn {
+      background: #ffc107;
+      color: #222;
+    }
+    .edit-btn:hover {
+      background: #ffb300;
+      color: #fff;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background: #a71d2a;
+    }
+    .history-btn {
+      background: #17a2b8;
+      color: #fff;
+    }
+    .history-btn:hover {
+      background: #117a8b;
+    }
+
+    .status-btn {
+      padding: 0.35rem 1.1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      pointer-events: none; /* Prevent mouse/touch interactions */
+      cursor: default;      /* Show default cursor instead of pointer */
+      margin-right: 0.5rem;
+      background: #e0e3e7;
+      color: #222;
+      transition: background 0.2s, color 0.2s;
+    }
+    .status-active { background: #28a745; color: #fff; }
+    .status-notactive { background: #ffc107; color: #222; }
+    .status-Scraped { background: #dc3545; color: #fff; }
+    .status-handovered { background: #005fa3; color: #fff; }
+    .status-btn:hover { filter: brightness(0.95); }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(31,38,135,0.1);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 1.5rem;
+      color: #888;
+      cursor: pointer;
+    }
+    .modal-close:hover {
+      color: #dc3545;
+    }
+
+    /* Ensure the search form is a positioned container so the overlay can anchor to it */
+    .search-bar form { position: relative; }
+
+    /* Filter controls should overlay content, not push it down */
+    .filter-controls {
+      position: absolute;
+      top: calc(100% + 8px);
+      /* Center the overlay relative to the form and constrain its width so it cannot extend beyond the surrounding container */
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      z-index: 1100; /* sit above product cards and other content */
+      min-width: 320px;
+      /* Use a constrained width that will not overflow the main container or viewport */
+      width: min(720px, calc(100% - 1rem));
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* Slightly constrain inner controls so overlay doesn't become too wide on large screens */
+    .filter-controls .filter-product input,
+    .filter-controls select,
+    .filter-controls input[type="date"] {
+      max-width: 100%;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="product-bg">
+    <div class="product-counter" style="background-color:#f8fafc; border-radius:8px; padding:1rem 1.5rem; margin:0 auto 1.5rem auto; box-shadow:0 2px 10px rgba(0,0,0,0.05); border:1px solid #e0e3e7; max-width: 1665px;">
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div style="font-weight:700; font-size:1.2rem; color:#005fa3;">
+          Total Products: <span style="color:#0077c8;">{{ total_count }}</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:flex-start;">
+          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:120px;">
+            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#28a745;"></div>
+            <span style="font-weight:600; color:#333;">Active: {{ status_counts.Active }}</span>
+          </div>
+          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:140px;">
+            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#ffc107;"></div>
+            <span style="font-weight:600; color:#333;">Not Active: {{ status_counts|get_item:"Not Active" }}</span>
+          </div>
+          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:120px;">
+            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#dc3545;"></div>
+            <span style="font-weight:600; color:#333;">Scraped: {{ status_counts.Scraped }}</span>
+          </div>
+          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:150px;">
+            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#005fa3;"></div>
+            <span style="font-weight:600; color:#333;">Hand-Overed: {{ status_counts|get_item:"Hand-Overed" }}</span>
+          </div>
+          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:160px;">
+            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#ff9800;"></div>
+            <span style="font-weight:600; color:#333;">Issue in the System: {{ status_counts.Issue }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">      
+	  <div class="top-actions">
+        {% if request.GET.category %}
+          <a href="/stream/{{ selected_stream }}/products/add/?category={{ request.GET.category }}" class="add-btn-text">+ Add Product</a>
+        {% else %}
+          <a href="/stream/{{ selected_stream }}/products/add/" class="add-btn-text">+ Add Product</a>
+        {% endif %}
+        <div class="search-bar">
+          <form method="get" style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <label for="filterType" style="font-weight:600;color:#005fa3;font-size:1.1rem;margin-top:1px;">Filter Data</label>
+              <select name="filter_type" id="filterType" style="padding:0.45rem;border:1px solid #cfd8dc;border-radius:6px;font-size:0.95rem;min-width:220px;">
+                <option value="" {% if not request.GET.filter_type %}selected{% endif %}>-- Select filter --</option>
+                <option value="product" {% if request.GET.filter_type == 'product' %}selected{% endif %}>Field Search</option>
+                <option value="date" {% if request.GET.filter_type == 'date' %}selected{% endif %}>Filter by Date</option>
+                <option value="location" {% if request.GET.filter_type == 'location' %}selected{% endif %}>Filter by Location</option>
+              </select>
+            </div>
+
+            <!-- Filter controls appear below the dropdown as an overlay (absolute) so dropdown doesn't move -->
+            <div class="filter-controls">
+              <!-- Product search -->
+              <div class="filter-product" style="display:none;align-items:center;gap:0.5rem;">
+                <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search products…" style="padding:0.5rem;border:1px solid #cfd8dc;border-radius:6px;width:320px;" />
+              </div>
+
+              <!-- Date Filter -->
+              <div class="filter-date" style="display:none;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;">From:</label>
+                  <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" 
+                         style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem;" />
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;  margin-left:0.6rem;
+                  margin-right:0.5rem">To:</label>
+                  <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" 
+                         style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem;" />
+                </div>
+              </div>
+
+              <!-- Location Filter -->
+              <div class="filter-location" style="display:none;align-items:center;gap:0.5rem;">
+                <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;">Location:</label>
+                <select name="location" style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem; min-width: 220px;">
+                  <option value="">All Locations</option>
+                  {% for location in locations %}
+                    <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
+                      {{ location.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </form>      </div>      </div>
+
+    <!-- Active Filter Display -->
+    {% if request.GET.filter_type %}
+    <div class="active-filters" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem; margin-bottom: 1rem;">
+      <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; font-size: 0.9rem;">
+        <i class="fas fa-filter" style="color: #005fa3;"></i>
+        <span style="font-weight: 600; color: #005fa3;">Active Filter:</span>
+        
+        {% if request.GET.filter_type == 'product' and request.GET.q %}
+          <span style="color: #333;">Product Search: <strong>"{{ request.GET.q }}"</strong></span>
+        {% elif request.GET.filter_type == 'date' %}
+          <span style="color: #333;">Date Range: 
+            {% if request.GET.start_date %}<strong>From {{ request.GET.start_date }}</strong>{% endif %}
+            {% if request.GET.end_date %}<strong>{% if request.GET.start_date %} To {% endif %}{{ request.GET.end_date }}</strong>{% endif %}
+          </span>
+        {% elif request.GET.filter_type == 'location' and request.GET.location %}
+          <span style="color: #333;">Location: 
+            <strong>
+              {% for location in locations %}
+                {% if location.id|stringformat:"s" == request.GET.location %}{{ location.name }}{% endif %}
+              {% endfor %}
+            </strong>
+          </span>
+        {% endif %}
+        
+        <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" 
+           style="margin-left: auto; color: #dc3545; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.3rem;">
+          <i class="fas fa-times"></i> Clear Filter
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="toast-container animate__animated animate__fadeInRight" style="list-style:none;padding:0;max-width: 1665px;position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+        {% for message in messages %}
+            {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}
+            <div class="toast messages-danger animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#f8d7da;color:#721c24;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+                <i class="fas fa-exclamation-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                {{ message }}
+                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#721c24;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+            </div>
+            {% elif 'added' in message|lower or 'deleted' in message|lower or message.tags == 'success' %}
+            <div class="toast messages-success animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#d4edda;color:#155724;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+                <i class="fas fa-check-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                {{ message }}
+                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#155724;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+            </div>
+            {% else %}
+            <div class="toast messages animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#e3f0fa;color:#005fa3;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+                <i class="fas fa-info-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                {{ message }}
+                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#005fa3;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container">
+
+      <div class="product-grid">
+        {% for product in products %}
+          <div class="product-card" style="position:relative; box-shadow:0 4px 24px rgba(0,95,163,0.10); border:1.5px solid #e0e3e7; border-radius:16px; padding:2.2rem 2.2rem 1.5rem 2.2rem; margin-bottom:1.5rem; word-wrap: break-word; overflow-wrap: break-word;">
+            <!-- Top-right overlay section for system tags and projects -->
+            {% if product.system_tags.exists %}
+            <div style="position:absolute; top:1rem; right:1rem; display:flex; flex-direction:column; gap:0.6rem; justify-content:flex-start; align-items:flex-end; max-width:40%; min-width:200px;">
+              
+              <!-- System Tags Container -->
+              <div style="background:linear-gradient(135deg, #e7f3ff 0%, #d6efff 100%); border:1px solid #005fa3; border-radius:12px; padding:0.5rem 0.7rem; font-size:0.8rem; box-shadow:0 3px 12px rgba(0,95,163,0.25); width:100%; max-width:180px; transition:all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(0,95,163,0.35)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(0,95,163,0.25)';">
+                
+                <!-- System Header -->
+                <div style="color:#003d6b; font-weight:700; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; border-bottom:1px solid rgba(0,95,163,0.2); padding-bottom:0.2rem;">
+                  <i class="fas fa-server" style="font-size:0.7rem; color:#005fa3;"></i>
+                  <span style="letter-spacing:0.3px;">System Assigned</span>
+                </div>
+                
+                <!-- System List -->
+                <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                  {% for system_tag in product.system_tags.all %}
+                    <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
+                      <div style="color:#005fa3; font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+                        {{ system_tag.system.name }} - {{ system_tag.tag_name }}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              <!-- Project Assignment Cards -->
+              {% for system_tag in product.system_tags.all %}
+                {% if system_tag.projects.exists %}
+                  <div style="background:linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border:1px solid #ffb300; border-radius:12px; padding:0.5rem 0.7rem; font-size:0.8rem; box-shadow:0 3px 12px rgba(255,179,0,0.25); width:100%; max-width:180px; transition:all 0.3s ease;"
+                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(255,179,0,0.35)';"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(255,179,0,0.25)';">
+                    
+                    <!-- Project Header -->
+                    <div style="color:#e65100; font-weight:700; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; border-bottom:1px solid rgba(230,81,0,0.2); padding-bottom:0.2rem;">
+                      <i class="fas fa-project-diagram" style="font-size:0.7rem; color:#ff9800;"></i>
+                      <span style="letter-spacing:0.3px;">Project Aligned</span>
+                    </div>
+                    
+                    <!-- Project List -->
+                    <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                      {% for project in system_tag.projects.all %}
+                        <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
+                          <div style="color:#333; font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+                            {{ project.name }}
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
+            <h3 style="font-size:1.3rem; font-weight:700; color:#005fa3; margin-bottom:0.3rem; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.3; padding-right:{% if product.system_tags.exists %}50%{% else %}0{% endif %};">Product Name: {{ product.name }}</h3>
+            <div class="serial" style="font-size:1.05rem; color:#0077c8; font-weight:600; margin-bottom:0.2rem; word-break:break-all; overflow-wrap:break-word; white-space:normal; line-height:1.4;">Product ID: {{ product.serial_number }}</div>
+            {% if product.twelve_nc %}
+            <div class="twelve-nc" style="color:#555; font-size:1rem; margin-bottom:0.4rem; font-weight:600; word-break:break-all; overflow-wrap:break-word; white-space:normal; line-height:1.4;">12NC Information: {{ product.twelve_nc }}</div>
+            {% endif %}
+            <div class="desc" style="color:#444; font-size:1.01rem; margin-bottom:0.2rem; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.4;">
+              <b>Description:</b><br>{{ product.description|linebreaksbr }}
+            </div>
+            <div class="created" style="color:#888; font-size:0.97rem; margin-bottom:0.5rem; word-break:break-word; overflow-wrap:break-word; white-space:normal;">Added: {{ product.created_at|date:'Y-m-d H:i' }}</div>
+            <div class="location" style="color:#005fa3; font-size:1.01rem; margin-bottom:0.5rem; font-weight:600; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.4;">
+              Location: {% if product.location %}{{ product.location.name }}{% else %}No location assigned{% endif %}
+            </div>
+            {% if product.status == 'Hand-Overed' %}
+              <div style="background:#f4f6fa; border-radius:8px; padding:0.7rem 1rem; margin-bottom:0.5rem; font-size:0.99rem; color:#333; border:1px solid #e0e3e7;">
+                <div><strong>To which team?</strong> {{ product.handover_team_type }}</div>
+                {% if product.handover_team_type == 'External' and product.handover_external_team %}
+                  <div><strong>External Team:</strong> {{ product.handover_external_team }}</div>
+                {% endif %}
+                <div><strong>Name of the assignee / Owner:</strong> {{ product.handover_owner }}</div>
+              </div>
+            {% endif %}
+            {% if product.status == 'Issue' and product.issue_description %}
+              <div style="background:#fff3cd; border-radius:8px; padding:0.7rem 1rem; margin-bottom:0.5rem; font-size:0.99rem; color:#856404; border:1px solid #ffeeba;">
+                <strong>Issue Description:</strong><br>{{ product.issue_description|linebreaksbr }}
+              </div>
+            {% endif %}
+            <a href="{% url 'product_detail_stream' selected_stream product.pk %}" style="color:#005fa3; margin-top:0.5rem; font-weight:800; display:inline-block;">View Details</a>            <div class="action-links" style="margin-top:0.7rem; align-items:center; display:flex; gap:0.7rem; justify-content: flex-start;">
+              <a href="{% url 'product_edit_stream' selected_stream product.pk %}" class="edit-btn">Edit</a>
+              {% if user|can_delete_products %}
+                <a href="{% url 'product_delete_stream' selected_stream product.pk %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="delete-btn">Delete</a>
+              {% endif %}
+              <button type="button" class="history-btn" onclick="openHistoryModal('{{ product.pk }}')">History</button>
+              <div class="status-btn {% if product.status == 'Active' %}status-active{% elif product.status == 'Not Active' %}status-notactive{% elif product.status == 'Scraped' %}status-Scraped{% elif product.status == 'Hand-Overed' %}status-handovered{% endif %}" style="margin-bottom:0; margin-left:0.5rem; text-align:center; display:flex; align-items:center; justify-content:center; min-width:130px;">
+                {% if product.status == 'Issue' %}Issue in the System{% else %}{{ product.status }}{% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div style="text-align:center;color:#888;margin-top: 4rem; display: flex; justify-content: center; align-items: center; height: 120px;">No products found.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div id="historyModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeHistoryModal()">&times;</span>
+      <h3 style="color:#005fa3;">History</h3>
+      <div id="historyContent">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    function openHistoryModal(productId) {
+      const modal = document.getElementById('historyModal');
+      modal.style.display = 'flex';
+      fetch(`/stream/{{ selected_stream }}/products/${productId}/history/`)
+        .then(r => r.text())
+        .then(html => (document.getElementById('historyContent').innerHTML = html));
+    }
+    function closeHistoryModal() {
+      document.getElementById('historyModal').style.display = 'none';
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeHistoryModal();
+    });
+    document.getElementById('historyModal').onclick = e => {
+      if (e.target === document.getElementById('historyModal')) closeHistoryModal();
+    };
+
+    // Live filtering: debounce typing and auto-submit on input/date/select changes
+    function debounce(fn, delay) {
+      let timer;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('.search-bar form');
+      if (!form) return;
+
+      const filterType = form.querySelector('select[name="filter_type"]');
+      const productDiv = form.querySelector('.filter-product');
+      const dateDiv = form.querySelector('.filter-date');
+      const locDiv = form.querySelector('.filter-location');
+
+      const input = form.querySelector('input[name="q"]');
+      const start = form.querySelector('input[name="start_date"]');
+      const end = form.querySelector('input[name="end_date"]');
+      const locationSelect = form.querySelector('select[name="location"]');
+
+      const submitDebounced = debounce(() => form.submit(), 400);
+      // Use a slightly longer delay to avoid accidental submits while the user is deleting characters.
+      const submitEmptyDebounced = debounce(() => {
+        // Ensure the q input is empty before submitting so URL has no q param
+        const qInput = form.querySelector('input[name="q"]');
+        if (qInput) qInput.value = '';
+        // Reset filter type to "— Select filter —" when search is cleared
+        if (filterType) filterType.value = '';
+        // Hide filter controls
+        showFor('');
+        form.submit();
+      }, 300);
+
+      function showFor(type) {
+        // ensure overlay is hidden by default
+        const fc = form.querySelector('.filter-controls');
+        const pg = document.querySelector('.product-grid');
+        if (!fc) return;
+        if (type === 'product') {
+          productDiv.style.display = 'flex';
+          dateDiv.style.display = 'none';
+          locDiv.style.display = 'none';
+          fc.style.display = 'flex';
+        } else if (type === 'date') {
+          productDiv.style.display = 'none';
+          dateDiv.style.display = 'flex';
+          locDiv.style.display = 'none';
+          fc.style.display = 'flex';
+        } else if (type === 'location') {
+          productDiv.style.display = 'none';
+          dateDiv.style.display = 'none';
+          locDiv.style.display = 'flex';
+          fc.style.display = 'flex';
+        } else {
+          // hide overlay entirely
+          productDiv.style.display = 'none';
+          dateDiv.style.display = 'none';
+          locDiv.style.display = 'none';
+          fc.style.display = 'none';
+        }
+      }
+
+      // No layout recalculation needed because the overlay floats above content.
+
+      // initialize based on query param or default to none
+      const initial = (filterType && filterType.value) ? filterType.value : '';
+      showFor(initial);
+
+      // If this navigation is a page reload, clear filter-related query params and reset UI
+      try {
+        const navEntries = (performance.getEntriesByType && performance.getEntriesByType('navigation')) || [];
+        const isReload = (navEntries.length && navEntries[0].type === 'reload') || (performance.navigation && performance.navigation.type === 1);
+        if (isReload) {
+          const params = new URLSearchParams(window.location.search);
+          const category = params.get('category');
+          // Remove filter params
+          params.delete('filter_type');
+          params.delete('q');
+          params.delete('start_date');
+          params.delete('end_date');
+          params.delete('location');
+          // Build new URL (preserve category if present)
+          let newUrl = `/stream/{{ selected_stream }}/products/`;
+          if (category) newUrl += `?category=${category}`;
+          // Navigate to the cleaned URL so the server re-renders the unfiltered list
+          window.location.replace(newUrl);
+        }
+      } catch (e) { /* ignore */ }
+
+      // If product filter was active on load, focus the search input and place caret at end
+      if (initial === 'product' && input) {
+        try {
+          input.focus();
+          input.selectionStart = input.selectionEnd = input.value ? input.value.length : 0;
+        } catch (e) { /* ignore in browsers that don't support selection APIs */ }
+      }
+
+      filterType && filterType.addEventListener('change', () => {
+        // Clear all filter fields when filter type changes
+        if (input) input.value = '';
+        if (start) start.value = '';
+        if (end) end.value = '';
+        if (locationSelect) locationSelect.selectedIndex = 0;
+        // Remove all query params except filter_type and category (if present)
+        const params = new URLSearchParams(window.location.search);
+        const filterTypeVal = filterType.value;
+        const category = params.get('category');
+        let url = `/stream/{{ selected_stream }}/products/`;
+        if (category) url += `?category=${category}&filter_type=${filterTypeVal}`;
+        else url += `?filter_type=${filterTypeVal}`;
+        window.location.href = url;
+        showFor(filterType.value);
+        // focus first control for convenience
+        if (filterType.value === 'product' && input) input.focus();
+        if (filterType.value === 'date' && start) start.focus();
+        if (filterType.value === 'location' && locationSelect) locationSelect.focus();
+      });
+
+      if (input) {
+        input.addEventListener('input', () => {
+          if (filterType.value !== 'product') return;
+          const val = input.value || '';
+          if (val.trim().length === 0) {
+            // Schedule the "clear" submit to show all products
+            submitEmptyDebounced();
+            return;
+          }
+          // If user typed again, cancel the pending empty-submit implicitly by calling the other debounced submit
+          submitDebounced();
+        });
+
+        // Submit immediately on Enter key (useful when user wants instant search)
+        input.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' && filterType.value === 'product') {
+            ev.preventDefault();
+            form.submit();
+          }
+        });
+      }
+
+      [start, end].forEach(el => {
+        // Ensure 'To' date (end) is never earlier than 'From' date (start)
+        if (start) {
+          start.addEventListener('change', () => {
+            try {
+              // set minimum allowed on end input
+              if (end) end.min = start.value;
+              // if end is set and earlier than start, correct it to start
+              if (end && end.value && start.value && end.value < start.value) {
+                end.value = start.value;
+              }
+            } catch (e) { /* ignore */ }
+            if (filterType.value === 'date') form.submit();
+          });
+        }
+        if (end) {
+          end.addEventListener('change', () => {
+            try {
+              // If end is earlier than start, snap it to start and show a brief visual cue
+              if (start && start.value && end.value < start.value) {
+                end.value = start.value;
+                // Briefly flash a red border to indicate correction
+                const old = end.style.border;
+                end.style.border = '2px solid #dc3545';
+                setTimeout(() => { end.style.border = old; }, 800);
+              }
+            } catch (e) { /* ignore */ }
+            if (filterType.value === 'date') form.submit();
+          });
+        }
+      });
+
+      // Submit when location is changed while location filter is active
+      if (locationSelect) {
+        locationSelect.addEventListener('change', () => {
+          if (filterType && filterType.value === 'location') {
+            form.submit();
+          }
+        });
+      }
+
+      // Close filter popup when clicking outside of it
+      document.addEventListener('click', (event) => {
+        const filterControls = form.querySelector('.filter-controls');
+        const filterTypeSelect = form.querySelector('select[name="filter_type"]');
+        
+        // Check if filter controls are currently visible
+        if (filterControls && filterControls.style.display !== 'none') {
+          // Check if click is outside both filter controls and filter type select
+          if (!filterControls.contains(event.target) && !filterTypeSelect.contains(event.target)) {
+            // Hide the filter popup without changing the filter type value
+            // This preserves the selected filter type in the dropdown
+            showFor('');
+          }
+        }
+      });
+    });
+  </script>
+  <!-- <script>
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+  </script> -->
+
+    <script>
+      // Auto-hide success toasts after 5 seconds
+      setTimeout(function() {
+        const successToasts = document.querySelectorAll('.messages-success');
+        successToasts.forEach(toast => {
+          toast.style.display = 'none';
+        });
+      }, 2000);
+    </script>
+</body>
+</html>
+{% endblock %}

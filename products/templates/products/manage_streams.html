@@ -1,0 +1,880 @@
+{% load static %}
+{% load product_filters %}
+<title>Mos - Manage Streams</title>
+
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'products/manage_streams.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+/* Modern UI Styles */
+.page-header {
+    background: linear-gradient(135deg, #0070ba 0%, #1e4b9c 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    opacity: 0.9;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0070ba;
+    box-shadow: 0 0 0 0.2rem rgba(0, 112, 186, 0.25);
+}
+
+.form-check {
+    margin: 1rem 0;
+}
+
+.form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #0070ba;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 112, 186, 0.2);
+}
+
+.btn-primary:hover {
+    background: #005a94;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 112, 186, 0.3);
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(220, 53, 69, 0.3);
+}
+
+.table {
+    margin: 0;
+}
+
+.table thead th {
+    border-top: none;
+    border-bottom: 2px solid #e9ecef;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 1.25rem;
+}
+
+.table tbody td {
+    padding: 1.15rem;
+    vertical-align: middle;
+}
+
+/* Center the two permission-related columns (User Registration & Requires Admin Approval) */
+.table thead th:nth-child(4),
+.table thead th:nth-child(5),
+.table tbody td:nth-child(4),
+.table tbody td:nth-child(5) {
+    text-align: center;
+    vertical-align: middle; /* ensure badges are vertically centered */
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.badge-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.badge-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.table tbody tr {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+    animation-delay: calc(var(--row-index) * 0.1s);
+}
+
+.btn-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Action button styles */
+.action-btn {
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: all 0.18s ease;
+}
+
+.action-btn.edit-btn {
+    background: linear-gradient(180deg,#fff,#f7fbff);
+    color: #0b2e4a;
+    border: 1px solid #e6eef6;
+}
+
+.action-btn.delete-btn {
+    background: linear-gradient(180deg,#fff6f7,#fff);
+    color: #9b2b2b;
+    border: 1px solid #f5c6cb;
+}
+
+.action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(2,16,43,0.06); }
+
+/* Visual upgrade for modal content (small refinements) */
+.modal .modal-content { padding: 0.35rem; }
+.modal .modal-body .form-group { max-width: 100%; }
+
+/* Lightweight modal override (keeps modal hidden until opened) */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    inset: 0; /* top:0; right:0; bottom:0; left:0; */
+    align-items: center;
+    justify-content: center;
+    background: rgba(4, 12, 28, 0.6); /* slightly darker overlay */
+    z-index: 1050;
+    padding: 1.5rem;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal .modal-dialog {
+    max-width: 760px; /* wider dialog */
+    width: 100%;
+    margin: 0 auto;
+    transform: translateY(0);
+}
+
+/* Modal content card */
+.modal .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(2,16,43,0.35);
+    overflow: hidden;
+    border: none;
+    padding: 0;
+}
+
+/* Header layout */
+.modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.2rem 1.25rem;
+    border-bottom: none;
+    background: linear-gradient(90deg, rgba(0,112,186,0.06), rgba(30,75,156,0.02));
+}
+
+.modal .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #12263b;
+}
+
+.modal .modal-body {
+    padding: 1.2rem 1.25rem;
+    background: #fff;
+}
+
+.modal .modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: none;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    background: #fff;
+}
+
+/* Close button style */
+.modal .close {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #4b5563;
+}
+
+/* Delete modal header variant */
+.modal .modal-header.bg-danger {
+    background: linear-gradient(90deg,#c82333,#dc3545);
+    color: #fff;
+}
+
+.modal .modal-header.bg-danger .modal-title { color: #fff; }
+.modal .modal-header.bg-danger .close { color: rgba(255,255,255,0.9); }
+
+/* Make form groups inside modal full width and neat spacing */
+.modal .form-group { margin-bottom: 0.85rem; }
+.modal .form-group label { font-weight: 600; color: #22303f; }
+
+/* Center and style action buttons (edit/delete) in table */
+.btn-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Slightly larger modal buttons for touch */
+.modal .btn { padding: 0.6rem 1.1rem; border-radius: 8px; }
+.modal .btn-primary { background: #0070ba; color: #fff; border: none; }
+.modal .btn-secondary { background: #f1f5f9; color: #1f3a5a; border: 1px solid #e6eef6; }
+.modal .btn-danger { background: #dc3545; color: #fff; border: none; }
+
+/* New: center container and alignment */
+.app-container {
+    max-width: 1250px; /* increased width */
+    margin: 0 auto; /* center horizontally */
+    padding: 2rem 1rem;
+}
+
+/* Main page container (wraps entire page) */
+.main-container {
+    max-width: 1400px; /* increased width */
+    margin: 0 auto;
+    padding: 1rem;
+    margin-top: -5%;
+}
+
+.page-header {
+    text-align: center; /* center header text */
+}
+
+/* Button helper to center primary actions */
+.btn-center {
+    display: block;
+    width: auto;
+    margin: 0.9rem auto 0; /* center horizontally */
+    background: #ffffff !important; /* white background */
+    color: #0070ba !important; /* primary brand color */
+    border: 2px solid #0070ba !important;
+    padding: 0.95rem 1.8rem !important; /* slightly larger */
+    font-size: 1.08rem !important;
+    font-weight: 700;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 18px rgba(0,112,186,0.08);
+}
+
+.btn-center:hover {
+    background: #f8fcff !important;
+    transform: translateY(-2px);
+}
+
+/* Keep cards centered and constrained */
+.app-container .card {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Center form fields while preserving responsive layout */
+.app-container .form-group,
+.app-container .form-check {
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Make inputs full-width within the constrained form-group */
+.app-container .form-group .form-control {
+    width: 100%;
+}
+
+/* Center the table block and limit its width */
+.app-container .table-responsive {
+    max-width: 1200px; /* increased width */
+    margin: 0 auto;
+}
+
+/* Center action buttons in the actions cell */
+.table tbody td:last-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ensure Create Stream button is centered */
+.card-body form .text-center {
+    display: block;
+    text-align: center; /* center inline content */
+}
+
+/* Help icon small styles */
+.help-icon {
+    background: transparent;
+    border: none;
+    color: #0070ba;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+}
+.help-icon i { pointer-events: none; }
+.help-icon:focus { outline: 2px solid rgba(0,112,186,0.18); border-radius: 4px; }
+</style>
+
+<!-- Add Home icon and Philips header like usage_tracking.html -->
+<a href="/dashboard/" title="Go to Dashboard"
+    style="position: fixed; top: 30px; right: 150px; z-index: 1001;">
+    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg"
+            alt="Home"
+            style="height:40px;width:40px;vertical-align:middle;filter: grayscale(60%);background:white;border-radius:8px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+</a>
+
+<header style="position: sticky; top: 0; background: transparent; z-index: 1000;">
+    <div style="display: flex; align-items: center; width:100%; gap: 4px;">
+        <div class="user-info" style="margin-left: 0;">
+            <!-- optional place for date or user info -->
+        </div>
+        <img src="{% static 'products/philips.png' %}" alt="Philips Logo" class="philips-logo"
+             style="margin-left: auto; height:80px; width:auto; transform: translate(-55px, 20px);">
+    </div>
+</header>
+
+<div class="main-container">
+<div class="app-container">
+    <div class="page-header">
+        <h1>Manage Streams</h1>
+    </div>
+
+    <div class="text-center" style="margin-bottom: 2rem; margin-left: -980px; text-align: left;">
+        <button id="showCreateStreamBtn" class="btn btn-primary btn-center" type="button">Create New Stream</button>
+    </div>
+    <div id="createStreamContainer" class="card mb-4" style="display: none; position: relative;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0;">Create New Stream</h5>
+            <button id="closeCreateStreamBtn" type="button" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; margin-left: 1rem;">
+                &times;
+            </button>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="name">Stream Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" class="form-control" name="description">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="allow_public_registration" id="allow_public_registration" checked>
+                            <label class="form-check-label" for="allow_public_registration">
+                                Allow User Registration
+                                <button type="button" class="help-icon" data-help-title="User Registration" data-help-content="Allows users to self-register to join this stream. If OFF, only administrators can add users to the stream." aria-label="Help: User Registration">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="requires_approval" id="requires_approval" checked>
+                            <label class="form-check-label" for="requires_approval">
+                                Requires Admin Approval
+                                <button type="button" class="help-icon" data-help-title="Requires Approval" data-help-content="When ON, new registrations for this stream require an administrator to approve them before they become active." aria-label="Help: Requires Approval">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-center">Create Stream</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Existing Streams</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Users</th>
+                            <th>User Registration</th>
+                            <th>Requires Admin Approval</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stream in streams %}
+                        <tr>
+                            <td><strong>{{ stream.name }}</strong></td>
+                            <td>{{ stream.description|default:"-" }}</td>
+                            <td>{{ stream.get_active_users_count }}</td>
+                            <td>
+                                {% if stream.allow_public_registration %}
+                                    <span class="badge badge-success">Yes</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stream.requires_approval %}
+                                    <span class="badge badge-warning">Yes</span>
+                                {% else %}
+                                    <span class="badge badge-success">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if stream.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ stream.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-actions">
+                                    <button type="button" class="action-btn edit-btn" onclick="editStream({{ stream.id }}, '{{ stream.name|escapejs }}', '{{ stream.description|default:''|escapejs }}', {{ stream.allow_public_registration|yesno:'true,false'|lower }}, {{ stream.requires_approval|yesno:'true,false'|lower }}, {{ stream.is_active|yesno:'true,false'|lower }})" aria-label="Edit {{ stream.name|escapejs }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="action-btn delete-btn" onclick="deleteStream({{ stream.id }}, '{{ stream.name|escapejs }}')" aria-label="Delete {{ stream.name|escapejs }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No streams found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div> <!-- end .app-container -->
+</div> <!-- end .main-container -->
+
+<!-- Edit Stream Modal -->
+<div class="modal fade" id="editStreamModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i> Edit Stream
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="stream_id" id="edit_stream_id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_name">Stream Name</label>
+                        <input type="text" class="form-control" name="name" id="edit_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_description">Description</label>
+                        <input type="text" class="form-control" name="description" id="edit_description">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="allow_public_registration" id="edit_allow_public_registration">
+                        <label class="form-check-label" for="edit_allow_public_registration">
+                            Allow User Registration
+                            <button type="button" class="help-icon" data-help-title="User Registration" data-help-content="Allows users to self-register to join this stream. If OFF, only administrators can add users to the stream." aria-label="Help: User Registration">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="requires_approval" id="edit_requires_approval">
+                        <label class="form-check-label" for="edit_requires_approval">
+                            Requires Admin Approval
+                            <button type="button" class="help-icon" data-help-title="Requires Approval" data-help-content="When ON, new registrations for this stream require an administrator to approve them before they become active." aria-label="Help: Requires Approval">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" id="edit_is_active">
+                        <label class="form-check-label" for="edit_is_active">
+                            Active
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Stream</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Stream Modal -->
+<div class="modal fade" id="deleteStreamModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Delete Stream
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="deleteStreamForm" method="post" onsubmit="return false;">
+                {% csrf_token %}
+                <input type="hidden" name="stream_name" id="delete_stream_name_input">
+                <div class="modal-body">
+                    <p class="text-danger" style="font-weight:700;">Deleting the stream will remove all its containing data.</p>
+                    <p>Are you sure you want to delete the stream "<strong id="delete_stream_name_display"></strong>"?</p>
+                    <div class="form-group" style="margin-top:1rem;">
+                        <label for="delete_stream_password" style="font-weight:600;">Enter your password to confirm</label>
+                        <input type="password" id="delete_stream_password" class="form-control" placeholder="Password" autocomplete="current-password">
+                    </div>
+                    <div id="delete_stream_error" style="color:#c82333;margin-top:0.6rem;display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteStreamBtn">Delete Stream</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal (re-usable for inline help) -->
+<div class="modal" id="helpModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="helpModalTitle"><i class="fas fa-info-circle"></i> Help</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="helpModalBody">
+                <!-- populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide create stream container
+    const showBtn = document.getElementById('showCreateStreamBtn');
+    const createContainer = document.getElementById('createStreamContainer');
+    if (showBtn && createContainer) {
+        showBtn.addEventListener('click', function() {
+            if (createContainer.style.display === 'none') {
+                createContainer.style.display = 'block';
+                showBtn.style.display = 'none';
+            }
+        });
+        const closeBtn = document.getElementById('closeCreateStreamBtn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                createContainer.style.display = 'none';
+                showBtn.style.display = 'block';
+            });
+        }
+    }
+    // Add row animation index
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+        row.style.setProperty('--row-index', index);
+    });
+
+    // Add hover effects to table rows
+    rows.forEach(row => {
+        row.addEventListener('mouseover', () => {
+            row.style.backgroundColor = 'rgba(0, 112, 186, 0.05)';
+            row.style.transform = 'scale(1.01)';
+            row.style.transition = 'all 0.3s ease';
+        });
+
+        row.addEventListener('mouseout', () => {
+            row.style.backgroundColor = '';
+            row.style.transform = 'scale(1)';
+        });
+    });
+
+    // Add smooth transitions to forms
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'translateY(-2px)';
+                input.parentElement.style.transition = 'all 0.3s ease';
+            });
+
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    });
+
+    // Attach click handlers to any element that should dismiss a modal
+    document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal);
+        });
+    });
+
+    // Close modal when clicking on overlay (but not when clicking inside dialog)
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal(modal);
+        });
+    });
+
+    const confirmBtn = document.getElementById('confirmDeleteStreamBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            const name = document.getElementById('delete_stream_name_input').value;
+            const password = document.getElementById('delete_stream_password').value.trim();
+            const errorEl = document.getElementById('delete_stream_error');
+
+            if (!password) {
+                errorEl.textContent = 'Please enter your password to confirm deletion.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // Send request
+            fetch('/stream/delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `stream_name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`
+            })
+            .then(res => res.json().then(data => ({status: res.status, body: data})))
+            .then(({status, body}) => {
+                if (status === 200 && body.success) {
+                    location.reload();
+                } else {
+                    errorEl.textContent = body.error || 'Failed to delete stream.';
+                    errorEl.style.display = 'block';
+                }
+            })
+            .catch(() => {
+                errorEl.textContent = 'Server error.';
+                errorEl.style.display = 'block';
+            });
+        });
+    }
+
+    // Attach help-icon handlers
+    document.querySelectorAll('.help-icon').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const title = btn.getAttribute('data-help-title') || 'Help';
+            const content = btn.getAttribute('data-help-content') || '';
+            const titleEl = document.getElementById('helpModalTitle');
+            const bodyEl = document.getElementById('helpModalBody');
+            if (titleEl) titleEl.innerHTML = '<i class="fas fa-info-circle"></i> ' + title;
+            if (bodyEl) bodyEl.textContent = content;
+            showModal(document.getElementById('helpModal'));
+        });
+    });
+
+    // Ensure help modal close controls call hideModal
+    document.getElementById('helpModal')?.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', () => hideModal(document.getElementById('helpModal')));
+    });
+
+    // helper to read cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
+function showModal(modal) {
+    if (!modal) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function hideModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+function editStream(id, name, description, allowPublic, requiresApproval, isActive) {
+    const modal = document.getElementById('editStreamModal');
+    document.getElementById('edit_stream_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_description').value = description;
+    document.getElementById('edit_allow_public_registration').checked = allowPublic;
+    document.getElementById('edit_requires_approval').checked = requiresApproval;
+    document.getElementById('edit_is_active').checked = isActive;
+    
+    showModal(modal);
+}
+
+function deleteStream(id, name) {
+    const modal = document.getElementById('deleteStreamModal');
+    document.getElementById('delete_stream_name_input').value = name;
+    document.getElementById('delete_stream_name_display').textContent = name;
+    document.getElementById('delete_stream_password').value = '';
+    document.getElementById('delete_stream_error').style.display = 'none';
+    showModal(modal);
+}
+</script>
+{% endblock %}

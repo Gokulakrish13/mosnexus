@@ -1,0 +1,352 @@
+{% extends 'products/base.html' %}
+{% block content %}
+    <style>
+        body, html {
+            color: #222;
+            font-size: 1rem;
+            background: #f4f6f8;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        .form-bg {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f4f6f8;
+            padding-top: 0; /* Removed the padding-top */
+        }
+        .form-container {
+            background: #fff;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+            border-radius: 18px;
+            padding: 2.7rem 3.5rem 2.2rem 3.5rem;
+            max-width: 900px;
+            width: 98vw;
+            transition: box-shadow 0.3s;
+            border: 1.5px solid #e0e3e7;
+            margin: 0 auto;
+        }
+        .form-container:hover {
+            box-shadow: 0 16px 48px rgba(0, 95, 163, 0.13);
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            color: #005fa3;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            margin-left: 0.2rem; 
+        }
+        .form-container label {
+            display: block;
+            margin-top: 1.2rem;
+            font-weight: 600;
+            color: #444;
+            letter-spacing: 0.01em;
+        }
+        .form-container input[type="text"],
+        .form-container textarea,
+        .form-container select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            margin-top: 0.5rem;
+            border: 1.5px solid #cfd8dc;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            background: #f8fafc;
+            color: #222;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            box-sizing: border-box;
+        }
+        .form-container input:focus, .form-container textarea:focus, .form-container select:focus {
+            border: 1.5px solid #005fa3;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(0, 95, 163, 0.10);
+        }
+        .form-container textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+        .form-container input[type="file"] {
+            margin-top: 0.7rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: #005fa3;
+        }
+        .form-container input[type="file"]::-webkit-file-upload-button {
+            background: #e3f0fa;
+            color: #005fa3;
+            border: 1px solid #b3d8f6;
+            border-radius: 6px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .form-container input[type="file"]:hover::-webkit-file-upload-button {
+            background: #cbe6fd;
+            color: #003e6b;
+        }
+        .form-container button[type="submit"] {
+            margin-top: 2.2rem;
+            width: 100%;
+            padding: 1rem 0;
+            background-color: #005fa3;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.18rem;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 95, 163, 0.13);
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+            user-select: none;
+        }
+        .form-container button[type="submit"]:hover,
+        .form-container button[type="submit"]:focus {
+            background-color: #004072;
+            box-shadow: 0 10px 28px rgba(0, 64, 114, 0.18);
+            transform: translateY(-2px);
+            outline: none;
+        }
+        .form-fields-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+        }
+        .form-col {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        @media (max-width: 900px) {
+            .form-fields-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+        .form-container form label {
+            margin-top: 1.2rem;
+        }
+        .form-container form input[type="text"],
+        .form-container form textarea,
+        .form-container form select {
+            margin-top: 0.5rem;
+        }
+        .form-container form input[type="file"] {
+            margin-top: 0.7rem;
+        }
+        /* Remove double margin for first label in each column */
+        .form-col label:first-child {
+            margin-top: 0;
+        }
+        @media (max-width: 1100px) {
+            .form-container {
+                max-width: 99vw;
+                padding: 2rem 1rem 1.5rem 1rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 1.5rem 0.7rem 1.2rem 0.7rem;
+                max-width: 99vw;
+            }
+            .form-container h2 {
+                font-size: 1.5rem;
+            }
+            .form-container button[type="submit"] {
+                font-size: 1rem;
+                padding: 0.8rem 0;
+            }
+        }
+    </style>
+
+    <div class="form-bg">
+        <div class="form-container">
+            <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" style="display:inline-block;margin-bottom:0.1rem;color:#005fa3;font-weight:600;text-decoration:underline;">&larr; Back to List</a>
+            <h2>{% if edit %}Edit Product{% else %}Add Product{% endif %}</h2>
+            {% if messages %}
+                <ul class="messages" style="margin-bottom:1rem;list-style:none;padding:0;">
+                    {% for message in messages %}
+                        <li style="color:#b30000;font-weight:600;">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="stream" value="{{ stream }}">
+                <div class="form-fields-row">
+                    <div class="form-col">
+                        <label for="category">Category:</label>
+                        {% if selected_category %}
+                            <input type="hidden" name="category" value="{{ selected_category.id }}">
+                            <input type="text" id="category" value="{{ selected_category.name }} ({{ selected_category.serial_number }})" disabled style="background:#f0f3f8; color:#555; font-weight:600;">
+                        {% elif product and product.category %}
+                            <input type="hidden" name="category" value="{{ product.category.id }}">
+                            <input type="text" id="category" value="{{ product.category.name }} ({{ product.category.serial_number }})" disabled style="background:#f0f3f8; color:#555; font-weight:600;">
+                        {% else %}
+                            <div style="color:#888; font-style:italic; margin-bottom:1rem;">No category selected. Please go back and select a category.</div>
+                        {% endif %}
+                        <label for="name">Product Name:</label>
+                        <input type="text" id="name" name="name" required value="{{ product.name|default:'' }}">
+                        <label for="serial_number">Product Number / ID:</label>
+                        <input type="text" id="serial_number" name="serial_number" required value="{{ product.serial_number|default:next_serial }}">
+                        <label for="status">Status:</label>
+                        <select id="status" name="status" required onchange="toggleHandedOverFields(); toggleIssueField();">
+                            <option value="Active" {% if product.status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Not Active" {% if product.status == 'Not Active' %}selected{% endif %}>Not Active</option>
+                            <option value="Scraped" {% if product.status == 'Scraped' %}selected{% endif %}>Scraped</option>
+                            <option value="Hand-Overed" {% if product.status == 'Hand-Overed' %}selected{% endif %}>Hand-Overed</option>
+                            <option value="Issue" {% if product.status == 'Issue' %}selected{% endif %}>Issue in the System</option>
+                        </select>
+                        
+                        <div id="handedOverFields" style="margin-top:1rem; display:none;">
+                            <label for="handover_team_type">Assigning team</label>
+                            <select id="handover_team_type" name="handover_team_type" onchange="toggleExternalTeamField()">
+                                <option value="Internal" {% if product and product.handover_team_type == 'Internal' %}selected{% endif %}>Internal (MoS)</option>
+                                <option value="External" {% if product and product.handover_team_type == 'External' %}selected{% endif %}>External</option>
+                            </select>
+                            <div id="externalTeamField" style="margin-top:0.7rem; display:none;">
+                                <label for="handover_external_team">If external, which team?</label>
+                                <input type="text" id="handover_external_team" name="handover_external_team" value="{{ product.handover_external_team|default:'' }}">
+                            </div>
+                        </div>
+                        
+                        <div id="issueField"
+                          {% if product.status == 'Issue' %}
+                            style="margin-top:1rem; display:block;"
+                          {% else %}
+                            style="margin-top:1rem; display:none;"
+                          {% endif %}
+                        >
+                            <label for="issue_description">Issue Description:</label>
+                            <textarea id="issue_description" name="issue_description" rows="4" {% if product.status == 'Issue' %}required{% endif %}>{{ product.issue_description|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div id="handoverOwnerField" style="display:none;">
+                            <label id="handoverOwnerLabel" for="handover_owner" style="margin-top:0.7rem;">Name of the assignee / Owner (default to Store)</label>
+                            <input type="text" id="handover_owner" name="handover_owner" value="{{ product.handover_owner|default:'' }}">
+                        </div>
+                        <label for="location" style="margin-top:0;">Location:</label>
+                        <select id="location" name="location" required>
+                            <option value="">-- Select Location --</option>
+                            {% for loc in locations %}
+                                <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    
+                    <div class="form-col">
+                        </br>
+                        <label for="twelve_nc">12NC Information:</label>
+                        <input type="text" id="twelve_nc" name="twelve_nc" value="{{ product.twelve_nc|default:'' }}" placeholder="Enter 12NC or related info (optional)">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="4" required>{{ product.description|default:'' }}</textarea>
+                        <label for="images">Product Images (optional, you can select multiple):</label>
+                        <input type="file" id="images" name="images" accept="image/*" multiple>
+                    </div>
+                    
+                </div>
+                    </div>
+
+                <button type="submit">{% if edit %}Update Product{% else %}Add Product{% endif %}</button>
+            </form>
+        </div>
+    </div>
+<script>
+    function openHistoryModal(productId) {
+      // ...existing code...
+    }
+    function closeHistoryModal() {
+      // ...existing code...
+    }
+    document.addEventListener('keydown', e => {
+      // ...existing code...
+    });
+    document.getElementById('historyModal').onclick = e => {
+      // ...existing code...
+    };
+    // Hand-Overed status logic
+    function toggleHandedOverFields() {
+      var status = document.getElementById('status').value;
+      var handoverFields = document.getElementById('handedOverFields');
+      // Normalize status for robust comparison
+      var normalized = status.replace(/[-\s]/g, '').toLowerCase();
+      var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
+      if (isHandedOver) {
+        handoverFields.style.display = '';
+      } else {
+        handoverFields.style.display = 'none';
+      }
+      toggleExternalTeamField();
+      // Debug log for troubleshooting
+      console.log('Status value:', status, '| Normalized:', normalized, '| Show handover fields:', isHandedOver);
+    }
+    window.toggleHandedOverFields = toggleHandedOverFields;
+    function toggleExternalTeamField() {
+      var teamType = document.getElementById('handover_team_type');
+      var externalField = document.getElementById('externalTeamField');
+      var ownerField = document.getElementById('handoverOwnerField');
+      var ownerLabel = document.getElementById('handoverOwnerLabel');
+      var ownerInput = document.getElementById('handover_owner');
+      var status = document.getElementById('status') ? document.getElementById('status').value : '';
+      var normalized = status.replace(/[-\s]/g, '').toLowerCase();
+      var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
+      // Only show owner field if status is Hand-Overed/HandedOver
+      if (!isHandedOver) {
+        if (ownerField) ownerField.style.display = 'none';
+        if (ownerInput) ownerInput.required = false;
+        return;
+      }
+      if (teamType && teamType.value === 'External') {
+        externalField.style.display = '';
+        if (ownerField) ownerField.style.display = '';
+        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner';
+        if (ownerInput) ownerInput.required = true;
+      } else if (teamType && teamType.value === 'Internal') {
+        externalField.style.display = 'none';
+        if (ownerField) ownerField.style.display = '';
+        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner (default to Store)';
+        if (ownerInput) ownerInput.required = false;
+      } else {
+        externalField.style.display = 'none';
+        if (ownerField) ownerField.style.display = 'none';
+        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner (default to Store)';
+        if (ownerInput) ownerInput.required = false;
+      }
+    }
+    window.toggleExternalTeamField = toggleExternalTeamField;
+    function toggleIssueField() {
+      var status = document.getElementById('status').value;
+      var issueField = document.getElementById('issueField');
+      if (status === 'Issue') {
+        issueField.style.display = '';
+        document.getElementById('issue_description').required = true;
+      } else {
+        issueField.style.display = 'none';
+        document.getElementById('issue_description').required = false;
+      }
+    }
+    window.toggleIssueField = toggleIssueField;
+    // Initial call on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.getElementById('status')) {
+        toggleHandedOverFields();
+        toggleIssueField();
+        document.getElementById('status').addEventListener('change', toggleHandedOverFields);
+        document.getElementById('status').addEventListener('change', toggleIssueField);
+      }
+      if (document.getElementById('handover_team_type')) {
+        document.getElementById('handover_team_type').addEventListener('change', toggleExternalTeamField);
+      }
+    });
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+      });
+  </script>
+{% endblock %}

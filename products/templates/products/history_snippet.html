@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* Removed forced font-family styling. Only keep color, font-size, and .top-bar style. */
+        body, html {
+            margin: 0;
+            background: #fff;
+            color: #222;
+            font-size: 1rem;
+        }
+        
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 60px;
+        }
+        .history-list > li {
+            padding: 10px;
+            border-bottom: 1px solid #e0e3e7;
+            line-height: 1.5;
+        }
+        .history-action {
+            color: #1976d2;
+            font-weight: 500;
+        }
+        .history-user {
+            color: #2e7d32;
+            font-weight: 500;
+        }
+        .history-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<ul class="history-list" style="max-height:540px;overflow-y:auto;padding-right:8px;margin-top:0;">
+    {% for h in history %}
+    <li>
+        <span class="history-action">{{ h.action|title }}</span>
+        by <span class="history-user">{{ h.user.username }}</span>
+        <span class="history-time">at {{ h.timestamp|date:'Y-m-d H:i:s' }}</span>
+        <br>        {% if h.action == "edited" and h.changes %}
+            <div style="margin-top: 5px;">
+            {% for change in h.changes %}
+                {% if change.old != change.new %}                    {% if change.field == "location" %}
+                        <div>Moved to location: {{ change.new }}</div>
+                    {% elif change.field == "status" %}
+                        <div>Status changed from "{{ change.old }}" to "{% if change.new == 'Issue' %}Issue in the system{% else %}{{ change.new }}{% endif %}"</div>
+                    {% elif change.field == "description" %}
+                        <div>Description changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                    {% elif change.field == "issue_description" %}
+                        <div>Issue Description changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                    {% else %}
+                        <div>{{ change.field|title }} changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            </div>
+        {% elif h.action == "created" %}
+            <span>{{ h.details }}</span>
+        {% else %}
+            <span>{{ h.details }}</span>
+        {% endif %}
+    </li>
+    {% empty %}
+    <li>No history available.</li>
+    {% endfor %}
+</ul>
+
+<!-- This template is only for AJAX partial rendering. All stream-aware links should be handled in the parent template/view. -->
+
+<script>
+      document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+      });
+    </script>
+  </body>
+</html>

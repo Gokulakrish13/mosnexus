@@ -1,0 +1,743 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Required - IGT Mobile Surgery Portal</title>
+    <meta name="description" content="Authentication Required for Mobile Surgery Management Platform">
+    <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+    
+    <!-- Google Fonts for modern professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'products/style.css' %}">
+    
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-solid: #667eea;
+            --accent: #00d4aa;
+            --accent-secondary: #ff6b6b;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f1419;
+            --glass: rgba(255,255,255,0.95);
+            --glass-dark: rgba(15,20,25,0.95);
+            --card-bg: rgba(255,255,255,0.8);
+            --card-bg-dark: rgba(30,41,59,0.8);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-primary-dark: #f1f5f9;
+            --text-secondary-dark: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 20px;
+            --radius-lg: 32px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.3) 0%, transparent 50%);
+        }
+
+        body.dark-mode .bg-animated {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.15) 0%, transparent 50%);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: var(--border);
+            padding: 1rem 2rem;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .header {
+            background: var(--glass-dark);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-solid);
+        }
+
+        .header-logo img {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: var(--border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: var(--card-bg-dark);
+        }
+
+        .theme-indicator {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: var(--transition);
+            left: 4px;
+        }
+
+        body.dark-mode .theme-indicator {
+            left: calc(100% - 36px);
+        }
+
+        .theme-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        /* Main Container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 2rem 2rem;
+        }
+
+        .login-section {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Login Card */
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            border: var(--border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.dark-mode .login-card {
+            background: var(--card-bg-dark);
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .login-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .login-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Logo */
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            transition: var(--transition);
+        }
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .login-subtitle {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .login-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        body.dark-mode .login-description {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Security Badge */
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--accent-secondary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .security-icon {
+            font-size: 1.2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-width: 180px;
+            justify-content: center;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: var(--border);
+            backdrop-filter: blur(20px);
+        }
+
+        body.dark-mode .btn-secondary {
+            background: var(--card-bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-solid);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            font-size: 1.2em;
+        }
+
+        /* Features Grid */
+        .access-features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: var(--border);
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+        }
+
+        body.dark-mode .feature-item {
+            background: var(--card-bg-dark);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content {
+            text-align: left;
+        }
+
+        .feature-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        body.dark-mode .feature-title {
+            color: var(--text-primary-dark);
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        body.dark-mode .feature-description {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode .login-footer {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-left: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .login-title {
+                font-size: 2.2rem;
+            }
+
+            .login-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .login-description {
+                font-size: 1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .access-features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .login-card {
+                padding: 1.5rem;
+            }
+
+            .theme-toggle {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips" />
+                <span>IGT MoS Portal</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <div class="theme-indicator"></div>
+                <div class="theme-icon">
+                    <i class="fas fa-sun" id="sunIcon"></i>
+                </div>
+                <div class="theme-icon">
+                    <i class="fas fa-moon" id="moonIcon"></i>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="login-section">
+            <div class="login-card">
+                <!-- Logo -->
+                <div class="login-logo">
+                    <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo" />
+                </div>
+
+                <!-- Content -->
+                <h1 class="login-title">Access Required</h1>
+                <div class="login-subtitle">
+                    <i class="fas fa-shield-alt"></i> Secure Authentication
+                </div>
+                
+                <!-- Display error messages if any -->
+                {% if messages %}
+                    <div style="margin: 1.5rem 0;">
+                        {% for message in messages %}
+                            <div style="
+                                padding: 1rem 1.5rem;
+                                background: rgba(255, 107, 107, 0.1);
+                                border: 2px solid rgba(255, 107, 107, 0.5);
+                                border-radius: 12px;
+                                color: #ff6b6b;
+                                font-weight: 600;
+                                font-size: 1rem;
+                                margin-bottom: 0.5rem;
+                                text-align: center;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 0.75rem;
+                            ">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <p class="login-description">
+                    Authentication is required to access the Mobile Surgery Management Platform. 
+                    Please login to continue with your secure session and access advanced healthcare management tools.
+                </p>
+
+                <!-- Security Badge -->
+                <div class="security-badge">
+                    <i class="fas fa-lock security-icon"></i>
+                    Enterprise-grade Security
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <a href="{% url 'login' %}" class="btn btn-primary" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login to Platform
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </a>
+                </div>
+
+                <!-- Access Features -->
+                <div class="access-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Dashboard Access</div>
+                            <div class="feature-description">Real-time system monitoring</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Analytics</div>
+                            <div class="feature-description">Advanced reporting tools</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">System Controls</div>
+                            <div class="feature-description">Complete platform management</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Team Management</div>
+                            <div class="feature-description">User and role administration</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="login-footer">
+                    <p>&copy; 2026 Philips Healthcare. Advanced Mobile Surgery Management Platform.</p>
+                    <p style="margin-top: 0.5rem; opacity: 0.7;">Protected by enterprise-grade security protocols</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            setTheme(!document.body.classList.contains('dark-mode'));
+        });
+        
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme(true);
+        }
+
+        // Floating Particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 6000);
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 300);
+
+        // Enhanced login button interaction
+        document.getElementById('loginBtn').addEventListener('click', function(e) {
+            this.classList.add('loading');
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<div class="loading-spinner"></div> Connecting...';
+        });
+
+        // Prevent right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "products/base.html" %}
+
+{% block title %}Delete Build Server - {{ server.hostname }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Deletion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to delete this build server?</p>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-server"></i> Server Details</h6>
+                        <ul class="mb-0">
+                            <li><strong>Hostname:</strong> {{ server.hostname }}</li>
+                            <li><strong>IP Address:</strong> {{ server.ip_address }}</li>
+                            <li><strong>Location:</strong> {{ server.location }}</li>
+                            <li><strong>Owner:</strong> {{ server.owner }}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Warning</h6>
+                        <p class="mb-0">This action cannot be undone. All history and maintenance logs associated with this server will also be deleted.</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="btn-group w-100" role="group">
+                            <a href="{% url 'build_server_detail' stream=stream server_id=server.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Server
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

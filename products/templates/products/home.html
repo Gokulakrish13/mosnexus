@@ -1,0 +1,1233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGT - Mobile Surgery Portal | Enterprise Healthcare Management</title>
+    <meta name="description" content="Advanced Inventory & Asset Management Portal for Mobile Surgery Systems">
+    <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+    
+    <!-- Google Fonts for modern professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'products/style.css' %}">
+    
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-solid: #667eea;
+            --accent: #00d4aa;
+            --accent-secondary: #ff6b6b;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f1419;
+            --glass: rgba(255,255,255,0.95);
+            --glass-dark: rgba(15,20,25,0.95);
+            --card-bg: rgba(255,255,255,0.8);
+            --card-bg-dark: rgba(30,41,59,0.8);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-primary-dark: #f1f5f9;
+            --text-secondary-dark: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 20px;
+            --radius-lg: 32px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.3) 0%, transparent 50%);
+        }
+
+        body.dark-mode .bg-animated {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.15) 0%, transparent 50%);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: var(--border);
+            padding: 1rem 2rem;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .header {
+            background: var(--glass-dark);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-solid);
+        }
+
+        .header-logo img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-solid);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: var(--primary-solid);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: var(--border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: var(--card-bg-dark);
+        }
+
+        .theme-indicator {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: var(--transition);
+            left: 4px;
+        }
+
+        body.dark-mode .theme-indicator {
+            left: calc(100% - 36px);
+        }
+
+        .theme-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        /* Main Container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 2rem 2rem;
+        }
+
+        .hero-section {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Hero Content */
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            transition: var(--transition);
+        }
+
+        .hero-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        body.dark-mode .hero-description {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 4rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-width: 160px;
+            justify-content: center;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: var(--border);
+            backdrop-filter: blur(20px);
+        }
+
+        body.dark-mode .btn-secondary {
+            background: var(--card-bg-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-solid);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            font-size: 1.2em;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: left;
+            transition: var(--transition);
+            border: var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-mode .feature-card {
+            background: var(--card-bg-dark);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .feature-title {
+            color: var(--text-primary-dark);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        body.dark-mode .feature-description {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            margin-bottom: 4rem;
+            border: var(--border);
+        }
+
+        body.dark-mode .stats-section {
+            background: var(--card-bg-dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-solid);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        body.dark-mode .stat-label {
+            color: var(--text-secondary-dark);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: var(--border);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+        }
+
+        body.dark-mode .footer {
+            background: var(--card-bg-dark);
+            color: var(--text-secondary-dark);
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-left: 4px solid var(--primary-solid);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-nav {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero-description {
+                font-size: 1.1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .theme-toggle {
+                width: 60px;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Scroll Progress */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--primary);
+            z-index: 1000;
+            transition: width 0.1s ease;
+        }
+
+        /* About Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            margin: auto;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            max-width: 900px;
+            width: 95%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            border: var(--border);
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        body.dark-mode .modal-content {
+            background: var(--card-bg-dark);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--accent-secondary);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-solid);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        body.dark-mode .modal-subtitle {
+            color: var(--text-secondary-dark);
+        }
+
+        .modal-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-solid);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: var(--radius);
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .modal-link:hover {
+            background: var(--primary-solid);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header fade-in">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips" />
+                <span>IGT MoS Portal</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link" onclick="openAboutModal(event)">About</a>
+                <a href="#support" class="nav-link">Support</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <div class="theme-indicator"></div>
+                <div class="theme-icon">
+                    <i class="fas fa-sun" id="sunIcon"></i>
+                </div>
+                <div class="theme-icon">
+                    <i class="fas fa-moon" id="moonIcon"></i>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="hero-section">
+            <!-- Hero Logo -->
+            <div class="hero-logo slide-up" style="animation-delay: 0.2s;">
+                <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo" />
+            </div>
+
+            <!-- Hero Content -->
+            <h1 class="hero-title slide-up" style="animation-delay: 0.4s;">
+                IGT Mobile Surgery
+            </h1>
+            <div class="hero-subtitle slide-up" style="animation-delay: 0.6s;">
+                <i class="fas fa-code"></i> MoS Nexus Platform
+            </div>
+            <p class="hero-description slide-up" style="animation-delay: 0.8s;">
+                Advanced Enterprise Healthcare Management System for Mobile Surgery Operations. 
+                Streamline your inventory, manage assets, and optimize surgical workflows with our comprehensive digital platform.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="button-group slide-up" style="animation-delay: 1s;">
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Access Portal
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-secondary">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </a>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section slide-up" style="animation-delay: 1.2s;">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="8">0</span>
+                        <div class="stat-label">Active Devices</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="150">0</span>
+                        <div class="stat-label">Surgical Teams</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="24">0</span>
+                        <div class="stat-label">Hours Monitoring</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="99.9">0</span>
+                        <div class="stat-label">% Uptime</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid" id="features">
+                <div class="feature-card slide-in-left" style="animation-delay: 1.4s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-inventory"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Inventory Management</h3>
+                    <p class="feature-description">
+                        Real-time tracking of medical equipment, supplies, and assets with automated alerts and predictive analytics.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 1.6s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Enterprise Security</h3>
+                    <p class="feature-description">
+                        Advanced role-based access control, data encryption, and compliance with healthcare security standards.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 1.8s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-analytics"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">
+                        Comprehensive dashboards, usage patterns, and performance metrics to optimize surgical operations.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 2s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Mobile Responsive</h3>
+                    <p class="feature-description">
+                        Access your management portal from any device with our responsive design and native mobile experience.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 2.2s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time Monitoring</h3>
+                    <p class="feature-description">
+                        Live status updates, system health monitoring, and instant notifications for critical events.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 2.4s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="feature-title">Process Automation</h3>
+                    <p class="feature-description">
+                        Streamlined workflows, automated reports, and intelligent scheduling for maximum efficiency.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Support Section -->
+            <div style="margin: 4rem 0; text-align: center;">
+                <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: var(--primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" id="support">Technical Support</h2>
+                <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">Get help when you need it with our comprehensive support resources and expert assistance.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card slide-in-left" style="animation-delay: 2.6s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="feature-title">Documentation</h3>
+                    <p class="feature-description">
+                        Comprehensive user guides, API documentation, system requirements, and best practices for optimal platform usage.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 2.8s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="feature-title">24/7 Help Desk</h3>
+                    <p class="feature-description">
+                        Round-the-clock technical support via phone (+1-800-PHILIPS), email (igt-support@philips.com), and live chat.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 3s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3 class="feature-title">Training Videos</h3>
+                    <p class="feature-description">
+                        Step-by-step tutorials, feature demonstrations, and comprehensive training sessions for all user levels.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 3.2s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="feature-title">Emergency Support</h3>
+                    <p class="feature-description">
+                        Critical incident response for system issues affecting patient care. Emergency hotline available 24/7/365.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 3.4s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="feature-title">Remote Diagnostics</h3>
+                    <p class="feature-description">
+                        Advanced remote troubleshooting and system diagnostics to quickly resolve issues and minimize downtime.
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 3.6s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="feature-title">Training Programs</h3>
+                    <p class="feature-description">
+                        Certification programs, workshops, and personalized training sessions for healthcare professionals.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div style="margin: 4rem 0; text-align: center;">
+                <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: var(--primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" id="contact">Contact Information</h2>
+                <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">Connect with our team across multiple channels and locations worldwide.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card slide-in-left" style="animation-delay: 3.8s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="feature-title">Corporate Headquarters</h3>
+                    <p class="feature-description">
+                        Philips Healthcare IGT Division<br>
+                        3000 Minuteman Road<br>
+                        Andover, MA 01810, USA<br>
+                        Phone: +1 (978) 659-2000
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 4s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="feature-title">Email Support</h3>
+                    <p class="feature-description">
+                        General Inquiries: info@philips.com<br>
+                        Technical Support: igt-support@philips.com<br>
+                        Sales: sales@philips.com<br>
+                        Response within 4 hours
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 4.2s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Global Offices</h3>
+                    <p class="feature-description">
+                        India: Bangalore Innovation Campus<br>
+                        Europe: Best, Netherlands<br>
+                        Asia-Pacific: Singapore<br>
+                        Latin America: São Paulo, Brazil
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 4.4s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title">Sales & Partnerships</h3>
+                    <p class="feature-description">
+                        Business Development: partnerships@philips.com<br>
+                        Enterprise Sales: enterprise@philips.com<br>
+                        Channel Partners: channels@philips.com<br>
+                        Schedule a consultation
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 4.6s;">
+                    <div class="feature-icon">
+                        <i class="fab fa-linkedin"></i>
+                    </div>
+                    <h3 class="feature-title">Social Media</h3>
+                    <p class="feature-description">
+                        LinkedIn: /company/philips<br>
+                        Twitter: @philips<br>
+                        YouTube: /user/philips<br>
+                        Stay connected with updates
+                    </p>
+                </div>
+                <div class="feature-card slide-in-left" style="animation-delay: 4.8s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="feature-title">Live Chat</h3>
+                    <p class="feature-description">
+                        Available in Portal Dashboard<br>
+                        Monday-Friday: 8AM-8PM EST<br>
+                        Real-time assistance<br>
+                        Multi-language support
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Philips Healthcare. Advanced Mobile Surgery Management Platform. All rights reserved.</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7;">Built with enterprise-grade security and reliability.</p>
+    </footer>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAboutModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h2 class="modal-title">About Our Mobile C-Arms</h2>
+                <p class="modal-subtitle">Advanced Image-Guided Therapy Systems</p>
+            </div>
+            <div style="text-align: center;">
+                <img src="{% static 'products/All_CArm.png' %}" alt="Mobile C-Arms Collection" class="modal-image" />
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+                    Our comprehensive range of mobile C-arms provides exceptional imaging capabilities for various surgical procedures, 
+                    ensuring precision, reliability, and optimal patient outcomes.
+                </p>
+                <a href="https://www.philips.co.in/healthcare/image-guided-therapy/image-guided-therapy-systems/mobile-c-arms" 
+                   target="_blank" class="modal-link">
+                    <i class="fas fa-external-link-alt"></i>
+                    Learn More About Philips Mobile C-Arms
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            setTheme(!document.body.classList.contains('dark-mode'));
+        });
+        
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme(true);
+        }
+
+        // Floating Particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 6000);
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 300);
+
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            document.getElementById('scrollProgress').style.width = scrolled + '%';
+        });
+
+        // Animated Counter
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = target % 1 === 0 ? Math.floor(current) : current.toFixed(1);
+            }, 20);
+        }
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    if (counter && !counter.classList.contains('animated')) {
+                        counter.classList.add('animated');
+                        const target = parseFloat(counter.dataset.count);
+                        animateCounter(counter, target);
+                    }
+                }
+            });
+        });
+
+        // Observe stat items
+        document.querySelectorAll('.stat-item').forEach((item) => {
+            observer.observe(item);
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Loading states for buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!this.classList.contains('loading')) {
+                    this.classList.add('loading');
+                    const originalContent = this.innerHTML;
+                    this.innerHTML = '<div class="loading-spinner"></div>';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalContent;
+                        this.classList.remove('loading');
+                    }, 1000);
+                }
+            });
+        });
+
+        // Prevent right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Add entrance animations on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.fade-in, .slide-up, .slide-in-left').forEach((el, index) => {
+                el.style.animationDelay = (index * 0.1) + 's';
+                el.style.opacity = '1';
+            });
+        });
+
+        // Modal Functions
+        function openAboutModal(event) {
+            event.preventDefault();
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAboutModal() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('aboutModal');
+            if (event.target === modal) {
+                closeAboutModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAboutModal();
+            }
+        });
+
+        // Enhanced smooth scroll for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                if (href.startsWith('#') && href !== '#about') {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

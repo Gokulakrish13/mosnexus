@@ -1,0 +1,941 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Note - IGT MoS Inventory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f4f6f8;
+    }
+
+    /* Hide navigation links for notes pages, but keep Home link */
+
+    .notes-main-container {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding: 2rem 1rem;
+        background: #f4f6f8;
+        min-height: 100vh;
+    }
+
+    .note-form-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+        animation: slideInUp 0.4s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-card .card-header {
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .form-card .card-header h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+    }
+
+    .form-card .card-body {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.6rem;
+        display: block;
+        font-size: 0.95rem;
+    }    .form-control {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        font-family: inherit;
+        background: #fafbfc;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #005fa3;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(0, 95, 163, 0.1);
+    }
+
+    .form-control textarea {
+        resize: vertical;
+        min-height: 150px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.5;
+    }
+
+    /* Table formatting support */
+    .form-control textarea {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    /* Style for pasted tables */
+    .content-preview {
+        border: 1px solid #e0e3e7;
+        border-radius: 8px;
+        padding: 1rem;
+        background: white;
+        margin-top: 0.5rem;
+        min-height: 100px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .content-preview table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .content-preview table th,
+    .content-preview table td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .content-preview table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .content-preview table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .content-preview table tr:hover {
+        background-color: #e8f4f8;
+    }
+
+    .character-count {
+        color: #888;
+        font-size: 0.85rem;
+        text-align: right;
+        margin-top: 0.4rem;
+    }    .character-count.warning {
+        color: #f39c12;
+    }
+
+    /* File upload styles */
+    .file-upload-section {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+        transition: all 0.3s;
+    }
+    
+    .file-upload-section:hover {
+        border-color: #005fa3;
+        background: #f0f7ff;
+    }
+    
+    .file-upload-label {
+        display: block;
+        text-align: center;
+        cursor: pointer;
+        padding: 1rem;
+    }
+    
+    .file-upload-icon {
+        font-size: 2rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-upload-text {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .file-upload-input {
+        display: none;
+    }
+    
+    .file-list {
+        margin-top: 1rem;
+    }
+    
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+    
+    .file-icon {
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+    
+    .file-details {
+        flex: 1;
+    }
+    
+    .file-name {
+        font-weight: 500;
+        color: #2c3e50;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .file-size {
+        color: #6c757d;
+        font-size: 0.8rem;
+        margin: 0;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-file-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-file-remove:hover {
+        background: #c82333;
+    }
+    
+    .existing-attachments {
+        margin-top: 1rem;
+    }
+    
+    .attachment-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: #e8f4f8;
+        border: 1px solid #bee5eb;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .attachment-checkbox {
+        margin-right: 0.5rem;
+    }
+      .file-size-info {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+
+    /* Upload Progress Styles */
+    .upload-progress-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #005fa3;
+        display: none;
+    }
+    
+    .upload-progress-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .upload-progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e0e3e7;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 4px;
+    }
+    
+    .upload-progress-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-align: center;
+    }
+    
+    .upload-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .upload-status.success {
+        color: #28a745;
+    }
+    
+    .upload-status.error {
+        color: #dc3545;
+    }
+    
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .form-check-input:checked {
+        background-color: #005fa3;
+        border-color: #005fa3;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-weight: 500;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e3e7;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        color: white;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 95, 163, 0.3);
+    }
+
+    .btn-cancel {
+        background: #e8eaed;
+        color: #2c3e50;
+    }
+
+    .btn-cancel:hover {
+        background: #d0d4d9;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        border-left-color: #28a745;
+        color: #155724;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+        color: #721c24;
+    }
+
+    .messages {
+        animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="notes-main-container">
+    <div class="note-form-wrapper">
+        <div class="form-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-{% if note %}edit{% else %}plus{% endif %}"></i>
+                    {% if note %}Edit Note{% else %}Create New Note{% endif %}
+                </h2>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" id="noteForm" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="title" class="form-label">
+                            <i class="fas fa-heading"></i> Note Title
+                        </label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                            value="{{ note.title|default:'' }}" maxlength="255" placeholder="Enter note title...">
+                        <div class="character-count" id="titleCount">0/255 characters</div>
+                    </div>                    
+                    
+                    <div class="form-group">
+                        <label for="content" class="form-label">
+                            <i class="fas fa-align-left"></i> Content
+                        </label>
+                        <textarea class="form-control" id="content" name="content" required placeholder="Write your note content here... (You can paste tables directly and formatting will be preserved)">{{ note.content|default:'' }}</textarea>
+                        <div class="character-count" id="contentCount">0 characters</div>
+                        <div class="content-preview" id="contentPreview" style="display: none;">
+                            <strong>Preview:</strong>
+                            <div id="previewContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- File Attachments Section -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-paperclip"></i> File Attachments
+                        </label>
+                        
+                        <!-- Existing Attachments (for edit mode) -->
+                        {% if note and note.attachments.all %}
+                        <div class="existing-attachments">
+                            <h6 style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.75rem;">
+                                <i class="fas fa-folder"></i> Current Attachments
+                            </h6>
+                            {% for attachment in note.attachments.all %}
+                            <div class="attachment-item">
+                                <div class="file-info">
+                                    <input type="checkbox" name="delete_attachments" value="{{ attachment.id }}" class="attachment-checkbox" id="delete_{{ attachment.id }}">
+                                    <label for="delete_{{ attachment.id }}" style="color: #dc3545; font-size: 0.8rem; margin-right: 0.5rem;">Delete</label>
+                                    <i class="{{ attachment.get_file_icon }} file-icon"></i>
+                                    <div class="file-details">
+                                        <p class="file-name">{{ attachment.original_filename }}</p>
+                                        <p class="file-size">{{ attachment.get_formatted_size }} • {{ attachment.file_type|title }}</p>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <a href="{{ attachment.file.url }}" target="_blank" class="btn btn-sm" style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem;">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- New File Upload -->
+                        <div class="file-upload-section">
+                            <label for="fileInput" class="file-upload-label">
+                                <div class="file-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p class="file-upload-text">
+                                    <strong>Click to upload files</strong> or drag and drop<br>
+                                    <small>Supported: Images, PDFs, Word docs, Excel sheets (Max 5MB each)</small>
+                                </p>
+                            </label>
+                            <input type="file" id="fileInput" name="attachments" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.xls,.xlsx" class="file-upload-input">
+                            <div class="file-list" id="fileList"></div>
+                            <div class="file-size-info">
+                                <i class="fas fa-info-circle"></i> 
+                                Maximum file size: 5MB per file
+                            </div>
+                            
+                            <!-- Upload Progress -->
+                            <div class="upload-progress-container" id="uploadProgressContainer">
+                                <div class="upload-progress-title">
+                                    <i class="fas fa-upload"></i>
+                                    Uploading Files...
+                                </div>
+                                <div class="upload-progress-bar">
+                                    <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                                </div>
+                                <div class="upload-progress-text" id="uploadProgressText">Preparing upload...</div>
+                                <div class="upload-status" id="uploadStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_public" name="is_public"
+                            {% if note.is_public|default:True %}checked{% endif %}>
+                        <label class="form-check-label" for="is_public">
+                            <i class="fas fa-globe"></i> Make this note public (visible to other users)
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'notes_list' %}" class="btn btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-save"></i> {% if note %}Update Note{% else %}Create Note{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const contentInput = document.getElementById('content');
+    const titleCount = document.getElementById('titleCount');
+    const contentCount = document.getElementById('contentCount');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const contentPreview = document.getElementById('contentPreview');
+    const previewContent = document.getElementById('previewContent');
+    const form = document.getElementById('noteForm');
+    const submitBtn = document.querySelector('.btn-submit');
+    
+    // Progress elements
+    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+    const uploadProgressFill = document.getElementById('uploadProgressFill');
+    const uploadProgressText = document.getElementById('uploadProgressText');
+    const uploadStatus = document.getElementById('uploadStatus');
+    
+    let selectedFiles = [];
+    let isUploading = false;
+    
+    function updateCharCount(input, display, maxLength = null) {
+        const length = input.value.length;
+        if (maxLength) {
+            display.textContent = `${length}/${maxLength} characters`;
+            if (length > maxLength * 0.9) {
+                display.classList.add('warning');
+            } else {
+                display.classList.remove('warning');
+            }
+        } else {
+            display.textContent = `${length} characters`;
+        }
+    }
+    
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    function getFileIcon(fileName) {
+        const extension = fileName.split('.').pop().toLowerCase();
+        const iconMap = {
+            'jpg': 'fas fa-image',
+            'jpeg': 'fas fa-image',
+            'png': 'fas fa-image',
+            'gif': 'fas fa-image',
+            'bmp': 'fas fa-image',
+            'webp': 'fas fa-image',
+            'pdf': 'fas fa-file-pdf',
+            'doc': 'fas fa-file-word',
+            'docx': 'fas fa-file-word',
+            'xls': 'fas fa-file-excel',
+            'xlsx': 'fas fa-file-excel'
+        };
+        return iconMap[extension] || 'fas fa-file';
+    }
+    
+    function updateFileList() {
+        fileList.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const sizeWarning = file.size > 5 * 1024 * 1024 ? ' style="color: #dc3545;"' : '';
+            
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <i class="${getFileIcon(file.name)} file-icon"></i>
+                    <div class="file-details">
+                        <p class="file-name">${file.name}</p>
+                        <p class="file-size"${sizeWarning}>${formatBytes(file.size)}</p>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button type="button" class="btn-file-remove" onclick="removeFile(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            fileList.appendChild(fileItem);
+        });
+    }
+    
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        updateFileList();
+        updateFileInput();
+    };
+    
+    function updateFileInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+    }
+    
+    function updateContentPreview() {
+        const content = contentInput.value.trim();
+        if (content.includes('\t') || (content.includes('\n') && content.split('\n').some(line => line.includes('\t') || line.split(/\s+/).length > 5))) {
+            contentPreview.style.display = 'block';
+            
+            const lines = content.split('\n').filter(line => line.trim());
+            if (lines.length > 1) {
+                let tableHtml = '<table>';
+                lines.forEach((line, index) => {
+                    const cells = line.split(/\t+|\s{2,}/).filter(cell => cell.trim());
+                    if (cells.length > 1) {
+                        const tag = index === 0 ? 'th' : 'td';
+                        tableHtml += `<tr>${cells.map(cell => `<${tag}>${cell.trim()}</${tag}>`).join('')}</tr>`;
+                    }
+                });
+                tableHtml += '</table>';
+                
+                if (tableHtml.includes('<tr>')) {
+                    previewContent.innerHTML = tableHtml;
+                    return;
+                }
+            }
+        }
+        
+        contentPreview.style.display = 'none';
+    }
+    
+    function showUploadProgress() {
+        uploadProgressContainer.style.display = 'block';
+        uploadProgressFill.style.width = '0%';
+        uploadProgressText.textContent = 'Preparing upload...';
+        uploadStatus.innerHTML = '';
+        submitBtn.disabled = true;
+        isUploading = true;
+    }
+    
+    function updateUploadProgress(percent, text) {
+        uploadProgressFill.style.width = percent + '%';
+        uploadProgressText.textContent = text;
+    }
+    
+    function hideUploadProgress() {
+        uploadProgressContainer.style.display = 'none';
+        submitBtn.disabled = false;
+        isUploading = false;
+    }
+    
+    function showUploadSuccess() {
+        uploadStatus.innerHTML = '<i class="fas fa-check-circle"></i> Upload completed successfully!';
+        uploadStatus.className = 'upload-status success';
+        setTimeout(() => {
+            hideUploadProgress();
+        }, 1500);
+    }
+    
+    function showUploadError(message) {
+        uploadStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> Upload failed: ${message}`;
+        uploadStatus.className = 'upload-status error';
+        submitBtn.disabled = false;
+        isUploading = false;
+    }
+    
+    // Handle paste events for table formatting
+    contentInput.addEventListener('paste', function(e) {
+        setTimeout(updateContentPreview, 10);
+    });
+    
+    // File upload handling
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const newFiles = Array.from(e.target.files);
+            
+            const validFiles = newFiles.filter(file => {
+                const allowedTypes = [
+                    'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp',
+                    'application/pdf',
+                    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                ];
+                
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`File "${file.name}" has an unsupported format.`);
+                    return false;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`File "${file.name}" is larger than 5MB.`);
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            selectedFiles = [...selectedFiles, ...validFiles];
+            updateFileList();
+        });
+        
+        // Drag and drop handling
+        const uploadSection = document.querySelector('.file-upload-section');
+        
+        if (uploadSection) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadSection.style.borderColor = '#005fa3';
+                uploadSection.style.backgroundColor = '#f0f7ff';
+            }
+            
+            function unhighlight() {
+                uploadSection.style.borderColor = '#dee2e6';
+                uploadSection.style.backgroundColor = '#f8f9fa';
+            }
+            
+            uploadSection.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = Array.from(dt.files);
+                
+                selectedFiles = [...selectedFiles, ...files];
+                updateFileList();
+                updateFileInput();
+            }
+        }
+    }
+    
+    // Event listeners
+    titleInput.addEventListener('input', () => updateCharCount(titleInput, titleCount, 255));
+    contentInput.addEventListener('input', () => {
+        updateCharCount(contentInput, contentCount);
+        updateContentPreview();
+    });
+    
+    // Initialize
+    updateCharCount(titleInput, titleCount, 255);
+    updateCharCount(contentInput, contentCount);
+    updateContentPreview();
+    
+    // Enhanced form submission with upload progress
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (isUploading) {
+            return false;
+        }
+        
+        // Basic validation
+        if (!form.checkValidity()) {
+            const invalidInputs = form.querySelectorAll(':invalid');
+            invalidInputs.forEach(input => {
+                input.style.borderColor = '#dc3545';
+            });
+            return false;
+        }
+        
+        // Show upload progress if there are files
+        if (selectedFiles.length > 0) {
+            showUploadProgress();
+            
+            // Simulate upload progress for demo (in real app, this would be actual upload progress)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    updateUploadProgress(100, 'Upload complete, saving note...');
+                    setTimeout(() => {
+                        submitForm();
+                    }, 500);
+                } else {
+                    updateUploadProgress(progress, `Uploading files... ${Math.round(progress)}%`);
+                }
+            }, 200);
+        } else {
+            // No files, submit directly
+            submitForm();
+        }
+    });
+    
+    function submitForm() {
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            if (response.redirected) {
+                showUploadSuccess();
+                setTimeout(() => {
+                    window.location.href = response.url;
+                }, 1500);
+            } else {
+                return response.text();
+            }
+        })
+        .then(html => {
+            if (html) {
+                // If there are errors, update the page content
+                document.documentElement.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showUploadError('Network error occurred');
+        });
+    }
+});
+</script>
+
+</body>
+</html>

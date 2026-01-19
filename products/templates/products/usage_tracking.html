@@ -1,0 +1,2166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usage Analytics Dashboard - Philips</title>
+    <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js" integrity="sha512-CryKbMe7sjSCDPl18jtJI5DR5jtkUWxPXWaLCst6QjH8wxDexfRJic2WRmRXmstr2Y8SxDDWuBO6CQC6IE4KTA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004499;
+            --primary-light: #e6f2ff;
+            --secondary: #6c757d;
+            --success: #00c851;
+            --warning: #ffbb33;
+            --danger: #ff4444;
+            --info: #00a8cc;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-dark: #1e293b;
+            --bg-card: #ffffff;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-icon:hover {
+            background: var(--border-hover);
+        }
+
+        .philips-logo {
+            height: 2.5rem;
+            width: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Filter Bar */
+        .filter-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .filter-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .date-range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.75rem;
+            align-items: end;
+        }
+
+        /* Stats Grid */
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        .stat-change.neutral {
+            color: var(--text-secondary);
+        }
+
+        /* Chart Section */
+        .chart-section {
+            margin-bottom: 2rem;
+        }
+
+        .chart-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .chart-container.small {
+            height: 250px;
+        }
+
+        .chart-container.large {
+            height: 450px;
+        }
+
+        /* Table Section */
+        .table-section {
+            margin-bottom: 2rem;
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Real-time indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--success);
+        }
+
+        .live-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .header-content {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .header-actions {
+                justify-content: center;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --bg-card: #1e293b;
+                
+                --text-primary: #f8fafc;
+                --text-secondary: #cbd5e1;
+                --text-muted: #64748b;
+                
+                --border-color: #334155;
+                --border-hover: #475569;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div>
+                        <h1 class="header-title">Usage Analytics</h1>
+                        <p class="header-subtitle">Monitor application performance and user engagement</p>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <div class="live-indicator">
+                        <div class="live-dot"></div>
+                        <span id="live-status">Live Data</span>
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">
+                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                            Export
+                        </button>
+                        
+                        <button class="btn btn-icon" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                            <i data-lucide="maximize-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        
+                        <a href="/dashboard/" class="btn btn-primary">
+                            <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+                            Dashboard
+                        </a>
+                    </div>
+                    
+                    <img src="{% static 'products/philips.png' %}" alt="Philips Logo" class="philips-logo">
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Filters Section -->
+            <section class="filter-section">
+                <div class="filter-header">
+                    <h2 class="filter-title">Filters & Controls</h2>
+                </div>
+                
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label for="date-range" class="form-label">Time Period</label>
+                        <select id="date-range" class="form-control" onchange="handleDateRangeChange()">
+                            <option value="1">Last 24 hours</option>
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 3 months</option>
+                            <option value="365">Last year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="metric-type" class="form-label">Primary Metric (for graphical view)</label>
+                        <select id="metric-type" class="form-control" onchange="updateCharts()">
+                            <option value="page_views">Page Views</option>
+                            <option value="unique_users">Unique Users</option>
+                            <option value="sessions">Sessions</option>
+                            <option value="bounce_rate">Bounce Rate</option>
+                            <option value="avg_session_time">Avg Session Time</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="refresh-interval" class="form-label">Auto Refresh</label>
+                        <select id="refresh-interval" class="form-control" onchange="setAutoRefresh()">
+                            <option value="0">Off</option>
+                            <option value="30">30 seconds</option>
+                            <option value="60" selected>1 minute</option>
+                            <option value="300">5 minutes</option>
+                        </select>
+                    </div>
+                    
+                    <div id="custom-date-container" class="hidden" style="grid-column: 1 / -1;">
+                        <div class="date-range-inputs">
+                            <div class="form-group">
+                                <label for="start-date" class="form-label">Start Date</label>
+                                <input type="date" id="start-date" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date" class="form-label">End Date</label>
+                                <input type="date" id="end-date" class="form-control">
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="updateCharts()">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Metrics Section -->
+            <section class="stats-section">
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-content">
+                                <div class="stat-title" id="stat-1-title">Page Views</div>
+                                <div class="stat-value" id="stat-1-value">{{ total_views|default:0 }}</div>
+                                <div class="stat-change {% if views_percent_change >= 0 %}positive{% else %}negative{% endif %}" id="stat-1-change">
+                                    <i data-lucide="{% if views_percent_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 16px; height: 16px;"></i>
+                                    <span>{% if views_percent_change >= 0 %}+{% endif %}{{ views_percent_change }}% from previous period</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" id="stat-1-icon">
+                                <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-content">
+                                <div class="stat-title" id="stat-2-title">Unique Users</div>
+                                <div class="stat-value" id="stat-2-value">{{ active_users|default:0 }}</div>
+                                <div class="stat-change {% if active_users_change >= 0 %}positive{% else %}negative{% endif %}" id="stat-2-change">
+                                    <i data-lucide="{% if active_users_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 16px; height: 16px;"></i>
+                                    <span>{% if active_users_change >= 0 %}+{% endif %}{{ active_users_change }}% from previous period</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" id="stat-2-icon">
+                                <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-content">
+                                <div class="stat-title" id="stat-3-title">Total Users</div>
+                                <div class="stat-value" id="stat-3-value">{{ total_users|default:0 }}</div>
+                                <div class="stat-change {% if new_users_percent >= 0 %}positive{% else %}negative{% endif %}" id="stat-3-change">
+                                    <i data-lucide="{% if new_users_percent >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 16px; height: 16px;"></i>
+                                    <span>{% if new_users_percent >= 0 %}+{% endif %}{{ new_users_percent }}% new users this period</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" id="stat-3-icon">
+                                <i data-lucide="mouse-pointer" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-content">
+                                <div class="stat-title" id="stat-4-title">Active Users (30d)</div>
+                                <div class="stat-value" id="stat-4-value">{{ active_users|default:0 }}</div>
+                                <div class="stat-change {% if active_users_change >= 0 %}positive{% else %}negative{% endif %}" id="stat-4-change">
+                                    <i data-lucide="{% if active_users_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 16px; height: 16px;"></i>
+                                    <span>{% if active_users_change >= 0 %}+{% endif %}{{ active_users_change }}% from previous period</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" id="stat-4-icon">
+                                <i data-lucide="activity" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-content">
+                                <div class="stat-title" id="stat-5-title">Avg Session Time</div>
+                                <div class="stat-value" id="stat-5-value">{{ avg_session_time|default:'N/A' }}</div>
+                                <div class="stat-change {% if session_time_change >= 0 %}positive{% else %}negative{% endif %}" id="stat-5-change">
+                                    <i data-lucide="{% if session_time_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 16px; height: 16px;"></i>
+                                    <span>{% if session_time_change >= 0 %}+{% endif %}{{ session_time_change }}% from previous period</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" id="stat-5-icon">
+                                <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="chart-section">
+                <div class="chart-grid">
+                    <!-- Main Usage Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Application Usage Trends</h3>
+                            <div class="chart-actions">
+                                <button class="btn btn-secondary" onclick="toggleChartType('dailyUsageChart')">
+                                    <i data-lucide="bar-chart-3" style="width: 16px; height: 16px;"></i>
+                                    Toggle View
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dailyUsageChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Page Views Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Most Visited Pages</h3>
+                                <div class="chart-actions">
+                                    <button class="btn btn-secondary" onclick="refreshChart('pageViewsChart')">
+                                        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container small">
+                                <canvas id="pageViewsChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Hourly Activity Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Activity by Hour</h3>
+                                <div class="chart-actions">
+                                    <button class="btn btn-secondary" onclick="refreshChart('hourlyActivityChart')">
+                                        <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container small">
+                                <canvas id="hourlyActivityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Table Section -->
+            <section class="table-section">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3 class="table-title">Top Active Users</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" onclick="refreshUserTable()">
+                                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Page Views</th>
+                                    <th>Last Active</th>
+                                    <th>Avg. Session</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                {% for user_stat in top_users %}
+                                <tr>
+                                    <td class="font-medium">{{ user_stat.username }}</td>
+                                    <td>{{ user_stat.page_views }}</td>
+                                    <td>{{ user_stat.last_active }}</td>
+                                    <td>{{ user_stat.avg_session_time }}</td>
+                                    <td>
+                                        <span class="stat-change positive">
+                                            <i data-lucide="circle" style="width: 8px; height: 8px; fill: currentColor;"></i>
+                                            Active
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No user data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let charts = {};
+        let refreshInterval;
+        let currentChartTypes = {
+            dailyUsageChart: 'line'
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Chart.js is loaded, with fallback loading
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded, attempting fallback...');
+                loadFallbackChart();
+                return;
+            }
+            
+            lucide.createIcons();
+            initializeDashboard();
+        });
+
+        function loadFallbackChart() {
+            const fallbackScript = document.createElement('script');
+            fallbackScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+            fallbackScript.onload = function() {
+                console.log('Fallback Chart.js loaded successfully');
+                lucide.createIcons();
+                initializeDashboard();
+            };
+            fallbackScript.onerror = function() {
+                console.error('Fallback Chart.js also failed to load');
+                showErrorMessage('Unable to load Chart.js library');
+                // Use minimal charts as last resort
+                initializeMinimalDashboard();
+            };
+            document.head.appendChild(fallbackScript);
+        }
+
+        function showErrorMessage(message) {
+            const containers = document.querySelectorAll('.chart-container');
+            containers.forEach(container => {
+                container.innerHTML = `<div class="error-state">
+                    <h4>Error loading chart library</h4>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">Reload Page</button>
+                    <button class="btn btn-secondary" onclick="initializeMinimalDashboard()" style="margin-left: 0.5rem;">Use Basic View</button>
+                </div>`;
+            });
+        }
+
+        function initializeMinimalDashboard() {
+            console.log('Initializing minimal dashboard without Chart.js');
+            
+            // Initialize basic functionality
+            lucide.createIcons();
+            
+            // Show data in tables instead of charts
+            const mockData = {
+                daily_usage: {
+                    dates: generateDateRange(7),
+                    views: generateMockData(7, 100, 500),
+                    users: generateMockData(7, 50, 200)
+                },
+                page_views: {
+                    pages: ['Dashboard', 'Analytics', 'Reports', 'Settings', 'Profile'],
+                    counts: [350, 280, 150, 120, 80]
+                },
+                hourly_activity: {
+                    hours: Array.from({length: 24}, (_, i) => i),
+                    counts: generateMockData(24, 10, 100)
+                }
+            };
+            
+            // Replace chart containers with data tables
+            createDataTable('dailyUsageChart', mockData.daily_usage, 'Daily Usage');
+            createDataTable('pageViewsChart', mockData.page_views, 'Page Views');
+            createDataTable('hourlyActivityChart', mockData.hourly_activity, 'Hourly Activity');
+            
+            showNotification('Using basic table view (Charts unavailable)', 'warning');
+        }
+
+        function createDataTable(canvasId, data, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const container = canvas.parentNode;
+            let tableHtml = `<h4>${title}</h4><div style="max-height: 300px; overflow-y: auto;">`;
+            
+            if (data.dates) {
+                // Daily usage table
+                tableHtml += `<table class="data-table">
+                    <thead><tr><th>Date</th><th>Views</th><th>Users</th></tr></thead><tbody>`;
+                for (let i = 0; i < data.dates.length; i++) {
+                    tableHtml += `<tr><td>${data.dates[i]}</td><td>${data.views[i]}</td><td>${data.users[i]}</td></tr>`;
+                }
+                tableHtml += '</tbody></table>';
+            } else if (data.pages) {
+                // Page views table
+                tableHtml += `<table class="data-table">
+                    <thead><tr><th>Page</th><th>Views</th></tr></thead><tbody>`;
+                for (let i = 0; i < data.pages.length; i++) {
+                    tableHtml += `<tr><td>${data.pages[i]}</td><td>${data.counts[i]}</td></tr>`;
+                }
+                tableHtml += '</tbody></table>';
+            } else if (data.hours) {
+                // Hourly activity table
+                tableHtml += `<table class="data-table">
+                    <thead><tr><th>Hour</th><th>Activity</th></tr></thead><tbody>`;
+                for (let i = 0; i < data.hours.length; i++) {
+                    const hour = data.hours[i];
+                    const timeStr = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour-12} PM`;
+                    tableHtml += `<tr><td>${timeStr}</td><td>${data.counts[i]}</td></tr>`;
+                }
+                tableHtml += '</tbody></table>';
+            }
+            
+            tableHtml += '</div>';
+            container.innerHTML = tableHtml;
+        }
+
+        function initializeDashboard() {
+            // Set default date values
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('end-date').value = endDate.toISOString().split('T')[0];
+            document.getElementById('start-date').value = startDate.toISOString().split('T')[0];
+            
+            // Initialize charts
+            updateCharts();
+            
+            // Set up auto refresh
+            setAutoRefresh();
+            
+            // Set up keyboard shortcuts
+            setupKeyboardShortcuts();
+        }
+
+        function handleDateRangeChange() {
+            const dateRange = document.getElementById('date-range').value;
+            const customContainer = document.getElementById('custom-date-container');
+            
+            if (dateRange === 'custom') {
+                customContainer.classList.remove('hidden');
+            } else {
+                customContainer.classList.add('hidden');
+                updateCharts();
+            }
+        }
+
+        function setAutoRefresh() {
+            const interval = parseInt(document.getElementById('refresh-interval').value);
+            
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+            
+            if (interval > 0) {
+                refreshInterval = setInterval(() => {
+                    updateCharts(false); // Silent update
+                    updateStats();
+                }, interval * 1000);
+            }
+        }
+
+        function updateCharts(showLoading = true) {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                showErrorMessage('Chart.js library not loaded');
+                return;
+            }
+            
+            if (showLoading) {
+                showLoadingState();
+            }
+            
+            const dateRange = document.getElementById('date-range').value;
+            let startDate = '', endDate = '';
+            
+            if (dateRange === 'custom') {
+                startDate = document.getElementById('start-date').value;
+                endDate = document.getElementById('end-date').value;
+                
+                if (!startDate || !endDate) {
+                    showNotification('Please select both start and end dates', 'error');
+                    hideLoadingState();
+                    return;
+                }
+            }
+            
+            const metricType = document.getElementById('metric-type').value;
+            
+            // Build the API URL
+            let url = `/usage-tracking-data/?range=${dateRange}`;
+            if (dateRange === 'custom') {
+                url += `&start=${startDate}&end=${endDate}`;
+            }
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data from API:', data); // Debug log
+                    
+                    // Update all charts with real data
+                    updateDailyUsageChart(data.daily_usage, metricType);
+                    updatePageViewsChart(data.page_views);
+                    updateHourlyActivityChart(data.hourly_activity);
+                    
+                    // Update stat cards with real data
+                    if (data.stats) {
+                        console.log('Stats data available, updating cards...');
+                        updateStatCardsWithRealData(data.stats);
+                    } else {
+                        console.error('No stats data in response!');
+                    }
+                    
+                    hideLoadingState();
+                    
+                    if (showLoading) {
+                        showNotification('Data updated successfully', 'success');
+                    }
+                    
+                    // Reinitialize icons
+                    lucide.createIcons();
+                })
+                .catch(error => {
+                    console.error('Error fetching chart data:', error);
+                    hideLoadingState();
+                    showNotification('Error loading data: ' + error.message, 'error');
+                });
+        }
+
+        function generateMockDataForMetric(metricType, days) {
+            const baseData = {
+                daily_usage: {
+                    dates: generateDateRange(days),
+                    views: generateMockData(days, 100, 500),
+                    users: generateMockData(days, 50, 200),
+                    sessions: generateMockData(days, 30, 150),
+                    bounce_rate: generateMockData(days, 20, 60),
+                    avg_session_time: generateMockData(days, 120, 600) // seconds
+                }
+            };
+
+            // Generate different secondary charts based on metric type
+            switch(metricType) {
+                case 'page_views':
+                    return {
+                        ...baseData,
+                        top_pages: {
+                            pages: ['Dashboard', 'Analytics', 'Reports', 'Settings', 'Profile', 'Users', 'Projects'],
+                            counts: [450, 380, 220, 180, 140, 110, 90]
+                        },
+                        page_performance: {
+                            pages: ['Home', 'Login', 'Reports', 'Analytics', 'Settings'],
+                            load_times: [1.2, 0.8, 2.1, 1.5, 0.9] // seconds
+                        }
+                    };
+
+                case 'unique_users':
+                    return {
+                        ...baseData,
+                        user_segments: {
+                            segments: ['New Users', 'Returning', 'Power Users', 'Inactive', 'Admin'],
+                            counts: [120, 250, 80, 45, 15]
+                        },
+                        user_activity: {
+                            hours: Array.from({length: 24}, (_, i) => i),
+                            counts: generateMockData(24, 5, 50)
+                        }
+                    };
+
+                case 'sessions':
+                    return {
+                        ...baseData,
+                        session_duration: {
+                            ranges: ['< 1 min', '1-5 min', '5-15 min', '15-30 min', '> 30 min'],
+                            counts: [45, 120, 180, 95, 60]
+                        },
+                        session_sources: {
+                            hours: Array.from({length: 24}, (_, i) => i),
+                            counts: generateMockData(24, 2, 25)
+                        }
+                    };
+
+                case 'bounce_rate':
+                    return {
+                        ...baseData,
+                        bounce_by_page: {
+                            pages: ['Landing', 'Login', 'Dashboard', 'Reports', 'Settings'],
+                            rates: [65, 25, 15, 35, 45] // percentages
+                        },
+                        engagement_depth: {
+                            hours: Array.from({length: 24}, (_, i) => i),
+                            counts: generateMockData(24, 10, 80).map(val => 100 - val) // Inverse for bounce rate
+                        }
+                    };
+
+                case 'avg_session_time':
+                    return {
+                        ...baseData,
+                        time_by_page: {
+                            pages: ['Dashboard', 'Analytics', 'Reports', 'Settings', 'Profile'],
+                            times: [240, 180, 320, 150, 90] // seconds
+                        },
+                        time_distribution: {
+                            hours: Array.from({length: 24}, (_, i) => i),
+                            counts: generateMockData(24, 60, 400) // session times in seconds
+                        }
+                    };
+
+                default:
+                    return {
+                        ...baseData,
+                        page_views: {
+                            pages: ['Dashboard', 'Analytics', 'Reports', 'Settings', 'Profile'],
+                            counts: [350, 280, 150, 120, 80]
+                        },
+                        hourly_activity: {
+                            hours: Array.from({length: 24}, (_, i) => i),
+                            counts: generateMockData(24, 10, 100)
+                        }
+                    };
+            }
+        }
+
+        function updateMetricSpecificCharts(data, mockData, metricType) {
+            const chartTitles = document.querySelectorAll('.chart-title');
+            
+            switch(metricType) {
+                case 'page_views':
+                    updateSecondaryChart('pageViewsChart', 
+                        data?.top_pages || mockData.top_pages, 
+                        'doughnut', 
+                        'Top Pages by Views');
+                    updateSecondaryChart('hourlyActivityChart', 
+                        data?.page_performance || mockData.page_performance, 
+                        'bar', 
+                        'Page Load Times');
+                    
+                    // Update chart titles
+                    chartTitles[1].textContent = 'Top Pages by Views';
+                    chartTitles[2].textContent = 'Page Load Performance';
+                    break;
+
+                case 'unique_users':
+                    updateSecondaryChart('pageViewsChart', 
+                        data?.user_segments || mockData.user_segments, 
+                        'pie', 
+                        'User Segments');
+                    updateSecondaryChart('hourlyActivityChart', 
+                        data?.user_activity || mockData.user_activity, 
+                        'line', 
+                        'User Activity by Hour');
+                    
+                    chartTitles[1].textContent = 'User Segments';
+                    chartTitles[2].textContent = 'User Activity by Hour';
+                    break;
+
+                case 'sessions':
+                    updateSecondaryChart('pageViewsChart', 
+                        data?.session_duration || mockData.session_duration, 
+                        'doughnut', 
+                        'Session Duration Distribution');
+                    updateSecondaryChart('hourlyActivityChart', 
+                        data?.session_sources || mockData.session_sources, 
+                        'bar', 
+                        'Sessions by Hour');
+                    
+                    chartTitles[1].textContent = 'Session Duration';
+                    chartTitles[2].textContent = 'Sessions by Hour';
+                    break;
+
+                case 'bounce_rate':
+                    updateSecondaryChart('pageViewsChart', 
+                        data?.bounce_by_page || mockData.bounce_by_page, 
+                        'bar', 
+                        'Bounce Rate by Page');
+                    updateSecondaryChart('hourlyActivityChart', 
+                        data?.engagement_depth || mockData.engagement_depth, 
+                        'line', 
+                        'Engagement by Hour');
+                    
+                    chartTitles[1].textContent = 'Bounce Rate by Page';
+                    chartTitles[2].textContent = 'User Engagement by Hour';
+                    break;
+
+                case 'avg_session_time':
+                    updateSecondaryChart('pageViewsChart', 
+                        data?.time_by_page || mockData.time_by_page, 
+                        'bar', 
+                        'Avg Time by Page');
+                    updateSecondaryChart('hourlyActivityChart', 
+                        data?.time_distribution || mockData.time_distribution, 
+                        'line', 
+                        'Session Time Distribution');
+                    
+                    chartTitles[1].textContent = 'Time Spent by Page';
+                    chartTitles[2].textContent = 'Session Duration by Hour';
+                    break;
+
+                default:
+                    updatePageViewsChart(data?.page_views || mockData.page_views);
+                    updateHourlyActivityChart(data?.hourly_activity || mockData.hourly_activity);
+                    chartTitles[1].textContent = 'Most Visited Pages';
+                    chartTitles[2].textContent = 'Activity by Hour';
+            }
+        }
+
+        function updateStatCardsWithRealData(stats) {
+            console.log('Updating stat cards with:', stats); // Debug log
+            console.log('Time period:', document.getElementById('date-range').value);
+            
+            // Add visual feedback that update happened
+            const statsGrid = document.getElementById('stats-grid');
+            if (statsGrid) {
+                statsGrid.style.opacity = '0.7';
+                setTimeout(() => {
+                    statsGrid.style.opacity = '1';
+                }, 300);
+            }
+            
+            // Update Page Views (stat-1)
+            const stat1Value = document.getElementById('stat-1-value');
+            const stat1Change = document.getElementById('stat-1-change');
+            if (stat1Value) {
+                const oldValue = stat1Value.textContent;
+                const newValue = (stats.total_views || 0).toLocaleString();
+                stat1Value.textContent = newValue;
+                console.log(`Updated stat-1-value from "${oldValue}" to "${newValue}"`);
+            }
+            if (stat1Change) {
+                const changeSpan = stat1Change.querySelector('span');
+                const changeIcon = stat1Change.querySelector('i');
+                const change = stats.views_percent_change || 0;
+                
+                if (changeSpan) changeSpan.textContent = `${change >= 0 ? '+' : ''}${change}% from previous period`;
+                if (changeIcon) changeIcon.setAttribute('data-lucide', change >= 0 ? 'trending-up' : 'trending-down');
+                stat1Change.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update Unique Users (stat-2)
+            const stat2Value = document.getElementById('stat-2-value');
+            const stat2Change = document.getElementById('stat-2-change');
+            if (stat2Value) {
+                stat2Value.textContent = (stats.active_users || 0).toLocaleString();
+                console.log('Updated stat-2-value to:', stats.active_users);
+            }
+            if (stat2Change) {
+                const changeSpan = stat2Change.querySelector('span');
+                const changeIcon = stat2Change.querySelector('i');
+                const change = stats.active_users_change || 0;
+                
+                if (changeSpan) changeSpan.textContent = `${change >= 0 ? '+' : ''}${change}% from previous period`;
+                if (changeIcon) changeIcon.setAttribute('data-lucide', change >= 0 ? 'trending-up' : 'trending-down');
+                stat2Change.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update Total Users (stat-3)
+            const stat3Value = document.getElementById('stat-3-value');
+            const stat3Change = document.getElementById('stat-3-change');
+            if (stat3Value) {
+                stat3Value.textContent = (stats.total_users || 0).toLocaleString();
+                console.log('Updated stat-3-value to:', stats.total_users);
+            }
+            if (stat3Change) {
+                const changeSpan = stat3Change.querySelector('span');
+                const changeIcon = stat3Change.querySelector('i');
+                const change = stats.new_users_percent || 0;
+                
+                if (changeSpan) changeSpan.textContent = `${change >= 0 ? '+' : ''}${change}% new users this period`;
+                if (changeIcon) changeIcon.setAttribute('data-lucide', change >= 0 ? 'trending-up' : 'trending-down');
+                stat3Change.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update Active Users (stat-4) - same as stat-2
+            const stat4Title = document.getElementById('stat-4-title');
+            const stat4Value = document.getElementById('stat-4-value');
+            const stat4Change = document.getElementById('stat-4-change');
+            
+            // Update title based on selected time period
+            const dateRange = document.getElementById('date-range').value;
+            const periodText = dateRange === '1' ? '24h' : 
+                              dateRange === '7' ? '7d' : 
+                              dateRange === '30' ? '30d' : 
+                              dateRange === '90' ? '90d' : 
+                              dateRange === '365' ? '1y' : 'period';
+            if (stat4Title) stat4Title.textContent = `Active Users (${periodText})`;
+            
+            if (stat4Value) {
+                stat4Value.textContent = (stats.active_users || 0).toLocaleString();
+                console.log('Updated stat-4-value to:', stats.active_users);
+            }
+            if (stat4Change) {
+                const changeSpan = stat4Change.querySelector('span');
+                const changeIcon = stat4Change.querySelector('i');
+                const change = stats.active_users_change || 0;
+                
+                if (changeSpan) changeSpan.textContent = `${change >= 0 ? '+' : ''}${change}% from previous period`;
+                if (changeIcon) changeIcon.setAttribute('data-lucide', change >= 0 ? 'trending-up' : 'trending-down');
+                stat4Change.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update Avg Session Time (stat-5)
+            const stat5Value = document.getElementById('stat-5-value');
+            const stat5Change = document.getElementById('stat-5-change');
+            if (stat5Value) {
+                stat5Value.textContent = stats.avg_session_time || 'N/A';
+                console.log('Updated stat-5-value to:', stats.avg_session_time);
+            }
+            if (stat5Change) {
+                const changeSpan = stat5Change.querySelector('span');
+                const changeIcon = stat5Change.querySelector('i');
+                const change = stats.session_time_change || 0;
+                
+                if (changeSpan) changeSpan.textContent = `${change >= 0 ? '+' : ''}${change}% from previous period`;
+                if (changeIcon) changeIcon.setAttribute('data-lucide', change >= 0 ? 'trending-up' : 'trending-down');
+                stat5Change.className = `stat-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        function updateStatCards(mockData, metricType) {
+            // Generate dynamic stats based on the selected metric
+            const stats = generateStatsForMetric(metricType, mockData);
+            
+            // Update all 5 stat cards
+            for (let i = 0; i < 5; i++) {
+                const stat = stats[i];
+                const titleEl = document.getElementById(`stat-${i + 1}-title`);
+                const valueEl = document.getElementById(`stat-${i + 1}-value`);
+                const changeEl = document.getElementById(`stat-${i + 1}-change`);
+                const iconEl = document.getElementById(`stat-${i + 1}-icon`);
+                
+                if (titleEl && valueEl && changeEl && iconEl && stat) {
+                    titleEl.textContent = stat.title;
+                    valueEl.textContent = stat.value;
+                    
+                    // Update change indicator
+                    const changeSpan = changeEl.querySelector('span');
+                    const changeIcon = changeEl.querySelector('i');
+                    
+                    changeSpan.textContent = `${stat.change >= 0 ? '+' : ''}${stat.change}% from previous period`;
+                    
+                    // Update change class and icon
+                    changeEl.className = `stat-change ${stat.change >= 0 ? 'positive' : 'negative'}`;
+                    changeIcon.setAttribute('data-lucide', stat.change >= 0 ? 'trending-up' : 'trending-down');
+                    
+                    // Update icon
+                    iconEl.querySelector('i').setAttribute('data-lucide', stat.icon);
+                }
+            }
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        function generateStatsForMetric(metricType, mockData) {
+            switch(metricType) {
+                case 'page_views':
+                    return [
+                        { title: 'Total Page Views', value: '15,847', change: 15.2, icon: 'eye' },
+                        { title: 'Unique Page Views', value: '12,543', change: 8.7, icon: 'eye' },
+                        { title: 'Views per User', value: '5.6', change: 12.3, icon: 'user' },
+                        { title: 'Top Page Views', value: '2,841', change: 22.1, icon: 'trending-up' },
+                        { title: 'Views Growth Rate', value: '+18.2%', change: 9.4, icon: 'bar-chart-3' }
+                    ];
+                    
+                case 'unique_users':
+                    return [
+                        { title: 'Total Unique Users', value: '2,841', change: 11.5, icon: 'users' },
+                        { title: 'New Users', value: '1,247', change: 18.3, icon: 'user-plus' },
+                        { title: 'Returning Users', value: '1,594', change: 7.2, icon: 'user-check' },
+                        { title: 'User Retention Rate', value: '68.4%', change: 3.8, icon: 'repeat' },
+                        { title: 'Daily Active Users', value: '425', change: 14.7, icon: 'activity' }
+                    ];
+                    
+                case 'sessions':
+                    return [
+                        { title: 'Total Sessions', value: '4,127', change: 9.8, icon: 'mouse-pointer' },
+                        { title: 'Avg Sessions per User', value: '2.3', change: 5.4, icon: 'repeat' },
+                        { title: 'New Sessions', value: '1,825', change: 16.2, icon: 'plus-circle' },
+                        { title: 'Session Quality Score', value: '8.7/10', change: 12.1, icon: 'star' },
+                        { title: 'Sessions Growth', value: '+12.3%', change: 8.9, icon: 'trending-up' }
+                    ];
+                    
+                case 'bounce_rate':
+                    return [
+                        { title: 'Overall Bounce Rate', value: '34.2%', change: -5.8, icon: 'activity' },
+                        { title: 'Desktop Bounce Rate', value: '28.5%', change: -3.2, icon: 'monitor' },
+                        { title: 'Mobile Bounce Rate', value: '41.7%', change: -8.4, icon: 'smartphone' },
+                        { title: 'Engagement Rate', value: '65.8%', change: 5.8, icon: 'heart' },
+                        { title: 'Pages per Session', value: '3.2', change: 7.3, icon: 'file-text' }
+                    ];
+                    
+                case 'avg_session_time':
+                    return [
+                        { title: 'Avg Session Time', value: '4m 32s', change: 18.9, icon: 'clock' },
+                        { title: 'Median Session Time', value: '2m 45s', change: 12.4, icon: 'clock' },
+                        { title: 'Time on Page', value: '1m 28s', change: 9.7, icon: 'eye' },
+                        { title: 'Engagement Duration', value: '6m 12s', change: 22.3, icon: 'play-circle' },
+                        { title: 'Session Quality', value: '85.4%', change: 6.8, icon: 'thumbs-up' }
+                    ];
+                    
+                default:
+                    return [
+                        { title: 'Page Views', value: '12,543', change: 15.2, icon: 'eye' },
+                        { title: 'Unique Users', value: '2,841', change: 8.7, icon: 'users' },
+                        { title: 'Total Sessions', value: '4,127', change: 12.3, icon: 'mouse-pointer' },
+                        { title: 'Bounce Rate', value: '34.2%', change: -5.8, icon: 'activity' },
+                        { title: 'Avg Session Time', value: '4m 32s', change: 18.9, icon: 'clock' }
+                    ];
+            }
+        }
+
+        // Generate mock data for demonstration
+        function generateDateRange(days) {
+            const dates = [];
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            return dates;
+        }
+
+        function generateMockData(length, min, max) {
+            return Array.from({length}, () => 
+                Math.floor(Math.random() * (max - min + 1)) + min
+            );
+        }
+
+        function updateDailyUsageChart(data, metricType) {
+            if (typeof Chart === 'undefined') {
+                createDataTable('dailyUsageChart', data, 'Daily Usage');
+                return;
+            }
+            
+            const ctx = document.getElementById('dailyUsageChart').getContext('2d');
+            
+            if (charts.dailyUsageChart) {
+                charts.dailyUsageChart.destroy();
+            }
+            
+            if (!data || !data.dates || data.dates.length === 0) {
+                ctx.canvas.parentNode.innerHTML = '<div class="empty-state">No daily usage data available</div>';
+                return;
+            }
+            
+            const chartType = currentChartTypes.dailyUsageChart;
+            
+            // Determine which dataset to show based on selected metric
+            let datasets = [];
+            let chartTitle = 'Application Usage Trends';
+            
+            if (metricType === 'page_views') {
+                chartTitle = 'Page Views Trends';
+                datasets = [{
+                    label: 'Page Views',
+                    data: data.views || [],
+                    backgroundColor: chartType === 'bar' ? 'rgba(0, 102, 204, 0.8)' : 'rgba(0, 102, 204, 0.1)',
+                    borderColor: 'rgba(0, 102, 204, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            } else if (metricType === 'unique_users') {
+                chartTitle = 'Unique Users Trends';
+                datasets = [{
+                    label: 'Unique Users',
+                    data: data.users || [],
+                    backgroundColor: chartType === 'bar' ? 'rgba(0, 200, 81, 0.8)' : 'rgba(0, 200, 81, 0.1)',
+                    borderColor: 'rgba(0, 200, 81, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            } else if (metricType === 'sessions') {
+                chartTitle = 'Session Trends';
+                datasets = [{
+                    label: 'Sessions',
+                    data: data.sessions || data.users || [], // Fallback to users if sessions not available
+                    backgroundColor: chartType === 'bar' ? 'rgba(255, 187, 51, 0.8)' : 'rgba(255, 187, 51, 0.1)',
+                    borderColor: 'rgba(255, 187, 51, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            } else if (metricType === 'bounce_rate') {
+                chartTitle = 'Bounce Rate Trends';
+                datasets = [{
+                    label: 'Bounce Rate (%)',
+                    data: data.bounce_rate || generateMockData(data.dates.length, 20, 60),
+                    backgroundColor: chartType === 'bar' ? 'rgba(255, 68, 68, 0.8)' : 'rgba(255, 68, 68, 0.1)',
+                    borderColor: 'rgba(255, 68, 68, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            } else if (metricType === 'avg_session_time') {
+                chartTitle = 'Average Session Time Trends';
+                datasets = [{
+                    label: 'Avg Session Time (min)',
+                    data: (data.avg_session_time || generateMockData(data.dates.length, 120, 600)).map(seconds => (seconds / 60).toFixed(1)),
+                    backgroundColor: chartType === 'bar' ? 'rgba(156, 39, 176, 0.8)' : 'rgba(156, 39, 176, 0.1)',
+                    borderColor: 'rgba(156, 39, 176, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            } else {
+                // Default: show both views and users
+                datasets = [{
+                    label: 'Page Views',
+                    data: data.views || [],
+                    backgroundColor: chartType === 'bar' ? 'rgba(0, 102, 204, 0.8)' : 'rgba(0, 102, 204, 0.1)',
+                    borderColor: 'rgba(0, 102, 204, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Unique Users',
+                    data: data.users || [],
+                    backgroundColor: chartType === 'bar' ? 'rgba(0, 200, 81, 0.8)' : 'rgba(0, 200, 81, 0.1)',
+                    borderColor: 'rgba(0, 200, 81, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+            }
+            
+            // Update chart title
+            const chartTitleElement = document.querySelector('.chart-title');
+            if (chartTitleElement) {
+                chartTitleElement.textContent = chartTitle;
+            }
+            
+            charts.dailyUsageChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: data.dates.map(date => {
+                        const d = new Date(date);
+                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(0, 102, 204, 1)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSecondaryChart(canvasId, data, chartType, title) {
+            if (typeof Chart === 'undefined') {
+                createDataTable(canvasId, data, title);
+                return;
+            }
+            
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            
+            if (!data) {
+                ctx.canvas.parentNode.innerHTML = `<div class="empty-state">No ${title.toLowerCase()} data available</div>`;
+                return;
+            }
+
+            let chartConfig = {};
+
+            // Configure chart based on data structure and type
+            if (data.pages && data.counts) {
+                // Standard page-based data
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.pages.map(page => page.length > 20 ? page.substring(0, 20) + '...' : page),
+                        datasets: [{
+                            label: chartType === 'bar' ? 'Count' : '',
+                            data: data.counts,
+                            backgroundColor: chartType === 'bar' ? 
+                                'rgba(0, 168, 204, 0.8)' : 
+                                ['#0066cc', '#00a8cc', '#00c851', '#ffbb33', '#ff4444', '#6c757d', '#17a2b8'],
+                            borderColor: chartType === 'bar' ? 'rgba(0, 168, 204, 1)' : undefined,
+                            borderWidth: chartType === 'bar' ? 1 : 0,
+                            cutout: chartType === 'doughnut' ? '60%' : undefined
+                        }]
+                    }
+                };
+            } else if (data.pages && data.rates) {
+                // Bounce rate by page
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.pages,
+                        datasets: [{
+                            label: 'Bounce Rate (%)',
+                            data: data.rates,
+                            backgroundColor: 'rgba(255, 68, 68, 0.8)',
+                            borderColor: 'rgba(255, 68, 68, 1)',
+                            borderWidth: 1
+                        }]
+                    }
+                };
+            } else if (data.pages && data.times) {
+                // Time by page
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.pages,
+                        datasets: [{
+                            label: 'Time (seconds)',
+                            data: data.times,
+                            backgroundColor: 'rgba(156, 39, 176, 0.8)',
+                            borderColor: 'rgba(156, 39, 176, 1)',
+                            borderWidth: 1
+                        }]
+                    }
+                };
+            } else if (data.pages && data.load_times) {
+                // Page load times
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.pages,
+                        datasets: [{
+                            label: 'Load Time (s)',
+                            data: data.load_times,
+                            backgroundColor: 'rgba(255, 187, 51, 0.8)',
+                            borderColor: 'rgba(255, 187, 51, 1)',
+                            borderWidth: 1
+                        }]
+                    }
+                };
+            } else if (data.segments && data.counts) {
+                // User segments
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.segments,
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: ['#0066cc', '#00c851', '#ffbb33', '#ff4444', '#6c757d'],
+                            borderWidth: 0
+                        }]
+                    }
+                };
+            } else if (data.ranges && data.counts) {
+                // Session duration ranges
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.ranges,
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: ['#ff4444', '#ffbb33', '#00c851', '#00a8cc', '#0066cc'],
+                            borderWidth: 0,
+                            cutout: '60%'
+                        }]
+                    }
+                };
+            } else if (data.hours && data.counts) {
+                // Hourly data
+                chartConfig = {
+                    type: chartType,
+                    data: {
+                        labels: data.hours.map(hour => {
+                            const h = parseInt(hour);
+                            return h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
+                        }),
+                        datasets: [{
+                            label: title.includes('Time') ? 'Avg Time (sec)' : 
+                                   title.includes('Engagement') ? 'Engagement %' : 'Activity',
+                            data: data.counts,
+                            backgroundColor: chartType === 'bar' ? 'rgba(0, 168, 204, 0.8)' : 'rgba(0, 168, 204, 0.1)',
+                            borderColor: 'rgba(0, 168, 204, 1)',
+                            borderWidth: chartType === 'line' ? 2 : 1,
+                            tension: chartType === 'line' ? 0.4 : undefined,
+                            fill: chartType === 'line' ? true : undefined
+                        }]
+                    }
+                };
+            } else {
+                // Fallback for unknown data structure
+                ctx.canvas.parentNode.innerHTML = `<div class="empty-state">Unable to display ${title.toLowerCase()}</div>`;
+                return;
+            }
+
+            // Common chart options
+            chartConfig.options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: chartType === 'doughnut' || chartType === 'pie' ? 'bottom' : 'top',
+                        display: !(chartType === 'pie' && data.segments), // Hide legend for user segments pie
+                        labels: {
+                            usePointStyle: true,
+                            padding: chartType === 'doughnut' || chartType === 'pie' ? 15 : 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(0, 102, 204, 1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        callbacks: chartType === 'doughnut' || chartType === 'pie' ? {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        } : undefined
+                    }
+                },
+                scales: (chartType === 'bar' || chartType === 'line') ? {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                } : undefined
+            };
+
+            charts[canvasId] = new Chart(ctx, chartConfig);
+        }
+
+        function updatePageViewsChart(data) {
+            if (typeof Chart === 'undefined') {
+                createDataTable('pageViewsChart', data, 'Page Views');
+                return;
+            }
+            
+            const ctx = document.getElementById('pageViewsChart').getContext('2d');
+            
+            if (charts.pageViewsChart) {
+                charts.pageViewsChart.destroy();
+            }
+            
+            if (!data || !data.pages || data.pages.length === 0) {
+                ctx.canvas.parentNode.innerHTML = '<div class="empty-state">No page views data available</div>';
+                return;
+            }
+            
+            charts.pageViewsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.pages.map(page => page.length > 20 ? page.substring(0, 20) + '...' : page),
+                    datasets: [{
+                        data: data.counts,
+                        backgroundColor: [
+                            '#0066cc', '#00a8cc', '#00c851', '#ffbb33', '#ff4444',
+                            '#6c757d', '#17a2b8', '#28a745', '#ffc107', '#dc3545'
+                        ],
+                        borderWidth: 0,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateHourlyActivityChart(data) {
+            if (typeof Chart === 'undefined') {
+                createDataTable('hourlyActivityChart', data, 'Hourly Activity');
+                return;
+            }
+            
+            const ctx = document.getElementById('hourlyActivityChart').getContext('2d');
+            
+            if (charts.hourlyActivityChart) {
+                charts.hourlyActivityChart.destroy();
+            }
+            
+            if (!data || !data.hours || data.hours.length === 0) {
+                ctx.canvas.parentNode.innerHTML = '<div class="empty-state">No hourly activity data available</div>';
+                return;
+            }
+            
+            charts.hourlyActivityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.hours,  // Already formatted from backend
+                    datasets: [{
+                        label: 'Activity',
+                        data: data.counts,
+                        backgroundColor: 'rgba(0, 168, 204, 0.8)',
+                        borderColor: 'rgba(0, 168, 204, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStats() {
+            // This would typically fetch updated stats from the server
+            // For now, we'll simulate real-time updates
+            const elements = [
+                { id: 'total-users', variance: 0.02 },
+                { id: 'active-users', variance: 0.05 },
+                { id: 'total-views', variance: 0.1 },
+            ];
+            
+            elements.forEach(el => {
+                const element = document.getElementById(el.id);
+                if (element) {
+                    const currentValue = parseInt(element.textContent.replace(/,/g, ''));
+                    const change = Math.floor(currentValue * el.variance * (Math.random() - 0.5));
+                    const newValue = Math.max(0, currentValue + change);
+                    element.textContent = newValue.toLocaleString();
+                }
+            });
+        }
+
+        // Utility Functions
+        function toggleChartType(chartId) {
+            if (chartId === 'dailyUsageChart') {
+                currentChartTypes.dailyUsageChart = currentChartTypes.dailyUsageChart === 'line' ? 'bar' : 'line';
+                updateCharts();
+            }
+        }
+
+        function refreshChart(chartId) {
+            updateCharts();
+        }
+
+        function refreshUserTable() {
+            // Simulate user table refresh
+            showNotification('User table refreshed', 'success');
+        }
+
+        function exportData() {
+            try {
+                // Get current date range
+                const dateRange = document.getElementById('date-range');
+                const period = dateRange.options[dateRange.selectedIndex].text;
+                
+                // Collect all stat card data
+                const stats = [];
+                for (let i = 1; i <= 5; i++) {
+                    const title = document.getElementById(`stat-${i}-title`)?.textContent?.trim() || '';
+                    const value = document.getElementById(`stat-${i}-value`)?.textContent?.trim() || '';
+                    const changeText = document.getElementById(`stat-${i}-change`)?.querySelector('span')?.textContent?.trim() || '';
+                    
+                    if (title && value) {
+                        // Properly escape and quote CSV fields
+                        const escapedTitle = `"${title.replace(/"/g, '""')}"`;
+                        const escapedValue = `"${value.replace(/"/g, '""')}"`;
+                        const escapedChange = `"${changeText.replace(/"/g, '""')}"`;
+                        stats.push(`${escapedTitle},${escapedValue},${escapedChange}`);
+                    }
+                }
+                
+                // Create CSV content
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += `"Usage Analytics Report"\n`;
+                csvContent += `"Period","${period}"\n`;
+                csvContent += `"Generated","${new Date().toLocaleString()}"\n\n`;
+                csvContent += `"Metric","Value","Change"\n`;
+                csvContent += stats.join('\n');
+                
+                // Download CSV
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `usage-analytics-${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Data exported successfully', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('Error exporting data: ' + error.message, 'error');
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    showNotification('Entered fullscreen mode', 'info');
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    showNotification('Exited fullscreen mode', 'info');
+                });
+            }
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + R: Refresh data
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    updateCharts();
+                }
+                
+                // Ctrl/Cmd + E: Export data
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    exportData();
+                }
+                
+                // F11: Toggle fullscreen
+                if (e.key === 'F11') {
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+            });
+        }
+
+        // Loading and Error States
+        function showLoadingState() {
+            const containers = document.querySelectorAll('.chart-container canvas');
+            containers.forEach(canvas => {
+                const container = canvas.parentNode;
+                if (!container.querySelector('.loading-skeleton')) {
+                    const loader = document.createElement('div');
+                    loader.className = 'loading-skeleton';
+                    loader.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        border-radius: var(--radius-md);
+                        z-index: 10;
+                    `;
+                    container.style.position = 'relative';
+                    container.appendChild(loader);
+                }
+            });
+        }
+
+        function hideLoadingState() {
+            const loaders = document.querySelectorAll('.loading-skeleton');
+            loaders.forEach(loader => loader.remove());
+        }
+
+        function showErrorState(message) {
+            const containers = document.querySelectorAll('.chart-container');
+            containers.forEach(container => {
+                if (container.querySelector('canvas')) {
+                    container.innerHTML = `<div class="error-state">
+                        <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <h4>Error loading data</h4>
+                        <p>${message}</p>
+                        <button class="btn btn-primary" onclick="updateCharts()">Retry</button>
+                    </div>`;
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? '#00c851' : 
+                           type === 'error' ? '#ff4444' : 
+                           type === 'warning' ? '#ffbb33' : '#00a8cc';
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                padding: 1rem 1.5rem;
+                background: ${bgColor};
+                color: white;
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-lg);
+                z-index: 10000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                max-width: 400px;
+                font-size: 14px;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

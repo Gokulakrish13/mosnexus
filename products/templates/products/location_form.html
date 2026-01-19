@@ -1,0 +1,31 @@
+{% extends 'products/base.html' %}
+{% block title %}{% if edit %}Edit Location{% else %}Add Location{% endif %}{% endblock %}
+{% block content %}
+<div class="form-bg" style="background:#f4f6f8;min-height:100vh;display:flex;justify-content:center;align-items:center;">
+    <div class="form-container" style="background:#fff;box-shadow:0 8px 32px rgba(0,95,163,0.13);border-radius:18px;padding:2.5rem;width:98%;max-width:480px;animation:fadeIn 0.5s ease-in-out;">
+        <a href="{% url 'location_list_stream' stream %}" style="display:block;margin-bottom:1.2rem;color:#005fa3;font-weight:600;text-decoration:underline;font-size:1.08rem;">&larr; Back to List</a>
+        <h2 style="font-size:2rem;font-weight:900;color:#005fa3;letter-spacing:1.2px;margin-bottom:2rem;">{% if edit %}Edit Location{% else %}Add Location{% endif %}</h2>
+        {% if messages %}
+            <ul class="messages" role="alert" aria-live="assertive" style="list-style:none;padding:0;margin-bottom:1.2rem;">
+                {% for message in messages %}
+                    <li style="background:#e3f0fa;color:#005fa3;padding:0.7rem 1.2rem;border-radius:6px;margin-bottom:0.7rem;font-size:1.08rem;">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <form method="post" novalidate style="display:flex;flex-direction:column;gap:1.2rem;">
+            {% csrf_token %}
+            <input type="hidden" name="stream" value="{{ stream }}">
+            <label for="name" style="font-size:1.08rem;font-weight:700;color:#005fa3;margin-bottom:0.3rem;">Location Name:</label>
+            <input type="text" id="name" name="name" value="{{ location.name|default:'' }}" autocomplete="off" required style="border:1px solid #e3e8ee;border-radius:8px;padding:0.7rem 1.2rem;font-size:1.08rem;background:#f7fafc;">
+            <label for="address" style="font-size:1.08rem;font-weight:700;color:#005fa3;margin-bottom:0.3rem;">Address:</label>
+            <textarea id="address" name="address" rows="3" style="border:1px solid #e3e8ee;border-radius:8px;padding:0.7rem 1.2rem;font-size:1.08rem;background:#f7fafc;resize:vertical;">{{ location.address|default:'' }}</textarea>
+            <button type="submit" class="btn btn-success" style="font-size:1.13rem;padding:0.9rem 2rem;border-radius:8px;font-weight:700;margin-top:1.2rem;">{% if edit %}Update Location{% else %}Add Location{% endif %}</button>
+        </form>
+    </div>
+</div>
+<script>
+      document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+      });
+    </script>
+{% endblock %}

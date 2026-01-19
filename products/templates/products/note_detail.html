@@ -1,0 +1,528 @@
+{% extends 'products/base.html' %}
+
+{% block title %}{{ note.title }} - IGT MoS Inventory{% endblock %}
+
+{% block content %}
+<style>    /* Hide navigation links for notes pages, but keep Home link */
+    .top-bar .top-left a:nth-child(n+3) {
+        display: none !important;
+    }
+
+    .notes-main-container {
+        margin-top: 80px;
+        margin-bottom: 60px;
+        padding: 2rem 1rem;
+        background: #f4f6f8;
+        min-height: calc(100vh - 140px);
+    }
+
+    .note-detail-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+        animation: slideInUp 0.4s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .detail-card .card-header {
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .detail-card .card-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        flex: 1;
+        min-width: 0;
+        word-break: break-word;
+        color: white;
+
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .detail-card .card-body {
+        padding: 2rem;
+    }
+
+    .note-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #444;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #005fa3;
+    }
+
+    .meta-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e3e7;
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .meta-item {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 8px;
+        border-left: 3px solid #005fa3;
+    }
+
+    .meta-label {
+        color: #888;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .meta-value {
+        color: #2c3e50;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .badge-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-public {
+        background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+        color: white;
+    }
+
+    .badge-private {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        color: white;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-edit {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-back {
+        background: #e8eaed;
+        color: #2c3e50;
+    }
+
+    .btn-back:hover {
+        background: #d0d4d9;
+        transform: translateY(-2px);
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .author-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #005fa3 0%, #003d7a 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }    .author-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Attachments Section Styles */
+    .attachments-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e3e7;
+    }
+
+    .attachments-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .attachments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .attachment-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s;
+        border-left: 4px solid #005fa3;
+    }
+
+    .attachment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: #f0f7ff;
+    }
+
+    .attachment-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 0.75rem;
+    }
+
+    .attachment-icon {
+        font-size: 1.5rem;
+        color: #005fa3;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .attachment-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .attachment-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        margin: 0 0 0.25rem 0;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+
+    .attachment-meta {
+        color: #6c757d;
+        font-size: 0.8rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .attachment-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .attachment-btn {
+        padding: 4px 10px;
+        border-radius: 4px;
+        border: none;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .attachment-btn-download {
+        background: #28a745;
+        color: white;
+    }
+
+    .attachment-btn-download:hover {
+        background: #218838;
+        transform: translateY(-1px);
+    }
+
+    .attachment-btn-preview {
+        background: #007bff;
+        color: white;
+    }
+
+    .attachment-btn-preview:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+
+    .no-attachments {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .attachment-type-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .attachment-type-badge.image {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .attachment-type-badge.document {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .attachment-type-badge.pdf {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .attachment-type-badge.spreadsheet {
+        background: #fff3cd;
+        color: #856404;
+    }
+</style>
+
+<div class="notes-main-container">
+    <div class="note-detail-wrapper">
+        <div class="detail-card">
+            <div class="card-header">
+                <h2>{{ note.title }}</h2>
+                <div class="header-actions">
+                    {% if note.created_by == request.user %}
+                    <a href="{% url 'note_edit' note.pk %}" class="btn btn-edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'note_delete' note.pk %}" class="btn btn-delete">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'notes_list' %}" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">                <div class="note-content">
+                    {{ note.content|linebreaks }}
+                </div>
+                
+                <!-- Attachments Section -->
+                {% if attachments %}
+                <div class="attachments-section">
+                    <div class="attachments-header">
+                        <i class="fas fa-paperclip"></i>
+                        Attachments ({{ attachments.count }})
+                    </div>
+                    <div class="attachments-grid">
+                        {% for attachment in attachments %}
+                        <div class="attachment-card">
+                            <div class="attachment-header">
+                                <div class="attachment-icon">
+                                    <i class="{{ attachment.get_file_icon }}"></i>
+                                </div>
+                                <div class="attachment-info">
+                                    <h4 class="attachment-name">{{ attachment.original_filename }}</h4>
+                                    <div class="attachment-meta">
+                                        <span class="attachment-type-badge {{ attachment.file_type }}">{{ attachment.file_type|title }}</span>
+                                        <span>{{ attachment.get_formatted_size }}</span>
+                                        <span>{{ attachment.uploaded_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="attachment-actions">
+                                <a href="{{ attachment.file.url }}" target="_blank" class="attachment-btn attachment-btn-download">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                {% if attachment.file_type == 'image' %}
+                                <button type="button" class="attachment-btn attachment-btn-preview" onclick="previewImage('{{ attachment.file.url }}', '{{ attachment.original_filename }}')">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                                {% elif attachment.file_type == 'pdf' %}
+                                <a href="{{ attachment.file.url }}" target="_blank" class="attachment-btn attachment-btn-preview">
+                                    <i class="fas fa-external-link-alt"></i> View PDF
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="meta-section">
+                    <div class="meta-grid">
+                        <div class="meta-item">
+                            <div class="meta-label">
+                                <i class="fas fa-user-circle"></i> Author
+                            </div>
+                            <div class="meta-value">
+                                <div class="author-info">
+                                    <div class="author-avatar">{{ note.created_by.username|first|upper }}</div>
+                                    <span>{{ note.created_by.username }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-label">
+                                <i class="fas fa-calendar"></i> Created
+                            </div>
+                            <div class="meta-value">{{ note.created_at|date:"M d, Y" }}</div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-label">
+                                <i class="fas fa-sync"></i> Last Updated
+                            </div>
+                            <div class="meta-value">{{ note.updated_at|date:"M d, Y" }}</div>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <div class="meta-label">
+                                <i class="fas fa-eye"></i> Visibility
+                            </div>
+                            <div class="meta-value">
+                                <div class="badge-container">
+                                    {% if note.is_public %}
+                                    <span class="badge badge-public">
+                                        <i class="fas fa-globe"></i> Public
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-private">
+                                        <i class="fas fa-lock"></i> Private
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);">
+    <div style="position: relative; margin: auto; padding: 20px; width: 90%; max-width: 800px; top: 50%; transform: translateY(-50%);">
+        <span onclick="closeImageModal()" style="position: absolute; top: 10px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer;">&times;</span>
+        <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
+        <div id="modalCaption" style="color: #fff; text-align: center; margin-top: 15px; font-size: 16px;"></div>
+    </div>
+</div>
+
+<script>
+function previewImage(imageUrl, filename) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const caption = document.getElementById('modalCaption');
+    
+    modal.style.display = 'block';
+    modalImg.src = imageUrl;
+    caption.textContent = filename;
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+// Close modal when clicking outside the image
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Delete Note - IGT MoS Inventory{% endblock %}
+
+{% block content %}
+<style>    /* Hide navigation links for notes pages, but keep Home link */
+    .top-bar .top-left a:nth-child(n+3) {
+        display: none !important;
+    }
+
+    .delete-main-container {
+        margin-top: 80px;
+        margin-bottom: 60px;
+        padding: 2rem 1rem;
+        background: #f4f6f8;
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-container {
+        max-width: 600px;
+        width: 100%;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .delete-card .card-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .delete-card .card-header h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+    }
+
+    .delete-card .card-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    .warning-text {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .note-title-highlight {
+        font-weight: 600;
+        color: #dc3545;
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+    .warning-subtext {
+        font-size: 0.9rem;
+        color: #888;
+        font-style: italic;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e3e7;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-delete-confirm {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn-delete-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-cancel {
+        background: #e8eaed;
+        color: #2c3e50;
+    }
+
+    .btn-cancel:hover {
+        background: #d0d4d9;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete-confirm:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+</style>
+
+<div class="delete-main-container">
+    <div class="delete-container">
+        <div class="delete-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i> Delete Note
+                </h2>
+            </div>
+            <div class="card-body">
+                <i class="fas fa-exclamation-circle warning-icon"></i>
+                <p class="warning-text">
+                    Are you sure you want to delete this note?
+                    <span class="note-title-highlight">{{ note.title }}</span>
+                    <span class="warning-subtext">This action cannot be undone.</span>
+                </p>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <div class="form-actions">
+                        <a href="{% url 'notes_list' %}" class="btn btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-delete-confirm">
+                            <i class="fas fa-trash-alt"></i> Delete Note
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deleteForm');
+    const deleteBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    });
+});
+</script>
+{% endblock %}

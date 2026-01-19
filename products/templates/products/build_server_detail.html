@@ -1,0 +1,868 @@
+{% load static %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<title>Build Server Detail</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        background: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    
+    .glass-container {
+        background: #ffffff;
+        border: 1px solid #e0e6ed;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .dashboard-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .nav-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .nav-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #495057;
+        text-decoration: none;
+    }
+    
+    .nav-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn-glass {
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        color: #495057;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+    
+    .btn-glass:hover {
+        background: #dee2e6;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: #495057;
+        text-decoration: none;
+    }
+    
+    .main-content {
+        margin-top: 90px;
+        padding: 1.5rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        background: #f8f9fa;
+        border-radius: 15px;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .server-hero {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .server-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    }
+    
+    .server-icon i {
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .server-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.8rem;
+        text-shadow: none;
+    }
+    
+    .server-subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+    
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+    
+    .status-maintenance {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #212529;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+    
+    .status-offline {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .copy-btn {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.4rem;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+        background: #e9ecef;
+        color: #495057;
+        transform: scale(1.05);
+    }
+    
+    .spec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .spec-item {
+        text-align: center;
+        padding: 1.2rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .spec-item:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .spec-icon {
+        font-size: 2.5rem;
+        color: #007bff;
+        margin-bottom: 0.7rem;
+    }
+    
+    .spec-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.4rem;
+    }
+    
+    .spec-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+    }
+    
+    .tag {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+        transition: all 0.3s ease;
+    }
+    
+    .tag:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.35);
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #007bff, #0056b3);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+        background: #f8f9fa;
+        padding: 1.2rem;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.75rem;
+        top: 1.5rem;
+        width: 12px;
+        height: 12px;
+        background: #007bff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+    }
+    
+    .warning-banner {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+    }
+    
+    .warning-icon {
+        font-size: 2rem;
+    }
+    
+    .action-panel {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-top: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.25);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: 1px solid #6c757d;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        border-color: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 1rem;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .server-title {
+            font-size: 2rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+{% block content %}
+<!-- Navigation -->
+<nav class="dashboard-nav">
+    <div class="nav-content">
+        <a href="{% url 'build_servers_list' stream=stream %}" class="nav-brand">
+            <i class="fas fa-server"></i> Server Dashboard
+        </a>
+        <div class="nav-actions">
+            <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="btn-glass">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'build_servers_list' stream=stream %}" class="btn-glass">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="main-content">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Warranty Warning -->
+    {% if server.is_warranty_expiring_soon %}
+        <div class="warning-banner">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <h5 style="margin: 0; font-weight: 700;">Warranty Expiring Soon</h5>
+                <p style="margin: 0; opacity: 0.9;">This server's warranty expires in {{ server.days_until_warranty_expiry }} days on {{ server.warranty_expiry|date:"F d, Y" }}.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Server Hero Section -->
+    <div class="server-hero">
+        <div class="server-icon">
+            <i class="fas fa-server"></i>
+        </div>
+        <h1 class="server-title">{{ server.hostname }}</h1>
+        <p class="server-subtitle">
+            {{ server.location }} • {{ server.floor }} • {{ server.stream_type }}
+        </p>
+        <div class="status-indicator status-{{ server.status|lower }}">
+            <i class="fas fa-circle"></i>
+            {{ server.get_status_display }}
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Basic Information Card -->
+        <div class="info-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h3 class="card-title">Basic Information</h3>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Hostname</span>
+                <span class="info-value">{{ server.hostname }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">IP Address</span>
+                <div class="info-value">
+                    {{ server.ip_address }}
+                    <button class="copy-btn" title="Copy IP" onclick="copyToClipboard('{{ server.ip_address }}')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Location</span>
+                <span class="info-value">{{ server.location }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Floor</span>
+                <span class="info-value">{{ server.floor }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Owner</span>
+                <span class="info-value">{{ server.owner }}</span>
+            </div>
+        </div>
+
+        <!-- System Information Card -->
+        <div class="info-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3 class="card-title">System Information</h3>
+            </div>
+            
+            {% if server.operating_system %}
+            <div class="info-item">
+                <span class="info-label">Operating System</span>
+                <span class="info-value">{{ server.operating_system }}</span>
+            </div>
+            {% endif %}
+            
+            {% if server.domain %}
+            <div class="info-item">
+                <span class="info-label">Domain</span>
+                <span class="info-value">{{ server.domain }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="info-item">
+                <span class="info-label">SSH Port</span>
+                <span class="info-value">{{ server.ssh_port }}</span>
+            </div>
+            
+            {% if server.mac_address %}
+            <div class="info-item">
+                <span class="info-label">MAC Address</span>
+                <div class="info-value">
+                    {{ server.mac_address }}
+                    <button class="copy-btn" title="Copy MAC" onclick="copyToClipboard('{{ server.mac_address }}')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="info-item">
+                <span class="info-label">Uptime</span>
+                <span class="info-value">{{ server.uptime_percentage }}%</span>
+            </div>
+        </div>
+
+        <!-- Contact Information Card -->
+        <div class="info-card animate__animated animate__fadeInLeft animate__delay-1s">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-address-book"></i>
+                </div>
+                <h3 class="card-title">Contact Information</h3>
+            </div>
+            
+            {% if server.primary_contact %}
+            <div class="info-item">
+                <span class="info-label">Primary Contact</span>
+                <span class="info-value">{{ server.primary_contact }}</span>
+            </div>
+            {% endif %}
+            
+            {% if server.secondary_contact %}
+            <div class="info-item">
+                <span class="info-label">Secondary Contact</span>
+                <span class="info-value">{{ server.secondary_contact }}</span>
+            </div>
+            {% endif %}
+            
+            {% if server.contact_email %}
+            <div class="info-item">
+                <span class="info-label">Contact Email</span>
+                <span class="info-value">
+                    <a href="mailto:{{ server.contact_email }}" style="color: white; text-decoration: none;">
+                        {{ server.contact_email }}
+                    </a>
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Business Information Card -->
+        <div class="info-card animate__animated animate__fadeInRight animate__delay-1s">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h3 class="card-title">Business Information</h3>
+            </div>
+            
+            {% if server.project_allocation %}
+            <div class="info-item">
+                <span class="info-label">Project Allocation</span>
+                <span class="info-value">{{ server.project_allocation }}</span>
+            </div>
+            {% endif %}
+            
+            {% if server.cost_center %}
+            <div class="info-item">
+                <span class="info-label">Cost Center</span>
+                <span class="info-value">{{ server.cost_center }}</span>
+            </div>
+            {% endif %}
+            
+            {% if server.purpose %}
+            <div class="info-item">
+                <span class="info-label">Purpose</span>
+                <span class="info-value">{{ server.purpose }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Technical Specifications -->
+    {% if server.cpu_cores or server.ram_gb or server.storage_gb %}
+    <div class="info-card animate__animated animate__fadeInUp animate__delay-2s">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-microchip"></i>
+            </div>
+            <h3 class="card-title">Technical Specifications</h3>
+        </div>
+        <div class="spec-grid">
+            {% if server.cpu_cores %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-microchip"></i></div>
+                <div class="spec-value">{{ server.cpu_cores }}</div>
+                <div class="spec-label">CPU Cores</div>
+            </div>
+            {% endif %}
+            
+            {% if server.ram_gb %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-memory"></i></div>
+                <div class="spec-value">{{ server.ram_gb }} GB</div>
+                <div class="spec-label">RAM</div>
+            </div>
+            {% endif %}
+            
+            {% if server.storage_gb %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-hdd"></i></div>
+                <div class="spec-value">{{ server.storage_gb }} GB</div>
+                <div class="spec-label">Storage</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Dates and Maintenance Timeline -->
+    <div class="info-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h3 class="card-title">Timeline & Maintenance</h3>
+        </div>
+        <div class="spec-grid">
+            {% if server.procurement_date %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="spec-value">{{ server.procurement_date|date:"M d, Y" }}</div>
+                <div class="spec-label">Procurement</div>
+            </div>
+            {% endif %}
+            
+            {% if server.warranty_expiry %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="spec-value">{{ server.warranty_expiry|date:"M d, Y" }}</div>
+                <div class="spec-label">Warranty Expiry</div>
+            </div>
+            {% endif %}
+            
+            {% if server.last_maintenance %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-wrench"></i></div>
+                <div class="spec-value">{{ server.last_maintenance|date:"M d, Y" }}</div>
+                <div class="spec-label">Last Maintenance</div>
+            </div>
+            {% endif %}
+            
+            {% if server.next_maintenance %}
+            <div class="spec-item">
+                <div class="spec-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="spec-value">{{ server.next_maintenance|date:"M d, Y" }}</div>
+                <div class="spec-label">Next Maintenance</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tags -->
+    {% if server.tags %}
+    <div class="info-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-tags"></i>
+            </div>
+            <h3 class="card-title">Tags</h3>
+        </div>
+        <div class="tag-cloud">
+            {% for tag in server.get_tag_list %}
+                <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Notes -->
+    {% if server.notes %}
+    <div class="info-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-sticky-note"></i>
+            </div>
+            <h3 class="card-title">Notes</h3>
+        </div>
+        <p style="color: #495057; font-size: 1.1rem; line-height: 1.6;">{{ server.notes|linebreaks }}</p>
+    </div>
+    {% endif %}
+    </br>
+
+
+    <div class="dashboard-grid">
+        <!-- Recent History -->
+        <div class="info-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3 class="card-title">Recent History</h3>
+            </div>
+            <div class="timeline">
+                {% for item in history %}
+                    <div class="timeline-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: #2c3e50;">{{ item.get_action_display }}</strong>
+                            <small style="color: #6c757d;">{{ item.timestamp|date:"M d, Y H:i" }}</small>
+                        </div>
+                        {% if item.user %}
+                            <div style="color: #495057; margin-bottom: 0.5rem;">by {{ item.user.username }}</div>
+                        {% endif %}
+                        {% if item.details %}
+                            <div style="color: #495057;">{{ item.details }}</div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p style="color: #6c757d;">No history available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Maintenance Logs -->
+        
+    </div>
+
+    <!-- Action Panel -->
+    <div class="action-panel">
+        <h3 style="color: #2c3e50; margin-bottom: 2rem; font-weight: 700;">Server Actions</h3>
+        <div class="action-buttons">
+            <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="btn-primary">
+                <i class="fas fa-edit"></i> Edit Server
+            </a>
+            <a href="{% url 'build_server_delete' stream=stream server_id=server.id %}" class="btn-danger">
+                <i class="fas fa-trash"></i> Delete Server
+            </a>
+            <a href="{% url 'build_servers_list' stream=stream %}" class="btn-secondary">
+                <i class="fas fa-list"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Copied: ' + text);
+        }, function(err) {
+            alert('Failed to copy');
+        });
+    }
+    $(document).ready(function() {
+        // Add tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+{% endblock %}

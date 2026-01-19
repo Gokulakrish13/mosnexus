@@ -1,0 +1,34 @@
+{% extends 'products/base.html' %}
+{% block content %}
+<div style="max-width:900px;margin:5rem auto 2rem auto;background:#fff;border-radius:16px;box-shadow:0 8px 32px #b3c6e0;padding:2.5rem 2.5rem 2rem 2.5rem;">
+    <h2 style="color:#005fa3;font-weight:900;margin-bottom:1.2rem;font-size:1.5rem;">System Status History for {{ system.name }}</h2>
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="background:#e3f0fa;">
+                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Status Date</th>
+                <th style="padding:0.7rem 0.5rem;text-align:left;width:120px;font-weight:700;color:#005fa3;">Status</th>
+                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Assignee</th>
+                <th style="padding:0.7rem 0.5rem;text-align:left;width:340px;font-weight:700;color:#005fa3;">Description</th>
+                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Changed By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in history %}
+            <tr style="border-bottom:1px solid #e0e3e7;">
+                <td style="padding:0.7rem 0.5rem;font-weight:600;color:#005fa3;">{{ h.updated_at|date:'d-m-Y' }}</td>
+                <td style="padding:0.7rem 0.5rem;font-weight:600;">{{ h.get_status_display }}</td>
+                <td style="padding:0.7rem 0.5rem;">{{ h.assignee|default:"N/A" }}</td>
+                <td style="padding:0.7rem 0.5rem;max-width:340px;word-break:break-word;">{{ h.description|default:"No description" }}</td>
+                <td style="padding:0.7rem 0.5rem;">{{ h.updated_by }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;padding:1.2rem;color:#888;">No status history found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align:right;">
+        <br>
+        <a href="/stream/{{ stream|default:'' }}/system-allocation/" class="back-link" style="color:#005fa3;font-size:1.13rem;font-weight:700;text-decoration:none;">&larr; Back to System Allocation</a>
+    </div>
+</div>
+{% endblock %}

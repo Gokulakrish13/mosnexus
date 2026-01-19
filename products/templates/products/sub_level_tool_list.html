@@ -1,0 +1,1146 @@
+{% extends 'products/base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sub Tools</title>
+    <link rel="stylesheet" href="/static/products/style.css">
+    <style>
+        body, html {
+            color: #222;
+            font-size: 1rem;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .top-bar {
+            color: #222;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 2.5rem;
+            background: #fff;
+            border-bottom: 1px solid #e0e3e7;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+        .subleveltool-bg {
+            padding-top: 80px;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }        .subleveltool-list-container {
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 2rem;
+        }        
+        .header-toolbar-wrapper {
+            display: flex;
+            gap: 4rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+            position: relative;
+        }
+        .header-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex: 2.5;
+            min-width: 0;
+        }
+        .add-form-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #005fa3;
+            margin: 0;
+        }
+        .add-form {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }        .toolbar-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+            position: relative;
+            left: 75px;
+        }
+        .toolbar-row {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .search-sort-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }        .bulk-actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e3e7;
+        }
+        .select-all-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            height: 32px;
+        }
+        .bulk-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .add-btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: #005fa3;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin: 0;
+        }
+        .add-btn:hover {
+            background: #003e6b;
+            transform: translateY(-1px);
+        }
+        .add-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .form-input {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #cfd8dc;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #005fa3;
+            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
+        }        .subleveltool-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: -18.5rem;
+        }
+        
+        /* Create custom layout: 3 in first row, then 4 in each subsequent row */
+        .subleveltool-grid::before {
+            content: '';
+            grid-column: 4;
+            grid-row: 1;
+        }
+        
+        /* First 3 cards take up first 3 columns of first row */
+        .subleveltool-card:nth-child(1) { grid-column: 1; grid-row: 1; }
+        .subleveltool-card:nth-child(2) { grid-column: 2; grid-row: 1; }
+        .subleveltool-card:nth-child(3) { grid-column: 3; grid-row: 1; }
+        
+        /* Next 4 cards fill the second row */
+        .subleveltool-card:nth-child(4) { grid-column: 1; grid-row: 2; }
+        .subleveltool-card:nth-child(5) { grid-column: 2; grid-row: 2; }
+        .subleveltool-card:nth-child(6) { grid-column: 3; grid-row: 2; }
+        .subleveltool-card:nth-child(7) { grid-column: 4; grid-row: 2; }
+        
+        /* Continue the pattern for subsequent rows */
+        .subleveltool-card:nth-child(8) { grid-column: 1; grid-row: 3; }
+        .subleveltool-card:nth-child(9) { grid-column: 2; grid-row: 3; }
+        .subleveltool-card:nth-child(10) { grid-column: 3; grid-row: 3; }
+        .subleveltool-card:nth-child(11) { grid-column: 4; grid-row: 3; }
+        .subleveltool-card {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #e0e3e7;
+        }
+        .subleveltool-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            border-color: #005fa3;
+        }
+        .subleveltool-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .subleveltool-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #005fa3;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .status-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .badge-stock {
+            background: #e6f7e6;
+            color: #1a7f37;
+        }
+        .badge-use {
+            background: #fffbe6;
+            color: #b59f00;
+        }
+        .badge-scraped {
+            background: #ffeaea;
+            color: #dc3545;
+        }
+        .subleveltool-note {
+            width: 100%;
+            min-height: 60px;
+            border-radius: 8px;
+            border: 1px solid #cfd8dc;
+            font-size: 0.95rem;
+            padding: 0.7rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .subleveltool-note:focus {
+            border-color: #005fa3;
+            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
+        }
+        .card-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: none;
+            gap: 0.5rem;
+        }
+        .subleveltool-card:hover .card-actions {
+            display: flex;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            font-size: 1.1rem;
+        }
+        .action-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .edit-btn {
+            color: #005fa3;
+        }
+        .delete-btn {
+            color: #dc3545;
+        }
+        /* Only style the select-all checkbox in the toolbar */
+        #select-all-subleveltools {
+            position: static;
+            transform: scale(1.1);
+            margin-right: 0.25rem;
+        }
+        #select-all-subleveltools + label {
+            margin-top: 6px;
+        }
+        /* Keep .subleveltool-checkbox for grid cards as is */
+        .subleveltool-card .subleveltool-checkbox {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .pagination a {
+            padding: 0.7rem 1.2rem;
+            background: #005fa3;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .pagination a:hover {
+            background: #003e6b;
+        }        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .header-toolbar-wrapper {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .toolbar-section {
+                max-width: none;
+                min-width: auto;
+                margin-left: 0;
+            }
+            .toolbar-row {
+                flex-direction: column;
+            }
+            .search-sort-group {
+                flex-direction: column;
+            }
+            .bulk-actions-group {
+                flex-direction: column;
+            }
+            .bulk-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+            .subleveltool-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            /* Reset grid positioning for tablets */
+            .subleveltool-grid::before {
+                display: none;
+            }
+            .subleveltool-card:nth-child(n) {
+                grid-column: auto;
+                grid-row: auto;
+            }
+        }
+        @media (max-width: 768px) {
+            .subleveltool-list-container {
+                padding: 1rem;
+            }
+            .header-section,
+            .toolbar-section {
+                padding: 1rem;
+            }
+            .add-form-container {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .search-sort-group {
+                flex-direction: column;
+            }
+            .bulk-buttons {
+                flex-direction: column;
+            }
+            .subleveltool-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if messages %}
+      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:4000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; padding:2rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
+          <button onclick="closeErrorModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
+          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1rem;">Error</h3>
+          <div id="errorModalMsg" style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">
+            {% for message in messages %}
+              {% if 'already exists' in message or message.tags == 'error' %}
+                {{ message }}
+              {% endif %}
+            {% endfor %}
+          </div>
+          <button onclick="closeErrorModal()" class="add-btn" style="background:#dc3545;">OK</button>
+        </div>
+      </div>
+    {% endif %}    <div class="subleveltool-bg">
+        <div class="subleveltool-list-container">
+            <!-- Header and Toolbar Wrapper -->
+            <div class="header-toolbar-wrapper">
+                <!-- Header Section (Left Side - 3/4) -->
+                <div class="header-section">
+                    <div class="add-form-container">
+                        <h1 class="page-title">Sub Tools Management</h1>
+                        <form method="post" class="add-form">
+                            {% csrf_token %}
+                            <input type="text" name="subtool_name" placeholder="Add new sub tool..." class="form-input" style="width:220px;" required>
+                            <button type="submit" class="add-btn">+ Add sub tool</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Toolbar Section (Right Side - 1/4) -->
+                <div class="toolbar-section">
+                    <div class="toolbar-row">
+                        <div class="search-sort-group">
+                            <input type="text" id="subleveltool-search-input" placeholder="Search Sub Tools..." class="form-input" style="width:100%;">
+                            <select id="subleveltool-sort-select" class="form-input" style="width:100%;">
+                                <option value="name">Sort by Name</option>
+                                <option value="in_stock">Sort by In Stock</option>
+                                <option value="in_use">Sort by In Use</option>
+                                <option value="scraped">Sort by Scraped</option>
+                            </select>
+                        </div>
+                        <button id="export-subleveltools-btn" class="add-btn" style="background:#28a745; width:100%;">📊 Export CSV/Excel</button>
+                    </div>
+                    
+                    <div class="bulk-actions-group">
+                        <div class="select-all-group">
+                            <input type="checkbox" id="select-all-subleveltools" class="subleveltool-checkbox" value="">
+                            <label for="select-all-subleveltools" style="font-size:1rem; font-weight:600;">Select All</label>
+                        </div>
+                        <div class="bulk-buttons">
+                            <button id="bulk-delete-subleveltools-btn" class="add-btn" style="background:#dc3545; width:100%;" disabled>🗑 Bulk Delete</button>
+                            <button id="bulk-update-subleveltools-btn" class="add-btn" style="background:#17a2b8; width:100%;" disabled>✏️ Update Comments</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div class="subleveltool-grid" id="subleveltool-grid">
+                {% for subtool in subtools %}
+                <div class="subleveltool-card" data-name="{{ subtool.name|lower }}" data-id="{{ subtool.id }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
+                    <input type="checkbox" class="subleveltool-checkbox" value="{{ subtool.id }}">
+                    
+                    <div class="subleveltool-icon">
+                        <img src="/static/products/philips.png" alt="Philips Logo" style="height:50px;width:auto;">
+                    </div>
+                    
+                    <div class="subleveltool-name">{{ subtool.name }}</div>
+                    
+                    <div class="status-badges">
+                        <span class="status-badge badge-stock">Stock: {{ subtool.in_stock }}</span>
+                        <span class="status-badge badge-use">Use: {{ subtool.in_use }}</span>
+                        <span class="status-badge badge-scraped">Scraped: {{ subtool.scraped }}</span>
+                    </div>
+                    
+                    <textarea class="subleveltool-note" data-id="{{ subtool.id }}" placeholder="Add note...">{{ subtool.note|default_if_none:'' }}</textarea>
+                    
+                    <div class="card-actions" onclick="event.stopPropagation();">
+                        <button type="button" onclick="event.stopPropagation(); editsubleveltool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Edit" class="action-btn edit-btn">✎</button>
+                        <button type="button" onclick="event.stopPropagation(); openDeletesubleveltool({{ subtool.id }});" class="action-btn delete-btn" title="Delete">🗑</button>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; color: #888; width: 100%; padding: 3rem; background: #fff; border-radius: 12px;">
+                    <h3 style="margin-bottom: 1rem;">No Sub Tools found</h3>
+                    <p>Add your first sub tool to get started!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">← Previous</a>
+                {% endif %}
+                <span style="color: #666; font-weight: 600;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Popup Modal for subleveltool -->
+    <div id="subleveltoolPopup" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:400px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
+        <button onclick="closesubleveltoolPopup()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
+        <button type="button" onclick="showsubleveltoolInfo()" title="Info" style="position:absolute; top:12px; left:12px; background:#e3eefd; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#005fa3; cursor:pointer; font-weight:700;">i</button>
+        
+        <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+          <div style="background:#e3eefd; border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
+            <img src="/static/products/Philips_NoBG.png" alt="Philips Logo" style="height:36px;width:auto;">
+          </div>
+          
+          <h2 id="popupsubleveltoolName" style="color:#005fa3; font-size:1.5rem; font-weight:700; margin-bottom:1.5rem; text-align:center;"></h2>
+          
+          <form id="subleveltoolCountForm" method="post" action="" style="width:100%; max-width:350px;">
+            {% csrf_token %}
+            <input type="hidden" name="subleveltool_id" id="popupsubleveltoolId">
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#e6f7e6; border-radius:8px; padding:1rem;">
+                <label for="popupInStock" style="font-weight:600; color:#1a7f37; font-size:1rem;">In Stock</label>
+                <input type="number" name="in_stock" id="popupInStock" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #b6e2b6; font-size:1rem; background:#f7fff7; text-align:center; color:#1a7f37; font-weight:600;">
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#fffbe6; border-radius:8px; padding:1rem;">
+                <label for="popupInUse" style="font-weight:600; color:#b59f00; font-size:1rem;">In Use</label>
+                <input type="number" name="in_use" id="popupInUse" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffe9a6; font-size:1rem; background:#fffde7; text-align:center; color:#b59f00; font-weight:600;">
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; background:#ffeaea; border-radius:8px; padding:1rem;">
+                <label for="popupScraped" style="font-weight:600; color:#dc3545; font-size:1rem;">Scraped</label>
+                <input type="number" name="scraped" id="popupScraped" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffc2c7; font-size:1rem; background:#fff7f8; text-align:center; color:#dc3545; font-weight:600;">
+              </div>
+            </div>
+            <div style="display:flex; justify-content:center; width:100%;">
+              <button type="submit" class="add-btn" style="padding:0.8rem 2rem; font-size:1.1rem;">💾 Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit sub tool Modal -->
+    <div id="editsubtoolModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
+        <button onclick="closeEditsubtoolModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
+        <h3 style="color:#005fa3; font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; text-align:center;">
+            Edit sub tool: <span id="editsubtoolTitle"></span>
+        </h3>
+        <form id="editsubtoolForm" style="width:100%; max-width:300px;">
+          <input type="hidden" name="edit_id" id="editsubtoolId">
+          <input type="text" name="new_name" id="editsubtoolName" class="form-input" style="width:100%; margin-bottom:1.5rem;" required>
+          <div style="display:flex; justify-content:center;">
+            <button type="submit" class="add-btn">💾 Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete sub tool Modal -->
+    <div id="deletesubtoolModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
+        <button onclick="closeDeletesubtoolModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
+        <h3 style="color:#dc3545; font-size:1.3rem; font-weight:700; margin-bottom:1rem; text-align:center;">
+        Delete sub tool
+        </h3>
+        <p style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">Are you sure you want to delete <strong id="deletesubtoolName"></strong>?</p>
+        <form id="deletesubtoolForm" method="post" action="/stream/{{ selected_stream }}/subleveltooltools/" style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:1rem; align-items:center;">
+        {% csrf_token %}
+        <input type="hidden" name="delete_id" id="deletesubtoolId">
+        <button type="submit" class="add-btn" style="background:#dc3545;">
+            🗑 Delete Item
+        </button>
+        </form>
+      </div>
+    </div>
+
+    {% if messages %}
+      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:4000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:14px; padding:2rem 2.5rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px #b3c6e0; position:relative; display:flex; flex-direction:column; align-items:center;">
+          <button onclick="closeErrorModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; font-size:2rem; color:#888; cursor:pointer;">&times;</button>
+          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1.2rem;">Error</h3>
+          <div id="errorModalMsg" style="font-size:1.08rem; color:#333; margin-bottom:1.5rem; text-align:center;">
+            {% for message in messages %}
+              {% if 'already exists' in message or message.tags == 'error' %}
+                {{ message }}
+              {% endif %}
+            {% endfor %}
+          </div>
+          <button onclick="closeErrorModal()" class="add-btn" style="width:100%; padding:0.7rem 0; font-size:1.13rem; border-radius:7px; font-weight:700; background:linear-gradient(90deg,#dc3545 60%,#ff6b6b 100%); color:#fff; border:none;">OK</button>
+        </div>
+      </div>
+    {% endif %}
+
+    <script>
+    // Core functions for popup management
+    function opensubleveltoolPopup(id, name, inStock, inUse, scraped) {
+      document.getElementById('subleveltoolPopup').style.display = 'flex';
+      document.getElementById('popupsubleveltoolName').textContent = name;
+      document.getElementById('popupsubleveltoolId').value = id;
+      document.getElementById('popupInStock').value = inStock || 0;
+      document.getElementById('popupInUse').value = inUse || 0;
+      document.getElementById('popupScraped').value = scraped || 0;
+    }
+
+    function closesubleveltoolPopup() {
+      document.getElementById('subleveltoolPopup').style.display = 'none';
+    }
+
+    function openDeletesubleveltool(id, name) {
+        event.stopPropagation();
+        document.getElementById('deletesubtoolId').value = id;
+        document.getElementById('deletesubtoolName').textContent = name;
+        document.getElementById('editsubtoolTitle').textContent = name; // Set the title
+        document.getElementById('deletesubtoolModal').style.display = 'flex';
+    }
+
+    function editsubleveltool(id, name) {
+      event.stopPropagation();
+      document.getElementById('editsubtoolId').value = id;
+      document.getElementById('editsubtoolName').value = name;
+      document.getElementById('editsubtoolTitle').textContent = name;
+      document.getElementById('editsubtoolModal').style.display = 'flex';
+      setTimeout(() => {
+        document.getElementById('editsubtoolName').focus();
+      }, 100);
+    }
+
+    function closeEditsubtoolModal() {
+      document.getElementById('editsubtoolModal').style.display = 'none';
+    }
+
+    function openDeletesubleveltool(id) {
+      event.stopPropagation();
+      const card = document.querySelector('.subleveltool-card[data-id="' + id + '"]');
+      const name = card ? card.querySelector('.subleveltool-name').textContent : '';
+      document.getElementById('deletesubtoolId').value = id;
+      document.getElementById('deletesubtoolName').textContent = name;
+      document.getElementById('deletesubtoolModal').style.display = 'flex';
+    }
+
+    function closeDeletesubtoolModal() {
+      document.getElementById('deletesubtoolModal').style.display = 'none';
+    }
+
+    function closeErrorModal() {
+      document.getElementById('errorModal').style.display = 'none';
+    }
+
+    function showsubleveltoolInfo() {
+      var subleveltoolId = document.getElementById('popupsubleveltoolId').value;
+      var history = (window.subleveltoolHistoryData && window.subleveltoolHistoryData[subleveltoolId]) || [];
+      let html = '<div style="font-size:1.08rem; font-weight:600; color:#005fa3; margin-bottom:0.7rem;">subleveltool History</div>';
+      // Week filter dropdown (always show, even if only one week)
+      function getISOWeek(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        var dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        var weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        return {week: weekNum, year: d.getUTCFullYear()};
+      }
+      let weekSet = new Set();
+      for (const h of history) {
+        let d = new Date(h.at);
+        let w = getISOWeek(d);
+        weekSet.add(`W${w.week}, ${w.year}`);
+        h._week = `W${w.week}, ${w.year}`;
+      }
+      let weekList = Array.from(weekSet).sort((a,b)=>{
+        let [wa, ya] = a.match(/W(\d+), (\d+)/).slice(1).map(Number);
+        let [wb, yb] = b.match(/W(\d+), (\d+)/).slice(1).map(Number);
+        return yb-ya || wb-wa;
+      });
+      html += '<div style="margin-bottom:1rem;">Filter by week: <select id="historyWeekFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
+      html += '<option value="">All</option>';
+      for (const w of weekList) html += `<option value="${w}">${w}</option>`;
+      html += '</select></div>';
+      // User filter dropdown
+      let users = Array.from(new Set(history.map(h => h.by)));
+      if (users.length > 1) {
+        html += '<div style="margin-bottom:1rem;">Filter by user: <select id="historyUserFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
+        html += '<option value="">All</option>';
+        for (const u of users) html += `<option value="${u}">${u}</option>`;
+        html += '</select></div>';
+      }
+      // Graph placeholder (centered)
+      html += '<div style="display:flex; justify-content:center; margin-bottom:1.2rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
+      if (history.length === 0) {
+        html += '<div style="color:#888;">No history found.</div>';
+      } else {
+        html += '<div style="max-height:220px; overflow-y:auto; width:100%; margin-bottom:0.5rem;"><ul id="historyList" style="padding-left:1.2rem; margin:0;">';
+        for (const entry of history.slice().reverse()) {
+          const dateStr = new Date(entry.at).toLocaleString();
+          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:0.5rem;"><span style="font-weight:700;">${entry.action}</span> by <span style="color:#3182ce;">${entry.by}</span> <span style="color:#888;">(${dateStr})</span><br><span style="font-size:0.98rem; color:#444;">${entry.details}</span></li>`;
+        }
+        html += '</ul></div>';
+      }
+      const popup = document.createElement('div');
+      popup.style.position = 'fixed';
+      popup.style.top = '0';
+      popup.style.left = '0';
+      popup.style.width = '100vw';
+      popup.style.height = '100vh';
+      popup.style.background = 'rgba(0,0,0,0.25)';
+      popup.style.zIndex = '3000';
+      popup.style.display = 'flex';
+      popup.style.alignItems = 'center';
+      popup.style.justifyContent = 'center';
+      const content = document.createElement('div');
+      content.style.background = '#fff';
+      content.style.borderRadius = '14px';
+      content.style.padding = '2rem 2.5rem';
+      content.style.boxShadow = '0 8px 32px #b3c6e0';
+      content.style.minWidth = '320px';
+      content.style.maxWidth = '95vw';
+      content.innerHTML = html + '<div style="text-align:center; margin-top:1.5rem;"><button onclick="closeInfoPopup(this)" style="padding:0.5rem 1.2rem; border-radius:7px; background:#005fa3; color:#fff; border:none; font-size:1.08rem; font-weight:700; cursor:pointer;">Close</button></div>';
+      popup.appendChild(content);
+      document.body.appendChild(popup);
+
+      // Add filter logic
+      const weekFilter = content.querySelector('#historyWeekFilter');
+      const userFilter = content.querySelector('#historyUserFilter');
+      function applyFilters() {
+        const weekVal = weekFilter ? weekFilter.value : '';
+        const userVal = userFilter ? userFilter.value : '';
+        content.querySelectorAll('#historyList li').forEach(li => {
+          let show = true;
+          if (weekVal && li.getAttribute('data-week') !== weekVal) show = false;
+          if (userVal && li.getAttribute('data-by') !== userVal) show = false;
+          li.style.display = show ? '' : 'none';
+        });
+      }
+      if (weekFilter) weekFilter.addEventListener('change', applyFilters);
+      if (userFilter) userFilter.addEventListener('change', applyFilters);
+      // Draw advanced graph (date x-axis, 3 y-series, hover tooltip)
+      const canvas = content.querySelector('#historyGraph');
+      const ctx = canvas.getContext('2d');
+      // Parse progress from details
+      let points = [];
+      let last = {in_stock: null, in_use: null, scraped: null};
+      for (const entry of history) {
+        let m = entry.details.match(/In Stock from (\d+) to (\d+)/);
+        if (m) last.in_stock = +m[2];
+        m = entry.details.match(/In Use from (\d+) to (\d+)/);
+        if (m) last.in_use = +m[2];
+        m = entry.details.match(/Scraped from (\d+) to (\d+)/);
+        if (m) last.scraped = +m[2];
+        points.push({t: new Date(entry.at), ...last});
+      }
+      // Only plot if we have at least 2 points
+      if (points.length > 1) {
+        // Show only last 5 transactions
+        if (points.length > 5) points = points.slice(-5);
+        // Find min/max for y, and min/max for x (date)
+        let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
+        let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
+        if (min === Infinity) min = 0;
+        if (max === -Infinity) max = 1;
+        const t0 = points[0].t.getTime();
+        const t1 = points[points.length-1].t.getTime();
+        function tx(t) { return 50 + 220 * (t.getTime()-t0)/(t1-t0||1); }
+        function ty(val) { return 100 - 80 * ((val-min)/(max-min||1)); }
+        ctx.clearRect(0,0,320,120);
+        // Axes (remove Y axis/date)
+        ctx.strokeStyle = '#bbb'; ctx.beginPath(); ctx.moveTo(50,10); ctx.lineTo(50,110); ctx.lineTo(300,110); ctx.stroke();
+        // Y axis labels removed
+        // X axis labels (dates)
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#888';
+        ctx.textAlign = 'center';
+        let step = Math.max(1, Math.floor(points.length/4));
+        for (let i=0; i<points.length; i+=step) {
+          let d = points[i].t;
+          ctx.fillText(d.toLocaleDateString(), tx(d), 122);
+        }
+        // Draw lines
+        function drawLine(key, color) {
+          ctx.strokeStyle = color; ctx.beginPath();
+          let started = false;
+          for (const p of points) {
+            if (p[key] == null) continue;
+            const x = tx(p.t), y = ty(p[key]);
+            if (!started) { ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+          }
+          ctx.stroke();
+        }
+        drawLine('in_stock', '#1a7f37');
+        drawLine('in_use', '#b59f00');
+        drawLine('scraped', '#dc3545');
+        // Draw points for hover
+        let dots = [];
+        function drawDots(key, color) {
+          for (const p of points) {
+            if (p[key] == null) continue;
+            const x = tx(p.t), y = ty(p[key]);
+            ctx.beginPath(); ctx.arc(x, y, 4, 0, 2*Math.PI);
+            ctx.fillStyle = color; ctx.fill();
+            dots.push({x, y, key, val: p[key], date: p.t});
+          }
+        }
+        drawDots('in_stock', '#1a7f37');
+        drawDots('in_use', '#b59f00');
+        drawDots('scraped', '#dc3545');
+        // Legend
+        ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+        ctx.fillStyle = '#1a7f37'; ctx.fillText('In Stock', 220, 22);
+        ctx.fillStyle = '#b59f00'; ctx.fillText('In Use', 220, 38);
+        ctx.fillStyle = '#dc3545'; ctx.fillText('Scraped', 220, 54);
+        // Tooltip on hover (always above graph)
+        let tooltip = document.getElementById('historyGraphTooltip');
+        if (!tooltip) {
+          tooltip = document.createElement('div');
+          tooltip.id = 'historyGraphTooltip';
+          tooltip.style.position = 'fixed';
+          tooltip.style.pointerEvents = 'none';
+          tooltip.style.background = '#fff';
+          tooltip.style.border = '1px solid #bbb';
+          tooltip.style.borderRadius = '6px';
+          tooltip.style.padding = '4px 10px';
+          tooltip.style.fontSize = '13px';
+          tooltip.style.color = '#222';
+          tooltip.style.boxShadow = '0 2px 8px #e0e3e7';
+          tooltip.style.display = 'none';
+          tooltip.style.zIndex = '9999';
+          document.body.appendChild(tooltip);
+        }
+        canvas.onmousemove = function(e) {
+          const rect = canvas.getBoundingClientRect();
+          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+          let found = null;
+          for (const d of dots) {
+            if (Math.abs(d.x-mx)<7 && Math.abs(d.y-my)<7) { found = d; break; }
+          }
+          if (found) {
+            tooltip.style.display = 'block';
+            tooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
+            // Always above the graph
+            tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+          } else {
+            tooltip.style.display = 'none';
+          }
+        };
+        canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
+        // Maximize on click
+        canvas.onclick = function() {
+          // Create overlay
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100vw';
+          overlay.style.height = '100vh';
+          overlay.style.background = 'rgba(0,0,0,0.5)';
+          overlay.style.zIndex = '4000';
+          overlay.style.display = 'flex';
+          overlay.style.alignItems = 'center';
+          overlay.style.justifyContent = 'center';
+          overlay.onclick = function(e) { if (e.target === overlay) document.body.removeChild(overlay); };
+          // Content
+          const modal = document.createElement('div');
+          modal.style.background = '#fff';
+          modal.style.borderRadius = '16px';
+          modal.style.padding = '2rem 2.5rem';
+          modal.style.boxShadow = '0 8px 32px #b3c6e0';
+          modal.style.position = 'relative';
+          // Close button
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = '\u00D7';
+          closeBtn.style.position = 'absolute';
+          closeBtn.style.top = '18px';
+          closeBtn.style.right = '18px';
+          closeBtn.style.background = 'none';
+          closeBtn.style.border = 'none';
+          closeBtn.style.fontSize = '2rem';
+          closeBtn.style.color = '#888';
+          closeBtn.style.cursor = 'pointer';
+          closeBtn.onclick = function() { document.body.removeChild(overlay); };
+          modal.appendChild(closeBtn);
+          // Large canvas
+          const bigCanvas = document.createElement('canvas');
+          bigCanvas.width = 900;
+          bigCanvas.height = 350;
+          bigCanvas.style.display = 'block';
+          bigCanvas.style.margin = '0 auto';
+          modal.appendChild(bigCanvas);
+          overlay.appendChild(modal);
+          document.body.appendChild(overlay);
+          // Redraw the graph on bigCanvas
+          const bigCtx = bigCanvas.getContext('2d');
+          // Show only last 5 transactions
+          let bigPoints = points;
+          if (bigPoints.length > 5) bigPoints = bigPoints.slice(-5);
+          // Axes (remove Y axis/date)
+          bigCtx.strokeStyle = '#bbb'; bigCtx.beginPath(); bigCtx.moveTo(80,30); bigCtx.lineTo(80,320); bigCtx.lineTo(870,320); bigCtx.stroke();
+          // Y axis labels removed
+          // X axis labels (dates)
+          bigCtx.font = '16px sans-serif'; bigCtx.fillStyle = '#888';
+          bigCtx.textAlign = 'center';
+          let step = Math.max(1, Math.floor(bigPoints.length/4));
+          for (let i=0; i<bigPoints.length; i+=step) {
+            let d = bigPoints[i].t;
+            bigCtx.fillText(d.toLocaleDateString(), 80+790*(d.getTime()-t0)/(t1-t0||1), 340);
+          }
+          // Draw lines
+          function drawBigLine(key, color) {
+            bigCtx.strokeStyle = color; bigCtx.beginPath();
+            let started = false;
+            for (const p of bigPoints) {
+              if (p[key] == null) continue;
+              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
+              if (!started) { bigCtx.moveTo(x,y); started=true; } else bigCtx.lineTo(x,y);
+            }
+            bigCtx.stroke();
+          }
+          drawBigLine('in_stock', '#1a7f37');
+          drawBigLine('in_use', '#b59f00');
+          drawBigLine('scraped', '#dc3545');
+          // Draw points for hover
+          let bigDots = [];
+          function drawBigDots(key, color) {
+            for (const p of bigPoints) {
+              if (p[key] == null) continue;
+              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
+              bigCtx.beginPath(); bigCtx.arc(x, y, 7, 0, 2*Math.PI);
+              bigCtx.fillStyle = color; bigCtx.fill();
+              bigDots.push({x, y, key, val: p[key], date: p.t});
+            }
+          }
+          drawBigDots('in_stock', '#1a7f37');
+          drawBigDots('in_use', '#b59f00');
+          drawBigDots('scraped', '#dc3545');
+          // Legend
+          bigCtx.font = '18px sans-serif'; bigCtx.textAlign = 'left';
+          bigCtx.fillStyle = '#1a7f37'; bigCtx.fillText('In Stock', 750, 60);
+          bigCtx.fillStyle = '#b59f00'; bigCtx.fillText('In Use', 750, 90);
+          bigCtx.fillStyle = '#dc3545'; bigCtx.fillText('Scraped', 750, 120);
+          // Tooltip on hover (always above graph)
+          let bigTooltip = document.getElementById('bigHistoryGraphTooltip');
+          if (!bigTooltip) {
+            bigTooltip = document.createElement('div');
+            bigTooltip.id = 'bigHistoryGraphTooltip';
+            bigTooltip.style.position = 'fixed';
+            bigTooltip.style.pointerEvents = 'none';
+            bigTooltip.style.background = '#fff';
+            bigTooltip.style.border = '1px solid #bbb';
+            bigTooltip.style.borderRadius = '6px';
+            bigTooltip.style.padding = '6px 16px';
+            bigTooltip.style.fontSize = '16px';
+            bigTooltip.style.color = '#222';
+            bigTooltip.style.boxShadow = '0 2px 8px #e0e3e7';
+            bigTooltip.style.display = 'none';
+            bigTooltip.style.zIndex = '9999';
+            document.body.appendChild(bigTooltip);
+          }
+          bigCanvas.onmousemove = function(e) {
+            const rect = bigCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            let found = null;
+            for (const d of bigDots) {
+              if (Math.abs(d.x-mx)<12 && Math.abs(d.y-my)<12) { found = d; break; }
+            }
+            if (found) {
+              bigTooltip.style.display = 'block';
+              bigTooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
+              // Always above the graph
+              bigTooltip.style.left = (rect.left + rect.width/2 - bigTooltip.offsetWidth/2) + 'px';
+              bigTooltip.style.top = (rect.top - bigTooltip.offsetHeight - 16) + 'px';
+            } else {
+              bigTooltip.style.display = 'none';
+            }
+          };
+          bigCanvas.onmouseleave = function() { bigTooltip.style.display = 'none'; };
+        };
+      } else if (ctx) {
+        ctx.clearRect(0,0,320,120);
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = '#888';
+        ctx.fillText('Not enough data for graph', 60, 65);
+      }
+    }
+
+    function closeInfoPopup(btn) {
+      // Remove the entire overlay popup (the parent of the content div)
+      let overlay = btn.closest('div');
+      // Traverse up to find the overlay (the one with fixed position and 100vw/100vh)
+      while (overlay && overlay.parentNode && overlay !== document.body) {
+        if (
+          overlay.style &&
+          overlay.style.position === 'fixed' &&
+          overlay.style.width === '100vw' &&
+          overlay.style.height === '100vh'
+        ) {
+          break;
+        }
+        overlay = overlay.parentNode;
+      }
+      if (overlay && overlay.parentNode === document.body) {
+        document.body.removeChild(overlay);
+      }
+      // Re-show the main subleveltool popup if it was hidden (ensure it's visible)
+      document.getElementById('subleveltoolPopup').style.display = 'flex';
+    }
+    // Prepare subleveltool history data for JS
+    window.subleveltoolHistoryData = {};
+    {% for sub in subtools %}
+    window.subleveltoolHistoryData['{{ sub.id }}'] = JSON.parse(`[
+      {% for h in sub.history_list %}
+        {"action": "{{ h.action|escapejs }}", "by": "{{ h.by|escapejs }}", "at": "{{ h.at|date:'c' }}", "details": "{{ h.details|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]`);
+    {% endfor %}
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+
+    // Form submissions
+    document.getElementById('editsubtoolForm').onsubmit = function(e) {
+      e.preventDefault();
+      var id = document.getElementById('editsubtoolId').value;
+      var newName = document.getElementById('editsubtoolName').value.trim();
+      if (newName) {
+        window.location.href = `/stream/{{ selected_stream }}/subleveltooltools/?edit_id=${id}&new_name=${encodeURIComponent(newName)}`;
+      }
+    };
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      var errorModal = document.getElementById('errorModal');
+      var errorMsg = document.getElementById('errorModalMsg');
+      if (errorModal && errorMsg && errorMsg.textContent.trim().length > 0) {
+        errorModal.style.display = 'flex';
+      }
+
+      // Add click handlers to cards
+      document.querySelectorAll('.subleveltool-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          if (e.target.classList.contains('subleveltool-checkbox') || 
+              e.target.closest('.card-actions') || 
+              e.target.classList.contains('subleveltool-note')) {
+            return;
+          }
+          const id = this.dataset.id;
+          const name = this.querySelector('.subleveltool-name').textContent;
+          const inStock = this.dataset.inStock;
+          const inUse = this.dataset.inUse;
+          const scraped = this.dataset.scraped;
+          opensubleveltoolPopup(id, name, inStock, inUse, scraped);
+        });
+      });
+    });
+
+    // Search functionality
+    document.getElementById('subleveltool-search-input').addEventListener('input', function() {
+      const q = this.value.trim().toLowerCase();
+      document.querySelectorAll('#subleveltool-grid .subleveltool-card').forEach(card => {
+        const name = card.dataset.name || '';
+        card.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
+    });
+
+    // Sort functionality
+    document.getElementById('subleveltool-sort-select').addEventListener('change', function() {
+      const sortBy = this.value;
+      const grid = document.getElementById('subleveltool-grid');
+      const cards = Array.from(grid.children);
+      // Map select values to dataset keys
+      const keyMap = {
+        name: 'name',
+        in_stock: 'inStock',
+        in_use: 'inUse',
+        scraped: 'scraped'
+      };
+      const dataKey = keyMap[sortBy] || 'name';
+      cards.sort((a, b) => {
+        if (dataKey === 'name') {
+          return a.dataset.name.localeCompare(b.dataset.name);
+        } else {
+          return parseInt(b.dataset[dataKey]) - parseInt(a.dataset[dataKey]);
+        }
+      });
+      cards.forEach(card => grid.appendChild(card));
+    });
+
+    // Bulk selection
+    document.getElementById('select-all-subleveltools').addEventListener('change', function() {
+      const checked = this.checked;
+      document.querySelectorAll('.subleveltool-checkbox').forEach(cb => {
+        if (cb !== this) cb.checked = checked;
+      });
+      updateBulkState();
+    });
+
+    function updateBulkState() {
+      const checkboxes = document.querySelectorAll('.subleveltool-checkbox');
+      // Only count checked checkboxes with a non-empty value
+      const checked = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).filter(cb => cb.value);
+      document.getElementById('bulk-delete-subleveltools-btn').disabled = checked.length === 0;
+      document.getElementById('bulk-update-subleveltools-btn').disabled = checked.length === 0;
+    }
+
+    document.querySelectorAll('.subleveltool-checkbox').forEach(cb => {
+      cb.addEventListener('change', updateBulkState);
+    });
+
+    // Bulk operations
+    document.getElementById('bulk-delete-subleveltools-btn').addEventListener('click', function() {
+      // Only collect checked checkboxes with a non-empty value
+      const ids = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).map(cb => cb.value).filter(id => id);
+      if (!ids.length || !confirm('Delete selected Sub Tools?')) return;
+      
+      fetch('/stream/{{ selected_stream }}/subleveltools/bulk-delete/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({ids: ids})
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          ids.forEach(id => {
+            const card = document.querySelector('.subleveltool-card[data-id="'+id+'"]');
+            if (card) card.remove();
+          });
+          alert('Deleted ' + data.deleted + ' Sub Tools.');
+        } else {
+          alert('Error: ' + (data.error || 'Unable to delete'));
+        }
+      }).catch(() => alert('Request failed'));
+    });
+
+    document.getElementById('bulk-update-subleveltools-btn').addEventListener('click', function() {
+      const ids = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).map(cb => cb.value).filter(id => id);
+      const notes = {};
+      ids.forEach(id => {
+        const note = document.querySelector('.subleveltool-note[data-id="'+id+'"]');
+        if (note) notes[id] = note.value;
+      });
+      
+      fetch('/stream/{{ selected_stream }}/subleveltools/bulk-update/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({notes: notes})
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          alert('Updated notes for selected Sub Tools.');
+        } else {
+          alert('Error: ' + (data.error || 'Unable to update'));
+        }
+      }).catch(() => alert('Request failed'));
+    });
+
+    // Export functionality
+    document.getElementById('export-subleveltools-btn').addEventListener('click', function() {
+      window.location.href = '/stream/{{ selected_stream }}/subleveltools/export/';
+    });
+
+    // Disable context menu
+    // document.addEventListener('contextmenu', function (e) {
+    //   e.preventDefault();
+    // });
+    </script>
+  </body>
+</html>
+{% endblock %}
