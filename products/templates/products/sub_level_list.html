@@ -4,436 +4,935 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sub Items</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub Items Management</title>
     <link rel="stylesheet" href="/static/products/style.css">
     <style>
+        :root {
+            --primary-color: #005fa3;
+            --primary-dark: #003e6b;
+            --primary-light: #e3eefd;
+            --success-color: #28a745;
+            --success-light: #e6f7e6;
+            --warning-color: #ffc107;
+            --warning-light: #fffbe6;
+            --danger-color: #dc3545;
+            --danger-light: #ffeaea;
+            --info-color: #17a2b8;
+            --text-dark: #222;
+            --text-muted: #666;
+            --text-light: #888;
+            --border-color: #e0e3e7;
+            --bg-light: #f8f9fa;
+            --white: #fff;
+            --shadow-sm: 0 0.125rem 0.5rem rgba(0,0,0,0.08);
+            --shadow-md: 0 0.25rem 1rem rgba(0,0,0,0.12);
+            --shadow-lg: 0 0.5rem 2rem rgba(0,0,0,0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body, html {
-            color: #222;
+            color: var(--text-dark);
             font-size: 1rem;
-            background: #f8f9fa;
+            background: var(--bg-light);
             margin: 0;
             padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
-        .top-bar {
-            color: #222;
-            font-size: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.9rem 2.5rem;
-            background: #fff;
-            border-bottom: 1px solid #e0e3e7;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            box-sizing: border-box;
-            z-index: 1000;
-        }
+
         .sublevel-bg {
-            padding-top: 80px;
+            padding-top: 5rem;
             min-height: 100vh;
-            background: #f8f9fa;
-        }        .sublevel-list-container {
-            max-width: 1450px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .sublevel-list-container {
+            max-width: 85%;
             margin: 0 auto;
+            padding: 1.5rem;
+            margin-top: -1rem;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: var(--white);
+            border-radius: 1rem;
             padding: 2rem;
-        }        
-        .header-toolbar-wrapper {
-            display: flex;
-            gap: 4rem;
             margin-bottom: 2rem;
-            align-items: flex-start;
-            position: relative;
+            box-shadow: var(--shadow-md);
+            border-left: 0.25rem solid var(--primary-color);
         }
-        .header-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex: 2.5;
-            min-width: 0;
-        }
-        .add-form-container {
+
+        .header-content {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .page-title-wrapper {
+            display: flex;
+            align-items: center;
             gap: 1rem;
         }
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #005fa3;
-            margin: 0;
+
+        .title-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: bold;
         }
+
+        .page-title {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+            line-height: 1.2;
+        }
+
         .add-form {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            flex-wrap: wrap;
-        }        .toolbar-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 320px;
-            max-width: 400px;
-            position: relative;
-            left: 75px;
+            flex-wrap: nowrap;
         }
-        .toolbar-row {
-            display: flex;
-            flex-direction: column;
+
+        .add-form .form-input {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+        }
+
+        .add-form .btn {
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: -0.1rem;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-        .search-sort-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }        .bulk-actions-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e3e7;
-        }
-        .select-all-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            height: 32px;
-        }
-        .bulk-buttons {
+
+        .control-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
-        .add-btn {
-            display: inline-block;
-            padding: 0.8rem 1.5rem;
-            background: #005fa3;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 1rem;
+
+        .control-label {
+            font-size: 0.875rem;
             font-weight: 600;
-            border: none;
-            transition: all 0.2s ease;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions-section {
+            background: linear-gradient(135deg, var(--primary-light), var(--white));
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            border: 0.125rem solid var(--primary-color);
+        }
+
+        .bulk-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .select-all-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            line-height: 1;
+        }
+
+        .custom-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
             cursor: pointer;
+            accent-color: var(--primary-color);
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .select-all-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            line-height: 1.25rem;
             margin: 0;
         }
-        .add-btn:hover {
-            background: #003e6b;
-            transform: translateY(-1px);
+
+        .bulk-actions-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+            gap: 0.75rem;
         }
-        .add-btn:disabled {
-            opacity: 0.6;
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 18.75rem;
+            height: 18.75rem;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--white);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 95, 163, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0.375rem 1rem rgba(0, 95, 163, 0.4);
+            transform: translateY(-0.125rem);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #1e7e34);
+            color: var(--white);
+            box-shadow: 0 0.25rem 0.75rem rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #c82333);
+            color: var(--white);
+            box-shadow: 0 0.25rem 0.75rem rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color), #117a8b);
+            color: var(--white);
+            box-shadow: 0 0.25rem 0.75rem rgba(23, 162, 184, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
+
+        .btn:disabled:hover {
+            transform: none;
+        }
+
+        /* Form Inputs */
         .form-input {
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid #cfd8dc;
-            font-size: 1rem;
-            transition: border-color 0.2s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 0.125rem solid var(--border-color);
+            font-size: 0.9375rem;
+            transition: all 0.3s ease;
             outline: none;
+            background: var(--white);
+            width: 100%;
+            height: 3rem;
+            line-height: 1.5;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
         }
+
         .form-input:focus {
-            border-color: #005fa3;
-            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
-        }        .sublevel-grid {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.1875rem rgba(0, 95, 163, 0.15);
+            transform: translateY(-0.0625rem);
+        }
+
+        select.form-input {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.25rem;
+            padding-right: 2.5rem;
+            cursor: pointer;
+            border: 0.125rem solid var(--border-color) !important;
+            border-radius: 0.5rem !important;
+            -webkit-border-radius: 0.5rem;
+            -moz-border-radius: 0.5rem;
+        }
+        
+        input.form-input {
+            border: 0.125rem solid var(--border-color) !important;
+            border-radius: 0.5rem !important;
+            -webkit-border-radius: 0.5rem;
+            -moz-border-radius: 0.5rem;
+        }
+
+        /* Items Grid */
+        .sublevel-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
             gap: 1.5rem;
-            margin-top: -18.5rem;
+            margin-bottom: 2rem;
         }
-        
-        /* Create custom layout: 3 in first row, then 4 in each subsequent row */
-        .sublevel-grid::before {
-            content: '';
-            grid-column: 4;
-            grid-row: 1;
-        }
-        
-        /* First 3 cards take up first 3 columns of first row */
-        .sublevel-card:nth-child(1) { grid-column: 1; grid-row: 1; }
-        .sublevel-card:nth-child(2) { grid-column: 2; grid-row: 1; }
-        .sublevel-card:nth-child(3) { grid-column: 3; grid-row: 1; }
-        
-        /* Next 4 cards fill the second row */
-        .sublevel-card:nth-child(4) { grid-column: 1; grid-row: 2; }
-        .sublevel-card:nth-child(5) { grid-column: 2; grid-row: 2; }
-        .sublevel-card:nth-child(6) { grid-column: 3; grid-row: 2; }
-        .sublevel-card:nth-child(7) { grid-column: 4; grid-row: 2; }
-        
-        /* Continue the pattern for subsequent rows */
-        .sublevel-card:nth-child(8) { grid-column: 1; grid-row: 3; }
-        .sublevel-card:nth-child(9) { grid-column: 2; grid-row: 3; }
-        .sublevel-card:nth-child(10) { grid-column: 3; grid-row: 3; }
-        .sublevel-card:nth-child(11) { grid-column: 4; grid-row: 3; }
+
         .sublevel-card {
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 12px;
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            border-radius: 1rem;
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
-            border: 1px solid #e0e3e7;
+            border: 0.125rem solid transparent;
+            overflow: hidden;
         }
+
+        .sublevel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0.25rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .sublevel-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-            border-color: #005fa3;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-0.375rem);
+            border-color: var(--primary-color);
         }
+
+        .sublevel-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-checkbox-wrapper {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+
+        .sublevel-checkbox {
+            width: 1.125rem;
+            height: 1.125rem;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
         .sublevel-icon {
             display: flex;
             justify-content: center;
+            align-items: center;
             margin-bottom: 1rem;
+            padding: 0.5rem;
         }
+
+        .sublevel-icon img {
+            height: 3rem;
+            width: auto;
+            object-fit: contain;
+        }
+
         .sublevel-name {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 700;
-            color: #005fa3;
+            color: var(--primary-color);
             margin-bottom: 1rem;
             text-align: center;
+            line-height: 1.3;
+            word-break: break-word;
         }
+
         .status-badges {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
             gap: 0.5rem;
             margin-bottom: 1rem;
-            justify-content: center;
         }
+
         .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 700;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
         }
+
+        .badge-label {
+            font-size: 0.6875rem;
+            opacity: 0.8;
+            margin-bottom: 0.125rem;
+        }
+
         .badge-stock {
-            background: #e6f7e6;
+            background: var(--success-light);
             color: #1a7f37;
+            border: 0.0625rem solid #b6e2b6;
         }
+
         .badge-use {
-            background: #fffbe6;
-            color: #b59f00;
+            background: var(--warning-light);
+            color: #856404;
+            border: 0.0625rem solid #ffe9a6;
         }
+
         .badge-scraped {
-            background: #ffeaea;
-            color: #dc3545;
+            background: var(--danger-light);
+            color: var(--danger-color);
+            border: 0.0625rem solid #ffc2c7;
         }
+
         .sublevel-note {
             width: 100%;
-            min-height: 60px;
-            border-radius: 8px;
-            border: 1px solid #cfd8dc;
-            font-size: 0.95rem;
-            padding: 0.7rem;
+            min-height: 4.5rem;
+            border-radius: 0.5rem;
+            border: 0.125rem solid var(--border-color);
+            font-size: 0.875rem;
+            padding: 0.75rem;
             resize: vertical;
             margin-bottom: 1rem;
             outline: none;
-            transition: border-color 0.2s ease;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
+
         .sublevel-note:focus {
-            border-color: #005fa3;
-            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.1875rem rgba(0, 95, 163, 0.15);
         }
+
+        .sublevel-note::placeholder {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
         .card-actions {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            display: none;
-            gap: 0.5rem;
-        }
-        .sublevel-card:hover .card-actions {
+            top: 1rem;
+            right: 1rem;
             display: flex;
+            gap: 0.375rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
+        .sublevel-card:hover .card-actions {
+            opacity: 1;
+        }
+
         .action-btn {
-            background: none;
-            border: none;
+            background: var(--white);
+            border: 0.125rem solid var(--border-color);
             cursor: pointer;
             padding: 0.5rem;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
         }
+
         .action-btn:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        .edit-btn {
-            color: #005fa3;
-        }
-        .delete-btn {
-            color: #dc3545;
-        }
-        /* Only style the select-all checkbox in the toolbar */
-        #select-all-sublevels {
-            position: static;
             transform: scale(1.1);
-            margin-right: 0.25rem;
+            box-shadow: var(--shadow-md);
         }
-        #select-all-sublevels + label {
-            margin-top: 6px;
+
+        .edit-btn {
+            color: var(--primary-color);
         }
-        /* Keep .sublevel-checkbox for grid cards as is */
-        .sublevel-card .sublevel-checkbox {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            transform: scale(1.3);
-            cursor: pointer;
+
+        .edit-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
         }
+
+        .delete-btn {
+            color: var(--danger-color);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger-light);
+            border-color: var(--danger-color);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            grid-column: 1 / -1;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 1rem;
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            flex-wrap: wrap;
         }
-        .pagination a {
-            padding: 0.7rem 1.2rem;
-            background: #005fa3;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
+
+        .pagination a, .pagination .page-info {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
             font-weight: 600;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
         }
+
+        .pagination a {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--white);
+            text-decoration: none;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 95, 163, 0.3);
+        }
+
         .pagination a:hover {
-            background: #003e6b;
-        }        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .header-toolbar-wrapper {
-                flex-direction: column;
-                gap: 1.5rem;
+            box-shadow: 0 0.375rem 1rem rgba(0, 95, 163, 0.4);
+            transform: translateY(-0.125rem);
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            background: var(--bg-light);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(0.25rem);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            min-width: min(25rem, 95vw);
+            max-width: 95vw;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-1.25rem);
             }
-            .toolbar-section {
-                max-width: none;
-                min-width: auto;
-                margin-left: 0;
-            }
-            .toolbar-row {
-                flex-direction: column;
-            }
-            .search-sort-group {
-                flex-direction: column;
-            }
-            .bulk-actions-group {
-                flex-direction: column;
-            }
-            .bulk-buttons {
-                flex-direction: row;
-                justify-content: center;
-            }
-            .sublevel-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            /* Reset grid positioning for tablets */
-            .sublevel-grid::before {
-                display: none;
-            }
-            .sublevel-card:nth-child(n) {
-                grid-column: auto;
-                grid-row: auto;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
-        @media (max-width: 768px) {
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-icon {
+            width: 4rem;
+            height: 4rem;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .status-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            gap: 1rem;
+        }
+
+        .status-input-label {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-input {
+            width: 6.25rem;
+            padding: 0.625rem;
+            border-radius: 0.375rem;
+            border: 0.125rem solid;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .status-input:focus {
+            transform: scale(1.05);
+        }
+
+        .stock-input-group {
+            background: var(--success-light);
+        }
+
+        .stock-input-label {
+            color: #1a7f37;
+        }
+
+        .stock-input {
+            background: #f7fff7;
+            border-color: #b6e2b6;
+            color: #1a7f37;
+        }
+
+        .use-input-group {
+            background: var(--warning-light);
+        }
+
+        .use-input-label {
+            color: #856404;
+        }
+
+        .use-input {
+            background: #fffde7;
+            border-color: #ffe9a6;
+            color: #856404;
+        }
+
+        .scraped-input-group {
+            background: var(--danger-light);
+        }
+
+        .scraped-input-label {
+            color: var(--danger-color);
+        }
+
+        .scraped-input {
+            background: #fff7f8;
+            border-color: #ffc2c7;
+            color: var(--danger-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 75rem) {
+            .sublevel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+            }
+        }
+
+        @media (max-width: 64rem) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sublevel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+            }
+        }
+
+        @media (max-width: 48rem) {
             .sublevel-list-container {
                 padding: 1rem;
             }
-            .header-section,
-            .toolbar-section {
+
+            .page-header {
+                padding: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .add-form {
+                flex-direction: column;
+            }
+
+            .control-panel {
                 padding: 1rem;
             }
-            .add-form-container {
+
+            .bulk-actions-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .sublevel-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+
+            .status-input-group {
                 flex-direction: column;
                 align-items: stretch;
                 text-align: center;
             }
-            .search-sort-group {
-                flex-direction: column;
+
+            .status-input {
+                width: 100%;
             }
-            .bulk-buttons {
-                flex-direction: column;
+        }
+
+        @media (max-width: 30rem) {
+            .page-title {
+                font-size: 1.5rem;
             }
-            .sublevel-grid {
-                grid-template-columns: 1fr;
+
+            .title-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Error Messages Modal -->
     {% if messages %}
-      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:4000; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:12px; padding:2rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-          <button onclick="closeErrorModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1rem;">Error</h3>
-          <div id="errorModalMsg" style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">
-            {% for message in messages %}
-              {% if 'already exists' in message or message.tags == 'error' %}
-                {{ message }}
-              {% endif %}
-            {% endfor %}
-          </div>
-          <button onclick="closeErrorModal()" class="add-btn" style="background:#dc3545;">OK</button>
+    <div id="errorModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeErrorModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: var(--danger-light); color: var(--danger-color);">
+                    ⚠️
+                </div>
+                <h3 class="modal-title" style="color: var(--danger-color);">Error</h3>
+            </div>
+            <div id="errorModalMsg" style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
+                {% for message in messages %}
+                    {% if 'already exists' in message or message.tags == 'error' %}
+                        {{ message }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button onclick="closeErrorModal()" class="btn btn-danger" style="width: 100%;">OK</button>
         </div>
-      </div>
-    {% endif %}    <div class="sublevel-bg">
+    </div>
+    {% endif %}
+
+    <div class="sublevel-bg">
         <div class="sublevel-list-container">
-            <!-- Header and Toolbar Wrapper -->
-            <div class="header-toolbar-wrapper">
-                <!-- Header Section (Left Side - 3/4) -->
-                <div class="header-section">
-                    <div class="add-form-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="header-content">
+                    <div class="page-title-wrapper">
+                        <div class="title-icon">SI</div>
                         <h1 class="page-title">Sub Items Management</h1>
-                        <form method="post" class="add-form">
-                            {% csrf_token %}
-                            <input type="text" name="subitem_name" placeholder="Add new sub item..." class="form-input" style="width:220px;" required>
-                            <button type="submit" class="add-btn">+ Add Sub Item</button>
-                        </form>
+                    </div>
+                    <form method="post" class="add-form">
+                        {% csrf_token %}
+                        <input type="text" name="subitem_name" placeholder="Enter new sub item name..." class="form-input" style="min-width: 15rem;" required>
+                        <button type="submit" class="btn btn-primary">
+                            <span>➕</span>
+                            <span>Add Sub Item</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-grid">
+                    <div class="control-group">
+                        <label class="control-label">🔍 Search</label>
+                        <input type="text" id="sublevel-search-input" placeholder="Search sub items..." class="form-input">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">📊 Sort By</label>
+                        <select id="sublevel-sort-select" class="form-input">
+                            <option value="name">Name (A-Z)</option>
+                            <option value="in_stock">In Stock (High to Low)</option>
+                            <option value="in_use">In Use (High to Low)</option>
+                            <option value="scraped">Scraped (High to Low)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">📥 Export</label>
+                        <button id="export-sublevels-btn" class="btn btn-success" style="width: 100%; margin-top: -0.01rem;">
+                            <span>📊</span>
+                            <span>Export CSV/Excel</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Toolbar Section (Right Side - 1/4) -->
-                <div class="toolbar-section">
-                    <div class="toolbar-row">
-                        <div class="search-sort-group">
-                            <input type="text" id="sublevel-search-input" placeholder="Search sub items..." class="form-input" style="width:100%;">
-                            <select id="sublevel-sort-select" class="form-input" style="width:100%;">
-                                <option value="name">Sort by Name</option>
-                                <option value="in_stock">Sort by In Stock</option>
-                                <option value="in_use">Sort by In Use</option>
-                                <option value="scraped">Sort by Scraped</option>
-                            </select>
+                <!-- Bulk Actions -->
+                <div class="bulk-actions-section">
+                    <div class="bulk-header">
+                        <div class="select-all-wrapper">
+                            <input type="checkbox" id="select-all-sublevels" class="custom-checkbox">
+                            <label for="select-all-sublevels" class="select-all-label">Select All Items</label>
                         </div>
-                        <button id="export-sublevels-btn" class="add-btn" style="background:#28a745; width:100%;">📊 Export CSV/Excel</button>
                     </div>
-                    
-                    <div class="bulk-actions-group">
-                        <div class="select-all-group">
-                            <input type="checkbox" id="select-all-sublevels" class="sublevel-checkbox" value="">
-                            <label for="select-all-sublevels" style="font-size:1rem; font-weight:600;">Select All</label>
-                        </div>
-                        <div class="bulk-buttons">
-                            <button id="bulk-delete-sublevels-btn" class="add-btn" style="background:#dc3545; width:100%;" disabled>🗑 Bulk Delete</button>
-                            <button id="bulk-update-sublevels-btn" class="add-btn" style="background:#17a2b8; width:100%;" disabled>✏️ Update Comments</button>
-                        </div>
+                    <div class="bulk-actions-buttons">
+                        <button id="bulk-delete-sublevels-btn" class="btn btn-danger" disabled>
+                            <span>🗑️</span>
+                            <span>Bulk Delete</span>
+                        </button>
+                        <button id="bulk-update-sublevels-btn" class="btn btn-info" disabled>
+                            <span>✏️</span>
+                            <span>Update Comments</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -442,31 +941,43 @@
             <div class="sublevel-grid" id="sublevel-grid">
                 {% for subitem in subitems %}
                 <div class="sublevel-card" data-name="{{ subitem.name|lower }}" data-id="{{ subitem.id }}" data-in-stock="{{ subitem.in_stock|default_if_none:0 }}" data-in-use="{{ subitem.in_use|default_if_none:0 }}" data-scraped="{{ subitem.scraped|default_if_none:0 }}">
-                    <input type="checkbox" class="sublevel-checkbox" value="{{ subitem.id }}">
-                    
-                    <div class="sublevel-icon">
-                        <img src="/static/products/philips.png" alt="Philips Logo" style="height:50px;width:auto;">
+                    <div class="card-checkbox-wrapper">
+                        <input type="checkbox" class="sublevel-checkbox" value="{{ subitem.id }}">
                     </div>
-                    
-                    <div class="sublevel-name">{{ subitem.name }}</div>
-                    
-                    <div class="status-badges">
-                        <span class="status-badge badge-stock">Stock: {{ subitem.in_stock }}</span>
-                        <span class="status-badge badge-use">Use: {{ subitem.in_use }}</span>
-                        <span class="status-badge badge-scraped">Scraped: {{ subitem.scraped }}</span>
-                    </div>
-                    
-                    <textarea class="sublevel-note" data-id="{{ subitem.id }}" placeholder="Add note...">{{ subitem.note|default_if_none:'' }}</textarea>
                     
                     <div class="card-actions" onclick="event.stopPropagation();">
                         <button type="button" onclick="event.stopPropagation(); editSublevel({{ subitem.id }}, '{{ subitem.name|escapejs }}');" title="Edit" class="action-btn edit-btn">✎</button>
                         <button type="button" onclick="event.stopPropagation(); openDeleteSublevel({{ subitem.id }});" class="action-btn delete-btn" title="Delete">🗑</button>
                     </div>
+                    
+                    <div class="sublevel-icon">
+                        <img src="/static/products/philips.png" alt="Philips Logo">
+                    </div>
+                    
+                    <div class="sublevel-name">{{ subitem.name }}</div>
+                    
+                    <div class="status-badges">
+                        <div class="status-badge badge-stock">
+                            <div class="badge-label">Stock</div>
+                            <div>{{ subitem.in_stock }}</div>
+                        </div>
+                        <div class="status-badge badge-use">
+                            <div class="badge-label">In Use</div>
+                            <div>{{ subitem.in_use }}</div>
+                        </div>
+                        <div class="status-badge badge-scraped">
+                            <div class="badge-label">Scraped</div>
+                            <div>{{ subitem.scraped }}</div>
+                        </div>
+                    </div>
+                    
+                    <textarea class="sublevel-note" data-id="{{ subitem.id }}" placeholder="Add a note or comment...">{{ subitem.note|default_if_none:'' }}</textarea>
                 </div>
                 {% empty %}
-                <div style="text-align: center; color: #888; width: 100%; padding: 3rem; background: #fff; border-radius: 12px;">
-                    <h3 style="margin-bottom: 1rem;">No sub items found</h3>
-                    <p>Add your first sub item to get started!</p>
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h3 class="empty-title">No Sub Items Found</h3>
+                    <p class="empty-text">Get started by adding your first sub item using the form above!</p>
                 </div>
                 {% endfor %}
             </div>
@@ -475,167 +986,164 @@
             {% if page_obj %}
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">← Previous</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                    ← Previous
+                </a>
                 {% endif %}
-                <span style="color: #666; font-weight: 600;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next →</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                    Next →
+                </a>
                 {% endif %}
             </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Popup Modal for Sublevel -->
-    <div id="sublevelPopup" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:400px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closeSublevelPopup()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <button type="button" onclick="showSublevelInfo()" title="Info" style="position:absolute; top:12px; left:12px; background:#e3eefd; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#005fa3; cursor:pointer; font-weight:700;">i</button>
-        
-        <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-          <div style="background:#e3eefd; border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
-            <img src="/static/products/Philips_NoBG.png" alt="Philips Logo" style="height:36px;width:auto;">
-          </div>
-          
-          <h2 id="popupSublevelName" style="color:#005fa3; font-size:1.5rem; font-weight:700; margin-bottom:1.5rem; text-align:center;"></h2>
-          
-          <form id="sublevelCountForm" method="post" action="" style="width:100%; max-width:350px;">
-            {% csrf_token %}
-            <input type="hidden" name="sublevel_id" id="popupSublevelId">
-            <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#e6f7e6; border-radius:8px; padding:1rem;">
-                <label for="popupInStock" style="font-weight:600; color:#1a7f37; font-size:1rem;">In Stock</label>
-                <input type="number" name="in_stock" id="popupInStock" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #b6e2b6; font-size:1rem; background:#f7fff7; text-align:center; color:#1a7f37; font-weight:600;">
-              </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#fffbe6; border-radius:8px; padding:1rem;">
-                <label for="popupInUse" style="font-weight:600; color:#b59f00; font-size:1rem;">In Use</label>
-                <input type="number" name="in_use" id="popupInUse" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffe9a6; font-size:1rem; background:#fffde7; text-align:center; color:#b59f00; font-weight:600;">
-              </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#ffeaea; border-radius:8px; padding:1rem;">
-                <label for="popupScraped" style="font-weight:600; color:#dc3545; font-size:1rem;">Scraped</label>
-                <input type="number" name="scraped" id="popupScraped" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffc2c7; font-size:1rem; background:#fff7f8; text-align:center; color:#dc3545; font-weight:600;">
-              </div>
+    <!-- Sublevel Popup Modal -->
+    <div id="sublevelPopup" class="modal-overlay">
+        <div class="modal-content" style="max-width: min(28rem, 95vw);">
+            <button onclick="closeSublevelPopup()" class="modal-close">&times;</button>
+            <button type="button" onclick="showSublevelInfo()" title="View History" style="position: absolute; top: 1rem; left: 1rem; background: var(--primary-light); border: 0.125rem solid var(--primary-color); border-radius: 50%; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; font-size: 1.125rem; color: var(--primary-color); cursor: pointer; font-weight: 700; transition: all 0.3s ease;">ℹ️</button>
+            
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <img src="/static/products/Philips_NoBG.png" alt="Philips Logo" style="height: 2.25rem; width: auto;">
+                </div>
+                <h2 id="popupSublevelName" class="modal-title"></h2>
             </div>
-            <div style="display:flex; justify-content:center; width:100%;">
-              <button type="submit" class="add-btn" style="padding:0.8rem 2rem; font-size:1.1rem;">💾 Save Changes</button>
-            </div>
-          </form>
+            
+            <form id="sublevelCountForm" method="post" class="modal-form">
+                {% csrf_token %}
+                <input type="hidden" name="sublevel_id" id="popupSublevelId">
+                
+                <div class="status-input-group stock-input-group">
+                    <label for="popupInStock" class="status-input-label stock-input-label">In Stock</label>
+                    <input type="number" name="in_stock" id="popupInStock" min="0" class="status-input stock-input">
+                </div>
+                
+                <div class="status-input-group use-input-group">
+                    <label for="popupInUse" class="status-input-label use-input-label">In Use</label>
+                    <input type="number" name="in_use" id="popupInUse" min="0" class="status-input use-input">
+                </div>
+                
+                <div class="status-input-group scraped-input-group">
+                    <label for="popupScraped" class="status-input-label scraped-input-label">Scraped</label>
+                    <input type="number" name="scraped" id="popupScraped" min="0" class="status-input scraped-input">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.125rem;">
+                    <span>💾</span>
+                    <span>Save Changes</span>
+                </button>
+            </form>
         </div>
-      </div>
     </div>
 
     <!-- Edit Sub Item Modal -->
-    <div id="editSubItemModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closeEditSubItemModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <h3 style="color:#005fa3; font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; text-align:center;">
-            Edit Sub Item: <span id="editSubItemTitle"></span>
-        </h3>
-        <form id="editSubItemForm" style="width:100%; max-width:300px;">
-          <input type="hidden" name="edit_id" id="editSubItemId">
-          <input type="text" name="new_name" id="editSubItemName" class="form-input" style="width:100%; margin-bottom:1.5rem;" required>
-          <div style="display:flex; justify-content:center;">
-            <button type="submit" class="add-btn">💾 Save Changes</button>
-          </div>
-        </form>
-      </div>
+    <div id="editSubItemModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeEditSubItemModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">✏️</div>
+                <h3 class="modal-title">Edit Sub Item</h3>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;"><strong id="editSubItemTitle"></strong></p>
+            </div>
+            <form id="editSubItemForm" class="modal-form">
+                <input type="hidden" name="edit_id" id="editSubItemId">
+                <div class="form-group">
+                    <label for="editSubItemName">New Name</label>
+                    <input type="text" name="new_name" id="editSubItemName" class="form-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <span>💾</span>
+                    <span>Save Changes</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Delete Sub Item Modal -->
-    <div id="deleteSubItemModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closeDeleteSubItemModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <h3 style="color:#dc3545; font-size:1.3rem; font-weight:700; margin-bottom:1rem; text-align:center;">
-        Delete Sub Item
-        </h3>
-        <p style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">Are you sure you want to delete <strong id="deleteSubItemName"></strong>?</p>
-        <form id="deleteSubItemForm" method="post" action="/stream/{{ selected_stream }}/subleveldata/" style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:1rem; align-items:center;">
-        {% csrf_token %}
-        <input type="hidden" name="delete_id" id="deleteSubItemId">
-        <button type="submit" class="add-btn" style="background:#dc3545;">
-            🗑 Delete Item
-        </button>
-        </form>
-      </div>
+    <div id="deleteSubItemModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeDeleteSubItemModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: var(--danger-light); color: var(--danger-color);">🗑️</div>
+                <h3 class="modal-title" style="color: var(--danger-color);">Delete Sub Item</h3>
+            </div>
+            <p style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
+                Are you sure you want to delete <strong id="deleteSubItemName"></strong>? This action cannot be undone.
+            </p>
+            <form id="deleteSubItemForm" method="post" action="/stream/{{ selected_stream }}/subleveldata/" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" id="deleteSubItemId">
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    <span>🗑️</span>
+                    <span>Delete Item</span>
+                </button>
+                <button type="button" onclick="closeDeleteSubItemModal()" class="btn btn-primary" style="width: 100%; background: var(--text-muted);">
+                    Cancel
+                </button>
+            </form>
+        </div>
     </div>
 
-    {% if messages %}
-      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:4000; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:14px; padding:2rem 2.5rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px #b3c6e0; position:relative; display:flex; flex-direction:column; align-items:center;">
-          <button onclick="closeErrorModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; font-size:2rem; color:#888; cursor:pointer;">&times;</button>
-          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1.2rem;">Error</h3>
-          <div id="errorModalMsg" style="font-size:1.08rem; color:#333; margin-bottom:1.5rem; text-align:center;">
-            {% for message in messages %}
-              {% if 'already exists' in message or message.tags == 'error' %}
-                {{ message }}
-              {% endif %}
-            {% endfor %}
-          </div>
-          <button onclick="closeErrorModal()" class="add-btn" style="width:100%; padding:0.7rem 0; font-size:1.13rem; border-radius:7px; font-weight:700; background:linear-gradient(90deg,#dc3545 60%,#ff6b6b 100%); color:#fff; border:none;">OK</button>
-        </div>
-      </div>
-    {% endif %}
-
     <script>
-    // Core functions for popup management
+    // Modal Management Functions
     function openSublevelPopup(id, name, inStock, inUse, scraped) {
-      document.getElementById('sublevelPopup').style.display = 'flex';
-      document.getElementById('popupSublevelName').textContent = name;
-      document.getElementById('popupSublevelId').value = id;
-      document.getElementById('popupInStock').value = inStock || 0;
-      document.getElementById('popupInUse').value = inUse || 0;
-      document.getElementById('popupScraped').value = scraped || 0;
+        document.getElementById('sublevelPopup').style.display = 'flex';
+        document.getElementById('popupSublevelName').textContent = name;
+        document.getElementById('popupSublevelId').value = id;
+        document.getElementById('popupInStock').value = inStock || 0;
+        document.getElementById('popupInUse').value = inUse || 0;
+        document.getElementById('popupScraped').value = scraped || 0;
     }
 
     function closeSublevelPopup() {
-      document.getElementById('sublevelPopup').style.display = 'none';
-    }
-
-    function openDeleteSublevel(id, name) {
-        event.stopPropagation();
-        document.getElementById('deleteSubItemId').value = id;
-        document.getElementById('deleteSubItemName').textContent = name;
-        document.getElementById('editSubItemTitle').textContent = name; // Set the title
-        document.getElementById('deleteSubItemModal').style.display = 'flex';
+        document.getElementById('sublevelPopup').style.display = 'none';
     }
 
     function editSublevel(id, name) {
-      event.stopPropagation();
-      document.getElementById('editSubItemId').value = id;
-      document.getElementById('editSubItemName').value = name;
-      document.getElementById('editSubItemTitle').textContent = name;
-      document.getElementById('editSubItemModal').style.display = 'flex';
-      setTimeout(() => {
-        document.getElementById('editSubItemName').focus();
-      }, 100);
+        event.stopPropagation();
+        document.getElementById('editSubItemId').value = id;
+        document.getElementById('editSubItemName').value = name;
+        document.getElementById('editSubItemTitle').textContent = name;
+        document.getElementById('editSubItemModal').style.display = 'flex';
+        setTimeout(() => {
+            document.getElementById('editSubItemName').focus();
+            document.getElementById('editSubItemName').select();
+        }, 100);
     }
 
     function closeEditSubItemModal() {
-      document.getElementById('editSubItemModal').style.display = 'none';
+        document.getElementById('editSubItemModal').style.display = 'none';
     }
 
     function openDeleteSublevel(id) {
-      event.stopPropagation();
-      const card = document.querySelector('.sublevel-card[data-id="' + id + '"]');
-      const name = card ? card.querySelector('.sublevel-name').textContent : '';
-      document.getElementById('deleteSubItemId').value = id;
-      document.getElementById('deleteSubItemName').textContent = name;
-      document.getElementById('deleteSubItemModal').style.display = 'flex';
+        event.stopPropagation();
+        const card = document.querySelector('.sublevel-card[data-id="' + id + '"]');
+        const name = card ? card.querySelector('.sublevel-name').textContent.trim() : '';
+        document.getElementById('deleteSubItemId').value = id;
+        document.getElementById('deleteSubItemName').textContent = name;
+        document.getElementById('deleteSubItemModal').style.display = 'flex';
     }
 
     function closeDeleteSubItemModal() {
-      document.getElementById('deleteSubItemModal').style.display = 'none';
+        document.getElementById('deleteSubItemModal').style.display = 'none';
     }
 
     function closeErrorModal() {
-      document.getElementById('errorModal').style.display = 'none';
+        document.getElementById('errorModal').style.display = 'none';
     }
 
+    // History Information Display
     function showSublevelInfo() {
       var sublevelId = document.getElementById('popupSublevelId').value;
       var history = (window.sublevelHistoryData && window.sublevelHistoryData[sublevelId]) || [];
-      let html = '<div style="font-size:1.08rem; font-weight:600; color:#005fa3; margin-bottom:0.7rem;">Sublevel History</div>';
-      // Week filter dropdown (always show, even if only one week)
+      let html = '<div style="font-size:1.125rem; font-weight:700; color:var(--primary-color); margin-bottom:1rem; text-align:center;">📊 Sublevel History</div>';
+      
+      // Week filter
       function getISOWeek(d) {
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         var dayNum = d.getUTCDay() || 7;
@@ -644,6 +1152,7 @@
         var weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
         return {week: weekNum, year: d.getUTCFullYear()};
       }
+      
       let weekSet = new Set();
       for (const h of history) {
         let d = new Date(h.at);
@@ -651,58 +1160,58 @@
         weekSet.add(`W${w.week}, ${w.year}`);
         h._week = `W${w.week}, ${w.year}`;
       }
+      
       let weekList = Array.from(weekSet).sort((a,b)=>{
         let [wa, ya] = a.match(/W(\d+), (\d+)/).slice(1).map(Number);
         let [wb, yb] = b.match(/W(\d+), (\d+)/).slice(1).map(Number);
         return yb-ya || wb-wa;
       });
-      html += '<div style="margin-bottom:1rem;">Filter by week: <select id="historyWeekFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
-      html += '<option value="">All</option>';
+      
+      html += '<div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;">';
+      html += '<select id="historyWeekFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Weeks</option>';
       for (const w of weekList) html += `<option value="${w}">${w}</option>`;
-      html += '</select></div>';
-      // User filter dropdown
+      html += '</select>';
+      
+      // User filter
       let users = Array.from(new Set(history.map(h => h.by)));
       if (users.length > 1) {
-        html += '<div style="margin-bottom:1rem;">Filter by user: <select id="historyUserFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
-        html += '<option value="">All</option>';
+        html += '<select id="historyUserFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Users</option>';
         for (const u of users) html += `<option value="${u}">${u}</option>`;
-        html += '</select></div>';
+        html += '</select>';
       }
-      // Graph placeholder (centered)
-      html += '<div style="display:flex; justify-content:center; margin-bottom:1.2rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
+      html += '</div>';
+      
+      // Graph
+      html += '<div style="display:flex; justify-content:center; margin-bottom:1.5rem; background:var(--bg-light); padding:1rem; border-radius:0.75rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
+      
       if (history.length === 0) {
-        html += '<div style="color:#888;">No history found.</div>';
+        html += '<div style="text-align:center; color:var(--text-light); padding:2rem; background:var(--bg-light); border-radius:0.75rem;">📭 No history found.</div>';
       } else {
-        html += '<div style="max-height:220px; overflow-y:auto; width:100%; margin-bottom:0.5rem;"><ul id="historyList" style="padding-left:1.2rem; margin:0;">';
+        html += '<div style="max-height:15rem; overflow-y:auto; background:var(--bg-light); border-radius:0.75rem; padding:1rem;"><ul id="historyList" style="list-style:none; padding:0; margin:0;">';
         for (const entry of history.slice().reverse()) {
           const dateStr = new Date(entry.at).toLocaleString();
-          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:0.5rem;"><span style="font-weight:700;">${entry.action}</span> by <span style="color:#3182ce;">${entry.by}</span> <span style="color:#888;">(${dateStr})</span><br><span style="font-size:0.98rem; color:#444;">${entry.details}</span></li>`;
+          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:1rem; padding:0.75rem; background:var(--white); border-radius:0.5rem; border-left:0.25rem solid var(--primary-color);">
+            <div style="font-weight:700; color:var(--primary-color); margin-bottom:0.25rem;">${entry.action}</div>
+            <div style="font-size:0.875rem; color:var(--text-muted);">by <strong style="color:var(--primary-color);">${entry.by}</strong> • ${dateStr}</div>
+            <div style="font-size:0.9rem; color:var(--text-dark); margin-top:0.375rem;">${entry.details}</div>
+          </li>`;
         }
         html += '</ul></div>';
       }
+      
       const popup = document.createElement('div');
-      popup.style.position = 'fixed';
-      popup.style.top = '0';
-      popup.style.left = '0';
-      popup.style.width = '100vw';
-      popup.style.height = '100vh';
-      popup.style.background = 'rgba(0,0,0,0.25)';
-      popup.style.zIndex = '3000';
+      popup.className = 'modal-overlay';
       popup.style.display = 'flex';
-      popup.style.alignItems = 'center';
-      popup.style.justifyContent = 'center';
+      popup.style.zIndex = '3000';
+      
       const content = document.createElement('div');
-      content.style.background = '#fff';
-      content.style.borderRadius = '14px';
-      content.style.padding = '2rem 2.5rem';
-      content.style.boxShadow = '0 8px 32px #b3c6e0';
-      content.style.minWidth = '320px';
-      content.style.maxWidth = '95vw';
-      content.innerHTML = html + '<div style="text-align:center; margin-top:1.5rem;"><button onclick="closeInfoPopup(this)" style="padding:0.5rem 1.2rem; border-radius:7px; background:#005fa3; color:#fff; border:none; font-size:1.08rem; font-weight:700; cursor:pointer;">Close</button></div>';
+      content.className = 'modal-content';
+      content.style.maxWidth = 'min(50rem, 95vw)';
+      content.innerHTML = html + '<div style="text-align:center; margin-top:1.5rem;"><button onclick="closeInfoPopup(this)" class="btn btn-primary">Close</button></div>';
       popup.appendChild(content);
       document.body.appendChild(popup);
 
-      // Add filter logic
+      // Filter logic
       const weekFilter = content.querySelector('#historyWeekFilter');
       const userFilter = content.querySelector('#historyUserFilter');
       function applyFilters() {
@@ -717,10 +1226,10 @@
       }
       if (weekFilter) weekFilter.addEventListener('change', applyFilters);
       if (userFilter) userFilter.addEventListener('change', applyFilters);
-      // Draw advanced graph (date x-axis, 3 y-series, hover tooltip)
+      
+      // Draw graph
       const canvas = content.querySelector('#historyGraph');
       const ctx = canvas.getContext('2d');
-      // Parse progress from details
       let points = [];
       let last = {in_stock: null, in_use: null, scraped: null};
       for (const entry of history) {
@@ -732,11 +1241,9 @@
         if (m) last.scraped = +m[2];
         points.push({t: new Date(entry.at), ...last});
       }
-      // Only plot if we have at least 2 points
+      
       if (points.length > 1) {
-        // Show only last 5 transactions
         if (points.length > 5) points = points.slice(-5);
-        // Find min/max for y, and min/max for x (date)
         let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
         let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
         if (min === Infinity) min = 0;
@@ -745,21 +1252,30 @@
         const t1 = points[points.length-1].t.getTime();
         function tx(t) { return 50 + 220 * (t.getTime()-t0)/(t1-t0||1); }
         function ty(val) { return 100 - 80 * ((val-min)/(max-min||1)); }
+        
         ctx.clearRect(0,0,320,120);
-        // Axes (remove Y axis/date)
-        ctx.strokeStyle = '#bbb'; ctx.beginPath(); ctx.moveTo(50,10); ctx.lineTo(50,110); ctx.lineTo(300,110); ctx.stroke();
-        // Y axis labels removed
-        // X axis labels (dates)
-        ctx.font = '11px sans-serif'; ctx.fillStyle = '#888';
+        ctx.strokeStyle = '#ddd'; 
+        ctx.beginPath(); 
+        ctx.moveTo(50,10); 
+        ctx.lineTo(50,110); 
+        ctx.lineTo(300,110); 
+        ctx.stroke();
+        
+        // X axis dates
+        ctx.font = '11px sans-serif'; 
+        ctx.fillStyle = '#888';
         ctx.textAlign = 'center';
         let step = Math.max(1, Math.floor(points.length/4));
         for (let i=0; i<points.length; i+=step) {
           let d = points[i].t;
           ctx.fillText(d.toLocaleDateString(), tx(d), 122);
         }
+        
         // Draw lines
         function drawLine(key, color) {
-          ctx.strokeStyle = color; ctx.beginPath();
+          ctx.strokeStyle = color; 
+          ctx.lineWidth = 2;
+          ctx.beginPath();
           let started = false;
           for (const p of points) {
             if (p[key] == null) continue;
@@ -769,223 +1285,160 @@
           ctx.stroke();
         }
         drawLine('in_stock', '#1a7f37');
-        drawLine('in_use', '#b59f00');
+        drawLine('in_use', '#856404');
         drawLine('scraped', '#dc3545');
-        // Draw points for hover
-        let dots = [];
-        function drawDots(key, color) {
-          for (const p of points) {
-            if (p[key] == null) continue;
-            const x = tx(p.t), y = ty(p[key]);
-            ctx.beginPath(); ctx.arc(x, y, 4, 0, 2*Math.PI);
-            ctx.fillStyle = color; ctx.fill();
-            dots.push({x, y, key, val: p[key], date: p.t});
-          }
-        }
-        drawDots('in_stock', '#1a7f37');
-        drawDots('in_use', '#b59f00');
-        drawDots('scraped', '#dc3545');
+        
         // Legend
-        ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
-        ctx.fillStyle = '#1a7f37'; ctx.fillText('In Stock', 220, 22);
-        ctx.fillStyle = '#b59f00'; ctx.fillText('In Use', 220, 38);
-        ctx.fillStyle = '#dc3545'; ctx.fillText('Scraped', 220, 54);
-        // Tooltip on hover (always above graph)
-        let tooltip = document.getElementById('historyGraphTooltip');
-        if (!tooltip) {
-          tooltip = document.createElement('div');
-          tooltip.id = 'historyGraphTooltip';
-          tooltip.style.position = 'fixed';
-          tooltip.style.pointerEvents = 'none';
-          tooltip.style.background = '#fff';
-          tooltip.style.border = '1px solid #bbb';
-          tooltip.style.borderRadius = '6px';
-          tooltip.style.padding = '4px 10px';
-          tooltip.style.fontSize = '13px';
-          tooltip.style.color = '#222';
-          tooltip.style.boxShadow = '0 2px 8px #e0e3e7';
-          tooltip.style.display = 'none';
-          tooltip.style.zIndex = '9999';
-          document.body.appendChild(tooltip);
-        }
-        canvas.onmousemove = function(e) {
-          const rect = canvas.getBoundingClientRect();
-          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-          let found = null;
-          for (const d of dots) {
-            if (Math.abs(d.x-mx)<7 && Math.abs(d.y-my)<7) { found = d; break; }
-          }
-          if (found) {
-            tooltip.style.display = 'block';
-            tooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
-            // Always above the graph
-            tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
-            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
-          } else {
-            tooltip.style.display = 'none';
-          }
-        };
-        canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
-        // Maximize on click
-        canvas.onclick = function() {
-          // Create overlay
-          const overlay = document.createElement('div');
-          overlay.style.position = 'fixed';
-          overlay.style.top = '0';
-          overlay.style.left = '0';
-          overlay.style.width = '100vw';
-          overlay.style.height = '100vh';
-          overlay.style.background = 'rgba(0,0,0,0.5)';
-          overlay.style.zIndex = '4000';
-          overlay.style.display = 'flex';
-          overlay.style.alignItems = 'center';
-          overlay.style.justifyContent = 'center';
-          overlay.onclick = function(e) { if (e.target === overlay) document.body.removeChild(overlay); };
-          // Content
-          const modal = document.createElement('div');
-          modal.style.background = '#fff';
-          modal.style.borderRadius = '16px';
-          modal.style.padding = '2rem 2.5rem';
-          modal.style.boxShadow = '0 8px 32px #b3c6e0';
-          modal.style.position = 'relative';
-          // Close button
-          const closeBtn = document.createElement('button');
-          closeBtn.textContent = '\u00D7';
-          closeBtn.style.position = 'absolute';
-          closeBtn.style.top = '18px';
-          closeBtn.style.right = '18px';
-          closeBtn.style.background = 'none';
-          closeBtn.style.border = 'none';
-          closeBtn.style.fontSize = '2rem';
-          closeBtn.style.color = '#888';
-          closeBtn.style.cursor = 'pointer';
-          closeBtn.onclick = function() { document.body.removeChild(overlay); };
-          modal.appendChild(closeBtn);
-          // Large canvas
-          const bigCanvas = document.createElement('canvas');
-          bigCanvas.width = 900;
-          bigCanvas.height = 350;
-          bigCanvas.style.display = 'block';
-          bigCanvas.style.margin = '0 auto';
-          modal.appendChild(bigCanvas);
-          overlay.appendChild(modal);
-          document.body.appendChild(overlay);
-          // Redraw the graph on bigCanvas
-          const bigCtx = bigCanvas.getContext('2d');
-          // Show only last 5 transactions
-          let bigPoints = points;
-          if (bigPoints.length > 5) bigPoints = bigPoints.slice(-5);
-          // Axes (remove Y axis/date)
-          bigCtx.strokeStyle = '#bbb'; bigCtx.beginPath(); bigCtx.moveTo(80,30); bigCtx.lineTo(80,320); bigCtx.lineTo(870,320); bigCtx.stroke();
-          // Y axis labels removed
-          // X axis labels (dates)
-          bigCtx.font = '16px sans-serif'; bigCtx.fillStyle = '#888';
-          bigCtx.textAlign = 'center';
-          let step = Math.max(1, Math.floor(bigPoints.length/4));
-          for (let i=0; i<bigPoints.length; i+=step) {
-            let d = bigPoints[i].t;
-            bigCtx.fillText(d.toLocaleDateString(), 80+790*(d.getTime()-t0)/(t1-t0||1), 340);
-          }
-          // Draw lines
-          function drawBigLine(key, color) {
-            bigCtx.strokeStyle = color; bigCtx.beginPath();
-            let started = false;
-            for (const p of bigPoints) {
-              if (p[key] == null) continue;
-              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
-              if (!started) { bigCtx.moveTo(x,y); started=true; } else bigCtx.lineTo(x,y);
-            }
-            bigCtx.stroke();
-          }
-          drawBigLine('in_stock', '#1a7f37');
-          drawBigLine('in_use', '#b59f00');
-          drawBigLine('scraped', '#dc3545');
-          // Draw points for hover
-          let bigDots = [];
-          function drawBigDots(key, color) {
-            for (const p of bigPoints) {
-              if (p[key] == null) continue;
-              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
-              bigCtx.beginPath(); bigCtx.arc(x, y, 7, 0, 2*Math.PI);
-              bigCtx.fillStyle = color; bigCtx.fill();
-              bigDots.push({x, y, key, val: p[key], date: p.t});
-            }
-          }
-          drawBigDots('in_stock', '#1a7f37');
-          drawBigDots('in_use', '#b59f00');
-          drawBigDots('scraped', '#dc3545');
-          // Legend
-          bigCtx.font = '18px sans-serif'; bigCtx.textAlign = 'left';
-          bigCtx.fillStyle = '#1a7f37'; bigCtx.fillText('In Stock', 750, 60);
-          bigCtx.fillStyle = '#b59f00'; bigCtx.fillText('In Use', 750, 90);
-          bigCtx.fillStyle = '#dc3545'; bigCtx.fillText('Scraped', 750, 120);
-          // Tooltip on hover (always above graph)
-          let bigTooltip = document.getElementById('bigHistoryGraphTooltip');
-          if (!bigTooltip) {
-            bigTooltip = document.createElement('div');
-            bigTooltip.id = 'bigHistoryGraphTooltip';
-            bigTooltip.style.position = 'fixed';
-            bigTooltip.style.pointerEvents = 'none';
-            bigTooltip.style.background = '#fff';
-            bigTooltip.style.border = '1px solid #bbb';
-            bigTooltip.style.borderRadius = '6px';
-            bigTooltip.style.padding = '6px 16px';
-            bigTooltip.style.fontSize = '16px';
-            bigTooltip.style.color = '#222';
-            bigTooltip.style.boxShadow = '0 2px 8px #e0e3e7';
-            bigTooltip.style.display = 'none';
-            bigTooltip.style.zIndex = '9999';
-            document.body.appendChild(bigTooltip);
-          }
-          bigCanvas.onmousemove = function(e) {
-            const rect = bigCanvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-            let found = null;
-            for (const d of bigDots) {
-              if (Math.abs(d.x-mx)<12 && Math.abs(d.y-my)<12) { found = d; break; }
-            }
-            if (found) {
-              bigTooltip.style.display = 'block';
-              bigTooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
-              // Always above the graph
-              bigTooltip.style.left = (rect.left + rect.width/2 - bigTooltip.offsetWidth/2) + 'px';
-              bigTooltip.style.top = (rect.top - bigTooltip.offsetHeight - 16) + 'px';
-            } else {
-              bigTooltip.style.display = 'none';
-            }
-          };
-          bigCanvas.onmouseleave = function() { bigTooltip.style.display = 'none'; };
-        };
+        ctx.font = '12px sans-serif'; 
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#1a7f37'; 
+        ctx.fillText('● Stock', 220, 22);
+        ctx.fillStyle = '#856404'; 
+        ctx.fillText('● In Use', 220, 38);
+        ctx.fillStyle = '#dc3545'; 
+        ctx.fillText('● Scraped', 220, 54);
       } else if (ctx) {
         ctx.clearRect(0,0,320,120);
         ctx.font = '14px sans-serif';
         ctx.fillStyle = '#888';
-        ctx.fillText('Not enough data for graph', 60, 65);
+        ctx.textAlign = 'center';
+        ctx.fillText('Not enough data for graph', 160, 65);
+      }
+      
+      // Add click handler to maximize graph
+      if (canvas && points.length > 1) {
+        canvas.addEventListener('click', function() {
+          maximizeGraph(points);
+        });
       }
     }
 
-    function closeInfoPopup(btn) {
-      // Remove the entire overlay popup (the parent of the content div)
-      let overlay = btn.closest('div');
-      // Traverse up to find the overlay (the one with fixed position and 100vw/100vh)
-      while (overlay && overlay.parentNode && overlay !== document.body) {
-        if (
-          overlay.style &&
-          overlay.style.position === 'fixed' &&
-          overlay.style.width === '100vw' &&
-          overlay.style.height === '100vh'
-        ) {
-          break;
-        }
-        overlay = overlay.parentNode;
+    function maximizeGraph(points) {
+      const graphPopup = document.createElement('div');
+      graphPopup.className = 'modal-overlay';
+      graphPopup.style.display = 'flex';
+      graphPopup.style.zIndex = '4000';
+      
+      const graphContent = document.createElement('div');
+      graphContent.className = 'modal-content';
+      graphContent.style.maxWidth = 'min(70rem, 95vw)';
+      graphContent.innerHTML = `
+        <button onclick="this.closest('.modal-overlay').remove()" class="modal-close">&times;</button>
+        <div class="modal-header">
+          <div class="modal-icon">📊</div>
+          <h3 class="modal-title">History Graph</h3>
+        </div>
+        <div style="display:flex; justify-content:center; background:var(--bg-light); padding:2rem; border-radius:0.75rem;">
+          <canvas id="maximizedGraph" width="800" height="400"></canvas>
+        </div>
+        <div style="text-align:center; margin-top:1.5rem;">
+          <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-primary">Close</button>
+        </div>
+      `;
+      graphPopup.appendChild(graphContent);
+      document.body.appendChild(graphPopup);
+      
+      // Draw maximized graph
+      const maxCanvas = graphContent.querySelector('#maximizedGraph');
+      const maxCtx = maxCanvas.getContext('2d');
+      
+      let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
+      let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
+      if (min === Infinity) min = 0;
+      if (max === -Infinity) max = 1;
+      const t0 = points[0].t.getTime();
+      const t1 = points[points.length-1].t.getTime();
+      function tx(t) { return 80 + 640 * (t.getTime()-t0)/(t1-t0||1); }
+      function ty(val) { return 350 - 280 * ((val-min)/(max-min||1)); }
+      
+      maxCtx.clearRect(0,0,800,400);
+      maxCtx.strokeStyle = '#ddd'; 
+      maxCtx.lineWidth = 2;
+      maxCtx.beginPath(); 
+      maxCtx.moveTo(80,50); 
+      maxCtx.lineTo(80,360); 
+      maxCtx.lineTo(740,360); 
+      maxCtx.stroke();
+      
+      // Y axis labels
+      maxCtx.font = '14px sans-serif';
+      maxCtx.fillStyle = '#666';
+      maxCtx.textAlign = 'right';
+      for (let i = 0; i <= 5; i++) {
+        const val = min + (max - min) * i / 5;
+        const y = 350 - 280 * i / 5;
+        maxCtx.fillText(Math.round(val), 70, y + 5);
+        maxCtx.strokeStyle = '#eee';
+        maxCtx.beginPath();
+        maxCtx.moveTo(80, y);
+        maxCtx.lineTo(740, y);
+        maxCtx.stroke();
       }
+      
+      // X axis dates
+      maxCtx.font = '14px sans-serif'; 
+      maxCtx.fillStyle = '#666';
+      maxCtx.textAlign = 'center';
+      let step = Math.max(1, Math.floor(points.length/8));
+      for (let i=0; i<points.length; i+=step) {
+        let d = points[i].t;
+        maxCtx.fillText(d.toLocaleDateString(), tx(d), 380);
+      }
+      
+      // Draw lines
+      function drawLine(key, color) {
+        maxCtx.strokeStyle = color; 
+        maxCtx.lineWidth = 3;
+        maxCtx.beginPath();
+        let started = false;
+        for (const p of points) {
+          if (p[key] == null) continue;
+          const x = tx(p.t), y = ty(p[key]);
+          if (!started) { maxCtx.moveTo(x,y); started=true; } else maxCtx.lineTo(x,y);
+        }
+        maxCtx.stroke();
+        
+        // Draw points
+        maxCtx.fillStyle = color;
+        for (const p of points) {
+          if (p[key] == null) continue;
+          const x = tx(p.t), y = ty(p[key]);
+          maxCtx.beginPath();
+          maxCtx.arc(x, y, 5, 0, 2 * Math.PI);
+          maxCtx.fill();
+        }
+      }
+      drawLine('in_stock', '#1a7f37');
+      drawLine('in_use', '#856404');
+      drawLine('scraped', '#dc3545');
+      
+      // Legend
+      maxCtx.font = '16px sans-serif'; 
+      maxCtx.textAlign = 'left';
+      maxCtx.fillStyle = '#1a7f37'; 
+      maxCtx.fillText('● In Stock', 600, 40);
+      maxCtx.fillStyle = '#856404'; 
+      maxCtx.fillText('● In Use', 600, 65);
+      maxCtx.fillStyle = '#dc3545'; 
+      maxCtx.fillText('● Scraped', 600, 90);
+      
+      // Close on overlay click
+      graphPopup.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.remove();
+        }
+      });
+    }
+
+    function closeInfoPopup(btn) {
+      let overlay = btn.closest('.modal-overlay');
       if (overlay && overlay.parentNode === document.body) {
         document.body.removeChild(overlay);
       }
-      // Re-show the main sublevel popup if it was hidden (ensure it's visible)
       document.getElementById('sublevelPopup').style.display = 'flex';
     }
-    // Prepare sublevel history data for JS
+    
+    // Prepare history data
     window.sublevelHistoryData = {};
     {% for sub in subitems %}
     window.sublevelHistoryData['{{ sub.id }}'] = JSON.parse(`[
@@ -994,9 +1447,6 @@
       {% endfor %}
     ]`);
     {% endfor %}
-    document.addEventListener('contextmenu', function (e) {
-      e.preventDefault();
-    });
 
     // Form submissions
     document.getElementById('editSubItemForm').onsubmit = function(e) {
@@ -1010,6 +1460,7 @@
 
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
+      // Show error modal if present
       var errorModal = document.getElementById('errorModal');
       var errorMsg = document.getElementById('errorModalMsg');
       if (errorModal && errorMsg && errorMsg.textContent.trim().length > 0) {
@@ -1021,15 +1472,25 @@
         card.addEventListener('click', function(e) {
           if (e.target.classList.contains('sublevel-checkbox') || 
               e.target.closest('.card-actions') || 
-              e.target.classList.contains('sublevel-note')) {
+              e.target.classList.contains('sublevel-note') ||
+              e.target.closest('.card-checkbox-wrapper')) {
             return;
           }
           const id = this.dataset.id;
-          const name = this.querySelector('.sublevel-name').textContent;
+          const name = this.querySelector('.sublevel-name').textContent.trim();
           const inStock = this.dataset.inStock;
           const inUse = this.dataset.inUse;
           const scraped = this.dataset.scraped;
           openSublevelPopup(id, name, inStock, inUse, scraped);
+        });
+      });
+      
+      // Close modals on overlay click
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.style.display = 'none';
+          }
         });
       });
     });
@@ -1047,8 +1508,7 @@
     document.getElementById('sublevel-sort-select').addEventListener('change', function() {
       const sortBy = this.value;
       const grid = document.getElementById('sublevel-grid');
-      const cards = Array.from(grid.children);
-      // Map select values to dataset keys
+      const cards = Array.from(grid.querySelectorAll('.sublevel-card'));
       const keyMap = {
         name: 'name',
         in_stock: 'inStock',
@@ -1056,42 +1516,41 @@
         scraped: 'scraped'
       };
       const dataKey = keyMap[sortBy] || 'name';
+      
       cards.sort((a, b) => {
         if (dataKey === 'name') {
-          return a.dataset.name.localeCompare(b.dataset.name);
+          return (a.dataset.name || '').localeCompare(b.dataset.name || '');
         } else {
-          return parseInt(b.dataset[dataKey]) - parseInt(a.dataset[dataKey]);
+          return parseInt(b.dataset[dataKey] || 0) - parseInt(a.dataset[dataKey] || 0);
         }
       });
+      
       cards.forEach(card => grid.appendChild(card));
     });
 
     // Bulk selection
     document.getElementById('select-all-sublevels').addEventListener('change', function() {
       const checked = this.checked;
-      document.querySelectorAll('.sublevel-checkbox').forEach(cb => {
-        if (cb !== this) cb.checked = checked;
+      document.querySelectorAll('.sublevel-card .sublevel-checkbox').forEach(cb => {
+        cb.checked = checked;
       });
       updateBulkState();
     });
 
     function updateBulkState() {
-      const checkboxes = document.querySelectorAll('.sublevel-checkbox');
-      // Only count checked checkboxes with a non-empty value
-      const checked = Array.from(document.querySelectorAll('.sublevel-checkbox:checked')).filter(cb => cb.value);
+      const checked = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).filter(cb => cb.value);
       document.getElementById('bulk-delete-sublevels-btn').disabled = checked.length === 0;
       document.getElementById('bulk-update-sublevels-btn').disabled = checked.length === 0;
     }
 
-    document.querySelectorAll('.sublevel-checkbox').forEach(cb => {
+    document.querySelectorAll('.sublevel-card .sublevel-checkbox').forEach(cb => {
       cb.addEventListener('change', updateBulkState);
     });
 
-    // Bulk operations
+    // Bulk delete
     document.getElementById('bulk-delete-sublevels-btn').addEventListener('click', function() {
-      // Only collect checked checkboxes with a non-empty value
-      const ids = Array.from(document.querySelectorAll('.sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
-      if (!ids.length || !confirm('Delete selected sub items?')) return;
+      const ids = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
+      if (!ids.length || !confirm(`Delete ${ids.length} selected sub item(s)? This action cannot be undone.`)) return;
       
       fetch('/stream/{{ selected_stream }}/sublevels/bulk-delete/', {
         method: 'POST',
@@ -1103,15 +1562,18 @@
             const card = document.querySelector('.sublevel-card[data-id="'+id+'"]');
             if (card) card.remove();
           });
-          alert('Deleted ' + data.deleted + ' sub items.');
+          alert(`✅ Successfully deleted ${data.deleted} sub item(s).`);
+          document.getElementById('select-all-sublevels').checked = false;
+          updateBulkState();
         } else {
-          alert('Error: ' + (data.error || 'Unable to delete'));
+          alert('❌ Error: ' + (data.error || 'Unable to delete'));
         }
-      }).catch(() => alert('Request failed'));
+      }).catch(() => alert('❌ Request failed. Please try again.'));
     });
 
+    // Bulk update
     document.getElementById('bulk-update-sublevels-btn').addEventListener('click', function() {
-      const ids = Array.from(document.querySelectorAll('.sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
+      const ids = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
       const notes = {};
       ids.forEach(id => {
         const note = document.querySelector('.sublevel-note[data-id="'+id+'"]');
@@ -1124,22 +1586,17 @@
         body: JSON.stringify({notes: notes})
       }).then(r => r.json()).then(data => {
         if (data.success) {
-          alert('Updated notes for selected sub items.');
+          alert('✅ Successfully updated notes for selected sub items.');
         } else {
-          alert('Error: ' + (data.error || 'Unable to update'));
+          alert('❌ Error: ' + (data.error || 'Unable to update'));
         }
-      }).catch(() => alert('Request failed'));
+      }).catch(() => alert('❌ Request failed. Please try again.'));
     });
 
     // Export functionality
     document.getElementById('export-sublevels-btn').addEventListener('click', function() {
       window.location.href = '/stream/{{ selected_stream }}/sublevels/export/';
     });
-
-    // Disable context menu
-    // document.addEventListener('contextmenu', function (e) {
-    //   e.preventDefault();
-    // });
     </script>
   </body>
 </html>
