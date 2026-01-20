@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}IGT MoS Inventory{% endblock %}</title>
     {% load static %}
     {% load product_filters %}
-    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NOBG.png' %}" />
     <link rel="stylesheet" href="/static/products/style.css">
     <style>
         body, html {
@@ -14,7 +15,9 @@
             color: #222;
             background: #f4f6f8;
             margin: 0;
+            overflow-x: hidden;
         }
+        
         .top-bar {
             color: #222;
             font-size: 1rem;
@@ -28,30 +31,48 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
+            width: 100%;
             box-sizing: border-box;
             z-index: 1000;
         }
         
-        .top-bar .logout-btn {
-            margin-left: 1.2rem;
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-
-        .hidden {
-            display: none !important;
+        
+        .logo-section img {
+            height: 32px;
+            width: auto;
+            margin-right: 1rem;
         }
-
-        /* Smooth navigation link hover effects */
-        .top-left a {
+        
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        
+        .nav-links a, .nav-links button {
+            color: #005fa3;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.08rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
             position: relative;
         }
-
-        .top-left a:hover {
-            color: #003d7a !important;
+        
+        .nav-links a:hover {
+            color: #003d7a;
             transform: translateY(-1px);
         }
-
-        .top-left a::after {
+        
+        .nav-links a::after {
             content: '';
             position: absolute;
             bottom: -4px;
@@ -61,9 +82,214 @@
             background: #005fa3;
             transition: width 0.3s ease;
         }
-
-        .top-left a:hover::after {
+        
+        .nav-links a:hover::after {
             width: 100%;
+        }
+        
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+            padding: 8px;
+            z-index: 1002;
+        }
+        
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #005fa3;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 66px;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 999;
+            max-height: calc(100vh - 66px);
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .mobile-menu a {
+            display: block;
+            padding: 1rem 2rem;
+            color: #005fa3;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+        
+        .mobile-menu a:hover {
+            background: #f4f6f8;
+        }
+        
+        .mobile-user-info {
+            display: none;
+            padding: 1rem 2rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e3e7;
+        }
+        
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .top-bar .logout-btn {
+            margin-left: 1.2rem;
+            padding: 0.5rem 1rem;
+            background: #dc3545;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+        
+        .top-bar .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
+        /* More Dropdown */
+        .more-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .more-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border: 1px solid #e0e3e7;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 1001;
+            margin-top: 0.5rem;
+        }
+        
+        .more-dropdown-content.active {
+            display: block;
+        }
+        
+        .more-dropdown-content a {
+            display: block;
+            color: #005fa3;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.8rem 1.2rem;
+            font-size: 1.08rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .more-dropdown-content a:last-child {
+            border-bottom: none;
+        }
+        
+        .more-dropdown-content a:hover {
+            background: #f4f6f8;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .nav-links a, .nav-links button {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .top-bar {
+                padding: 0.9rem 1.5rem;
+            }
+            
+            .nav-links a, .nav-links button {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .top-right {
+                display: none;
+            }
+            
+            .mobile-user-info {
+                display: block;
+            }
+            
+            .logo-section img {
+                height: 28px;
+            }
+            
+            .top-bar {
+                padding: 0.7rem 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-section img {
+                height: 24px;
+            }
+            
+            .mobile-menu a {
+                padding: 0.8rem 1rem;
+                font-size: 0.95rem;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -71,35 +297,40 @@
 <body>
     {% with stream=stream|default:selected_stream|default:' ' %}
     <div class="top-bar">
-        <div class="top-left">
-            <img src="/static/products/philips.png" alt="Philips Logo" style="height:32px;width:auto;margin-right:1.2rem;vertical-align:middle;">
-            <a href="/dashboard/" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">Home</a>
-            <a href="{% url 'category_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Categories</a>
-            <a href="{% url 'product_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Products</a>
+        <div class="logo-section">
+            <img src="/static/products/philips.png" alt="Philips Logo">
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <!-- Desktop Navigation -->
+        <div class="nav-links">
+            <a href="/dashboard/">Home</a>
+            <a href="{% url 'category_list_stream' stream %}">{{ stream }} Categories</a>
+            <a href="{% url 'product_list_stream' stream %}">{{ stream }} Products</a>
             {% if user|is_admin %}
-            <a href="{% url 'sub_level_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Sub-Level Data</a>
-            <a href="{% url 'sub_level_tool_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Sub-Level Tools</a>
+            <a href="{% url 'sub_level_list_stream' stream %}">{{ stream }} Sub-Level Data</a>
+            <a href="{% url 'sub_level_tool_list_stream' stream %}">{{ stream }} Sub-Level Tools</a>
             {% endif %}
-            <a href="{% url 'location_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} Location</a>
-            <a href="{% url 'system_allocation_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;transition:all 0.3s ease;">{{ stream }} System Allocation</a>
+            <a href="{% url 'location_list_stream' stream %}">{{ stream }} Location</a>
+            <a href="{% url 'system_allocation_stream' stream %}">{{ stream }} System Allocation</a>
             
             <!-- More dropdown for additional navigation items -->
             {% if '/notes' not in request.path %}
-            <div style="position:relative;display:inline-block;">
-                <button id="moreNavBtn" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;">
+            <div class="more-dropdown">
+                <button id="moreNavBtn" style="color:#005fa3;font-weight:600;text-decoration:none;font-size:1.08rem;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;">
                     More <span style="font-size:0.8rem;">▼</span>
                 </button>
-                <div id="moreNavDropdown" style="display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #e0e3e7;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:200px;z-index:1001;margin-top:0.5rem;">
-                    <a href="{% url 'allocation_tree_stream' stream %}" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;border-bottom:1px solid #f0f0f0;">{{ stream }} Allocation Tree</a>
-                    {% if user|can_manage_users %}
-                    <!-- <a href="/users/" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;border-bottom:1px solid #f0f0f0;">Users</a> -->
-                    {% endif %}
-                    <!-- <a href="{% url 'faq_stream' stream %}" style="display:block;color:#005fa3;font-weight:600;text-decoration:none;padding:0.8rem 1.2rem;font-size:1.08rem;">Help / FAQ</a> -->
+                <div id="moreNavDropdown" class="more-dropdown-content">
+                    <a href="{% url 'allocation_tree_stream' stream %}">{{ stream }} Allocation Tree</a>
                 </div>
-
             </div>
             {% endif %}
         </div>
+        
         <div class="top-right">
             {% if user.is_authenticated %}
                 <strong>{{ user.username }}</strong> | Last login: <strong>{{ user.last_login|date:'Y-m-d H:i:s' }}</strong>
@@ -107,11 +338,83 @@
             {% endif %}
         </div>
     </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        {% if user.is_authenticated %}
+        <div class="mobile-user-info">
+            <strong>{{ user.username }}</strong><br>
+            <small>Last login: {{ user.last_login|date:'Y-m-d H:i:s' }}</small>
+        </div>
+        {% endif %}
+        <a href="/dashboard/">Home</a>
+        <a href="{% url 'category_list_stream' stream %}">{{ stream }} Categories</a>
+        <a href="{% url 'product_list_stream' stream %}">{{ stream }} Products</a>
+        {% if user|is_admin %}
+        <a href="{% url 'sub_level_list_stream' stream %}">{{ stream }} Sub-Level Data</a>
+        <a href="{% url 'sub_level_tool_list_stream' stream %}">{{ stream }} Sub-Level Tools</a>
+        {% endif %}
+        <a href="{% url 'location_list_stream' stream %}">{{ stream }} Location</a>
+        <a href="{% url 'system_allocation_stream' stream %}">{{ stream }} System Allocation</a>
+        {% if '/notes' not in request.path %}
+        <a href="{% url 'allocation_tree_stream' stream %}">{{ stream }} Allocation Tree</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" style="color:#dc3545;">Logout</a>
+        {% endif %}
+    </div>
     {% endwith %}
     {% block content %}{% endblock %}
     {% block extra_body %}{% endblock %}
     
     <script>
+// Hamburger Menu Toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+    });
+    
+    // Close mobile menu when clicking a link
+    const mobileLinks = mobileMenu.querySelectorAll('a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        });
+    });
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        }
+    });
+}
+
+// More navigation dropdown (desktop)
+const moreNavBtn = document.getElementById('moreNavBtn');
+const moreNavDropdown = document.getElementById('moreNavDropdown');
+
+if (moreNavBtn && moreNavDropdown) {
+    moreNavBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        moreNavDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!moreNavBtn.contains(e.target) && !moreNavDropdown.contains(e.target)) {
+            moreNavDropdown.classList.remove('active');
+        }
+    });
+}
+
 // Inactivity logout logic for all pages
 let inactivityTimeout, countdownInterval;
 let countdownModal;
@@ -122,7 +425,7 @@ function resetInactivityTimer() {
   clearInterval(countdownInterval);
   if (countdownModal) countdownModal.style.display = 'none';
   countdown = 60;
-  inactivityTimeout = setTimeout(showCountdown, 10 * 60 * 1000); // 4 min
+  inactivityTimeout = setTimeout(showCountdown, 10 * 60 * 1000); // 10 min
 }
 
 function showCountdown() {
@@ -168,38 +471,6 @@ function showCountdown() {
 });
 
 resetInactivityTimer();
-
-// More navigation dropdown
-document.addEventListener('DOMContentLoaded', function() {
-    const moreNavBtn = document.getElementById('moreNavBtn');
-    const moreNavDropdown = document.getElementById('moreNavDropdown');
-    
-    if (moreNavBtn && moreNavDropdown) {
-        moreNavBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            moreNavDropdown.style.display = moreNavDropdown.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!moreNavBtn.contains(e.target) && !moreNavDropdown.contains(e.target)) {
-                moreNavDropdown.style.display = 'none';
-            }
-        });
-        
-        // Add hover effect to dropdown items
-        const dropdownItems = moreNavDropdown.querySelectorAll('a');
-        dropdownItems.forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                this.style.background = '#f4f6f8';
-            });
-            item.addEventListener('mouseleave', function() {
-                this.style.background = '#fff';
-            });
-        });
-    }
-});
-
 </script>
 
 <style>
