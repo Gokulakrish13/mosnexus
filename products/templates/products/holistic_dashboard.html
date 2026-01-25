@@ -10,177 +10,863 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
-        /* Philips Logo */
-        .philips-logo {
-            height: 90px;
-            width: auto;
-            position: fixed;
-            top: 27px;
-            right: 30px;
-            z-index: 900;
+        :root {
+            --primary: #0066cc;
+            --primary-light: #0077e6;
+            --primary-dark: #004d99;
+            --primary-darker: #003366;
+            --accent: #0891b2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-hover: rgba(0, 102, 204, 0.3);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
-        /* Home Icon */
-        .home-icon {
-            position: fixed;
-            top: 30px;
-            right: 150px;
-            z-index: 901;
-            transition: all 0.3s ease;
-        }
-        .home-icon:hover {
-            transform: scale(1.1);
-        }
-        .home-icon img {
-            height: 45px;
-            width: 45px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-            background: white;
-            border-radius: 10px;
-            padding: 8px;
-        }
-    </style>
-    <style>
-        body {
-            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
-            min-height: 100vh;
-        }
-        .dashboard-header {
-            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .stats-card {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            border-left: 4px solid;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .stats-card.available { border-left-color: #28a745; }
-        .stats-card.allocated { border-left-color: #007bff; }
-        .stats-card.maintenance { border-left-color: #ffc107; }
-        .stats-card.total { border-left-color: #6c757d; }
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: bold;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .stats-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .filter-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .badge-status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .badge-available { background: #d4edda; color: #155724; }
-        .badge-allocated { background: #cce5ff; color: #004085; }
-        .badge-maintenance { background: #fff3cd; color: #856404; }
-        .badge-reserved { background: #e2e3e5; color: #383d41; }
-        .badge-offline { background: #f8d7da; color: #721c24; }
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .btn-action {
-            padding: 0.375rem 0.75rem;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        .btn-action:hover {
-            transform: scale(1.05);
-        }
-        .week-data-cell {
-            font-size: 0.85rem;
-            text-align: center;
-        }
-        .utilization-bar {
-            height: 5px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 0.25rem;
-        }
-        .utilization-fill {
+        
+        /* Subtle Background Pattern */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            transition: width 0.3s;
+            z-index: -1;
+            background: #ffffff;
         }
-        .utilization-low { background: #28a745; }
-        .utilization-medium { background: #ffc107; }
-        .utilization-high { background: #dc3545; }
-        .priority-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 3px;
+        
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle at 70% 30%, rgba(0, 102, 204, 0.04) 0%, transparent 60%);
         }
-        .priority-low { background: #d1ecf1; color: #0c5460; }
-        .priority-medium { background: #fff3cd; color: #856404; }
-        .priority-high { background: #f8d7da; color: #721c24; }
-        .priority-critical { background: #dc3545; color: white; }
-        .toolbar-section {
+        
+        .bg-animation::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle at 30% 70%, rgba(8, 145, 178, 0.03) 0%, transparent 60%);
+        }
+        
+        .bg-grid {
+            display: none;
+        }
+        
+        /* Corporate Top Navigation */
+        .corporate-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.75rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav-logo {
+            height: 36px;
+            opacity: 0.95;
+        }
+        
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-title-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+        
+        .nav-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .nav-btn.primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.4);
+        }
+        
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+            margin: 0 0.5rem;
+        }
+        
+        /* Main Container */
+        .main-container {
+            padding: 5.5rem 2rem 2rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        /* Hero Header */
+        .hero-header {
+            position: relative;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0, 102, 204, 0.1) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 102, 204, 0.1) 100%);
+            border-radius: 0 20px 20px 0;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(0, 102, 204, 0.1);
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 500px;
+        }
+        
+        .hero-actions {
+            position: absolute;
+            top: 50%;
+            right: 2.5rem;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 1;
+        }
+        
+        .hero-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .hero-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+        
+        .hero-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.4);
+        }
+        
+        .hero-btn.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .hero-btn.secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            position: relative;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--stat-color, var(--primary));
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--stat-color, var(--primary));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card.total { --stat-color: #64748b; }
+        .stat-card.available { --stat-color: #10b981; }
+        .stat-card.allocated { --stat-color: #3b82f6; }
+        .stat-card.maintenance { --stat-color: #f59e0b; }
+        .stat-card.offline { --stat-color: #ef4444; }
+        .stat-card.reserved { --stat-color: #8b5cf6; }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            background: rgba(var(--stat-color-rgb, 100, 116, 139), 0.15);
+            color: var(--stat-color, var(--text-secondary));
+        }
+        
+        .stat-card.total .stat-icon { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+        .stat-card.available .stat-icon { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .stat-card.allocated .stat-icon { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .stat-card.maintenance .stat-icon { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .stat-card.offline .stat-icon { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .stat-card.reserved .stat-icon { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Filter Section */
+        .filter-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
+        }
+        
+        .filter-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+        }
+        
+        .filter-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .filter-btn.primary:hover {
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .filter-btn.secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+        
+        /* Table Section */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
         }
-        .bulk-actions {
-            display: none;
-            background: #f8f9fa;
+        
+        .table-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .table-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .table-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(0, 102, 204, 0.1);
+        }
+        
+        .table-btn.success:hover {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .table-body {
+            padding: 0;
+        }
+        
+        /* Custom Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead th {
+            padding: 1rem 1rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        
+        .data-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .data-table tbody tr:hover {
+            background: rgba(0, 102, 204, 0.05);
+        }
+        
+        .data-table tbody td {
             padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-align: center;
+            vertical-align: middle;
         }
-        .bulk-actions.show {
-            display: block;
+        
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
         }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .status-badge.available {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-badge.allocated {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .status-badge.maintenance {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-badge.reserved {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        /* Priority Badges */
+        .priority-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .priority-chip.low {
+            background: rgba(14, 165, 233, 0.15);
+            color: #0ea5e9;
+        }
+        
+        .priority-chip.medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+        
+        .priority-chip.high {
+            background: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+        }
+        
+        .priority-chip.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            animation: pulse-critical 2s infinite;
+        }
+        
+        @keyframes pulse-critical {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Utilization Progress */
+        .util-cell {
+            min-width: 100px;
+        }
+        
+        .util-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+        
+        .util-bar {
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .util-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .util-fill.low { background: linear-gradient(90deg, #10b981, #34d399); }
+        .util-fill.medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .util-fill.high { background: linear-gradient(90deg, #ef4444, #f87171); }
+        
+        /* Action Buttons */
+        .action-group {
+            display: flex;
+            gap: 0.35rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.view:hover {
+            background: rgba(14, 165, 233, 0.15);
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+        
+        .action-btn.edit:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+        
+        .action-btn.calendar:hover {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+            color: #10b981;
+        }
+        
+        .action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .action-btn.graph:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+        
+        .project-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            background: rgba(0, 102, 204, 0.1);
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .project-week {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(8, 145, 178, 0.1));
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .bulk-actions-bar.show {
+            display: flex;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .hero-actions {
+                position: static;
+                transform: none;
+                margin-top: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .corporate-nav {
+                padding: 0.5rem 1rem;
+            }
+            
+            .main-container {
+                padding: 5rem 1rem 1rem;
+            }
+            
+            .hero-title {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Print Styles */
         @media print {
             .no-print { display: none !important; }
-            .stats-card { break-inside: avoid; }
+            .corporate-nav { display: none; }
+            .main-container { padding-top: 0; }
         }
-        /* System Card Styling */
-        .system-card {
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
+        
+        /* DataTable Overrides */
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px !important;
+            padding: 0.5rem !important;
         }
-        .system-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 95, 163, 0.2) !important;
-            border-left-color: #005fa3 !important;
+        
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: var(--text-secondary) !important;
+            padding-top: 1rem !important;
         }
-        /* Graph View Modal Styling */
-        #graphViewModal {
-            display: none !important;
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: var(--text-secondary) !important;
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            margin: 0 2px !important;
         }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: rgba(0, 102, 204, 0.1) !important;
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+        }
+    </style>
+    <style>
         #graphViewModal.show {
             display: block !important;
         }
@@ -189,12 +875,12 @@
             margin: 1.75rem auto;
         }
         #graphViewModal .modal-content {
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid #e9ecef;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e8f0;
         }
         /* Ensure backdrop is visible */
         .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5) !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
             z-index: 9998 !important;
         }
         /* Ensure Tag Project Modal is visible when shown */
@@ -204,308 +890,314 @@
         </style>
     </head>
     <body>
-        <!-- Home Icon -->
-        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
-            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
-        </a>
-
-        <!-- Philips Logo -->
-        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
+        <!-- Animated Background -->
+        <div class="bg-animation"></div>
+        <div class="bg-grid"></div>
         
-<div class="container-fluid py-4">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header shadow-lg">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>
-                    Holistic Systems Dashboard
-                </h1>
-                <p class="mb-0 mt-2 opacity-75">Advanced System Availability & Allocation Management</p>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex justify-content-end" style="margin-right: 60px;">
-                       <div class="btn-group" role="group" style="margin-top: 35px;">
-                        <a href="{% url 'holistic_system_create' %}" class="btn btn-light btn-lg">
-                            <i class="fas fa-plus me-1"></i> Add System
-                        </a>
-                        <button type="button" class="btn btn-light btn-lg dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'holistic_export_excel' %}">
-                                <i class="fas fa-file-excel text-success me-2"></i>Export to Excel
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'holistic_export_pdf' %}">
-                                <i class="fas fa-file-pdf text-danger me-2"></i>Export to PDF
-                            </a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-2">
-            <div class="stats-card total">
-                <div class="stats-number text-secondary">{{ total_systems }}</div>
-                <div class="stats-label">Total Systems</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card available">
-                <div class="stats-number text-success">{{ available_count }}</div>
-                <div class="stats-label">Available</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card allocated">
-                <div class="stats-number text-primary">{{ allocated_count }}</div>
-                <div class="stats-label">Allocated</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card maintenance">
-                <div class="stats-number text-warning">{{ maintenance_count }}</div>
-                <div class="stats-label">Maintenance</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card" style="border-left-color: #f8d7da;">
-                <div class="stats-number" style="color: #dc3545;">{{ offline_count }}</div>
-                <div class="stats-label">Offline</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card" style="border-left-color: #e2e3e5;">
-                <div class="stats-number" style="color: #383d41;">{{ reserved_count }}</div>
-                <div class="stats-label">Reserved</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="filter-section no-print">
-        <form method="get" id="filterForm" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-search me-1"></i>Search</label>
-                  <input type="text" class="form-control" name="q" value="{{ search_query }}" 
-                      placeholder="Sr No, Owner, STMi, Location...">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-filter me-1"></i>Status</label>
-                <select class="form-select" name="status">
-                    <option value="">All Statuses</option>
-                    {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-calendar-week me-1"></i>Week Filter</label>
-                <select class="form-select" name="week">
-                    <option value="">Current Week (W{{ current_week }})</option>
-                    {% for week in recent_weeks %}
-                    <option value="{{ week.value }}" {% if week_filter == week.value %}selected{% endif %}>
-                        {{ week.label }} {{ week.year }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="fas fa-filter me-1"></i> Apply Filters
-                </button>
-                <button type="button" class="btn btn-outline-secondary flex-fill" onclick="resetFilters()">
-                    <i class="fas fa-undo me-1"></i> Reset
-                </button>
-            </div>
-        </form>
-        
-        <script>
-            function resetFilters() {
-                // Clear all filter values
-                document.querySelector('input[name="q"]').value = '';
-                document.querySelector('select[name="status"]').value = '';
-                document.querySelector('select[name="week"]').value = '';
-                
-                // Submit form to apply reset (redirect to page without filters)
-                window.location.href = window.location.pathname;
-            }
-        </script>
-    </div>
-
-    <!-- Bulk Actions -->
-    <div class="bulk-actions" id="bulkActions">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Bulk Action</label>
-                <select class="form-select" id="bulkActionType">
-                    <option value="">Select Action...</option>
-                    <option value="system_availability">Change Status</option>
-                    <option value="priority">Change Priority</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Value</label>
-                <select class="form-select" id="bulkActionValue">
-                    <option value="">Select Value...</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <button type="button" class="btn btn-primary" onclick="applyBulkAction()">
-                    <i class="fas fa-check me-1"></i> Apply to Selected
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="cancelBulkAction()">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Table -->
-    <div class="table-container">
-        <div class="toolbar-section no-print">
-            <div>
-                <button type="button" class="btn btn-outline-primary" onclick="toggleBulkSelection()">
-                    <i class="fas fa-check-square me-1"></i> Bulk Select
-                </button>
-                <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
-                    <i class="fas fa-sync-alt me-1"></i> Refresh
-                </button>
-                <button type="button" class="btn btn-outline-success" onclick="openGraphView()">
-                    <i class="fas fa-chart-pie me-1"></i> Graph View
-                </button>
-            </div>
-            <div>
-                <span class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Showing {{ systems.count }} system{{ systems.count|pluralize }}
+        <!-- Corporate Navigation -->
+        <nav class="corporate-nav no-print">
+            <div class="nav-brand">
+                <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
+                <span class="nav-title">
+                    Holistic Systems
                 </span>
             </div>
+            <div class="nav-actions">
+                <div class="nav-divider"></div>
+                <a href="{% url 'holistic_export_excel' %}" class="nav-btn" title="Export to Excel">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{% url 'holistic_export_pdf' %}" class="nav-btn" title="Export to PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <div class="nav-divider"></div>
+                <a href="/faq/" class="nav-btn" title="Help & FAQ">
+                    <i class="fas fa-question-circle"></i>
+                </a>
+                <a href="/dashboard/" class="nav-btn" title="Go to Dashboard">
+                    <i class="fas fa-home"></i>
+                </a>
+            </div>
+        </nav>
+        
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Hero Header -->
+            <div class="hero-header">
+                <div class="hero-content">
+                    <h1 class="hero-title">Holistic Systems Dashboard</h1>
+                    <p class="hero-subtitle">Advanced system availability monitoring, allocation management, and utilization analytics</p>
+                </div>
+                <div class="hero-actions">
+                    <a href="{% url 'holistic_system_create' %}" class="hero-btn primary">
+                        <i class="fas fa-plus"></i>
+                        Add System
+                    </a>
+                    <button type="button" class="hero-btn secondary" onclick="openGraphView()">
+                        <i class="fas fa-chart-pie"></i>
+                        Analytics
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="stat-value">{{ total_systems }}</div>
+                    <div class="stat-label">Total Systems</div>
+                </div>
+                <div class="stat-card available">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">{{ available_count }}</div>
+                    <div class="stat-label">Available</div>
+                </div>
+                <div class="stat-card allocated">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-value">{{ allocated_count }}</div>
+                    <div class="stat-label">Allocated</div>
+                </div>
+                <div class="stat-card maintenance">
+                    <div class="stat-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-value">{{ maintenance_count }}</div>
+                    <div class="stat-label">Maintenance</div>
+                </div>
+                <div class="stat-card offline">
+                    <div class="stat-icon">
+                        <i class="fas fa-power-off"></i>
+                    </div>
+                    <div class="stat-value">{{ offline_count }}</div>
+                    <div class="stat-label">Offline</div>
+                </div>
+                <div class="stat-card reserved">
+                    <div class="stat-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="stat-value">{{ reserved_count }}</div>
+                    <div class="stat-label">Reserved</div>
+                </div>
+            </div>
+            
+            <!-- Filter Section -->
+            <div class="filter-card no-print">
+                <div class="filter-title">
+                    <i class="fas fa-sliders-h"></i>
+                    Filter & Search
+                </div>
+                <form method="get" id="filterForm">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label><i class="fas fa-search"></i> Search</label>
+                            <input type="text" class="filter-input" name="q" value="{{ search_query }}" 
+                                   placeholder="Sr No, Owner, STMi, Location...">
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fas fa-flag"></i> Status</label>
+                            <select class="filter-input" name="status">
+                                <option value="">All Statuses</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fas fa-calendar-week"></i> Week</label>
+                            <select class="filter-input" name="week">
+                                <option value="">Current Week (W{{ current_week }})</option>
+                                {% for week in recent_weeks %}
+                                <option value="{{ week.value }}" {% if week_filter == week.value %}selected{% endif %}>
+                                    {{ week.label }} {{ week.year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group" style="flex: 0 0 auto; min-width: auto;">
+                            <label>&nbsp;</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" class="filter-btn primary">
+                                    <i class="fas fa-filter"></i> Apply
+                                </button>
+                                <button type="button" class="filter-btn secondary" onclick="resetFilters()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <script>
+                function resetFilters() {
+                    document.querySelector('input[name="q"]').value = '';
+                    document.querySelector('select[name="status"]').value = '';
+                    document.querySelector('select[name="week"]').value = '';
+                    window.location.href = window.location.pathname;
+                }
+            </script>
+
+    <!-- Main Table -->
+    <div class="table-card">
+        <div class="table-header no-print">
+            <div class="table-title">
+                <i class="fas fa-list"></i>
+                Systems Overview
+                <span style="font-weight: 400; color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">
+                    {{ systems.count }} system{{ systems.count|pluralize }}
+                </span>
+            </div>
+            <div class="table-actions">
+                <button type="button" class="table-btn" onclick="toggleBulkSelection()">
+                    <i class="fas fa-check-square"></i> Select
+                </button>
+                <button type="button" class="table-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+        
+        <!-- Bulk Actions inside table card -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+            <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                <i class="fas fa-check-square me-1"></i> <span id="selectedCountInner">0</span> selected
+            </span>
+            <select class="filter-input" id="bulkActionTypeInner" style="width: auto; padding: 0.5rem 1rem;">
+                <option value="">Select Action...</option>
+                <option value="system_availability">Change Status</option>
+                <option value="priority">Change Priority</option>
+            </select>
+            <select class="filter-input" id="bulkActionValueInner" style="width: auto; padding: 0.5rem 1rem;">
+                <option value="">Select Value...</option>
+            </select>
+            <button type="button" class="filter-btn primary" onclick="applyBulkAction()" style="padding: 0.5rem 1rem;">
+                <i class="fas fa-check"></i> Apply
+            </button>
+            <button type="button" class="filter-btn secondary" onclick="cancelBulkAction()" style="padding: 0.5rem 1rem;">
+                Cancel
+            </button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover" id="holisticTable">
-                <thead class="table-light text-center">
-                    <tr>
-                        <th class="no-print text-center">
-                            <input type="checkbox" id="selectAll" class="form-check-input">
-                        </th>
-                        <th class="text-center">Sr No</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Allocation to Sl No</th>
-                        <th class="text-center">Location</th>
-                        <th class="text-center">STMi Number</th>
-                        <th class="text-center">System Owner</th>
-                        <th class="text-center">ECR#</th>
-                        <th class="text-center">Test Engineer</th>
-                        <th class="text-center">Priority</th>
-                        <th class="text-center">Current Week</th>
-                        <th class="text-center">Current Week Project</th>
-                        <th class="no-print text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    {% for system in systems %}
-                    <tr>
-                        <td class="no-print">
-                            <input type="checkbox" class="form-check-input row-select" value="{{ system.id }}">
+        <div class="table-body">
+            <div style="overflow-x: auto;">
+                <table class="data-table" id="holisticTable">
+                    <thead>
+                        <tr>
+                            <th class="no-print" style="width: 50px;">
+                                <input type="checkbox" id="selectAll" style="accent-color: var(--primary);">
+                            </th>
+                            <th>Sr No</th>
+                            <th>Status</th>
+                            <th>Allocation</th>
+                            <th>Location</th>
+                            <th>STMi Number</th>
+                            <th>Owner</th>
+                            <th>ECR#</th>
+                            <th>Engineer</th>
+                            <th>Priority</th>
+                            <th>Utilization</th>
+                            <th>Project</th>
+                            <th class="no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for system in systems %}
+                        <tr>
+                            <td class="no-print">
+                                <input type="checkbox" class="row-select" value="{{ system.id }}" style="accent-color: var(--primary);">
+                            </td>
+                            <td><strong style="color: var(--primary-light);">{{ system.sr_no }}</strong></td>
+                            <td>
+                                <span class="status-badge {{ system.system_availability }}">
+                                    {{ system.get_system_availability_display }}
+                                </span>
+                            </td>
+                            <td style="color: var(--text-secondary);">{{ system.allocation_to_sl_no|default:"-" }}</td>
+                            <td style="color: var(--text-secondary);">{{ system.location_info|default:"-" }}</td>
+                            <td style="color: var(--text-secondary);">{{ system.stmi_number|default:"-" }}</td>
+                            <td style="color: var(--text-secondary);">{{ system.system_owner|default:"-" }}</td>
+                            <td style="color: var(--text-secondary);">{{ system.ecr_number|default:"-" }}</td>
+                            <td style="color: var(--text-secondary);">{{ system.test_engineer|default:"-" }}</td>
+                            <td>
+                                <span class="priority-chip {{ system.priority }}">
+                                    {{ system.get_priority_display }}
+                                </span>
+                            </td>
+                            <td class="util-cell">
+                                {% if system.current_week_data %}
+                                    <div class="util-value" style="color: {% if system.current_week_data.utilization_percentage < 60 %}#10b981{% elif system.current_week_data.utilization_percentage < 85 %}#f59e0b{% else %}#ef4444{% endif %}">
+                                        {{ system.current_week_data.utilization_percentage }}%
+                                    </div>
+                                    <div class="util-bar">
+                                        <div class="util-fill {% if system.current_week_data.utilization_percentage < 60 %}low{% elif system.current_week_data.utilization_percentage < 85 %}medium{% else %}high{% endif %}" 
+                                             style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
+                                    </div>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">No data</span>
+                                {% endif %}
                         </td>
-                        <td><strong>{{ system.sr_no }}</strong></td>
-                        <td>
-                            <span class="badge-status badge-{{ system.system_availability }}">
-                                {{ system.get_system_availability_display }}
-                            </span>
-                        </td>
-                        <td>{{ system.allocation_to_sl_no|default:"-" }}</td>
-                        <td>{{ system.location_info|default:"-" }}</td>
-                        <td>{{ system.stmi_number|default:"-" }}</td>
-                        <td>{{ system.system_owner|default:"-" }}</td>
-                        <td>{{ system.ecr_number|default:"-" }}</td>
-                        <td>{{ system.test_engineer|default:"-" }}</td>
-                        <td>
-                            <span class="priority-badge priority-{{ system.priority }}">
-                                {{ system.get_priority_display }}
-                            </span>
-                        </td>
-                        <td class="week-data-cell">
-                            {% if system.current_week_data %}
-                                <div>{{ system.current_week_data.allocation_status|truncatewords:3 }}</div>
-                                <div class="utilization-bar">
-                                    {% if system.current_week_data.utilization_percentage < 60 %}
-                                    <div class="utilization-fill utilization-low" 
-                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
-                                    {% elif system.current_week_data.utilization_percentage < 85 %}
-                                    <div class="utilization-fill utilization-medium" 
-                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
-                                    {% else %}
-                                    <div class="utilization-fill utilization-high" 
-                                         style="width: {{ system.current_week_data.utilization_percentage }}%"></div>
-                                    {% endif %}
+                            <td>
+                                {% if system.current_week_data.project %}
+                                    <div class="project-badge">
+                                        {{ system.current_week_data.project.name }}
+                                    </div>
+                                    <div class="project-week">W{{ system.current_week_data.week_number }} {{ system.current_week_data.year }}</div>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">Not assigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="no-print">
+                                <div class="action-group">
+                                    <a href="{% url 'holistic_system_detail' system.id %}" 
+                                       class="action-btn view" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'holistic_system_edit' system.id %}" 
+                                       class="action-btn edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="action-btn calendar" 
+                                            onclick="updateWeekData({{ system.id }})" title="Update Week Data">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </button>
+                                    <a href="{% url 'holistic_system_delete' system.id %}" 
+                                       class="action-btn delete" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <button type="button" class="action-btn graph" title="View Graph" onclick="showSystemGraph('{{ system.id|escapejs }}', '{{ system.sr_no|escapejs }}')">
+                                        <i class="fas fa-chart-pie"></i>
+                                    </button>
+                                    <script type="application/json" id="system-current-project-{{ system.id }}">{{ system.current_project_id_json|safe }}</script>
                                 </div>
-                                <small class="text-muted">{{ system.current_week_data.utilization_percentage }}%</small>
-                            {% else %}
-                                <span class="text-muted">No data</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if system.current_week_data.project %}
-                                <div class="mb-1">
-                                    <span class="badge bg-primary">{{ system.current_week_data.project.name }}</span>
-                                    <small class="text-muted d-block mt-1">W{{ system.current_week_data.week_number }} {{ system.current_week_data.year }}</small>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="13" style="padding: 4rem 2rem; text-align: center;">
+                                <div style="color: var(--text-muted);">
+                                    <i class="fas fa-server" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                    <p style="font-size: 1.1rem; margin-bottom: 1rem;">No systems found</p>
+                                    <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">Create your first system to get started.</p>
+                                    <a href="{% url 'holistic_system_create' %}" class="hero-btn primary" style="display: inline-flex;">
+                                        <i class="fas fa-plus"></i> Add System
+                                    </a>
                                 </div>
-                            {% else %}
-                                <span class="text-muted">No project assigned</span>
-                            {% endif %}
-                        </td>
-                        <td class="no-print">
-                            <div class="action-buttons">
-                                <a href="{% url 'holistic_system_detail' system.id %}" 
-                                   class="btn btn-sm btn-info btn-action" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'holistic_system_edit' system.id %}" 
-                                   class="btn btn-sm btn-warning btn-action" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-success btn-action" 
-                                        onclick="updateWeekData({{ system.id }})" title="Update Week Data">
-                                    <i class="fas fa-calendar-plus"></i>
-                                </button>
-                                <a href="{% url 'holistic_system_delete' system.id %}" 
-                                   class="btn btn-sm btn-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                                <!-- Weekly Project Assignment Button -->
-                                <button type="button" class="btn btn-sm btn-secondary btn-action" title="Assign Weekly Projects" onclick="assignWeeklyProjects('{{ system.id|escapejs }}')">
-                                    <i class="fas fa-calendar-alt"></i> Weekly Projects
-                                </button>
-                                <!-- Graph View Button -->
-                                <button type="button" class="btn btn-sm btn-info btn-action" title="View Allocation Graph" onclick="showSystemGraph('{{ system.id|escapejs }}', '{{ system.sr_no|escapejs }}')">
-                                    <i class="fas fa-chart-pie"></i>
-                                </button>
-                                <script type="application/json" id="system-current-project-{{ system.id }}">{{ system.current_project_id_json|safe }}</script>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="12" class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No systems found. Create your first system to get started.</p>
-                            <a href="{% url 'holistic_system_create' %}" class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i> Add System
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    
+</div> <!-- End main-container -->
 </div>
 
 <!-- Weekly Data Modal -->
@@ -1034,7 +1726,7 @@ function getWeekNumber(date) {
             });
         }
         // Bulk action type change (use vanilla JS for reliability)
-        var bulkActionType = document.getElementById('bulkActionType');
+        var bulkActionType = document.getElementById('bulkActionTypeInner');
         if (bulkActionType) {
             bulkActionType.addEventListener('change', function() {
                 updateBulkActionValues(this.value);
@@ -1056,15 +1748,20 @@ function getWeekNumber(date) {
     }
     function toggleBulkActions() {
         const checked = document.querySelectorAll('.row-select:checked').length;
-        const bulkActions = document.getElementById('bulkActions');
-        if (checked > 0) {
-            bulkActions.classList.add('show');
-        } else {
-            bulkActions.classList.remove('show');
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCountEl = document.getElementById('selectedCountInner');
+        if (selectedCountEl) selectedCountEl.textContent = checked;
+        if (bulkActionsBar) {
+            if (checked > 0) {
+                bulkActionsBar.classList.add('show');
+            } else {
+                bulkActionsBar.classList.remove('show');
+            }
         }
     }
     function updateBulkActionValues(action) {
-        const valueSelect = document.getElementById('bulkActionValue');
+        const valueSelect = document.getElementById('bulkActionValueInner');
+        if (!valueSelect) return;
         valueSelect.innerHTML = '<option value="">Select Value...</option>';
         if (action === 'system_availability') {
             const statuses = [
@@ -1090,8 +1787,8 @@ function getWeekNumber(date) {
         }
     }
     function applyBulkAction() {
-        const action = document.getElementById('bulkActionType').value;
-        const value = document.getElementById('bulkActionValue').value;
+        const action = document.getElementById('bulkActionTypeInner').value;
+        const value = document.getElementById('bulkActionValueInner').value;
         const selectedIds = Array.from(document.querySelectorAll('.row-select:checked'))
             .map(cb => cb.value);
         if (!action || !value) {

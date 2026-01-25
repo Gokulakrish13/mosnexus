@@ -1,31 +1,441 @@
 {% extends 'products/base.html' %}
+{% load static %}
 {% block title %}{% if edit %}Edit Location{% else %}Add Location{% endif %}{% endblock %}
+
 {% block content %}
-<div class="form-bg" style="background:#f4f6f8;min-height:100vh;display:flex;justify-content:center;align-items:center;">
-    <div class="form-container" style="background:#fff;box-shadow:0 8px 32px rgba(0,95,163,0.13);border-radius:18px;padding:2.5rem;width:98%;max-width:480px;animation:fadeIn 0.5s ease-in-out;">
-        <a href="{% url 'location_list_stream' stream %}" style="display:block;margin-bottom:1.2rem;color:#005fa3;font-weight:600;text-decoration:underline;font-size:1.08rem;">&larr; Back to List</a>
-        <h2 style="font-size:2rem;font-weight:900;color:#005fa3;letter-spacing:1.2px;margin-bottom:2rem;">{% if edit %}Edit Location{% else %}Add Location{% endif %}</h2>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-light: #0077e6;
+        --primary-dark: #004d99;
+        --accent: #0891b2;
+        --success: #10b981;
+        --success-dark: #059669;
+        --warning: #f59e0b;
+        --bg-body: #ffffff;
+        --bg-card: #ffffff;
+        --bg-secondary: #f1f5f9;
+        --bg-tertiary: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .form-page-container {
+        min-height: calc(100vh - 60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--bg-body);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .form-card {
+        width: 100%;
+        max-width: 560px;
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Form Header */
+    .form-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .form-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .form-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .form-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-icon-wrapper i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .form-header-text h1 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: white;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .form-header-text p {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+
+    /* Header Back Button */
+    .header-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .header-back-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .header-back-btn i {
+        font-size: 0.75rem;
+    }
+
+    /* Messages */
+    .messages-container {
+        padding: 1rem 1.5rem;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .message-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        background: rgba(0, 102, 204, 0.1);
+        border: 1px solid rgba(0, 102, 204, 0.2);
+        border-radius: 10px;
+        color: var(--primary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .message-item i {
+        font-size: 1rem;
+    }
+
+    /* Form Body */
+    .form-body {
+        padding: 2rem;
+    }
+
+    /* Form Group */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.6rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        font-size: 0.85rem;
+    }
+
+    .required-indicator {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.2s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+        background: var(--bg-card);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .input-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .input-hint i {
+        font-size: 0.7rem;
+    }
+
+    /* Form Footer */
+    .form-footer {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-action {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-family: inherit;
+    }
+
+    .btn-action.primary {
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-action.primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-action.secondary {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    .btn-action.secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Footer Note */
+    .footer-note {
+        text-align: center;
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .footer-note-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .footer-note-text i {
+        margin-right: 0.35rem;
+        color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .form-page-container {
+            padding: 1rem;
+        }
+
+        .form-header {
+            padding: 1.5rem;
+        }
+
+        .form-header-text h1 {
+            font-size: 1.2rem;
+        }
+
+        .form-body {
+            padding: 1.5rem;
+        }
+
+        .form-footer {
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="form-page-container">
+    <div class="form-card">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-header-content">
+                <div class="form-header-left">
+                    <div class="form-icon-wrapper">
+                        <i class="fas fa-{% if edit %}edit{% else %}plus-circle{% endif %}"></i>
+                    </div>
+                    <div class="form-header-text">
+                        <h1>{% if edit %}Edit Location{% else %}Add New Location{% endif %}</h1>
+                        <p>{% if edit %}Update location information{% else %}Enter details for the new location{% endif %}</p>
+                    </div>
+                </div>
+                <a href="{% url 'location_list_stream' stream %}" class="header-back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
         {% if messages %}
-            <ul class="messages" role="alert" aria-live="assertive" style="list-style:none;padding:0;margin-bottom:1.2rem;">
-                {% for message in messages %}
-                    <li style="background:#e3f0fa;color:#005fa3;padding:0.7rem 1.2rem;border-radius:6px;margin-bottom:0.7rem;font-size:1.08rem;">{{ message }}</li>
-                {% endfor %}
-            </ul>
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message-item">
+                <i class="fas fa-info-circle"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
         {% endif %}
-        <form method="post" novalidate style="display:flex;flex-direction:column;gap:1.2rem;">
+
+        <!-- Form -->
+        <form method="post" novalidate>
             {% csrf_token %}
             <input type="hidden" name="stream" value="{{ stream }}">
-            <label for="name" style="font-size:1.08rem;font-weight:700;color:#005fa3;margin-bottom:0.3rem;">Location Name:</label>
-            <input type="text" id="name" name="name" value="{{ location.name|default:'' }}" autocomplete="off" required style="border:1px solid #e3e8ee;border-radius:8px;padding:0.7rem 1.2rem;font-size:1.08rem;background:#f7fafc;">
-            <label for="address" style="font-size:1.08rem;font-weight:700;color:#005fa3;margin-bottom:0.3rem;">Address:</label>
-            <textarea id="address" name="address" rows="3" style="border:1px solid #e3e8ee;border-radius:8px;padding:0.7rem 1.2rem;font-size:1.08rem;background:#f7fafc;resize:vertical;">{{ location.address|default:'' }}</textarea>
-            <button type="submit" class="btn btn-success" style="font-size:1.13rem;padding:0.9rem 2rem;border-radius:8px;font-weight:700;margin-top:1.2rem;">{% if edit %}Update Location{% else %}Add Location{% endif %}</button>
+
+            <div class="form-body">
+                <!-- Location Name -->
+                <div class="form-group">
+                    <label class="form-label" for="name">
+                        <i class="fas fa-building"></i>
+                        Location Name
+                        <span class="required-indicator">*</span>
+                    </label>
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           class="form-input"
+                           value="{{ location.name|default:'' }}" 
+                           placeholder="Enter location name"
+                           autocomplete="off" 
+                           required>
+                    <div class="input-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Enter a unique, descriptive name for this location
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group">
+                    <label class="form-label" for="address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Address
+                    </label>
+                    <textarea id="address" 
+                              name="address" 
+                              class="form-textarea"
+                              rows="3" 
+                              placeholder="Enter full address (optional)">{{ location.address|default:'' }}</textarea>
+                    <div class="input-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Include Floor and Room Number if applicable
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Footer -->
+            <div class="form-footer">
+                <a href="{% url 'location_list_stream' stream %}" class="btn-action secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-action primary">
+                    <i class="fas fa-{% if edit %}save{% else %}plus{% endif %}"></i>
+                    {% if edit %}Update Location{% else %}Add Location{% endif %}
+                </button>
+            </div>
         </form>
+
+        <!-- Footer Note -->
+        <div class="footer-note">
+            <p class="footer-note-text">
+                <i class="fas fa-info-circle"></i>
+                Fields marked with <span class="required-indicator">*</span> are required
+            </p>
+        </div>
     </div>
 </div>
+
 <script>
-      document.addEventListener('contextmenu', function (e) {
+    document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
-      });
-    </script>
+    });
+</script>
 {% endblock %}

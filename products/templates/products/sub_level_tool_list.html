@@ -4,374 +4,990 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sub Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub Tools Hub</title>
     <link rel="stylesheet" href="/static/products/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --tool-primary: #0369a1;
+            --tool-primary-dark: #075985;
+            --tool-primary-light: #e0f2fe;
+            --tool-secondary: #0284c7;
+            --tool-accent: #0891b2;
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger-color: #ef4444;
+            --danger-light: #fee2e2;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+            --bg-light: #f8fafc;
+            --white: #fff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(124, 58, 237, 0.5); }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body, html {
-            color: #222;
+            color: var(--text-dark);
             font-size: 1rem;
-            background: #f8f9fa;
+            background: var(--white);
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
-        .top-bar {
-            color: #222;
-            font-size: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.9rem 2.5rem;
-            background: #fff;
-            border-bottom: 1px solid #e0e3e7;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            box-sizing: border-box;
-            z-index: 1000;
-        }
+
         .subleveltool-bg {
-            padding-top: 80px;
+            padding-top: 5rem;
             min-height: 100vh;
-            background: #f8f9fa;
-        }        .subleveltool-list-container {
-            max-width: 1450px;
+            background: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .subleveltool-bg::before,
+        .subleveltool-bg::after {
+            display: none;
+        }
+
+        .subleveltool-list-container {
+            max-width: 90rem;
             margin: 0 auto;
             padding: 2rem;
-        }        
-        .header-toolbar-wrapper {
-            display: flex;
-            gap: 4rem;
-            margin-bottom: 2rem;
-            align-items: flex-start;
             position: relative;
+            z-index: 1;
         }
-        .header-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex: 2.5;
-            min-width: 0;
+
+        /* Hero Header - Blue Gradient Theme */
+        .page-header {
+            background: linear-gradient(135deg, #0369a1 0%, #0284c7 40%, #0891b2 100%);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl), 0 0 40px rgba(3, 105, 161, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
         }
-        .add-form-container {
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        
+        .page-header::after {
+            content: '🔧';
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 4rem;
+            opacity: 0.15;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .header-content {
             display: flex;
+            flex-wrap: nowrap;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title-wrapper {
+            display: flex;
+            align-items: center;
             gap: 1rem;
+            animation: slideInLeft 0.5s ease-out;
         }
+
+        .title-icon {
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
         .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #005fa3;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: var(--white);
             margin: 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.02em;
         }
+        
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
         .add-form {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            flex-wrap: wrap;
-        }        .toolbar-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-wrap: nowrap;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .add-form .form-input {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 0 1.25rem;
+            font-size: 1rem;
+            width: 16rem;
+            height: 2.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .add-form .form-input:focus {
+            outline: none;
+            border-color: white;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .add-form .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .add-form .btn {
+            background: var(--white);
+            color: var(--tool-primary);
+            border: none;
+            font-weight: 700;
+            padding: 0 1.25rem;
+            width: 16rem;
+            height: 2.75rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .add-form .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Stats Cards - Horizontal Layout */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.7s ease-out;
+        }
+        
+        .stat-pill {
             flex: 1;
-            min-width: 320px;
-            max-width: 400px;
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
             position: relative;
-            left: 75px;
+            overflow: hidden;
         }
-        .toolbar-row {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+        
+        .stat-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
         }
-        .search-sort-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }        .bulk-actions-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e3e7;
+        
+        .stat-pill:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
-        .select-all-group {
+        
+        .stat-pill.total::before { background: linear-gradient(180deg, var(--tool-primary), var(--tool-secondary)); }
+        .stat-pill.stock::before { background: var(--success-color); }
+        .stat-pill.use::before { background: var(--warning-color); }
+        .stat-pill.scraped::before { background: var(--danger-color); }
+        
+        .stat-pill-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.25rem;
-            height: 32px;
+            font-size: 1.25rem;
         }
-        .bulk-buttons {
+        
+        .stat-pill.total .stat-pill-icon { background: var(--tool-primary-light); color: var(--tool-primary); }
+        .stat-pill.stock .stat-pill-icon { background: var(--success-light); color: var(--success-color); }
+        .stat-pill.use .stat-pill-icon { background: var(--warning-light); color: var(--warning-color); }
+        .stat-pill.scraped .stat-pill-icon { background: var(--danger-light); color: var(--danger-color); }
+        
+        .stat-pill-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-pill-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+        
+        .stat-pill-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Control Panel - Glass Effect */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(3, 105, 161, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .control-grid {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .control-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            flex: 1;
+            min-width: 12rem;
         }
-        .add-btn {
-            display: inline-block;
-            padding: 0.8rem 1.5rem;
-            background: #005fa3;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 1rem;
+        
+        .control-group .form-input {
+            height: 3rem;
+        }
+        
+        .control-group .btn {
+            height: 3rem;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--tool-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-input {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid var(--border-color);
+            font-size: 0.9375rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background: var(--white);
+            width: 100%;
+            height: 3rem;
+        }
+
+        .form-input:focus {
+            border-color: var(--tool-primary);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+
+        select.form-input {
+            background-image: none;
+            padding-right: 1rem;
+            cursor: pointer;
+        }
+
+        /* Bulk Actions - Blue Theme */
+        .bulk-actions-section {
+            background: linear-gradient(135deg, var(--tool-primary-light), rgba(8, 145, 178, 0.1));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 2px solid var(--tool-primary);
+            position: relative;
+        }
+
+        .bulk-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .select-all-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .custom-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: var(--tool-primary);
+        }
+
+        .select-all-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        .bulk-actions-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons - Purple Theme */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
             font-weight: 600;
             border: none;
-            transition: all 0.2s ease;
             cursor: pointer;
-            margin: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
         }
-        .add-btn:hover {
-            background: #003e6b;
-            transform: translateY(-1px);
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
         }
-        .add-btn:disabled {
-            opacity: 0.6;
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--tool-primary), var(--tool-primary-dark));
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(3, 105, 161, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--tool-accent), #0891b2);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        .form-input {
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid #cfd8dc;
-            font-size: 1rem;
-            transition: border-color 0.2s ease;
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: #005fa3;
-            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
-        }        .subleveltool-grid {
+
+        /* Tool Cards - Unique Design */
+        .subleveltool-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
             gap: 1.5rem;
-            margin-top: -18.5rem;
+            margin-bottom: 2rem;
         }
-        
-        /* Create custom layout: 3 in first row, then 4 in each subsequent row */
-        .subleveltool-grid::before {
-            content: '';
-            grid-column: 4;
-            grid-row: 1;
-        }
-        
-        /* First 3 cards take up first 3 columns of first row */
-        .subleveltool-card:nth-child(1) { grid-column: 1; grid-row: 1; }
-        .subleveltool-card:nth-child(2) { grid-column: 2; grid-row: 1; }
-        .subleveltool-card:nth-child(3) { grid-column: 3; grid-row: 1; }
-        
-        /* Next 4 cards fill the second row */
-        .subleveltool-card:nth-child(4) { grid-column: 1; grid-row: 2; }
-        .subleveltool-card:nth-child(5) { grid-column: 2; grid-row: 2; }
-        .subleveltool-card:nth-child(6) { grid-column: 3; grid-row: 2; }
-        .subleveltool-card:nth-child(7) { grid-column: 4; grid-row: 2; }
-        
-        /* Continue the pattern for subsequent rows */
-        .subleveltool-card:nth-child(8) { grid-column: 1; grid-row: 3; }
-        .subleveltool-card:nth-child(9) { grid-column: 2; grid-row: 3; }
-        .subleveltool-card:nth-child(10) { grid-column: 3; grid-row: 3; }
-        .subleveltool-card:nth-child(11) { grid-column: 4; grid-row: 3; }
+
         .subleveltool-card {
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 12px;
-            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 1.25rem;
+            padding: 0;
             display: flex;
             flex-direction: column;
-            transition: all 0.2s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
-            border: 1px solid #e0e3e7;
+            border: 2px solid var(--border-color);
+            overflow: hidden;
+            animation: scaleIn 0.5s ease-out backwards;
         }
+        
+        .subleveltool-card:nth-child(1) { animation-delay: 0.1s; }
+        .subleveltool-card:nth-child(2) { animation-delay: 0.15s; }
+        .subleveltool-card:nth-child(3) { animation-delay: 0.2s; }
+        .subleveltool-card:nth-child(4) { animation-delay: 0.25s; }
+        .subleveltool-card:nth-child(5) { animation-delay: 0.3s; }
+        .subleveltool-card:nth-child(6) { animation-delay: 0.35s; }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--tool-primary), var(--tool-secondary));
+            padding: 1.25rem;
+            position: relative;
+        }
+        
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: var(--white);
+            border-radius: 1rem 1rem 0 0;
+            transform: translateY(10px);
+        }
+
         .subleveltool-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-            border-color: #005fa3;
+            box-shadow: var(--shadow-xl), 0 0 30px rgba(3, 105, 161, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--tool-primary);
         }
+
+        .card-checkbox-wrapper {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+
+        .subleveltool-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: var(--white);
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateX(10px);
+            z-index: 10;
+        }
+
+        .subleveltool-card:hover .card-actions {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .action-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .edit-btn:hover {
+            background: var(--tool-primary);
+            color: var(--white);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger-color);
+            color: var(--white);
+        }
+
         .subleveltool-icon {
             display: flex;
             justify-content: center;
-            margin-bottom: 1rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
         }
+        
+        .subleveltool-icon-circle {
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .subleveltool-icon img {
+            height: 2.5rem;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+            padding-top: 0.5rem;
+        }
+
         .subleveltool-name {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #005fa3;
+            color: var(--tool-primary);
             margin-bottom: 1rem;
             text-align: center;
+            line-height: 1.4;
         }
+
         .status-badges {
             display: flex;
-            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            justify-content: center;
         }
+
         .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            flex: 1;
+            padding: 0.6rem 0.5rem;
+            border-radius: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
         }
+        
+        .status-badge:hover {
+            transform: translateY(-2px);
+        }
+
+        .badge-label {
+            font-size: 0.65rem;
+            opacity: 0.8;
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
         .badge-stock {
-            background: #e6f7e6;
-            color: #1a7f37;
+            background: linear-gradient(135deg, var(--success-light), #ecfdf5);
+            color: #047857;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
+
         .badge-use {
-            background: #fffbe6;
-            color: #b59f00;
+            background: linear-gradient(135deg, var(--warning-light), #fffbeb);
+            color: #b45309;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
+
         .badge-scraped {
-            background: #ffeaea;
-            color: #dc3545;
+            background: linear-gradient(135deg, var(--danger-light), #fef2f2);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
+
         .subleveltool-note {
             width: 100%;
-            min-height: 60px;
-            border-radius: 8px;
-            border: 1px solid #cfd8dc;
-            font-size: 0.95rem;
-            padding: 0.7rem;
-            resize: vertical;
-            margin-bottom: 1rem;
+            min-height: 3.5rem;
+            border-radius: 0.6rem;
+            border: 2px solid var(--border-color);
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            resize: none;
             outline: none;
-            transition: border-color 0.2s ease;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--bg-light);
         }
+
         .subleveltool-note:focus {
-            border-color: #005fa3;
-            box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
+            border-color: var(--tool-primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            background: var(--white);
         }
-        .card-actions {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: none;
-            gap: 0.5rem;
+
+        .subleveltool-note::placeholder {
+            color: var(--text-light);
+            font-style: italic;
         }
-        .subleveltool-card:hover .card-actions {
-            display: flex;
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, var(--white), var(--tool-primary-light));
+            border-radius: 1.5rem;
+            border: 3px dashed var(--tool-primary);
+            animation: fadeInUp 0.6s ease-out;
         }
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-            font-size: 1.1rem;
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
         }
-        .action-btn:hover {
-            background: rgba(0,0,0,0.1);
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--tool-primary);
+            margin-bottom: 0.5rem;
         }
-        .edit-btn {
-            color: #005fa3;
+
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 1rem;
         }
-        .delete-btn {
-            color: #dc3545;
-        }
-        /* Only style the select-all checkbox in the toolbar */
-        #select-all-subleveltools {
-            position: static;
-            transform: scale(1.1);
-            margin-right: 0.25rem;
-        }
-        #select-all-subleveltools + label {
-            margin-top: 6px;
-        }
-        /* Keep .subleveltool-checkbox for grid cards as is */
-        .subleveltool-card .subleveltool-checkbox {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            transform: scale(1.3);
-            cursor: pointer;
-        }
+
+        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 1rem;
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            flex-wrap: wrap;
         }
+
         .pagination a {
-            padding: 0.7rem 1.2rem;
-            background: #005fa3;
-            color: #fff;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--tool-primary), var(--tool-primary-dark));
+            color: var(--white);
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 0.75rem;
             font-weight: 600;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(3, 105, 161, 0.3);
         }
+
         .pagination a:hover {
-            background: #003e6b;
-        }        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .header-toolbar-wrapper {
-                flex-direction: column;
-                gap: 1.5rem;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(3, 105, 161, 0.4);
+        }
+
+        .page-info {
+            padding: 0.75rem 1.5rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: var(--bg-light);
+            border-radius: 0.75rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            min-width: min(400px, 95vw);
+            max-width: 95vw;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-light);
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+        }
+
+        .modal-close:hover {
+            background: var(--danger-color);
+            color: var(--white);
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-icon {
+            width: 4rem;
+            height: 4rem;
+            background: var(--tool-primary-light);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--tool-primary);
+            margin: 0;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .status-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            gap: 1rem;
+            border: 2px solid;
+        }
+
+        .status-input-label {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-input {
+            width: 5rem;
+            padding: 0.625rem;
+            border-radius: 0.5rem;
+            border: 2px solid;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .status-input:focus {
+            transform: scale(1.05);
+        }
+
+        .stock-input-group {
+            background: var(--success-light);
+            border-color: var(--success-color);
+        }
+
+        .stock-input-label { color: #047857; }
+        .stock-input { border-color: var(--success-color); color: #047857; background: #f0fdf4; }
+
+        .use-input-group {
+            background: var(--warning-light);
+            border-color: var(--warning-color);
+        }
+
+        .use-input-label { color: #b45309; }
+        .use-input { border-color: var(--warning-color); color: #b45309; background: #fffbeb; }
+
+        .scraped-input-group {
+            background: var(--danger-light);
+            border-color: var(--danger-color);
+        }
+
+        .scraped-input-label { color: #dc2626; }
+        .scraped-input { border-color: var(--danger-color); color: #dc2626; background: #fef2f2; }
+
+        /* Responsive Design */
+        @media (max-width: 64rem) {
+            .stats-bar {
+                flex-wrap: wrap;
             }
-            .toolbar-section {
-                max-width: none;
-                min-width: auto;
-                margin-left: 0;
+            
+            .stat-pill {
+                min-width: calc(50% - 0.5rem);
             }
-            .toolbar-row {
-                flex-direction: column;
+            
+            .control-grid {
+                flex-wrap: wrap;
             }
-            .search-sort-group {
-                flex-direction: column;
-            }
-            .bulk-actions-group {
-                flex-direction: column;
-            }
-            .bulk-buttons {
-                flex-direction: row;
-                justify-content: center;
-            }
-            .subleveltool-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            /* Reset grid positioning for tablets */
-            .subleveltool-grid::before {
-                display: none;
-            }
-            .subleveltool-card:nth-child(n) {
-                grid-column: auto;
-                grid-row: auto;
+            
+            .control-group {
+                min-width: 10rem;
             }
         }
-        @media (max-width: 768px) {
+
+        @media (max-width: 48rem) {
             .subleveltool-list-container {
                 padding: 1rem;
             }
-            .header-section,
-            .toolbar-section {
-                padding: 1rem;
+
+            .page-header {
+                padding: 1.5rem;
             }
-            .add-form-container {
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+
+            .add-form {
+                width: 100%;
+            }
+            
+            .add-form .form-input {
+                min-width: auto;
+                flex: 1;
+            }
+            
+            .stats-bar {
                 flex-direction: column;
-                align-items: stretch;
-                text-align: center;
             }
-            .search-sort-group {
+            
+            .stat-pill {
+                width: 100%;
+            }
+            
+            .control-grid {
                 flex-direction: column;
             }
-            .bulk-buttons {
-                flex-direction: column;
+            
+            .control-group {
+                width: 100%;
             }
+
+            .bulk-actions-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .bulk-actions-buttons .btn {
+                width: 100%;
+            }
+
             .subleveltool-grid {
                 grid-template-columns: 1fr;
             }
@@ -379,202 +995,297 @@
     </style>
 </head>
 <body>
+    <!-- Error Messages Modal -->
     {% if messages %}
-      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:4000; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:12px; padding:2rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-          <button onclick="closeErrorModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1rem;">Error</h3>
-          <div id="errorModalMsg" style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">
-            {% for message in messages %}
-              {% if 'already exists' in message or message.tags == 'error' %}
-                {{ message }}
-              {% endif %}
-            {% endfor %}
-          </div>
-          <button onclick="closeErrorModal()" class="add-btn" style="background:#dc3545;">OK</button>
+    <div id="errorModal" class="modal-overlay" style="display: flex;">
+        <div class="modal-content">
+            <button onclick="closeErrorModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: var(--danger-light);">
+                    <i class="fas fa-exclamation-circle" style="color: var(--danger-color);"></i>
+                </div>
+                <h3 class="modal-title" style="color: var(--danger-color);">Error</h3>
+            </div>
+            <div id="errorModalMsg" style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
+                {% for message in messages %}
+                    {% if 'already exists' in message or message.tags == 'error' %}
+                        {{ message }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button onclick="closeErrorModal()" class="btn btn-danger" style="width: 100%;">
+                <i class="fas fa-check"></i> OK
+            </button>
         </div>
-      </div>
-    {% endif %}    <div class="subleveltool-bg">
+    </div>
+    {% endif %}
+
+    <div class="subleveltool-bg">
         <div class="subleveltool-list-container">
-            <!-- Header and Toolbar Wrapper -->
-            <div class="header-toolbar-wrapper">
-                <!-- Header Section (Left Side - 3/4) -->
-                <div class="header-section">
-                    <div class="add-form-container">
-                        <h1 class="page-title">Sub Tools Management</h1>
-                        <form method="post" class="add-form">
-                            {% csrf_token %}
-                            <input type="text" name="subtool_name" placeholder="Add new sub tool..." class="form-input" style="width:220px;" required>
-                            <button type="submit" class="add-btn">+ Add sub tool</button>
-                        </form>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="header-content">
+                    <div class="page-title-wrapper">
+                        <div class="title-icon">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <div>
+                            <h1 class="page-title">Sub Tools Hub</h1>
+                        </div>
+                    </div>
+                    <form method="post" class="add-form">
+                        {% csrf_token %}
+                        <input type="text" name="subtool_name" placeholder="Enter new sub tool name..." class="form-input" required>
+                        <button type="submit" class="btn btn-primary" style="margin-top: -0.1rem;">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Tool</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-pill total">
+                    <div class="stat-pill-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-pill-content">
+                        <div class="stat-pill-value">{{ subtools|length }}</div>
+                        <div class="stat-pill-label">Total Tools</div>
                     </div>
                 </div>
-
-                <!-- Toolbar Section (Right Side - 1/4) -->
-                <div class="toolbar-section">
-                    <div class="toolbar-row">
-                        <div class="search-sort-group">
-                            <input type="text" id="subleveltool-search-input" placeholder="Search Sub Tools..." class="form-input" style="width:100%;">
-                            <select id="subleveltool-sort-select" class="form-input" style="width:100%;">
-                                <option value="name">Sort by Name</option>
-                                <option value="in_stock">Sort by In Stock</option>
-                                <option value="in_use">Sort by In Use</option>
-                                <option value="scraped">Sort by Scraped</option>
-                            </select>
-                        </div>
-                        <button id="export-subleveltools-btn" class="add-btn" style="background:#28a745; width:100%;">📊 Export CSV/Excel</button>
+                <div class="stat-pill stock">
+                    <div class="stat-pill-icon">
+                        <i class="fas fa-box-open"></i>
                     </div>
-                    
-                    <div class="bulk-actions-group">
-                        <div class="select-all-group">
-                            <input type="checkbox" id="select-all-subleveltools" class="subleveltool-checkbox" value="">
-                            <label for="select-all-subleveltools" style="font-size:1rem; font-weight:600;">Select All</label>
-                        </div>
-                        <div class="bulk-buttons">
-                            <button id="bulk-delete-subleveltools-btn" class="add-btn" style="background:#dc3545; width:100%;" disabled>🗑 Bulk Delete</button>
-                            <button id="bulk-update-subleveltools-btn" class="add-btn" style="background:#17a2b8; width:100%;" disabled>✏️ Update Comments</button>
-                        </div>
+                    <div class="stat-pill-content">
+                        <div class="stat-pill-value">{% widthratio total_in_stock 1 1 %}</div>
+                        <div class="stat-pill-label">In Stock</div>
+                    </div>
+                </div>
+                <div class="stat-pill use">
+                    <div class="stat-pill-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="stat-pill-content">
+                        <div class="stat-pill-value">{% widthratio total_in_use 1 1 %}</div>
+                        <div class="stat-pill-label">In Use</div>
+                    </div>
+                </div>
+                <div class="stat-pill scraped">
+                    <div class="stat-pill-icon">
+                        <i class="fas fa-recycle"></i>
+                    </div>
+                    <div class="stat-pill-content">
+                        <div class="stat-pill-value">{% widthratio total_scraped 1 1 %}</div>
+                        <div class="stat-pill-label">Scraped</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Items Grid -->
-            <div class="subleveltool-grid" id="subleveltool-grid">
-                {% for subtool in subtools %}
-                <div class="subleveltool-card" data-name="{{ subtool.name|lower }}" data-id="{{ subtool.id }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
-                    <input type="checkbox" class="subleveltool-checkbox" value="{{ subtool.id }}">
-                    
-                    <div class="subleveltool-icon">
-                        <img src="/static/products/philips.png" alt="Philips Logo" style="height:50px;width:auto;">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-grid">
+                    <div class="control-group">
+                        <label class="control-label"><i class="fas fa-search"></i> Search</label>
+                        <input type="text" id="subleveltool-search-input" placeholder="Search sub tools..." class="form-input">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><i class="fas fa-sort-amount-down"></i> Sort By</label>
+                        <select id="subleveltool-sort-select" class="form-input">
+                            <option value="name">Name (A-Z)</option>
+                            <option value="in_stock">In Stock (High to Low)</option>
+                            <option value="in_use">In Use (High to Low)</option>
+                            <option value="scraped">Scraped (High to Low)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"><i class="fas fa-file-export"></i> Export</label>
+                        <button id="export-subleveltools-btn" class="btn btn-success" style="width: 100%;">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Export CSV</span>
+                        </button>
+                    </div>
+                </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions-section">
+                <div class="bulk-header">
+                    <div class="select-all-wrapper">
+                        <input type="checkbox" id="select-all-subleveltools" class="custom-checkbox">
+                        <label for="select-all-subleveltools" class="select-all-label">Select All Tools</label>
+                    </div>
+                </div>
+                <div class="bulk-actions-buttons">
+                    <button id="bulk-delete-subleveltools-btn" class="btn btn-danger" disabled>
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Bulk Delete</span>
+                    </button>
+                    <button id="bulk-update-subleveltools-btn" class="btn btn-info" disabled>
+                        <i class="fas fa-edit"></i>
+                        <span>Update Comments</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="subleveltool-grid" id="subleveltool-grid">
+            {% for subtool in subtools %}
+            <div class="subleveltool-card" data-name="{{ subtool.name|lower }}" data-id="{{ subtool.id }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
+                <div class="card-header">
+                    <div class="card-checkbox-wrapper">
+                        <input type="checkbox" class="subleveltool-checkbox" value="{{ subtool.id }}">
                     </div>
                     
+                    <div class="card-actions" onclick="event.stopPropagation();">
+                        <button type="button" onclick="event.stopPropagation(); editsubleveltool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Edit" class="action-btn edit-btn"><i class="fas fa-pen"></i></button>
+                        <button type="button" onclick="event.stopPropagation(); openDeletesubleveltool({{ subtool.id }});" class="action-btn delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                    
+                    <div class="subleveltool-icon">
+                        <div class="subleveltool-icon-circle">
+                            <img src="/static/products/philips.png" alt="Tool Icon">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
                     <div class="subleveltool-name">{{ subtool.name }}</div>
                     
                     <div class="status-badges">
-                        <span class="status-badge badge-stock">Stock: {{ subtool.in_stock }}</span>
-                        <span class="status-badge badge-use">Use: {{ subtool.in_use }}</span>
-                        <span class="status-badge badge-scraped">Scraped: {{ subtool.scraped }}</span>
+                        <div class="status-badge badge-stock">
+                            <div class="badge-label">Stock</div>
+                            <div>{{ subtool.in_stock }}</div>
+                        </div>
+                        <div class="status-badge badge-use">
+                            <div class="badge-label">In Use</div>
+                            <div>{{ subtool.in_use }}</div>
+                        </div>
+                        <div class="status-badge badge-scraped">
+                            <div class="badge-label">Scraped</div>
+                            <div>{{ subtool.scraped }}</div>
+                        </div>
                     </div>
                     
-                    <textarea class="subleveltool-note" data-id="{{ subtool.id }}" placeholder="Add note...">{{ subtool.note|default_if_none:'' }}</textarea>
-                    
-                    <div class="card-actions" onclick="event.stopPropagation();">
-                        <button type="button" onclick="event.stopPropagation(); editsubleveltool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Edit" class="action-btn edit-btn">✎</button>
-                        <button type="button" onclick="event.stopPropagation(); openDeletesubleveltool({{ subtool.id }});" class="action-btn delete-btn" title="Delete">🗑</button>
-                    </div>
+                    <textarea class="subleveltool-note" data-id="{{ subtool.id }}" placeholder="Add a note...">{{ subtool.note|default_if_none:'' }}</textarea>
                 </div>
-                {% empty %}
-                <div style="text-align: center; color: #888; width: 100%; padding: 3rem; background: #fff; border-radius: 12px;">
-                    <h3 style="margin-bottom: 1rem;">No Sub Tools found</h3>
-                    <p>Add your first sub tool to get started!</p>
-                </div>
-                {% endfor %}
             </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">🔧</div>
+                <h3 class="empty-title">No Sub Tools Found</h3>
+                <p class="empty-text">Start by adding your first sub tool using the form above!</p>
+            </div>
+            {% endfor %}
+        </div>
 
-            <!-- Pagination -->
-            {% if page_obj %}
-            <div class="pagination">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">← Previous</a>
-                {% endif %}
-                <span style="color: #666; font-weight: 600;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next →</a>
-                {% endif %}
-            </div>
+        <!-- Pagination -->
+        {% if page_obj %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                ← Previous
+            </a>
+            {% endif %}
+            <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                Next →
+            </a>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 
-    <!-- Popup Modal for subleveltool -->
-    <div id="subleveltoolPopup" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:400px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closesubleveltoolPopup()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <button type="button" onclick="showsubleveltoolInfo()" title="Info" style="position:absolute; top:12px; left:12px; background:#e3eefd; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#005fa3; cursor:pointer; font-weight:700;">i</button>
-        
-        <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-          <div style="background:#e3eefd; border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
-            <img src="/static/products/Philips_NoBG.png" alt="Philips Logo" style="height:36px;width:auto;">
-          </div>
-          
-          <h2 id="popupsubleveltoolName" style="color:#005fa3; font-size:1.5rem; font-weight:700; margin-bottom:1.5rem; text-align:center;"></h2>
-          
-          <form id="subleveltoolCountForm" method="post" action="" style="width:100%; max-width:350px;">
-            {% csrf_token %}
-            <input type="hidden" name="subleveltool_id" id="popupsubleveltoolId">
-            <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#e6f7e6; border-radius:8px; padding:1rem;">
-                <label for="popupInStock" style="font-weight:600; color:#1a7f37; font-size:1rem;">In Stock</label>
-                <input type="number" name="in_stock" id="popupInStock" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #b6e2b6; font-size:1rem; background:#f7fff7; text-align:center; color:#1a7f37; font-weight:600;">
-              </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#fffbe6; border-radius:8px; padding:1rem;">
-                <label for="popupInUse" style="font-weight:600; color:#b59f00; font-size:1rem;">In Use</label>
-                <input type="number" name="in_use" id="popupInUse" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffe9a6; font-size:1rem; background:#fffde7; text-align:center; color:#b59f00; font-weight:600;">
-              </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; background:#ffeaea; border-radius:8px; padding:1rem;">
-                <label for="popupScraped" style="font-weight:600; color:#dc3545; font-size:1rem;">Scraped</label>
-                <input type="number" name="scraped" id="popupScraped" min="0" style="width:100px; padding:0.5rem; border-radius:6px; border:1px solid #ffc2c7; font-size:1rem; background:#fff7f8; text-align:center; color:#dc3545; font-weight:600;">
-              </div>
+    <!-- Subtool Popup Modal -->
+    <div id="subleveltoolPopup" class="modal-overlay">
+        <div class="modal-content" style="max-width: min(28rem, 95vw);">
+            <button onclick="closesubleveltoolPopup()" class="modal-close">&times;</button>
+            <button type="button" onclick="showsubleveltoolInfo()" title="View History" style="position: absolute; top: 1rem; left: 1rem; background: var(--tool-primary-light); border: 2px solid var(--tool-primary); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--tool-primary); cursor: pointer; transition: all 0.3s ease;"><i class="fas fa-history"></i></button>
+            
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-wrench" style="color: var(--tool-primary);"></i>
+                </div>
+                <h2 id="popupsubleveltoolName" class="modal-title"></h2>
             </div>
-            <div style="display:flex; justify-content:center; width:100%;">
-              <button type="submit" class="add-btn" style="padding:0.8rem 2rem; font-size:1.1rem;">💾 Save Changes</button>
+            
+            <form id="subleveltoolCountForm" method="post" class="modal-form">
+                {% csrf_token %}
+                <input type="hidden" name="subleveltool_id" id="popupsubleveltoolId">
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; width: 100%;">
+                    <div class="status-input-group stock-input-group">
+                        <label for="popupInStock" class="status-input-label stock-input-label"><i class="fas fa-box-open"></i> In Stock</label>
+                        <input type="number" name="in_stock" id="popupInStock" min="0" class="status-input stock-input">
+                    </div>
+                    <div class="status-input-group use-input-group">
+                        <label for="popupInUse" class="status-input-label use-input-label"><i class="fas fa-cogs"></i> In Use</label>
+                        <input type="number" name="in_use" id="popupInUse" min="0" class="status-input use-input">
+                    </div>
+                    <div class="status-input-group scraped-input-group">
+                        <label for="popupScraped" class="status-input-label scraped-input-label"><i class="fas fa-recycle"></i> Scraped</label>
+                        <input type="number" name="scraped" id="popupScraped" min="0" class="status-input scraped-input">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem; font-size: 1.1rem;">
+                    <i class="fas fa-save"></i>
+                    <span>Save Changes</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Sub Tool Modal -->
+    <div id="editsubtoolModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: min(25rem, 95vw);">
+            <button onclick="closeEditsubtoolModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: rgba(6, 182, 212, 0.1);">
+                    <i class="fas fa-edit" style="color: var(--tool-accent);"></i>
+                </div>
+                <h3 class="modal-title">Edit Sub Tool</h3>
             </div>
-          </form>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Editing: <strong id="editsubtoolTitle" style="color: var(--tool-primary);"></strong>
+            </p>
+            <form id="editsubtoolForm" class="modal-form">
+                <input type="hidden" name="edit_id" id="editsubtoolId">
+                <input type="text" name="new_name" id="editsubtoolName" class="form-input" placeholder="Enter new name..." style="margin-bottom: 1.5rem; width: 100%;" required>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i>
+                    <span>Save Changes</span>
+                </button>
+            </form>
         </div>
-      </div>
     </div>
 
-    <!-- Edit sub tool Modal -->
-    <div id="editsubtoolModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closeEditsubtoolModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <h3 style="color:#005fa3; font-size:1.3rem; font-weight:700; margin-bottom:1.5rem; text-align:center;">
-            Edit sub tool: <span id="editsubtoolTitle"></span>
-        </h3>
-        <form id="editsubtoolForm" style="width:100%; max-width:300px;">
-          <input type="hidden" name="edit_id" id="editsubtoolId">
-          <input type="text" name="new_name" id="editsubtoolName" class="form-input" style="width:100%; margin-bottom:1.5rem;" required>
-          <div style="display:flex; justify-content:center;">
-            <button type="submit" class="add-btn">💾 Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Delete sub tool Modal -->
-    <div id="deletesubtoolModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:2rem; min-width:350px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.2); position:relative; display:flex; flex-direction:column; align-items:center;">
-        <button onclick="closeDeletesubtoolModal()" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
-        <h3 style="color:#dc3545; font-size:1.3rem; font-weight:700; margin-bottom:1rem; text-align:center;">
-        Delete sub tool
-        </h3>
-        <p style="font-size:1rem; color:#333; margin-bottom:1.5rem; text-align:center;">Are you sure you want to delete <strong id="deletesubtoolName"></strong>?</p>
-        <form id="deletesubtoolForm" method="post" action="/stream/{{ selected_stream }}/subleveltooltools/" style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:1rem; align-items:center;">
-        {% csrf_token %}
-        <input type="hidden" name="delete_id" id="deletesubtoolId">
-        <button type="submit" class="add-btn" style="background:#dc3545;">
-            🗑 Delete Item
-        </button>
-        </form>
-      </div>
-    </div>
-
-    {% if messages %}
-      <div id="errorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:4000; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:14px; padding:2rem 2.5rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px #b3c6e0; position:relative; display:flex; flex-direction:column; align-items:center;">
-          <button onclick="closeErrorModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; font-size:2rem; color:#888; cursor:pointer;">&times;</button>
-          <h3 style="color:#dc3545; font-size:1.25rem; font-weight:700; margin-bottom:1.2rem;">Error</h3>
-          <div id="errorModalMsg" style="font-size:1.08rem; color:#333; margin-bottom:1.5rem; text-align:center;">
-            {% for message in messages %}
-              {% if 'already exists' in message or message.tags == 'error' %}
-                {{ message }}
-              {% endif %}
-            {% endfor %}
-          </div>
-          <button onclick="closeErrorModal()" class="add-btn" style="width:100%; padding:0.7rem 0; font-size:1.13rem; border-radius:7px; font-weight:700; background:linear-gradient(90deg,#dc3545 60%,#ff6b6b 100%); color:#fff; border:none;">OK</button>
+    <!-- Delete Sub Tool Modal -->
+    <div id="deletesubtoolModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: min(25rem, 95vw);">
+            <button onclick="closeDeletesubtoolModal()" class="modal-close">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: var(--danger-light);">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                </div>
+                <h3 class="modal-title" style="color: var(--danger-color);">Delete Sub Tool</h3>
+            </div>
+            <p style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
+                Are you sure you want to delete <strong id="deletesubtoolName" style="color: var(--danger-color);"></strong>?
+            </p>
+            <form id="deletesubtoolForm" method="post" action="/stream/{{ selected_stream }}/subleveltooltools/" class="modal-form">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" id="deletesubtoolId">
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Delete Tool</span>
+                </button>
+            </form>
         </div>
-      </div>
-    {% endif %}
+    </div>
 
     <script>
     // Core functions for popup management
@@ -634,8 +1345,9 @@
     function showsubleveltoolInfo() {
       var subleveltoolId = document.getElementById('popupsubleveltoolId').value;
       var history = (window.subleveltoolHistoryData && window.subleveltoolHistoryData[subleveltoolId]) || [];
-      let html = '<div style="font-size:1.08rem; font-weight:600; color:#005fa3; margin-bottom:0.7rem;">subleveltool History</div>';
-      // Week filter dropdown (always show, even if only one week)
+      let html = '<div style="font-size:1.25rem; font-weight:700; color:var(--tool-primary); margin-bottom:1rem; text-align:center;"><i class="fas fa-chart-line"></i> Tool History</div>';
+      
+      // Week filter
       function getISOWeek(d) {
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         var dayNum = d.getUTCDay() || 7;
@@ -644,6 +1356,7 @@
         var weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
         return {week: weekNum, year: d.getUTCFullYear()};
       }
+      
       let weekSet = new Set();
       for (const h of history) {
         let d = new Date(h.at);
@@ -651,54 +1364,70 @@
         weekSet.add(`W${w.week}, ${w.year}`);
         h._week = `W${w.week}, ${w.year}`;
       }
+      
       let weekList = Array.from(weekSet).sort((a,b)=>{
         let [wa, ya] = a.match(/W(\d+), (\d+)/).slice(1).map(Number);
         let [wb, yb] = b.match(/W(\d+), (\d+)/).slice(1).map(Number);
         return yb-ya || wb-wa;
       });
-      html += '<div style="margin-bottom:1rem;">Filter by week: <select id="historyWeekFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
-      html += '<option value="">All</option>';
+      
+      html += '<div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;">';
+      html += '<select id="historyWeekFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Weeks</option>';
       for (const w of weekList) html += `<option value="${w}">${w}</option>`;
-      html += '</select></div>';
-      // User filter dropdown
+      html += '</select>';
+      
+      // User filter
       let users = Array.from(new Set(history.map(h => h.by)));
       if (users.length > 1) {
-        html += '<div style="margin-bottom:1rem;">Filter by user: <select id="historyUserFilter" style="font-size:1rem; padding:0.2rem 0.5rem; border-radius:5px;">';
-        html += '<option value="">All</option>';
+        html += '<select id="historyUserFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Users</option>';
         for (const u of users) html += `<option value="${u}">${u}</option>`;
-        html += '</select></div>';
+        html += '</select>';
       }
-      // Graph placeholder (centered)
-      html += '<div style="display:flex; justify-content:center; margin-bottom:1.2rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
+      html += '</div>';
+      
+      // Graph
+      html += '<div style="display:flex; justify-content:center; margin-bottom:1.5rem; background:var(--bg-light); padding:1rem; border-radius:0.75rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
+      
       if (history.length === 0) {
-        html += '<div style="color:#888;">No history found.</div>';
+        html += '<div style="text-align:center; color:var(--text-muted); padding:2rem; background:var(--bg-light); border-radius:0.75rem;"><i class="fas fa-inbox" style="font-size:2rem; opacity:0.5; display:block; margin-bottom:0.5rem;"></i> No history found.</div>';
       } else {
-        html += '<div style="max-height:220px; overflow-y:auto; width:100%; margin-bottom:0.5rem;"><ul id="historyList" style="padding-left:1.2rem; margin:0;">';
+        html += '<div style="max-height:15rem; overflow-y:auto; background:var(--bg-light); border-radius:0.75rem; padding:1rem;"><ul id="historyList" style="list-style:none; padding:0; margin:0;">';
         for (const entry of history.slice().reverse()) {
           const dateStr = new Date(entry.at).toLocaleString();
-          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:0.5rem;"><span style="font-weight:700;">${entry.action}</span> by <span style="color:#3182ce;">${entry.by}</span> <span style="color:#888;">(${dateStr})</span><br><span style="font-size:0.98rem; color:#444;">${entry.details}</span></li>`;
+          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:1rem; padding:0.75rem; background:var(--white); border-radius:0.5rem; border-left:0.25rem solid var(--tool-primary);">
+            <div style="font-weight:700; color:var(--tool-primary); margin-bottom:0.25rem;">${entry.action}</div>
+            <div style="font-size:0.875rem; color:var(--text-muted);">by <strong style="color:var(--tool-primary);">${entry.by}</strong> • ${dateStr}</div>
+            <div style="font-size:0.9rem; color:var(--text-dark); margin-top:0.375rem;">${entry.details}</div>
+          </li>`;
         }
         html += '</ul></div>';
       }
+      
       const popup = document.createElement('div');
+      popup.className = 'modal-overlay';
+      popup.style.display = 'flex';
+      popup.style.zIndex = '3000';
       popup.style.position = 'fixed';
-      popup.style.top = '0';
-      popup.style.left = '0';
       popup.style.width = '100vw';
       popup.style.height = '100vh';
-      popup.style.background = 'rgba(0,0,0,0.25)';
-      popup.style.zIndex = '3000';
-      popup.style.display = 'flex';
-      popup.style.alignItems = 'center';
-      popup.style.justifyContent = 'center';
+      
       const content = document.createElement('div');
-      content.style.background = '#fff';
-      content.style.borderRadius = '14px';
-      content.style.padding = '2rem 2.5rem';
-      content.style.boxShadow = '0 8px 32px #b3c6e0';
-      content.style.minWidth = '320px';
-      content.style.maxWidth = '95vw';
-      content.innerHTML = html + '<div style="text-align:center; margin-top:1.5rem;"><button onclick="closeInfoPopup(this)" style="padding:0.5rem 1.2rem; border-radius:7px; background:#005fa3; color:#fff; border:none; font-size:1.08rem; font-weight:700; cursor:pointer;">Close</button></div>';
+      content.className = 'modal-content';
+      content.style.maxWidth = '40rem';
+      content.style.position = 'relative';
+      
+      // Add close button
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-close';
+      closeBtn.innerHTML = '&times;';
+      closeBtn.onclick = function() { closeInfoPopup(this); };
+      content.appendChild(closeBtn);
+      
+      // Add content
+      const contentWrapper = document.createElement('div');
+      contentWrapper.innerHTML = html;
+      content.appendChild(contentWrapper);
+      
       popup.appendChild(content);
       document.body.appendChild(popup);
 
@@ -828,133 +1557,7 @@
         canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
         // Maximize on click
         canvas.onclick = function() {
-          // Create overlay
-          const overlay = document.createElement('div');
-          overlay.style.position = 'fixed';
-          overlay.style.top = '0';
-          overlay.style.left = '0';
-          overlay.style.width = '100vw';
-          overlay.style.height = '100vh';
-          overlay.style.background = 'rgba(0,0,0,0.5)';
-          overlay.style.zIndex = '4000';
-          overlay.style.display = 'flex';
-          overlay.style.alignItems = 'center';
-          overlay.style.justifyContent = 'center';
-          overlay.onclick = function(e) { if (e.target === overlay) document.body.removeChild(overlay); };
-          // Content
-          const modal = document.createElement('div');
-          modal.style.background = '#fff';
-          modal.style.borderRadius = '16px';
-          modal.style.padding = '2rem 2.5rem';
-          modal.style.boxShadow = '0 8px 32px #b3c6e0';
-          modal.style.position = 'relative';
-          // Close button
-          const closeBtn = document.createElement('button');
-          closeBtn.textContent = '\u00D7';
-          closeBtn.style.position = 'absolute';
-          closeBtn.style.top = '18px';
-          closeBtn.style.right = '18px';
-          closeBtn.style.background = 'none';
-          closeBtn.style.border = 'none';
-          closeBtn.style.fontSize = '2rem';
-          closeBtn.style.color = '#888';
-          closeBtn.style.cursor = 'pointer';
-          closeBtn.onclick = function() { document.body.removeChild(overlay); };
-          modal.appendChild(closeBtn);
-          // Large canvas
-          const bigCanvas = document.createElement('canvas');
-          bigCanvas.width = 900;
-          bigCanvas.height = 350;
-          bigCanvas.style.display = 'block';
-          bigCanvas.style.margin = '0 auto';
-          modal.appendChild(bigCanvas);
-          overlay.appendChild(modal);
-          document.body.appendChild(overlay);
-          // Redraw the graph on bigCanvas
-          const bigCtx = bigCanvas.getContext('2d');
-          // Show only last 5 transactions
-          let bigPoints = points;
-          if (bigPoints.length > 5) bigPoints = bigPoints.slice(-5);
-          // Axes (remove Y axis/date)
-          bigCtx.strokeStyle = '#bbb'; bigCtx.beginPath(); bigCtx.moveTo(80,30); bigCtx.lineTo(80,320); bigCtx.lineTo(870,320); bigCtx.stroke();
-          // Y axis labels removed
-          // X axis labels (dates)
-          bigCtx.font = '16px sans-serif'; bigCtx.fillStyle = '#888';
-          bigCtx.textAlign = 'center';
-          let step = Math.max(1, Math.floor(bigPoints.length/4));
-          for (let i=0; i<bigPoints.length; i+=step) {
-            let d = bigPoints[i].t;
-            bigCtx.fillText(d.toLocaleDateString(), 80+790*(d.getTime()-t0)/(t1-t0||1), 340);
-          }
-          // Draw lines
-          function drawBigLine(key, color) {
-            bigCtx.strokeStyle = color; bigCtx.beginPath();
-            let started = false;
-            for (const p of bigPoints) {
-              if (p[key] == null) continue;
-              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
-              if (!started) { bigCtx.moveTo(x,y); started=true; } else bigCtx.lineTo(x,y);
-            }
-            bigCtx.stroke();
-          }
-          drawBigLine('in_stock', '#1a7f37');
-          drawBigLine('in_use', '#b59f00');
-          drawBigLine('scraped', '#dc3545');
-          // Draw points for hover
-          let bigDots = [];
-          function drawBigDots(key, color) {
-            for (const p of bigPoints) {
-              if (p[key] == null) continue;
-              const x = 80+790*(p.t.getTime()-t0)/(t1-t0||1), y = 320-260*((p[key]-min)/(max-min||1));
-              bigCtx.beginPath(); bigCtx.arc(x, y, 7, 0, 2*Math.PI);
-              bigCtx.fillStyle = color; bigCtx.fill();
-              bigDots.push({x, y, key, val: p[key], date: p.t});
-            }
-          }
-          drawBigDots('in_stock', '#1a7f37');
-          drawBigDots('in_use', '#b59f00');
-          drawBigDots('scraped', '#dc3545');
-          // Legend
-          bigCtx.font = '18px sans-serif'; bigCtx.textAlign = 'left';
-          bigCtx.fillStyle = '#1a7f37'; bigCtx.fillText('In Stock', 750, 60);
-          bigCtx.fillStyle = '#b59f00'; bigCtx.fillText('In Use', 750, 90);
-          bigCtx.fillStyle = '#dc3545'; bigCtx.fillText('Scraped', 750, 120);
-          // Tooltip on hover (always above graph)
-          let bigTooltip = document.getElementById('bigHistoryGraphTooltip');
-          if (!bigTooltip) {
-            bigTooltip = document.createElement('div');
-            bigTooltip.id = 'bigHistoryGraphTooltip';
-            bigTooltip.style.position = 'fixed';
-            bigTooltip.style.pointerEvents = 'none';
-            bigTooltip.style.background = '#fff';
-            bigTooltip.style.border = '1px solid #bbb';
-            bigTooltip.style.borderRadius = '6px';
-            bigTooltip.style.padding = '6px 16px';
-            bigTooltip.style.fontSize = '16px';
-            bigTooltip.style.color = '#222';
-            bigTooltip.style.boxShadow = '0 2px 8px #e0e3e7';
-            bigTooltip.style.display = 'none';
-            bigTooltip.style.zIndex = '9999';
-            document.body.appendChild(bigTooltip);
-          }
-          bigCanvas.onmousemove = function(e) {
-            const rect = bigCanvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-            let found = null;
-            for (const d of bigDots) {
-              if (Math.abs(d.x-mx)<12 && Math.abs(d.y-my)<12) { found = d; break; }
-            }
-            if (found) {
-              bigTooltip.style.display = 'block';
-              bigTooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
-              // Always above the graph
-              bigTooltip.style.left = (rect.left + rect.width/2 - bigTooltip.offsetWidth/2) + 'px';
-              bigTooltip.style.top = (rect.top - bigTooltip.offsetHeight - 16) + 'px';
-            } else {
-              bigTooltip.style.display = 'none';
-            }
-          };
-          bigCanvas.onmouseleave = function() { bigTooltip.style.display = 'none'; };
+          maximizeSubToolGraph(points, min, max, t0, t1);
         };
       } else if (ctx) {
         ctx.clearRect(0,0,320,120);
@@ -985,6 +1588,116 @@
       // Re-show the main subleveltool popup if it was hidden (ensure it's visible)
       document.getElementById('subleveltoolPopup').style.display = 'flex';
     }
+
+    function maximizeSubToolGraph(points, min, max, t0, t1) {
+      const graphPopup = document.createElement('div');
+      graphPopup.className = 'modal-overlay';
+      graphPopup.style.display = 'flex';
+      graphPopup.style.zIndex = '4000';
+      graphPopup.style.position = 'fixed';
+      graphPopup.style.width = '100vw';
+      graphPopup.style.height = '100vh';
+      
+      const graphContent = document.createElement('div');
+      graphContent.className = 'modal-content';
+      graphContent.style.maxWidth = 'min(70rem, 95vw)';
+      graphContent.innerHTML = `
+        <button onclick="this.closest('.modal-overlay').remove()" class="modal-close">&times;</button>
+        <div class="modal-header">
+          <div class="modal-icon">
+            <i class="fas fa-chart-area" style="color: var(--tool-primary);"></i>
+          </div>
+          <h3 class="modal-title">Tool History Trends</h3>
+        </div>
+        <div style="display:flex; justify-content:center; background:var(--bg-light); padding:2rem; border-radius:0.75rem;">
+          <canvas id="maximizedSubToolGraph" width="800" height="400"></canvas>
+        </div>
+        <div style="text-align:center; margin-top:1.5rem;">
+          <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-primary"><i class="fas fa-times"></i> Close</button>
+        </div>
+      `;
+      graphPopup.appendChild(graphContent);
+      document.body.appendChild(graphPopup);
+      
+      // Draw maximized graph
+      const maxCanvas = graphContent.querySelector('#maximizedSubToolGraph');
+      const maxCtx = maxCanvas.getContext('2d');
+      
+      function tx(t) { return 80 + 640 * (t.getTime()-t0)/(t1-t0||1); }
+      function ty(val) { return 350 - 280 * ((val-min)/(max-min||1)); }
+      
+      maxCtx.clearRect(0,0,800,400);
+      maxCtx.strokeStyle = '#ddd'; 
+      maxCtx.lineWidth = 2;
+      maxCtx.beginPath(); 
+      maxCtx.moveTo(80,50); 
+      maxCtx.lineTo(80,360); 
+      maxCtx.lineTo(740,360); 
+      maxCtx.stroke();
+      
+      // Y axis labels
+      maxCtx.font = '14px sans-serif';
+      maxCtx.fillStyle = '#666';
+      maxCtx.textAlign = 'right';
+      for (let i = 0; i <= 5; i++) {
+        const val = min + (max - min) * i / 5;
+        const y = 350 - 280 * i / 5;
+        maxCtx.fillText(Math.round(val), 70, y + 5);
+        maxCtx.strokeStyle = '#eee';
+        maxCtx.beginPath();
+        maxCtx.moveTo(80, y);
+        maxCtx.lineTo(740, y);
+        maxCtx.stroke();
+      }
+      
+      // X axis dates
+      maxCtx.font = '14px sans-serif'; 
+      maxCtx.fillStyle = '#666';
+      maxCtx.textAlign = 'center';
+      let step = Math.max(1, Math.floor(points.length/8));
+      for (let i=0; i<points.length; i+=step) {
+        let d = points[i].t;
+        maxCtx.fillText(d.toLocaleDateString(), tx(d), 380);
+      }
+      
+      // Draw lines
+      function drawLine(key, color) {
+        maxCtx.strokeStyle = color; 
+        maxCtx.lineWidth = 3;
+        maxCtx.beginPath();
+        let started = false;
+        for (const p of points) {
+          if (p[key] == null) continue;
+          const x = tx(p.t), y = ty(p[key]);
+          if (!started) { maxCtx.moveTo(x,y); started=true; } else maxCtx.lineTo(x,y);
+        }
+        maxCtx.stroke();
+        
+        // Draw points
+        maxCtx.fillStyle = color;
+        for (const p of points) {
+          if (p[key] == null) continue;
+          const x = tx(p.t), y = ty(p[key]);
+          maxCtx.beginPath();
+          maxCtx.arc(x, y, 5, 0, 2 * Math.PI);
+          maxCtx.fill();
+        }
+      }
+      drawLine('in_stock', '#1a7f37');
+      drawLine('in_use', '#856404');
+      drawLine('scraped', '#dc3545');
+      
+      // Legend
+      maxCtx.font = '16px sans-serif'; 
+      maxCtx.textAlign = 'left';
+      maxCtx.fillStyle = '#1a7f37'; 
+      maxCtx.fillText('● In Stock', 600, 40);
+      maxCtx.fillStyle = '#856404'; 
+      maxCtx.fillText('● In Use', 600, 65);
+      maxCtx.fillStyle = '#dc3545'; 
+      maxCtx.fillText('● Scraped', 600, 90);
+    }
+
     // Prepare subleveltool history data for JS
     window.subleveltoolHistoryData = {};
     {% for sub in subtools %}
@@ -1019,7 +1732,8 @@
       // Add click handlers to cards
       document.querySelectorAll('.subleveltool-card').forEach(card => {
         card.addEventListener('click', function(e) {
-          if (e.target.classList.contains('subleveltool-checkbox') || 
+          if (e.target.classList.contains('card-checkbox') || 
+              e.target.classList.contains('subleveltool-checkbox') ||
               e.target.closest('.card-actions') || 
               e.target.classList.contains('subleveltool-note')) {
             return;
@@ -1047,7 +1761,7 @@
     document.getElementById('subleveltool-sort-select').addEventListener('change', function() {
       const sortBy = this.value;
       const grid = document.getElementById('subleveltool-grid');
-      const cards = Array.from(grid.children);
+      const cards = Array.from(grid.children).filter(el => el.classList.contains('subleveltool-card'));
       // Map select values to dataset keys
       const keyMap = {
         name: 'name',

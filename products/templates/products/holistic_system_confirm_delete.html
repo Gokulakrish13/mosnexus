@@ -1,81 +1,561 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delete System - {{ system.sr_no }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #0066cc;
+            --primary-light: #0077e6;
+            --primary-dark: #004d99;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --danger-light: #fca5a5;
+            --warning: #f59e0b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-secondary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(220,53,69,0.08);
-            margin-top: 4rem;
+
+        /* Corporate Navigation */
+        .corporate-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
         }
-        .card-header {
-            background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%);
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-logo {
+            height: 32px;
+            opacity: 0.95;
+        }
+
+        .nav-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-title-badge {
+            background: linear-gradient(135deg, var(--danger), var(--danger-dark));
             color: white;
-            border-radius: 16px 16px 0 0;
-            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .btn-danger {
-            background: #dc3545;
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 2rem;
+        }
+
+        /* Delete Card */
+        .delete-card {
+            width: 100%;
+            max-width: 560px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Warning Header */
+        .warning-header {
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .warning-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse-bg 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        .warning-icon-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce-soft 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce-soft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .warning-icon-wrapper i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .warning-title {
+            position: relative;
+            z-index: 1;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-subtitle {
+            position: relative;
+            z-index: 1;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 400;
+        }
+
+        /* Card Body */
+        .card-body-content {
+            padding: 2rem;
+        }
+
+        /* Alert Box */
+        .alert-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border: 1px solid #fcd34d;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .alert-box i {
+            color: #b45309;
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+        }
+
+        .alert-box-content {
+            flex: 1;
+        }
+
+        .alert-box-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-box-text {
+            font-size: 0.85rem;
+            color: #a16207;
+            line-height: 1.5;
+        }
+
+        /* System Details Card */
+        .details-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .details-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-header i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .details-header span {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .detail-value.sr-no {
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.available {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.allocated {
+            background: rgba(59, 130, 246, 0.15);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-badge.maintenance {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge.reserved {
+            background: rgba(139, 92, 246, 0.15);
+            color: #7c3aed;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
             border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
         }
-        .btn-danger:hover {
-            background: #a71d2a;
+
+        .btn-action.danger {
+            background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
-        .btn-secondary {
-            background: #6c757d;
-            border: none;
+
+        .btn-action.danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
         }
-        .btn-secondary:hover {
-            background: #495057;
+
+        .btn-action.secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-action.secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Footer Note */
+        .footer-note {
+            text-align: center;
+            padding: 1rem 2rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .footer-note-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-note-text i {
+            margin-right: 0.35rem;
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .corporate-nav {
+                padding: 0.5rem 1rem;
+            }
+
+            .main-container {
+                padding: 5rem 1rem 1.5rem;
+            }
+
+            .warning-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .warning-title {
+                font-size: 1.25rem;
+            }
+
+            .card-body-content {
+                padding: 1.5rem;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
-            <div class="card shadow-lg">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
-                    </h4>
+    <!-- Corporate Navigation -->
+    <nav class="corporate-nav">
+        <div class="nav-brand">
+            <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
+            <span class="nav-title">
+                System Management
+            </span>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'holistic_dashboard' %}" class="nav-btn" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="/dashboard/" class="nav-btn" title="Go to Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="delete-card">
+            <!-- Warning Header -->
+            <div class="warning-header">
+                <div class="warning-icon-wrapper">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="card-body">
-                    <p class="lead">Are you sure you want to delete this system?</p>
-                    <div class="alert alert-warning">
-                        <strong>Warning:</strong> This action cannot be undone. All weekly data and history associated with this system will also be deleted.
+                <h1 class="warning-title">Confirm System Deletion</h1>
+                <p class="warning-subtitle">This action requires your confirmation</p>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body-content">
+                <!-- Alert Box -->
+                <div class="alert-box">
+                    <i class="fas fa-shield-exclamation"></i>
+                    <div class="alert-box-content">
+                        <div class="alert-box-title">Permanent Action Warning</div>
+                        <div class="alert-box-text">
+                            This action cannot be undone. All weekly data, allocation history, and associated records will be permanently removed from the database.
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <strong>System Details:</strong>
-                        <ul class="mt-2">
-                            <li><strong>Sr No:</strong> {{ system.sr_no }}</li>
-                            <li><strong>Status:</strong> {{ system.get_system_availability_display }}</li>
-                            <li><strong>Owner:</strong> {{ system.system_owner|default:"-" }}</li>
-                            <li><strong>Location:</strong> {{ system.location_info|default:"-" }}</li>
-                        </ul>
+                </div>
+
+                <!-- System Details -->
+                <div class="details-card">
+                    <div class="details-header">
+                        <i class="fas fa-server"></i>
+                        <span>System Information</span>
                     </div>
-                    <form method="post" class="d-inline">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Serial Number</span>
+                            <span class="detail-value sr-no">{{ system.sr_no }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Current Status</span>
+                            <span class="status-badge {{ system.system_availability|lower }}">
+                                {{ system.get_system_availability_display }}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">System Owner</span>
+                            <span class="detail-value">{{ system.system_owner|default:"Not Assigned" }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">{{ system.location_info|default:"Not Specified" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{% url 'holistic_dashboard' %}" class="btn-action secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <form method="post" style="flex: 1; display: flex;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-lg">
-                            <i class="fas fa-trash me-2"></i>Yes, Delete System
+                        <button type="submit" class="btn-action danger" style="width: 100%;">
+                            <i class="fas fa-trash-alt"></i>
+                            Delete System
                         </button>
                     </form>
-                    <a href="{% url 'holistic_dashboard' %}" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </a>
                 </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="footer-note">
+                <p class="footer-note-text">
+                    <i class="fas fa-info-circle"></i>
+                    Need help? Contact your system administrator for assistance.
+                </p>
             </div>
         </div>
     </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

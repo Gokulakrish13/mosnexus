@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 from django.db import models
 from django.db.models import Q
 from django.core.files.storage import default_storage
-from .models import Product, ProductHistory, Category, Participant, Location, Stream, SystemStatusHistory, UserDataVersion, SubLevel, SubLevelHistory, SubLevelTool, SubLevelToolHistory, LegacyExcelUpload, ZenitionProduct, UsageTracking, SystemStatus, UserSession, SystemMetrics, Note, NoteAttachment, SharedNote, CustomUser, UserRole, UserStreamAccess, SystemTag, HolisticSystem, HolisticWeeklyData, HolisticSystemHistory, SystemDowntime, SystemDowntimeMetrics, BuildServer, BuildServerHistory, BuildServerMaintenanceLog, Floor
+from .models import Product, ProductHistory, Category, Participant, Location, Stream, SystemStatusHistory, UserDataVersion, SubLevel, SubLevelHistory, SubLevelTool, SubLevelToolHistory, LegacyExcelUpload, ZenitionProduct, UsageTracking, SystemStatus, UserSession, SystemMetrics, Note, NoteAttachment, SharedNote, CustomUser, UserRole, UserStreamAccess, SystemTag, HolisticSystem, HolisticWeeklyData, HolisticSystemHistory, SystemDowntime, SystemDowntimeMetrics, BuildServer, BuildServerHistory, BuildServerMaintenanceLog, Floor, OperatingSystem, Project, System
 from .utils import get_stream_or_404
 import qrcode
 from io import BytesIO
@@ -198,6 +198,7 @@ def product_list(request, stream=None):
         products = products.filter(location_id=location_id).exclude(location=None)
     products = products.prefetch_related('system_tags__system').order_by('location__name', '-created_at')
     locations = Location.objects.filter(stream=stream_obj).order_by('name')
+    categories = Category.objects.filter(stream=stream_obj).order_by('name')
     
     # Calculate product counts
     total_count = products.count()
@@ -215,6 +216,7 @@ def product_list(request, stream=None):
         'category_id': category_id,
         'product_list_url': f'/stream/{stream}/products/?category={category_id}' if category_id else f'/stream/{stream}/products/',
         'locations': locations,
+        'categories': categories,
         'total_count': total_count,
         'status_counts': status_counts,
     })
@@ -668,6 +670,31 @@ def analytics_dashboard(request):
     # Get selected stream from GET params
     selected_stream = request.GET.get('stream', '')
     
+    date_range = request.GET.get('range', 'all')  # all, year, quarter, month, custom
+    start_date = request.GET.get('start', '')
+    end_date = request.GET.get('end', '')
+    
+    # Calculate date filters
+    from datetime import datetime, timedelta
+    from django.utils import timezone
+    
+    today = timezone.now().date()
+    date_filter = None
+    
+    if date_range == 'year':
+        date_filter = today.replace(month=1, day=1)
+    elif date_range == 'quarter':
+        current_quarter = (today.month - 1) // 3
+        date_filter = today.replace(month=current_quarter * 3 + 1, day=1)
+    elif date_range == 'month':
+        date_filter = today.replace(day=1)
+    elif date_range == 'custom' and start_date and end_date:
+        try:
+            date_filter = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            date_filter = None
+            end_date_parsed = None
     # Handle stream object conversion
     stream_obj = None
     if selected_stream:
@@ -680,15 +707,120 @@ def analytics_dashboard(request):
             .annotate(product_count=Count('products'))
             .order_by('-product_count')
         )
-        total_products = Product.objects.filter(stream=stream_obj).count()
+        products_qs = Product.objects.filter(stream=stream_obj)
     else:
         category_usage = (
             Category.objects.annotate(product_count=Count('products'))
             .order_by('-product_count')
         )
-        total_products = Product.objects.count()
+        products_qs = Product.objects.all()
+    if date_filter:
+        if date_range == 'custom' and end_date_parsed:
+            products_qs = products_qs.filter(created_at__date__gte=date_filter, created_at__date__lte=end_date_parsed)
+        else:
+            products_qs = products_qs.filter(created_at__date__gte=date_filter)
+    total_products = products_qs.count()
     most_used = category_usage.first()
     least_used = category_usage.last()    # 2. Product growth over time (monthly trend) - filter by stream
+    status_counts = {
+        'Active': products_qs.filter(status='Active').count(),
+        'Not Active': products_qs.filter(status='Not Active').count(),
+        'Scraped': products_qs.filter(status='Scraped').count(),
+        'Hand-Overed': products_qs.filter(status='Hand-Overed').count(),
+        'Issue': products_qs.filter(status='Issue').count(),
+    }
+    status_counts_json = json.dumps(status_counts)
+    if stream_obj:
+        systems_qs = System.objects.filter(stream=stream_obj)
+    else:
+        systems_qs = System.objects.all()
+    
+    # Apply date filter to systems if set
+    if date_filter:
+        if date_range == 'custom' and end_date_parsed:
+            systems_qs = systems_qs.filter(created_at__date__gte=date_filter, created_at__date__lte=end_date_parsed)
+        else:
+            systems_qs = systems_qs.filter(created_at__date__gte=date_filter)
+    
+    system_health = {
+        'Excellent': systems_qs.filter(health='Excellent').count(),
+        'Good': systems_qs.filter(health='Good').count(),
+        'Warning': systems_qs.filter(health='Warning').count(),
+        'Critical': systems_qs.filter(health='Critical').count(),
+    }
+    system_health_json = json.dumps(system_health)
+    total_systems = systems_qs.count()
+    active_systems = systems_qs.filter(status='Active').count()
+    
+    # --- NEW: Build Server Statistics ---
+    if stream_obj:
+        build_servers_qs = BuildServer.objects.filter(stream=stream_obj)
+    else:
+        build_servers_qs = BuildServer.objects.all()
+    
+    build_server_status = {
+        'Active': build_servers_qs.filter(status='Active').count(),
+        'Inactive': build_servers_qs.filter(status='Inactive').count(),
+        'Maintenance': build_servers_qs.filter(status='Maintenance').count(),
+        'Offline': build_servers_qs.filter(status='Offline').count(),
+    }
+    build_server_status_json = json.dumps(build_server_status)
+    total_build_servers = build_servers_qs.count()
+    
+    # --- NEW: Project Status Overview ---
+    if stream_obj:
+        projects_qs = Project.objects.filter(stream=stream_obj)
+    else:
+        projects_qs = Project.objects.all()
+    
+    project_status = {
+        'Running': projects_qs.filter(status='running').count(),
+        'On Hold': projects_qs.filter(status='hold').count(),
+        'Planned': projects_qs.filter(status='planned').count(),
+    }
+    project_status_json = json.dumps(project_status)
+    total_projects = projects_qs.count()
+    
+    # --- NEW: Location-wise Product Distribution ---
+    if stream_obj:
+        location_dist = (
+            Location.objects.filter(stream=stream_obj)
+            .annotate(product_count=Count('product'))
+            .order_by('-product_count')[:10]
+        )
+    else:
+        location_dist = (
+            Location.objects.annotate(product_count=Count('product'))
+            .order_by('-product_count')[:10]
+        )
+    location_dist_json = json.dumps([
+        {'name': loc.name, 'product_count': loc.product_count} for loc in location_dist
+    ])
+    
+    # --- NEW: Recent Activity (last 30 days) ---
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    if stream_obj:
+        recent_products_created = Product.objects.filter(stream=stream_obj, created_at__gte=thirty_days_ago).count()
+        recent_history = ProductHistory.objects.filter(product__stream=stream_obj, timestamp__gte=thirty_days_ago)
+    else:
+        recent_products_created = Product.objects.filter(created_at__gte=thirty_days_ago).count()
+        recent_history = ProductHistory.objects.filter(timestamp__gte=thirty_days_ago)
+    
+    recent_edits = recent_history.filter(action='edited').count()
+    recent_creates = recent_history.filter(action='created').count()
+    
+    # --- NEW: User Activity Metrics ---
+    total_active_users = User.objects.filter(is_active=True).count()
+    recent_sessions = UsageTracking.objects.filter(timestamp__gte=thirty_days_ago).values('user').distinct().count()
+    
+    # --- NEW: Top Contributors (users who created/edited most products) ---
+    top_contributors = (
+        ProductHistory.objects.filter(timestamp__gte=thirty_days_ago)
+        .values('user__username')
+        .annotate(action_count=Count('id'))
+        .order_by('-action_count')[:5]
+    )
+    top_contributors_json = json.dumps(list(top_contributors))
     if stream_obj:
         products_by_month = (
             Product.objects.filter(stream=stream_obj)
@@ -752,6 +884,56 @@ def analytics_dashboard(request):
     months_sorted = sorted(month_counts.keys())
     sublevel_growth_months_json = json.dumps(months_sorted)
     sublevel_growth_counts_json = json.dumps([month_counts[m] for m in months_sorted])
+    if stream_obj:
+        downtime_events = SystemDowntime.objects.filter(stream=stream_obj)
+    else:
+        downtime_events = SystemDowntime.objects.all()
+    
+    downtime_by_type = {}
+    for dt_type, dt_label in SystemDowntime.DOWNTIME_TYPES:
+        downtime_by_type[dt_label] = downtime_events.filter(downtime_type=dt_type).count()
+    downtime_by_type_json = json.dumps(downtime_by_type)
+    
+    downtime_by_status = {
+        'Ongoing': downtime_events.filter(status='ongoing').count(),
+        'Resolved': downtime_events.filter(status='resolved').count(),
+        'Investigating': downtime_events.filter(status='investigating').count(),
+        'Escalated': downtime_events.filter(status='escalated').count(),
+    }
+    downtime_by_status_json = json.dumps(downtime_by_status)
+    total_downtime_events = downtime_events.count()
+    active_downtime = downtime_events.filter(status='ongoing').count()
+    
+    # --- NEW: Notes Statistics (Notes don't have stream filter) ---
+    notes_qs = Note.objects.all()
+    total_notes = notes_qs.count()
+    recent_notes = notes_qs.filter(created_at__gte=thirty_days_ago).count()
+    
+    # --- NEW: Floor Distribution (BuildServers per Floor) ---
+    if stream_obj:
+        floor_dist = (
+            Floor.objects.filter(stream=stream_obj)
+            .annotate(server_count=Count('buildserver'))
+            .order_by('-server_count')
+        )
+    else:
+        floor_dist = (
+            Floor.objects.annotate(server_count=Count('buildserver'))
+            .order_by('-server_count')
+        )
+    floor_dist_json = json.dumps([
+        {'name': f.name, 'server_count': f.server_count} for f in floor_dist
+    ])
+    total_floors = floor_dist.count()
+    
+    # --- NEW: Stream-wise Product Distribution ---
+    stream_product_dist = (
+        Stream.objects.annotate(product_count=Count('products'))
+        .order_by('-product_count')
+    )
+    stream_product_dist_json = json.dumps([
+        {'name': s.name, 'product_count': s.product_count} for s in stream_product_dist
+    ])
 
     return render(request, 'products/analytics_dashboard.html', {
         'category_usage': category_usage,
@@ -768,6 +950,38 @@ def analytics_dashboard(request):
         'sublevel_dist_json': sublevel_dist_json,
         'sublevel_growth_months_json': sublevel_growth_months_json,
         'sublevel_growth_counts_json': sublevel_growth_counts_json,
+        'status_counts': status_counts,
+        'status_counts_json': status_counts_json,
+        'system_health': system_health,
+        'system_health_json': system_health_json,
+        'total_systems': total_systems,
+        'active_systems': active_systems,
+        'build_server_status': build_server_status,
+        'build_server_status_json': build_server_status_json,
+        'total_build_servers': total_build_servers,
+        'project_status': project_status,
+        'project_status_json': project_status_json,
+        'total_projects': total_projects,
+        'location_dist_json': location_dist_json,
+        'recent_products_created': recent_products_created,
+        'recent_edits': recent_edits,
+        'recent_creates': recent_creates,
+        'total_active_users': total_active_users,
+        'recent_sessions': recent_sessions,
+        'top_contributors_json': top_contributors_json,
+        'downtime_by_type_json': downtime_by_type_json,
+        'downtime_by_status': downtime_by_status,
+        'downtime_by_status_json': downtime_by_status_json,
+        'total_downtime_events': total_downtime_events,
+        'active_downtime': active_downtime,
+        'total_notes': total_notes,
+        'recent_notes': recent_notes,
+        'floor_dist_json': floor_dist_json,
+        'total_floors': total_floors,
+        'stream_product_dist_json': stream_product_dist_json,
+        'selected_range': date_range,
+        'selected_start_date': start_date,
+        'selected_end_date': end_date,
     })
 
 @login_required
@@ -5563,17 +5777,21 @@ def note_detail(request, pk):
     """View a single note."""
     note = get_object_or_404(Note, pk=pk)
     # Check if user has permission to view the note
-    if not note.is_public and note.created_by != request.user:
+    is_shared_with_user = SharedNote.objects.filter(note=note, shared_with=request.user).exists()
+    if not note.is_public and note.created_by != request.user and not is_shared_with_user:
         messages.error(request, "You don't have permission to view this note.")
         return redirect('notes_list')
     
+    if is_shared_with_user:
+        SharedNote.objects.filter(note=note, shared_with=request.user).update(is_read=True)
     # Get all attachments for this note
     attachments = note.attachments.all()
     
     return render(request, 'products/note_detail.html', {
         'note': note,
         'attachments': attachments,
-        'selected_stream': 'HIC'
+        'selected_stream': 'HIC',
+        'is_shared_note': is_shared_with_user
     })
 
 @login_required
@@ -5789,11 +6007,42 @@ def shared_notes(request):
         'note', 'shared_by', 'note__created_by'
     ).order_by('-shared_at')
     
+    shared_by_me_count = SharedNote.objects.filter(shared_by=request.user).count()
     # Mark as read when viewed
     SharedNote.objects.filter(shared_with=request.user, is_read=False).update(is_read=True)
     
     return render(request, 'products/shared_notes.html', {
         'shared_notes': shared_notes,
+        'shared_by_me_count': shared_by_me_count,
+        'selected_stream': 'HIC'
+    })
+@login_required
+def shared_by_me(request):
+    """View notes shared by the current user to others."""
+    shared_notes = SharedNote.objects.filter(shared_by=request.user).select_related(
+        'note', 'shared_with', 'note__created_by'
+    ).order_by('-shared_at')
+    shared_with_me_count = SharedNote.objects.filter(shared_with=request.user).count()
+    notes_shared = {}
+    for share in shared_notes:
+        if share.note.pk not in notes_shared:
+            notes_shared[share.note.pk] = {
+                'note': share.note,
+                'recipients': [],
+                'latest_shared_at': share.shared_at
+            }
+        notes_shared[share.note.pk]['recipients'].append({
+            'user': share.shared_with,
+            'shared_at': share.shared_at,
+            'is_read': share.is_read,
+            'message': share.message,
+            'share_id': share.pk
+        })
+    notes_shared_list = list(notes_shared.values())
+    return render(request, 'products/shared_by_me.html', {
+        'shared_notes': shared_notes,
+        'notes_shared': notes_shared_list,
+        'shared_with_me_count': shared_with_me_count,
         'selected_stream': 'HIC'
     })
 
@@ -6012,7 +6261,7 @@ def allocation_tree(request, stream=None):
     stream_obj = get_stream_or_404(stream, default='HIC')
     
     # Get all systems for this stream with their allocations
-    from .models import SystemTag, Project
+    from .models import SystemTag, Project, SystemTagHistory
     systems = System.objects.filter(stream=stream_obj).prefetch_related(
         'tags__products__category',
         'tags__sublevels',
@@ -6074,15 +6323,26 @@ def create_system_tag(request, stream=None):
         return JsonResponse({'success': False, 'error': 'System and tag name are required'}, status=400)
     
     try:
-        from .models import SystemTag
+        from .models import SystemTag, SystemTagHistory
         system = System.objects.get(id=system_id, stream=stream_obj)
         
         # Check if we're updating an existing tag
         if tag_id:
             tag = SystemTag.objects.get(id=tag_id, system=system, stream=stream_obj)
+            old_name = tag.tag_name
             tag.tag_name = tag_name
             tag.description = description
             tag.save()
+            SystemTagHistory.objects.create(
+                system_tag=tag,
+                system_tag_name=tag_name,
+                system_name=system.name,
+                stream=stream_obj,
+                action='updated',
+                item_type='tag',
+                description=f'Tag renamed from "{old_name}" to "{tag_name}"' if old_name != tag_name else 'Tag description updated',
+                modified_by=request.user
+            )
             message = f'Tag "{tag_name}" updated successfully'
         else:
             # Check if system already has a tag (only one allowed)
@@ -6099,6 +6359,16 @@ def create_system_tag(request, stream=None):
                 stream=stream_obj,
                 description=description,
                 created_by=request.user
+            )
+            SystemTagHistory.objects.create(
+                system_tag=tag,
+                system_tag_name=tag_name,
+                system_name=system.name,
+                stream=stream_obj,
+                action='created',
+                item_type='tag',
+                description=f'Tag "{tag_name}" created for system "{system.name}"',
+                modified_by=request.user
             )
             message = f'Tag "{tag_name}" created successfully'
         
@@ -6127,9 +6397,20 @@ def delete_system_tag(request, stream=None, tag_id=None):
     stream_obj = get_stream_or_404(stream, default='HIC')
     
     try:
-        from .models import SystemTag
+        from .models import SystemTag, SystemTagHistory
         tag = SystemTag.objects.get(id=tag_id, stream=stream_obj)
         tag_name = tag.tag_name
+        system_name = tag.system.name
+        SystemTagHistory.objects.create(
+            system_tag=None,  # Will be null after deletion
+            system_tag_name=tag_name,
+            system_name=system_name,
+            stream=stream_obj,
+            action='deleted',
+            item_type='tag',
+            description=f'Tag "{tag_name}" deleted from system "{system_name}"',
+            modified_by=request.user
+        )
         tag.delete()
         
         return JsonResponse({
@@ -6154,7 +6435,7 @@ def manage_tag_items(request, stream=None, tag_id=None):
     stream_obj = get_stream_or_404(stream, default='HIC')
     
     try:
-        from .models import SystemTag, Project
+        from .models import SystemTag, Project, SystemTagHistory
         tag = SystemTag.objects.get(id=tag_id, stream=stream_obj)
         
         action = request.POST.get('action')  # 'add' or 'remove'
@@ -6171,24 +6452,42 @@ def manage_tag_items(request, stream=None, tag_id=None):
         if item_type == 'product':
             item = Product.objects.get(id=item_id, stream=stream_obj)
             relation = tag.products
+            item_name = item.name
         elif item_type == 'sublevel':
             item = SubLevel.objects.get(id=item_id)
             relation = tag.sublevels
+            item_name = item.name
         elif item_type == 'sublevel_tool':
             item = SubLevelTool.objects.get(id=item_id)
             relation = tag.sublevel_tools
+            item_name = item.name
         else:  # project
             # Get project regardless of stream since we now show all projects
             item = Project.objects.get(id=item_id)
             relation = tag.projects
+            item_name = item.name
         
         # Perform action
         if action == 'add':
             relation.add(item)
             message = f'{item_type.replace("_", " ").title()} added to tag'
+            history_action = 'item_added'
         else:
             relation.remove(item)
             message = f'{item_type.replace("_", " ").title()} removed from tag'
+            history_action = 'item_removed'
+        SystemTagHistory.objects.create(
+            system_tag=tag,
+            system_tag_name=tag.tag_name,
+            system_name=tag.system.name,
+            stream=stream_obj,
+            action=history_action,
+            item_type=item_type,
+            item_name=item_name,
+            item_id=item.id,
+            description=f'{item_type.replace("_", " ").title()} "{item_name}" {"added to" if action == "add" else "removed from"} tag "{tag.tag_name}"',
+            modified_by=request.user
+        )
         
         return JsonResponse({
             'success': True,
@@ -6198,6 +6497,47 @@ def manage_tag_items(request, stream=None, tag_id=None):
         
     except (SystemTag.DoesNotExist, Product.DoesNotExist, SubLevel.DoesNotExist, SubLevelTool.DoesNotExist, Project.DoesNotExist):
         return JsonResponse({'success': False, 'error': 'Tag or item not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+@login_required
+@require_GET
+def get_system_tag_history(request, stream=None, system_id=None):
+    """Get modification history for a specific system's tags"""
+    if not stream or stream.strip() == '':
+        stream = 'HIC'
+    stream_obj = get_stream_or_404(stream, default='HIC')
+    
+    try:
+        from .models import SystemTagHistory
+        from django.utils import timezone
+        
+        # Get history for this specific system
+        history = SystemTagHistory.objects.filter(
+            stream=stream_obj,
+            system_name=System.objects.get(id=system_id, stream=stream_obj).name
+        ).select_related('modified_by').order_by('-modified_at')[:30]
+        
+        history_data = []
+        for entry in history:
+            # Convert to local timezone
+            local_time = timezone.localtime(entry.modified_at)
+            history_data.append({
+                'date': local_time.strftime('%d %b %Y'),
+                'time': local_time.strftime('%H:%M'),
+                'user': entry.modified_by.username if entry.modified_by else 'Unknown',
+                'action': entry.action,
+                'tag_name': entry.system_tag_name,
+                'item_type': entry.item_type.replace('_', ' ').title() if entry.item_type else '',
+                'item_name': entry.item_name or '',
+                'description': entry.description or ''
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'history': history_data
+        })
+    except System.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'System not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -6413,6 +6753,37 @@ def project_status(request):
                 messages.error(request, 'Project not found.')
             except Exception as e:
                 messages.error(request, f'Error updating project: {str(e)}')
+        
+        elif action == 'update_status':
+            # AJAX request to update just the project status (for drag and drop)
+            try:
+                project_id = request.POST.get('project_id')
+                new_status = request.POST.get('status')
+                
+                if new_status not in ['running', 'hold', 'planned']:
+                    return JsonResponse({'success': False, 'error': 'Invalid status'})
+                
+                project = Project.objects.get(id=project_id)
+                old_status = project.status
+                project.status = new_status
+                
+                # Calculate expected progress if running, otherwise set to 0
+                if project.status == 'running':
+                    project.expected_progress = project.calculate_expected_progress()
+                else:
+                    project.expected_progress = 0
+                project.save()
+                
+                return JsonResponse({
+                    'success': True, 
+                    'message': f'Project moved from {old_status} to {new_status}',
+                    'project_id': project_id,
+                    'new_status': new_status
+                })
+            except Project.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Project not found'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
         
         return redirect('project_status')
     
@@ -8056,6 +8427,13 @@ def build_server_create(request, stream=None):
                     floor_instance = Floor.objects.get(id=floor_id)
                 except Floor.DoesNotExist:
                     floor_instance = None
+            os_id = request.POST.get('operating_system')
+            os_instance = None
+            if os_id:
+                try:
+                    os_instance = OperatingSystem.objects.get(id=os_id)
+                except OperatingSystem.DoesNotExist:
+                    os_instance = None
             server = BuildServer(
                 hostname=request.POST.get('hostname'),
                 ip_address=request.POST.get('ip_address'),
@@ -8065,7 +8443,7 @@ def build_server_create(request, stream=None):
                 stream_type=(stream_obj.name if stream_obj.name in ['PIC', 'HIC'] else 'Other'),
                 stream=stream_obj,
                 status=request.POST.get('status', 'Active'),
-                operating_system=request.POST.get('operating_system', ''),
+                operating_system_ref=os_instance,
                 cpu_cores=request.POST.get('cpu_cores') or None,
                 ram_gb=request.POST.get('ram_gb') or None,
                 storage_gb=request.POST.get('storage_gb') or None,
@@ -8127,6 +8505,7 @@ def build_server_create(request, stream=None):
         'status_choices': BuildServer.STATUS_CHOICES,
         'stream_type_choices': BuildServer.SERVER_TYPES,
         'floor_choices': [(floor.id, floor.name) for floor in Floor.objects.filter(stream=stream_obj, is_active=True)],
+        'operating_system_choices': [(os.id, str(os)) for os in OperatingSystem.objects.filter(stream=stream_obj, is_active=True)],
     }
     
     return render(request, 'products/build_server_form.html', context)
@@ -8195,7 +8574,14 @@ def build_server_edit(request, stream, server_id):
             server.hostname = request.POST.get('hostname')
             server.ip_address = request.POST.get('ip_address')
             server.location = request.POST.get('location')
-            server.floor = request.POST.get('floor')
+            floor_id = request.POST.get('floor')
+            if floor_id:
+                try:
+                    server.floor = Floor.objects.get(id=floor_id)
+                except Floor.DoesNotExist:
+                    server.floor = None
+            else:
+                server.floor = None
             server.owner = request.POST.get('owner')
             # Stream type is now static, not editable from form
             # server.stream_type remains unchanged
@@ -8207,7 +8593,14 @@ def build_server_edit(request, stream, server_id):
             else:
                 # Keep existing status if no valid status provided
                 pass
-            server.operating_system = request.POST.get('operating_system', '')
+            os_id = request.POST.get('operating_system')
+            if os_id:
+                try:
+                    server.operating_system_ref = OperatingSystem.objects.get(id=os_id)
+                except OperatingSystem.DoesNotExist:
+                    server.operating_system_ref = None
+            else:
+                server.operating_system_ref = None
             server.cpu_cores = request.POST.get('cpu_cores') or None
             server.ram_gb = request.POST.get('ram_gb') or None
             server.storage_gb = request.POST.get('storage_gb') or None
@@ -8284,6 +8677,7 @@ def build_server_edit(request, stream, server_id):
         'status_choices': BuildServer.STATUS_CHOICES,
         'stream_type_choices': BuildServer.SERVER_TYPES,
         'floor_choices': [(floor.id, floor.name) for floor in Floor.objects.filter(stream=stream_obj, is_active=True)],
+        'operating_system_choices': [(os.id, str(os)) for os in OperatingSystem.objects.filter(stream=stream_obj, is_active=True)],
         'is_edit': True,
     }
     
@@ -8357,12 +8751,12 @@ def build_servers_api(request, stream=None):
                 'hostname': server.hostname,
                 'ip_address': server.ip_address,
                 'location': server.location,
-                'floor': server.floor,
+                'floor': server.floor.name if server.floor else '',
                 'owner': server.owner,
                 'stream_type': server.stream_type,
                 'status': server.status,
                 'status_display': server.get_status_display(),
-                'operating_system': server.operating_system,
+                'operating_system': str(server.operating_system_ref) if server.operating_system_ref else '',
                 'cpu_cores': server.cpu_cores,
                 'ram_gb': server.ram_gb,
                 'storage_gb': server.storage_gb,
@@ -8432,11 +8826,11 @@ def build_servers_export(request, stream=None):
             server.hostname,
             server.ip_address,
             server.location,
-            server.floor,
+            server.floor.name if server.floor else '',
             server.owner,
             server.stream_type,
             server.status,
-            server.operating_system or '',
+            str(server.operating_system_ref) if server.operating_system_ref else '',
             server.cpu_cores or '',
             server.ram_gb or '',
             server.storage_gb or '',
@@ -8598,3 +8992,115 @@ def floor_delete(request, stream=None, floor_id=None):
     }
     return render(request, 'products/floor_confirm_delete.html', context)
 
+def operating_system_list(request, stream=None):
+    """List all operating systems with management options for specific stream"""
+    stream_obj = get_stream_or_404(stream)
+    operating_systems = OperatingSystem.objects.filter(stream=stream_obj).order_by('name', 'version')
+    
+    context = {
+        'operating_systems': operating_systems,
+        'stream': stream,
+        'stream_obj': stream_obj,
+        'selected_stream': stream_obj,
+    }
+    return render(request, 'products/operating_system_list.html', context)
+
+@login_required
+def operating_system_create(request, stream=None):
+    """Create a new operating system for specific stream"""
+    stream_obj = get_stream_or_404(stream)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        version = request.POST.get('version', '').strip() or None
+        description = request.POST.get('description', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if name:
+            try:
+                os_obj = OperatingSystem.objects.create(
+                    name=name,
+                    version=version,
+                    description=description,
+                    stream=stream_obj,
+                    is_active=is_active
+                )
+                messages.success(request, f'Operating System "{os_obj}" created successfully for {stream_obj.name} stream!')
+                return redirect('operating_system_list', stream=stream)
+            except IntegrityError:
+                messages.error(request, f'Operating System "{name}" with version "{version or "N/A"}" already exists in {stream_obj.name} stream!')
+        else:
+            messages.error(request, 'Operating System name is required!')
+    
+    context = {
+        'is_edit': False,
+        'title': 'Add New Operating System',
+        'stream': stream,
+        'stream_obj': stream_obj,
+        'selected_stream': stream_obj,
+    }
+    return render(request, 'products/operating_system_form.html', context)
+
+@login_required
+def operating_system_edit(request, stream=None, os_id=None):
+    """Edit an existing operating system within specific stream"""
+    stream_obj = get_stream_or_404(stream)
+    os_obj = get_object_or_404(OperatingSystem, id=os_id, stream=stream_obj)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        version = request.POST.get('version', '').strip() or None
+        description = request.POST.get('description', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if name:
+            try:
+                os_obj.name = name
+                os_obj.version = version
+                os_obj.description = description
+                os_obj.is_active = is_active
+                os_obj.save()
+                messages.success(request, f'Operating System "{os_obj}" updated successfully!')
+                return redirect('operating_system_list', stream=stream)
+            except IntegrityError:
+                messages.error(request, f'Operating System "{name}" with version "{version or "N/A"}" already exists in {stream_obj.name} stream!')
+        else:
+            messages.error(request, 'Operating System name is required!')
+    
+    context = {
+        'os': os_obj,
+        'is_edit': True,
+        'title': 'Edit Operating System',
+        'stream': stream,
+        'stream_obj': stream_obj,
+        'selected_stream': stream_obj,
+    }
+    return render(request, 'products/operating_system_form.html', context)
+
+@login_required
+def operating_system_delete(request, stream=None, os_id=None):
+    """Delete an operating system within specific stream"""
+    stream_obj = get_stream_or_404(stream)
+    os_obj = get_object_or_404(OperatingSystem, id=os_id, stream=stream_obj)
+    
+    if request.method == 'POST':
+        # Check if any build servers are using this operating system
+        servers_using_os = BuildServer.objects.filter(operating_system=os_obj).count()
+        
+        if servers_using_os > 0:
+            messages.error(request, f'Cannot delete Operating System "{os_obj}" as it is being used by {servers_using_os} build server(s)!')
+        else:
+            os_name = str(os_obj)
+            os_obj.delete()
+            messages.success(request, f'Operating System "{os_name}" deleted successfully!')
+        
+        return redirect('operating_system_list', stream=stream)
+    
+    context = {
+        'os': os_obj,
+        'servers_count': BuildServer.objects.filter(operating_system=os_obj).count(),
+        'stream': stream,
+        'stream_obj': stream_obj,
+        'selected_stream': stream_obj,
+    }
+    return render(request, 'products/operating_system_confirm_delete.html', context)

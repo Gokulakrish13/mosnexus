@@ -3,847 +3,774 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Analytics Dashboard - MoS</title>
+    <title>Analytics Dashboard - IGT MoS Inventory</title>
     {% load static %}
     <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
     
     <!-- Modern CSS Framework and Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Chart.js and Additional Libraries -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #f59e42;
-            --success: #22c55e;
-            --warning: #facc15;
-            --danger: #ef4444;
-            --info: #0ea5e9;
-            --background: #fff;
-            --foreground: #18181b;
-            --border: #e5e7eb;
-            --card-bg: #f8fafc;
-            --card-text: #18181b;
-            --panel-bg: #f1f5f9;
-            --icon-color: #2563eb;
-            --icon-bg: #e0e7ff;
-            --shadow-light: 0 4px 16px rgba(37, 99, 235, 0.08);
-            --shadow-heavy: 0 8px 32px rgba(37, 99, 235, 0.16);
-            --border-radius: 18px;
-            --text-primary: #18181b;
-            --text-secondary: #64748b;
-            --gradient: linear-gradient(90deg, #2563eb 0%, #f59e42 100%);
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --primary-light: #e6f0fa;
+            --accent: #00a3e0;
+            --success: #059669;
+            --success-light: #d1fae5;
+            --warning: #d97706;
+            --warning-light: #fef3c7;
+            --danger: #dc2626;
+            --danger-light: #fee2e2;
+            --info: #0891b2;
+            --info-light: #cffafe;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --orange: #ea580c;
+            --orange-light: #ffedd5;
+            --pink: #db2777;
+            --pink-light: #fce7f3;
+            --bg-body: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-card: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --radius: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+            --transition: all 0.2s ease;
         }
 
-        .dark-mode {
-            --primary: #60a5fa;
-            --secondary: #fbbf24;
-            --success: #4ade80;
-            --warning: #fde047;
-            --danger: #f87171;
-            --info: #38bdf8;
-            --background: #18181b;
-            --foreground: #f1f5f9;
-            --border: #27272a;
-            --card-bg: #23272f;
-            --card-text: #f1f5f9;
-            --panel-bg: #18181b;
-            --icon-color: #60a5fa;
-            --icon-bg: #1e293b;
-            --shadow-light: 0 4px 16px rgba(96, 165, 250, 0.10);
-            --shadow-heavy: 0 8px 32px rgba(96, 165, 250, 0.20);
-            --border-radius: 18px;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --gradient: linear-gradient(90deg, #60a5fa 0%, #fbbf24 100%);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--background);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
-            color: var(--text-primary);
-            overflow-x: hidden;
-            transition: all 0.3s ease;
         }
-        
-        /* Glassmorphism Effects */
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-        }
-        
-        .glass-heavy {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-heavy);
-        }
-        
-        /* Header Styles */
-        .dashboard-header {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            margin: 20px;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .dashboard-header::before {
-            content: '';
-            position: absolute;
+
+        .top-navbar {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient);
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-        }
-        
-        .philips-logo {
-            height: 90px;
-            width: auto;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 900;
-        }
-        
-        .home-icon {
-            position: absolute;
-            top: 45px;
-            right: 190px;
             z-index: 1000;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        
-        .home-icon:hover {
-            transform: scale(1.1);
+
+        .navbar-brand { display: flex; align-items: center; gap: 1rem; text-decoration: none; }
+        .navbar-brand img { height: 36px; }
+        .navbar-title { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); }
+        .navbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+        .nav-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 0.875rem; border-radius: var(--radius);
+            font-size: 0.875rem; font-weight: 500; text-decoration: none;
+            transition: var(--transition); border: none; cursor: pointer;
         }
-        
-        .home-icon img {
-            height: 45px;
-            width: 45px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-            background: white;
-            border-radius: 10px;
-            padding: 8px;
+        .nav-btn-ghost { background: transparent; color: var(--text-secondary); }
+        .nav-btn-ghost:hover { background: var(--bg-subtle); color: var(--text-primary); }
+        .nav-btn-primary { background: var(--primary); color: white; }
+        .nav-btn-primary:hover { background: var(--primary-dark); color: white; }
+
+        .main-container { max-width: 1800px; margin: 0 auto; padding: 1.5rem; }
+
+        .breadcrumb-container { margin-bottom: 1.25rem; }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.875rem; color: var(--text-muted);
+            margin: 0; padding: 0; background: none;
         }
-        
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 20px 20px;
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 0.375rem; }
+        .breadcrumb a:hover { color: var(--primary); }
+        .breadcrumb-separator { color: var(--text-muted); font-size: 0.75rem; }
+        .breadcrumb-current { color: var(--text-primary); font-weight: 500; }
+
+        .page-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;
         }
+        .page-header-content h1 {
+            font-size: 1.75rem; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 0.375rem; display: flex; align-items: center; gap: 0.75rem;
+        }
+        .page-header-content p { color: var(--text-secondary); font-size: 0.9375rem; margin: 0; }
+        .header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+        .filter-bar {
+            background: var(--bg-white); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        }
+        .filter-group { display: flex; align-items: center; gap: 0.75rem; }
+        .filter-label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
+        .filter-select {
+            padding: 0.5rem 2rem 0.5rem 0.75rem; border: 1px solid var(--border-color);
+            border-radius: var(--radius); font-size: 0.875rem; background: var(--bg-white);
+            color: var(--text-primary); min-width: 180px; cursor: pointer; transition: var(--transition);
+        }
+        .filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .time-range-btns { display: flex; gap: 0.25rem; background: var(--bg-subtle); padding: 0.25rem; border-radius: var(--radius); align-items: center; }
+        .time-btn {
+            padding: 0.375rem 0.75rem; border: none; border-radius: calc(var(--radius) - 2px);
+            font-size: 0.75rem; font-weight: 500; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+        }
+        .time-btn:hover { color: var(--text-primary); }
+        .time-btn.active { background: var(--bg-white); color: var(--primary); box-shadow: var(--shadow-sm); }
         
+        .date-range-divider { width: 1px; height: 20px; background: var(--border-color); margin: 0 0.5rem; }
+        .custom-date-btn { position: relative; }
+        .custom-date-btn i { margin-right: 0.25rem; }
+        .date-picker-dropdown {
+            position: fixed; background: var(--bg-white);
+            border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.25); padding: 1.25rem; z-index: 99999; min-width: 300px;
+            display: none; max-height: 90vh; overflow-y: auto;
+        }
+        .date-picker-dropdown.show { display: block; }
+        .date-picker-header { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; }
+        .date-input-group { margin-bottom: 0.75rem; }
+        .date-input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .date-input-group input {
+            width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);
+            border-radius: var(--radius); font-size: 0.8125rem; color: var(--text-primary);
+            background: var(--bg-white); transition: var(--transition);
+        }
+        .date-input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .date-picker-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .date-picker-actions button { flex: 1; padding: 0.5rem; font-size: 0.75rem; border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
+        .date-picker-actions .apply-btn { background: var(--primary); color: white; border: none; }
+        .date-picker-actions .apply-btn:hover { background: var(--primary-dark); }
+        .date-picker-actions .clear-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .date-picker-actions .clear-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+        .date-presets { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-light); }
+        .date-preset-btn {
+            padding: 0.25rem 0.5rem; font-size: 0.6875rem; border: 1px solid var(--border-color);
+            border-radius: var(--radius); background: transparent; color: var(--text-secondary);
+            cursor: pointer; transition: var(--transition);
+        }
+        .date-preset-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .date-range-display {
+            font-size: 0.75rem; color: var(--primary); background: var(--primary-light);
+            padding: 0.25rem 0.5rem; border-radius: var(--radius); margin-left: 0.5rem; display: none;
+        }
+        .date-range-display.show { display: inline-flex; align-items: center; gap: 0.375rem; }
+        .date-range-display .clear-range { cursor: pointer; opacity: 0.7; }
+        .date-range-display .clear-range:hover { opacity: 1; }
+
+        .analytics-tabs {
+            display: flex; gap: 0.25rem; background: var(--bg-subtle); padding: 0.25rem;
+            border-radius: var(--radius-lg); margin-bottom: 1.5rem; width: fit-content;
+        }
+        .tab-btn {
+            padding: 0.625rem 1.25rem; border: none; border-radius: var(--radius);
+            font-size: 0.875rem; font-weight: 500; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active { background: var(--bg-white); color: var(--primary); box-shadow: var(--shadow-sm); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: var(--bg-white); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: 1.25rem;
+            display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition);
         }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; flex-shrink: 0;
         }
-        
-        .stat-card.primary::before { background: var(--primary-gradient); }
-        .stat-card.primary::before { background: var(--primary); }
-        .stat-card.success::before { background: var(--success); }
-        .stat-card.warning::before { background: var(--warning); }
-        .stat-card.secondary::before { background: var(--secondary); }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-heavy);
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.info { background: var(--info-light); color: var(--info); }
+        .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .stat-icon.orange { background: var(--orange-light); color: var(--orange); }
+        .stat-icon.pink { background: var(--pink-light); color: var(--pink); }
+        .stat-icon.danger { background: var(--danger-light); color: var(--danger); }
+
+        .stat-content { flex: 1; min-width: 0; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+        .stat-label { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .stat-change {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            font-size: 0.75rem; font-weight: 500; padding: 0.125rem 0.375rem;
+            border-radius: 20px; margin-top: 0.5rem;
         }
-        
-        .stat-card .icon {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: var(--icon-color);
-            background: none;
-        }
-        
-        .stat-card .value {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--card-text);
-            transition: color 0.3s ease;
-        }
-        
-        .stat-card .label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: color 0.3s ease;
-        }
-        
-        /* Main Dashboard Grid */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
-            margin: 0 20px 40px 20px;
-            min-height: 600px;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        
-        .filter-panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--shadow-light);
-            transition: background 0.3s ease;
-        }
-        
-        .filter-panel h3 {
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .filter-panel select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 12px;
-            background: var(--background);
-            color: var(--text-primary);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .filter-panel select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary, #2563eb33);
-        }
-        
-        /* Chart Cards */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 25px;
-        }
-        
+        .stat-change.positive { background: var(--success-light); color: var(--success); }
+        .stat-change.negative { background: var(--danger-light); color: var(--danger); }
+        .stat-change.neutral { background: var(--bg-subtle); color: var(--text-muted); }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; }
+        .charts-section { display: flex; flex-direction: column; gap: 1.5rem; }
+        .charts-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .charts-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
         .chart-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--shadow-light);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: var(--bg-white); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition);
         }
-        
-        .chart-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-heavy);
+        .chart-card:hover { box-shadow: var(--shadow-md); }
+        .chart-card-header {
+            padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .chart-card .chart-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        .chart-title { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .chart-title i { color: var(--primary); font-size: 1rem; }
+        .chart-actions { display: flex; gap: 0.375rem; }
+        .chart-action-btn {
+            width: 32px; height: 32px; border-radius: var(--radius);
+            border: 1px solid var(--border-color); background: var(--bg-white);
+            color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition); font-size: 0.8125rem;
         }
-        
-        .chart-card .chart-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .chart-action-btn:hover { background: var(--bg-subtle); color: var(--text-primary); border-color: var(--text-muted); }
+
+        .chart-card-body { padding: 1.25rem; }
+        .chart-container { position: relative; height: 280px; }
+        .chart-card.tall .chart-container { height: 350px; }
+        .chart-card.small .chart-container { height: 200px; }
+
+        .chart-footer {
+            padding: 1rem 1.25rem; border-top: 1px solid var(--border-light);
+            background: var(--bg-subtle); display: flex; justify-content: space-around;
         }
-        
-        .chart-card .chart-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-chart-action {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            background: var(--icon-bg);
-            color: var(--icon-color);
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-chart-action:hover {
-            background: var(--icon-color);
-            color: #fff;
-            transform: scale(1.05);
-        }
-        
-        /* Enhanced Chart Styles */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 20px;
-        }
-        
-        .chart-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(102, 126, 234, 0.1);
-        }
-        
-        .chart-stat {
-            text-align: center;
-        }
-        
-        .chart-stat .stat-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .chart-stat .stat-label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-        
-        /* Advanced Features */
-        .ai-insights-panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-        
+        .chart-stat { text-align: center; }
+        .chart-stat-value { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); }
+        .chart-stat-label { font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 0.125rem; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+        .sidebar-card { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; }
+        .sidebar-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 0.5rem; }
+        .sidebar-card-header h3 { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+        .sidebar-card-header i { color: var(--primary); }
+        .sidebar-card-body { padding: 1rem 1.25rem; }
+
         .insight-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            transition: background 0.3s ease;
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            padding: 0.875rem; background: var(--bg-subtle); border-radius: var(--radius);
+            margin-bottom: 0.75rem; border-left: 3px solid var(--primary); transition: var(--transition);
         }
-        
+        .insight-item:last-child { margin-bottom: 0; }
+        .insight-item:hover { background: var(--primary-light); }
+        .insight-item.warning { border-left-color: var(--warning); }
+        .insight-item.success { border-left-color: var(--success); }
+        .insight-item.danger { border-left-color: var(--danger); }
+        .insight-item.info { border-left-color: var(--info); }
+
         .insight-icon {
-            font-size: 22px;
-            margin-right: 15px;
-            color: var(--icon-color);
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.875rem; flex-shrink: 0;
         }
-        
-        .insight-content .title {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 5px;
+        .insight-item .insight-icon { background: var(--primary-light); color: var(--primary); }
+        .insight-item.warning .insight-icon { background: var(--warning-light); color: var(--warning); }
+        .insight-item.success .insight-icon { background: var(--success-light); color: var(--success); }
+        .insight-item.danger .insight-icon { background: var(--danger-light); color: var(--danger); }
+        .insight-item.info .insight-icon { background: var(--info-light); color: var(--info); }
+
+        .insight-content { flex: 1; min-width: 0; }
+        .insight-title { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .insight-description { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+
+        .category-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border-light); }
+        .category-item:last-child { border-bottom: none; }
+        .category-rank {
+            width: 24px; height: 24px; border-radius: 50%; background: var(--bg-subtle);
+            color: var(--text-muted); font-size: 0.75rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
         }
-        
-        .insight-content .description {
-            color: var(--text-secondary);
-            font-size: 12px;
+        .category-rank.top { background: var(--primary); color: white; }
+        .category-info { flex: 1; min-width: 0; }
+        .category-name { font-size: 0.8125rem; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .category-bar { height: 4px; background: var(--bg-subtle); border-radius: 2px; margin-top: 0.375rem; overflow: hidden; }
+        .category-bar-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.5s ease; }
+        .category-count { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); }
+
+        .contributor-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0; border-bottom: 1px solid var(--border-light); }
+        .contributor-item:last-child { border-bottom: none; }
+        .contributor-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 600;
         }
-        
-        /* Export and Controls */
-        .control-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            margin: 0 20px 25px 20px;
-            box-shadow: var(--shadow-light);
-            transition: background 0.3s ease;
+        .contributor-info { flex: 1; }
+        .contributor-name { font-size: 0.8125rem; font-weight: 500; color: var(--text-primary); }
+        .contributor-count { font-size: 0.75rem; color: var(--text-muted); }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.625rem 1.25rem; border-radius: var(--radius); font-size: 0.875rem;
+            font-weight: 500; text-decoration: none; cursor: pointer; transition: var(--transition); border: none;
         }
-        
-        .btn-export {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            background: var(--primary);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 10px;
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .btn-outline:hover { border-color: var(--text-muted); color: var(--text-primary); }
+        .btn-sm { padding: 0.5rem 0.875rem; font-size: 0.8125rem; }
+
+        .activity-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius-lg); padding: 1.25rem; color: white; margin-bottom: 1rem;
         }
-        
-        .btn-export:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-light);
-            background: var(--secondary);
-        }
-        
-        /* Loading and Animation */
+        .activity-card h4 { font-size: 0.875rem; font-weight: 600; opacity: 0.9; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .activity-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .activity-stat { text-align: center; }
+        .activity-stat-value { font-size: 1.5rem; font-weight: 700; }
+        .activity-stat-label { font-size: 0.6875rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+
         .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--background);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-white); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
         }
-        
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid var(--border);
-            border-top: 6px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 48px; height: 48px; border: 3px solid var(--border-color);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        /* Responsive Design */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary); }
+
+        @media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 1200px) {
-            .dashboard-container {
-                grid-template-columns: 1fr;
-                gap: 25px;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .sidebar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+            .charts-row-3 { grid-template-columns: repeat(2, 1fr); }
         }
-        
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
-            .dashboard-header {
-                margin: 10px;
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                margin: 20px 10px;
-            }
-            
-            .dashboard-container {
-                margin: 0 10px 20px 10px;
-            }
-            
-            .chart-card {
-                padding: 20px;
-            }
-            
-            .philips-logo {
-                height: 60px;
-                top: 15px;
-                right: 15px;
-            }
-            
-            .home-icon {
-                top: 15px;
-                right: 70px;
-            }
-            
-            .home-icon a {
-                width: 40px;
-                height: 40px;
-                font-size: 14px;
-            }
+            .main-container { padding: 1rem; }
+            .page-header { flex-direction: column; align-items: stretch; }
+            .header-actions { justify-content: flex-start; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-group, .filter-select { width: 100%; }
+            .stats-grid, .sidebar { grid-template-columns: 1fr; }
+            .analytics-tabs { width: 100%; overflow-x: auto; }
         }
-        
-        /* Dark mode toggle */
-        .theme-toggle {
-            position: absolute;
-            top: 30px;
-            right: 110px;
-            width: 32px;
-            height: 32px;
-            background: var(--icon-bg);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--icon-color);
-            cursor: pointer;
-            transition: transform 0.3s ease, background 0.3s;
-            z-index: 1000;
-            font-size: 18px;
-        }
-        
-        .theme-toggle:hover {
-            transform: scale(1.1);
-            background: var(--icon-color);
-            color: #fff;
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .fade-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .fade-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .fade-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .fade-in-delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+        @media print {
+            .top-navbar, .filter-bar, .header-actions, .chart-actions, .analytics-tabs { display: none !important; }
+            .main-container { padding: 0; max-width: 100%; }
+            .chart-card, .sidebar-card, .stat-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="d-flex flex-column align-items-center">
-            <div class="loading-spinner"></div>
-            <p class="mt-3 text-primary fw-bold">Loading Advanced Analytics...</p>
-        </div>
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading Analytics Dashboard...</p>
     </div>
 
-    <!-- Home Icon -->
-    <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
-        <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
-    </a>
+    <nav class="top-navbar">
+        <a href="/dashboard/" class="navbar-brand">
+            <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo">
+            <span class="navbar-title">IGT MoS Inventory</span>
+        </a>
+        <div class="navbar-actions">
+            <a href="/dashboard/" class="nav-btn nav-btn-ghost"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <button class="nav-btn nav-btn-ghost" onclick="refreshData()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
+            <button class="nav-btn nav-btn-primary" onclick="exportDashboard()"><i class="fas fa-download"></i><span>Export</span></button>
+        </div>
+    </nav>
 
-    <!-- Dashboard Header -->
-    <div class="dashboard-header fade-in-up">
-        <!-- Philips Logo -->
-        <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo" class="philips-logo">
-        
-        <!-- Theme Toggle -->
-        <div class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
-            <i class="bi bi-moon-fill"></i>
+    <div class="main-container">
+        <div class="breadcrumb-container">
+            <nav class="breadcrumb">
+                <a href="/dashboard/"><i class="fas fa-home"></i> Home</a>
+                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+                <span class="breadcrumb-current">Analytics Dashboard</span>
+            </nav>
         </div>
-        
-        <h3 class="h2 fw-bold mb-0" style="color: var(--text-primary);">
-            <i class="fas fa-chart-line me-3"></i>Advanced Analytics Dashboard
-        </h3>
-    </div>
 
-    <!-- Key Performance Indicators -->
-    <div class="stats-grid fade-in-up" style="animation-delay: 0.2s;">
-        <div class="stat-card primary">
-            <div class="icon"><i class="fas fa-layer-group"></i></div>
-            <div class="value" id="totalCategories">{{ category_usage|length }}</div>
-            <div class="label">Total Categories</div>
+        <div class="page-header fade-in">
+            <div class="page-header-content">
+                <h1><i class="fas fa-chart-line" style="color: var(--primary);"></i>Analytics Dashboard</h1>
+                <p>Comprehensive insights into your inventory performance, systems, and trends</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline btn-sm" onclick="showAIInsights()"><i class="fas fa-brain"></i><span>AI Insights</span></button>
+                <button class="btn btn-outline btn-sm" onclick="printDashboard()"><i class="fas fa-print"></i><span>Print</span></button>
+            </div>
         </div>
-        <div class="stat-card success">
-            <div class="icon"><i class="fas fa-box"></i></div>
-            <div class="value" id="totalProducts">{{ total_products }}</div>
-            <div class="label">Total Products</div>
-        </div>
-        <div class="stat-card warning">
-            <div class="icon"><i class="fas fa-chart-bar"></i></div>
-            <div class="value" id="mostUsedCount">{{ most_used.product_count }}</div>
-            <div class="label">Top Category Usage</div>
-        </div>
-        <div class="stat-card secondary">
-            <div class="icon"><i class="fas fa-sitemap"></i></div>
-            <div class="value" id="subLevelCount">{{ sublevel_dist_json|length }}</div>
-            <div class="label">Sub Levels</div>
-        </div>
-    </div>
 
-    <!-- Control Panel -->
-    <div class="control-panel fade-in-up" style="animation-delay: 0.3s;">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-filter me-2 text-primary"></i>
-            <span class="fw-bold">Analytics Controls</span>
-        </div>
-        <div class="d-flex align-items-center">
-            <button class="btn-export me-2" onclick="exportDashboard()">
-                <i class="fas fa-download me-2"></i>Export Dashboard
-            </button>
-            <button class="btn-export me-2" onclick="refreshData()">
-                <i class="fas fa-sync-alt me-2"></i>Refresh Data
-            </button>
-            <button class="btn-export" onclick="showAIInsights()">
-                <i class="fas fa-brain me-2"></i>AI Insights
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Dashboard Container -->
-    <div class="dashboard-container fade-in-up" style="animation-delay: 0.4s;">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <!-- Filter Panel -->
-            <div class="filter-panel">
-                <h3><i class="fas fa-filter"></i>Stream Filter</h3>
-                <form method="get" action="">
-                    <select name="stream" class="form-select" onchange="this.form.submit()">
+        <div class="filter-bar fade-in fade-in-delay-1">
+            <div class="filter-group">
+                <span class="filter-label"><i class="fas fa-filter me-1"></i> Stream:</span>
+                <form method="get" action="" id="filterForm">
+                    <select name="stream" class="filter-select" onchange="this.form.submit()">
                         <option value="">All Streams</option>
-                        {% for s in streams %}
-                            <option value="{{ s }}" {% if selected_stream == s %}selected{% endif %}>{{ s }}</option>
-                        {% endfor %}
+                        {% for s in streams %}<option value="{{ s }}" {% if selected_stream == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
                     </select>
                 </form>
             </div>
+            <div class="time-range-btns">
+                <button class="time-btn {% if selected_range == 'all' or not selected_range %}active{% endif %}" data-range="all">All Time</button>
+                <button class="time-btn {% if selected_range == 'year' %}active{% endif %}" data-range="year">This Year</button>
+                <button class="time-btn {% if selected_range == 'quarter' %}active{% endif %}" data-range="quarter">This Quarter</button>
+                <button class="time-btn {% if selected_range == 'month' %}active{% endif %}" data-range="month">This Month</button>
+                <div class="date-range-divider"></div>
+                <div class="custom-date-btn" id="customDateBtn">
+                    <button class="time-btn {% if selected_range == 'custom' %}active{% endif %}" data-range="custom"><i class="fas fa-calendar-alt"></i> Custom</button>
+                </div>
+                <span class="date-range-display {% if selected_range == 'custom' and selected_start_date and selected_end_date %}show{% endif %}" id="dateRangeDisplay">
+                    <span id="dateRangeText">{% if selected_start_date and selected_end_date %}{{ selected_start_date }} - {{ selected_end_date }}{% endif %}</span>
+                    <i class="fas fa-times clear-range" onclick="clearDateRange()"></i>
+                </span>
+            </div>
+        </div>
 
-            <!-- AI Insights Panel -->
-            <div class="ai-insights-panel">
-                <h3 class="mb-3"><i class="fas fa-lightbulb me-2"></i>Smart Insights</h3>
-                <div class="insight-item">
-                    <div class="insight-icon"><i class="fas fa-trophy"></i></div>
-                    <div class="insight-content">
-                        <div class="title">Top Used Item</div>
-                        <div class="description">{{ most_used.name }} leads with {{ most_used.product_count }} products</div>
+        <!-- Date Picker Dropdown (placed at root level for proper z-index) -->
+        <div class="date-picker-dropdown" id="datePickerDropdown">
+            <div class="date-picker-header"><i class="fas fa-calendar-range me-1"></i> Custom Date Range</div>
+            <div class="date-presets">
+                <button class="date-preset-btn" data-preset="7d">Last 7 Days</button>
+                <button class="date-preset-btn" data-preset="14d">Last 14 Days</button>
+                <button class="date-preset-btn" data-preset="30d">Last 30 Days</button>
+                <button class="date-preset-btn" data-preset="60d">Last 60 Days</button>
+                <button class="date-preset-btn" data-preset="90d">Last 90 Days</button>
+                <button class="date-preset-btn" data-preset="6m">Last 6 Months</button>
+            </div>
+            <div class="date-input-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" name="startDate">
+            </div>
+            <div class="date-input-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" name="endDate">
+            </div>
+            <div class="date-picker-actions">
+                <button class="clear-btn" onclick="clearDateRange()">Clear</button>
+                <button class="apply-btn" onclick="applyDateRange()"><i class="fas fa-check me-1"></i> Apply</button>
+            </div>
+        </div>
+
+        <div class="analytics-tabs fade-in fade-in-delay-1">
+            <button class="tab-btn active" data-tab="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+            <button class="tab-btn" data-tab="products"><i class="fas fa-box"></i> Products</button>
+            <button class="tab-btn" data-tab="systems"><i class="fas fa-server"></i> Systems</button>
+            <button class="tab-btn" data-tab="activity"><i class="fas fa-clock"></i> Activity</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="tab-overview">
+            <div class="stats-grid fade-in fade-in-delay-2">
+                <div class="stat-card">
+                    <div class="stat-icon primary"><i class="fas fa-box"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_products }}</div>
+                        <div class="stat-label">Total Products</div>
+                        <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +{{ recent_products_created }} this month</span>
                     </div>
                 </div>
-                <div class="insight-item">
-                    <div class="insight-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="insight-content">
-                        <div class="title">Needs Attention</div>
-                        <div class="description">{{ least_used.name }} has only {{ least_used.product_count }} products</div>
+                <div class="stat-card">
+                    <div class="stat-icon success"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ category_usage|length }}</div>
+                        <div class="stat-label">Categories</div>
+                        <span class="stat-change positive"><i class="fas fa-check"></i> Active</span>
                     </div>
                 </div>
-                <div class="insight-item">
-                    <div class="insight-icon"><i class="fas fa-trending-up"></i></div>
-                    <div class="insight-content">
-                        <div class="title">Growth Trend</div>
-                        <div class="description">Inventory expanding at steady pace</div>
+                <div class="stat-card">
+                    <div class="stat-icon info"><i class="fas fa-server"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_systems }}</div>
+                        <div class="stat-label">Systems</div>
+                        <span class="stat-change positive"><i class="fas fa-circle"></i> {{ active_systems }} active</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-desktop"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_build_servers }}</div>
+                        <div class="stat-label">Build Servers</div>
+                        <span class="stat-change neutral"><i class="fas fa-server"></i> Infrastructure</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-project-diagram"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_projects }}</div>
+                        <div class="stat-label">Projects</div>
+                        <span class="stat-change positive"><i class="fas fa-running"></i> {{ project_status.Running }} running</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pink"><i class="fas fa-users"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_active_users }}</div>
+                        <div class="stat-label">Active Users</div>
+                        <span class="stat-change positive"><i class="fas fa-user-clock"></i> {{ recent_sessions }} recent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid fade-in fade-in-delay-3">
+                <div class="charts-section">
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div class="chart-title"><i class="fas fa-chart-bar"></i>Category Usage</div>
+                                <div class="chart-actions">
+                                    <button class="chart-action-btn" onclick="toggleChartType('categoryUsage')" title="Change chart type"><i class="fas fa-exchange-alt"></i></button>
+                                    <button class="chart-action-btn" onclick="downloadChart('categoryUsage')" title="Download"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="categoryUsageChart"></canvas></div></div>
+                            <div class="chart-footer">
+                                <div class="chart-stat"><div class="chart-stat-value">{% if most_used %}{{ most_used.product_count }}{% else %}0{% endif %}</div><div class="chart-stat-label">Highest</div></div>
+                                <div class="chart-stat"><div class="chart-stat-value">{{ category_usage|length }}</div><div class="chart-stat-label">Categories</div></div>
+                                <div class="chart-stat"><div class="chart-stat-value">{% if least_used %}{{ least_used.product_count }}{% else %}0{% endif %}</div><div class="chart-stat-label">Lowest</div></div>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div class="chart-title"><i class="fas fa-chart-pie"></i>Product Status</div>
+                                <div class="chart-actions">
+                                    <button class="chart-action-btn" onclick="toggleChartType('productStatus')" title="Change chart type"><i class="fas fa-exchange-alt"></i></button>
+                                    <button class="chart-action-btn" onclick="downloadChart('productStatus')" title="Download"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="productStatusChart"></canvas></div></div>
+                            <div class="chart-footer">
+                                <div class="chart-stat"><div class="chart-stat-value" style="color: var(--success);">{{ status_counts.Active|default:0 }}</div><div class="chart-stat-label">Active</div></div>
+                                <div class="chart-stat"><div class="chart-stat-value" style="color: var(--danger);">{{ status_counts.Issue|default:0 }}</div><div class="chart-stat-label">Issue</div></div>
+                                <div class="chart-stat"><div class="chart-stat-value" style="color: var(--text-muted);">{{ status_counts|length }}</div><div class="chart-stat-label">Statuses</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card tall">
+                        <div class="chart-card-header">
+                            <div class="chart-title"><i class="fas fa-chart-line"></i>Product Growth Trend</div>
+                            <div class="chart-actions">
+                                <button class="chart-action-btn" onclick="toggleChartType('growthTrend')" title="Change chart type"><i class="fas fa-exchange-alt"></i></button>
+                                <button class="chart-action-btn" onclick="downloadChart('growthTrend')" title="Download"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-card-body"><div class="chart-container"><canvas id="growthTrendChart"></canvas></div></div>
+                        <div class="chart-footer">
+                            <div class="chart-stat"><div class="chart-stat-value" id="totalMonths">0</div><div class="chart-stat-label">Months Tracked</div></div>
+                            <div class="chart-stat"><div class="chart-stat-value" id="averageGrowth">0</div><div class="chart-stat-label">Avg/Month</div></div>
+                            <div class="chart-stat"><div class="chart-stat-value" id="peakGrowth">0</div><div class="chart-stat-label">Peak Month</div></div>
+                            <div class="chart-stat"><div class="chart-stat-value" id="totalGrowth">0</div><div class="chart-stat-label">Total Added</div></div>
+                        </div>
+                    </div>
+
+                    <div class="charts-row-3">
+                        <div class="chart-card small">
+                            <div class="chart-card-header"><div class="chart-title"><i class="fas fa-heartbeat"></i>System Health</div></div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="systemHealthChart"></canvas></div></div>
+                        </div>
+                        <div class="chart-card small">
+                            <div class="chart-card-header"><div class="chart-title"><i class="fas fa-server"></i>Build Servers</div></div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="buildServerChart"></canvas></div></div>
+                        </div>
+                        <div class="chart-card small">
+                            <div class="chart-card-header"><div class="chart-title"><i class="fas fa-tasks"></i>Project Status</div></div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="projectStatusChart"></canvas></div></div>
+                        </div>
+                    </div>
+
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div class="chart-title"><i class="fas fa-sitemap"></i>Sub Level Usage</div>
+                                <div class="chart-actions"><button class="chart-action-btn" onclick="downloadChart('subLevelUsage')" title="Download"><i class="fas fa-download"></i></button></div>
+                            </div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="subLevelUsageChart"></canvas></div></div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div class="chart-title"><i class="fas fa-map-marker-alt"></i>Location Distribution</div>
+                                <div class="chart-actions"><button class="chart-action-btn" onclick="downloadChart('locationDist')" title="Download"><i class="fas fa-download"></i></button></div>
+                            </div>
+                            <div class="chart-card-body"><div class="chart-container"><canvas id="locationDistChart"></canvas></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar fade-in fade-in-delay-4">
+                    <div class="activity-card">
+                        <h4><i class="fas fa-bolt"></i> Last 30 Days</h4>
+                        <div class="activity-stats">
+                            <div class="activity-stat"><div class="activity-stat-value">{{ recent_creates }}</div><div class="activity-stat-label">Created</div></div>
+                            <div class="activity-stat"><div class="activity-stat-value">{{ recent_edits }}</div><div class="activity-stat-label">Edited</div></div>
+                            <div class="activity-stat"><div class="activity-stat-value">{{ recent_sessions }}</div><div class="activity-stat-label">Users</div></div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-header"><i class="fas fa-lightbulb"></i><h3>Smart Insights</h3></div>
+                        <div class="sidebar-card-body">
+                            <div class="insight-item success">
+                                <div class="insight-icon"><i class="fas fa-trophy"></i></div>
+                                <div class="insight-content">
+                                    <div class="insight-title">Top Performer</div>
+                                    <div class="insight-description">{% if most_used %}{{ most_used.name }} leads with {{ most_used.product_count }} products{% else %}No data{% endif %}</div>
+                                </div>
+                            </div>
+                            {% if least_used and least_used.product_count < 5 %}
+                            <div class="insight-item warning">
+                                <div class="insight-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                                <div class="insight-content">
+                                    <div class="insight-title">Needs Attention</div>
+                                    <div class="insight-description">{{ least_used.name }} has only {{ least_used.product_count }} products</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if system_health.Critical > 0 %}
+                            <div class="insight-item danger">
+                                <div class="insight-icon"><i class="fas fa-exclamation-circle"></i></div>
+                                <div class="insight-content">
+                                    <div class="insight-title">Critical Systems</div>
+                                    <div class="insight-description">{{ system_health.Critical }} system(s) in critical health</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="insight-item info">
+                                <div class="insight-icon"><i class="fas fa-chart-line"></i></div>
+                                <div class="insight-content">
+                                    <div class="insight-title">Growth Trend</div>
+                                    <div class="insight-description">{{ recent_products_created }} new products in last 30 days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-header"><i class="fas fa-medal"></i><h3>Top Categories</h3></div>
+                        <div class="sidebar-card-body" id="topCategoriesList"></div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-header"><i class="fas fa-user-star"></i><h3>Top Contributors</h3></div>
+                        <div class="sidebar-card-body" id="topContributorsList"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Grid -->
-        <div class="charts-grid">
-            <!-- Category Usage Chart -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-bar"></i>Category Usage Analysis
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('categoryUsageChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('categoryUsageChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
+        <!-- Products Tab -->
+        <div class="tab-content" id="tab-products">
+            <div class="charts-row">
+                <div class="chart-card tall">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-bar"></i>Category Distribution Detail</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="categoryDetailChart"></canvas></div></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="categoryUsageChart"></canvas>
-                </div>
-                <div class="chart-stats">
-                    <div class="chart-stat">
-                        <div class="stat-value">{{ most_used.product_count }}</div>
-                        <div class="stat-label">Highest Usage</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value">{{ category_usage|length }}</div>
-                        <div class="stat-label">Total Categories</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value">{{ least_used.product_count }}</div>
-                        <div class="stat-label">Lowest Usage</div>
-                    </div>
+                <div class="chart-card tall">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-area"></i>Sub Level Growth Trend</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="subLevelGrowthChart"></canvas></div></div>
                 </div>
             </div>
-
-            <!-- Product Growth Trend -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-line"></i>Product Growth Trend
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('growthTrendChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('growthTrendChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-stream"></i>Products by Stream</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="streamDistChart"></canvas></div></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="growthTrendChart"></canvas>
-                </div>
-                <div class="chart-stats">
-                    <div class="chart-stat">
-                        <div class="stat-value" id="totalMonths">{{ counts_json|length }}</div>
-                        <div class="stat-label">Months Tracked</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value" id="averageGrowth">0</div>
-                        <div class="stat-label">Avg Growth</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value" id="peakGrowth">0</div>
-                        <div class="stat-label">Peak Month</div>
-                    </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-pie"></i>Status Breakdown</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="statusBreakdownChart"></canvas></div></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Category Distribution -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-pie-chart"></i>Category Distribution
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('categoryDistChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('categoryDistChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
+        <!-- Systems Tab -->
+        <div class="tab-content" id="tab-systems">
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-check-circle"></i></div><div class="stat-content"><div class="stat-value">{{ system_health.Excellent }}</div><div class="stat-label">Excellent Health</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-thumbs-up"></i></div><div class="stat-content"><div class="stat-value">{{ system_health.Good }}</div><div class="stat-label">Good Health</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-content"><div class="stat-value">{{ system_health.Warning }}</div><div class="stat-label">Warning</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-times-circle"></i></div><div class="stat-content"><div class="stat-value">{{ system_health.Critical }}</div><div class="stat-label">Critical</div></div></div>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-power-off"></i></div><div class="stat-content"><div class="stat-value">{{ total_downtime_events }}</div><div class="stat-label">Total Downtime Events</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-clock"></i></div><div class="stat-content"><div class="stat-value">{{ active_downtime }}</div><div class="stat-label">Active Downtime</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-building"></i></div><div class="stat-content"><div class="stat-value">{{ total_floors }}</div><div class="stat-label">Total Floors</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-sticky-note"></i></div><div class="stat-content"><div class="stat-value">{{ total_notes }}</div><div class="stat-label">Total Notes</div><span class="stat-change positive"><i class="fas fa-arrow-up"></i> +{{ recent_notes }} this month</span></div></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card tall">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-heartbeat"></i>System Health Overview</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="systemHealthDetailChart"></canvas></div></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="categoryDistChart"></canvas>
-                </div>
-                <div class="chart-stats">
-                    <div class="chart-stat">
-                        <div class="stat-value">{{ total_products }}</div>
-                        <div class="stat-label">Total Products</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value">{{ category_usage|length }}</div>
-                        <div class="stat-label">Categories</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value" id="avgPerCategory">0</div>
-                        <div class="stat-label">Avg per Category</div>
-                    </div>
+                <div class="chart-card tall">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-server"></i>Build Server Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="buildServerDetailChart"></canvas></div></div>
                 </div>
             </div>
-
-            <!-- Sub Level Analysis -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-sitemap"></i>Sub Level Analysis
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('subLevelUsageChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('subLevelUsageChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-power-off"></i>Downtime by Type</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="downtimeTypeChart"></canvas></div></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="subLevelUsageChart"></canvas>
-                </div>
-                <div class="chart-stats">
-                    <div class="chart-stat">
-                        <div class="stat-value" id="totalSubLevels">0</div>
-                        <div class="stat-label">Sub Levels</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value" id="avgSubLevelUsage">0</div>
-                        <div class="stat-label">Avg Usage</div>
-                    </div>
-                    <div class="chart-stat">
-                        <div class="stat-value" id="topSubLevel">-</div>
-                        <div class="stat-label">Top Sub Level</div>
-                    </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-building"></i>Floor Distribution</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="floorDistChart"></canvas></div></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Sub Level Distribution -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-pie"></i>Sub Level Distribution
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('subLevelDistChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('subLevelDistChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="subLevelDistChart"></canvas>
-                </div>
+        <!-- Activity Tab -->
+        <div class="tab-content" id="tab-activity">
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-plus-circle"></i></div><div class="stat-content"><div class="stat-value">{{ recent_creates }}</div><div class="stat-label">Products Created (30d)</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-edit"></i></div><div class="stat-content"><div class="stat-value">{{ recent_edits }}</div><div class="stat-label">Products Edited (30d)</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-user-clock"></i></div><div class="stat-content"><div class="stat-value">{{ recent_sessions }}</div><div class="stat-label">Active Users (30d)</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-running"></i></div><div class="stat-content"><div class="stat-value">{{ project_status.Running }}</div><div class="stat-label">Running Projects</div></div></div>
             </div>
-
-            <!-- Sub Level Growth -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-area"></i>Sub Level Growth Trend
-                    </div>
-                    <div class="chart-actions">
-                        <button class="btn-chart-action" onclick="toggleChartType('subLevelGrowthChart')">
-                            <i class="fas fa-exchange-alt"></i>
-                        </button>
-                        <button class="btn-chart-action" onclick="downloadChart('subLevelGrowthChart')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
+            <div class="charts-row">
+                <div class="chart-card tall">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-tasks"></i>Project Status Distribution</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="projectDetailChart"></canvas></div></div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="subLevelGrowthChart"></canvas>
+                <div class="sidebar-card" style="height: fit-content;">
+                    <div class="sidebar-card-header"><i class="fas fa-star"></i><h3>Top Contributors (30 Days)</h3></div>
+                    <div class="sidebar-card-body" id="topContributorsDetailList"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap and Chart.js Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Global Variables and Data
         const categoryUsageRaw = JSON.parse('{{ category_usage_json|escapejs }}');
         const categoryLabels = categoryUsageRaw.map(obj => obj.name);
         const categoryCounts = categoryUsageRaw.map(obj => obj.product_count);
@@ -854,636 +781,386 @@
         const subLevelDistCounts = subLevelDistRaw.map(obj => obj.product_count);
         const subLevelGrowthMonths = JSON.parse('{{ sublevel_growth_months_json|escapejs }}');
         const subLevelGrowthCounts = JSON.parse('{{ sublevel_growth_counts_json|escapejs }}');
+        const statusCounts = JSON.parse('{{ status_counts_json|escapejs }}');
+        const systemHealth = JSON.parse('{{ system_health_json|escapejs }}');
+        const buildServerStatus = JSON.parse('{{ build_server_status_json|escapejs }}');
+        const projectStatus = JSON.parse('{{ project_status_json|escapejs }}');
+        const locationDistRaw = JSON.parse('{{ location_dist_json|escapejs }}');
+        const topContributors = JSON.parse('{{ top_contributors_json|escapejs }}');
+        
+        // New data
+        const downtimeByType = JSON.parse('{{ downtime_by_type_json|escapejs }}');
+        const downtimeByStatus = JSON.parse('{{ downtime_by_status_json|escapejs }}');
+        const floorDistRaw = JSON.parse('{{ floor_dist_json|escapejs }}');
+        const streamProductDist = JSON.parse('{{ stream_product_dist_json|escapejs }}');
 
-        // Chart instances
         let charts = {};
-        
-        // Modern color schemes
-        const colorSchemes = {
-            primary: [
-                getComputedStyle(document.body).getPropertyValue('--primary').trim() || '#2563eb',
-                getComputedStyle(document.body).getPropertyValue('--secondary').trim() || '#f59e42',
-                getComputedStyle(document.body).getPropertyValue('--success').trim() || '#22c55e',
-                getComputedStyle(document.body).getPropertyValue('--warning').trim() || '#facc15',
-                getComputedStyle(document.body).getPropertyValue('--info').trim() || '#0ea5e9',
-                getComputedStyle(document.body).getPropertyValue('--danger').trim() || '#ef4444'
-            ]
-        };
+        const colors = { primary: '#0066cc', primaryLight: 'rgba(0, 102, 204, 0.1)', success: '#059669', warning: '#d97706', danger: '#dc2626', info: '#0891b2', purple: '#7c3aed', orange: '#ea580c', palette: ['#0066cc', '#059669', '#d97706', '#0891b2', '#7c3aed', '#dc2626', '#0d9488', '#ea580c'] };
 
-        // Chart configuration with modern styling
-        const chartConfig = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: {
-                            size: 12,
-                            weight: '600'
-                        }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    cornerRadius: 8,
-                    padding: 12,
-                    displayColors: true
-                }
-            },
-            animation: {
-                duration: 1500,
-                easing: 'easeOutQuart'
-            }
-        };
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = '#64748b';
 
-        // Initialize all charts
-        function initializeCharts() {
-            initCategoryUsageChart();
-            initGrowthTrendChart();
-            initCategoryDistChart();
-            initSubLevelCharts();
-            calculateStats();
-        }
+        // Date range state
+        let selectedDateRange = { start: null, end: null };
 
-        // Category Usage Chart
-        function initCategoryUsageChart() {
-            const ctx = document.getElementById('categoryUsageChart').getContext('2d');
-            charts.categoryUsage = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        label: 'Products per Category',
-                        data: categoryCounts,
-                        backgroundColor: colorSchemes.primary,
-                        borderColor: colorSchemes.primary.map(color => color + 'CC'),
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    ...chartConfig,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                font: { size: 11 }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: { size: 11 }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Growth Trend Chart
-        function initGrowthTrendChart() {
-            const ctx = document.getElementById('growthTrendChart').getContext('2d');
-            charts.growthTrend = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthsArr,
-                    datasets: [{
-                        label: 'Products Added',
-                        data: countsArr,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        pointBackgroundColor: '#667eea',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    ...chartConfig,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Category Distribution Chart
-        function initCategoryDistChart() {
-            const ctx = document.getElementById('categoryDistChart').getContext('2d');
-            charts.categoryDist = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        data: categoryCounts,
-                        backgroundColor: colorSchemes.primary,
-                        borderColor: '#fff',
-                        borderWidth: 3,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    ...chartConfig,
-                    cutout: '60%',
-                    plugins: {
-                        ...chartConfig.plugins,
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 15,
-                                font: { size: 11 }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Sub Level Charts
-        function initSubLevelCharts() {
-            // Sub Level Usage Chart
-            const ctx1 = document.getElementById('subLevelUsageChart').getContext('2d');
-            charts.subLevelUsage = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: subLevelDistLabels,
-                    datasets: [{
-                        label: 'Sub Level Usage',
-                        data: subLevelDistCounts,
-                        backgroundColor: '#f093fb',
-                        borderColor: '#f093fb',
-                        borderWidth: 2,
-                        borderRadius: 8
-                    }]
-                },
-                options: chartConfig
-            });
-
-            // Sub Level Distribution Chart
-            const ctx2 = document.getElementById('subLevelDistChart').getContext('2d');
-            charts.subLevelDist = new Chart(ctx2, {
-                type: 'pie',
-                data: {
-                    labels: subLevelDistLabels,
-                    datasets: [{
-                        data: subLevelDistCounts,
-                        backgroundColor: colorSchemes.primary,
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    }]
-                },
-                options: chartConfig
-            });
-
-            // Sub Level Growth Chart
-            const ctx3 = document.getElementById('subLevelGrowthChart').getContext('2d');
-            charts.subLevelGrowth = new Chart(ctx3, {
-                type: 'area',
-                data: {
-                    labels: subLevelGrowthMonths,
-                    datasets: [{
-                        label: 'Sub Levels Added',
-                        data: subLevelGrowthCounts,
-                        borderColor: '#4facfe',
-                        backgroundColor: 'rgba(79, 172, 254, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: chartConfig
-            });
-        }
-
-        // Calculate and update statistics
-        function calculateStats() {
-            // Growth stats
-            const totalGrowth = countsArr.reduce((a, b) => a + b, 0);
-            const avgGrowth = Math.round(totalGrowth / countsArr.length);
-            const peakGrowth = Math.max(...countsArr);
-            
-            document.getElementById('averageGrowth').textContent = avgGrowth;
-            document.getElementById('peakGrowth').textContent = peakGrowth;
-            
-            // Category stats
-            const totalProductsCount = parseInt('{{ total_products|default:0 }}');
-            const avgPerCategory = Math.round(totalProductsCount / categoryLabels.length);
-            document.getElementById('avgPerCategory').textContent = avgPerCategory;
-            
-            // Sub level stats
-            const totalSubLevels = subLevelDistCounts.length;
-            const avgSubLevelUsage = Math.round(subLevelDistCounts.reduce((a, b) => a + b, 0) / totalSubLevels);
-            const topSubLevel = subLevelDistLabels[subLevelDistCounts.indexOf(Math.max(...subLevelDistCounts))];
-            
-            document.getElementById('totalSubLevels').textContent = totalSubLevels;
-            document.getElementById('avgSubLevelUsage').textContent = avgSubLevelUsage;
-            document.getElementById('topSubLevel').textContent = topSubLevel || '-';
-        }
-
-        // Enhanced Features
-        function toggleChartType(chartId) {
-            const chart = charts[chartId.replace('Chart', '')];
-            if (!chart) return;
-            
-            const currentType = chart.config.type;
-            let newType;
-            
-            switch(currentType) {
-                case 'bar':
-                    newType = 'line';
-                    break;
-                case 'line':
-                    newType = 'radar';
-                    break;
-                case 'radar':
-                    newType = 'bar';
-                    break;
-                case 'doughnut':
-                    newType = 'pie';
-                    break;
-                case 'pie':
-                    newType = 'polarArea';
-                    break;
-                case 'polarArea':
-                    newType = 'doughnut';
-                    break;
-                default:
-                    newType = 'bar';
-            }
-            
-            chart.config.type = newType;
-            chart.update('active');
-        }
-
-        function downloadChart(chartId) {
-            const chart = charts[chartId.replace('Chart', '')];
-            if (!chart) return;
-            
-            const link = document.createElement('a');
-            link.download = `${chartId}.png`;
-            link.href = chart.toBase64Image();
-            link.click();
-        }
-
-        function exportDashboard() {
-            // Create export data
-            const exportData = {
-                categories: categoryUsageRaw,
-                growthData: monthsArr.map((month, index) => ({
-                    month: month,
-                    count: countsArr[index]
-                })),
-                subLevels: subLevelDistRaw,
-                exportDate: new Date().toISOString(),
-                totalProducts: parseInt('{{ total_products|default:0 }}'),
-                totalCategories: categoryLabels.length
-            };
-            
-            // Download as JSON
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'analytics-dashboard-export.json';
-            link.click();
-            URL.revokeObjectURL(url);
-            
-            // Show success notification
-            showNotification('Dashboard data exported successfully!', 'success');
-        }
-
-        function refreshData() {
-            showNotification('Refreshing data...', 'info');
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        }
-
-        function showAIInsights() {
-            // Create comprehensive AI insights
-            const totalProducts = parseInt(document.getElementById('totalProducts').textContent);
-            const totalCategories = parseInt(document.getElementById('totalCategories').textContent);
-            const avgPerCategory = Math.round(totalProducts / totalCategories);
-            const topCategory = categoryLabels[0];
-            const topCategoryCount = categoryCounts[0];
-            const lowCategory = categoryLabels[categoryCounts.indexOf(Math.min(...categoryCounts))];
-            const lowCategoryCount = Math.min(...categoryCounts);
-            
-            // Calculate growth metrics
-            const recentGrowth = countsArr.slice(-3).reduce((a, b) => a + b, 0);
-            const avgGrowth = Math.round(countsArr.reduce((a, b) => a + b, 0) / countsArr.length);
-            const peakGrowth = Math.max(...countsArr);
-            
-            // Generate insights
-            const insights = {
-                performance: [
-                    {
-                        icon: 'fas fa-trophy',
-                        title: 'Top Used Category',
-                        description: `${topCategory} leads with ${topCategoryCount} products (${Math.round(topCategoryCount/totalProducts*100)}% of total inventory)`,
-                        type: 'success'
-                    },
-                    {
-                        icon: 'fas fa-chart-line',
-                        title: 'Growth Analysis',
-                        description: `Recent 3-month growth: ${recentGrowth} products. Average monthly growth: ${avgGrowth} products`,
-                        type: 'info'
-                    }
-                ],
-                recommendations: [
-                    {
-                        icon: 'fas fa-exclamation-triangle',
-                        title: 'Attention Needed',
-                        description: `${lowCategory} category has only ${lowCategoryCount} products - consider consolidation or expansion`,
-                        type: 'warning'
-                    },
-                    {
-                        icon: 'fas fa-balance-scale',
-                        title: 'Distribution Balance',
-                        description: avgPerCategory > 50 ? 
-                            `Categories are well-distributed (avg: ${avgPerCategory} products per category)` :
-                            `Consider redistributing inventory - some categories may be under-utilized`,
-                        type: avgPerCategory > 50 ? 'success' : 'warning'
-                    },
-                    {
-                        icon: 'fas fa-trend-up',
-                        title: 'Optimization Opportunity',
-                        description: peakGrowth > avgGrowth * 2 ? 
-                            `Peak growth month (${peakGrowth} products) suggests seasonal patterns - plan accordingly` :
-                            `Steady growth pattern detected - maintain current strategy`,
-                        type: 'info'
-                    }
-                ],
-                predictions: [
-                    {
-                        icon: 'fas fa-crystal-ball',
-                        title: 'Forecast',
-                        description: `Based on current trends, expect ~${Math.round(avgGrowth * 1.2)} products next month`,
-                        type: 'info'
-                    },
-                    {
-                        icon: 'fas fa-target',
-                        title: 'Goal Setting',
-                        description: `Target: Reach ${Math.round(totalProducts * 1.2)} total products by quarter end`,
-                        type: 'primary'
-                    }
-                ]
-            };
-            
-            showAIInsightsModal(insights);
-        }
-        
-        function showAIInsightsModal(insights) {
-            // Create modal HTML
-            const modalHTML = `
-                <div class="modal fade" id="aiInsightsModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content" style="background: var(--card-bg); border: none; border-radius: 20px;">
-                            <div class="modal-header" style="border-bottom: 2px solid var(--glass-border); background: var(--primary-gradient); color: white; border-radius: 20px 20px 0 0;">
-                                <h5 class="modal-title">
-                                    <i class="fas fa-brain me-3"></i>AI-Powered Analytics Insights
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <div class="row g-4">
-                                    <!-- Performance Section -->
-                                    <div class="col-12">
-                                        <h6 class="fw-bold text-success mb-3">
-                                            <i class="fas fa-chart-bar me-2"></i>Performance Analysis
-                                        </h6>
-                                        <div class="row g-3">
-                                            ${insights.performance.map(insight => createInsightCard(insight)).join('')}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Recommendations Section -->
-                                    <div class="col-12">
-                                        <h6 class="fw-bold text-warning mb-3">
-                                            <i class="fas fa-lightbulb me-2"></i>Smart Recommendations
-                                        </h6>
-                                        <div class="row g-3">
-                                            ${insights.recommendations.map(insight => createInsightCard(insight)).join('')}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Predictions Section -->
-                                    <div class="col-12">
-                                        <h6 class="fw-bold text-primary mb-3">
-                                            <i class="fas fa-magic me-2"></i>Predictive Insights
-                                        </h6>
-                                        <div class="row g-3">
-                                            ${insights.predictions.map(insight => createInsightCard(insight)).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer" style="border-top: 1px solid var(--glass-border);">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" onclick="exportInsights()">
-                                    <i class="fas fa-download me-2"></i>Export Insights
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Remove existing modal if any
-            const existingModal = document.getElementById('aiInsightsModal');
-            if (existingModal) existingModal.remove();
-            
-            // Add modal to page
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('aiInsightsModal'));
-            modal.show();
-        }
-        
-        function createInsightCard(insight) {
-            const colorClasses = {
-                success: 'border-success text-success',
-                warning: 'border-warning text-warning', 
-                info: 'border-info text-info',
-                primary: 'border-primary text-primary'
-            };
-            
-            return `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 ${colorClasses[insight.type]}" style="border-left: 4px solid;">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-start">
-                                <i class="${insight.icon} ${colorClasses[insight.type]} me-3 mt-1" style="font-size: 1.2rem;"></i>
-                                <div>
-                                    <h6 class="card-title ${colorClasses[insight.type]} mb-2">${insight.title}</h6>
-                                    <p class="card-text small mb-0">${insight.description}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function exportInsights() {
-            const insightsData = {
-                generated_at: new Date().toISOString(),
-                summary: {
-                    total_products: parseInt(document.getElementById('totalProducts').textContent),
-                    total_categories: parseInt(document.getElementById('totalCategories').textContent),
-                    top_category: categoryLabels[0],
-                    growth_trend: countsArr.slice(-3).reduce((a, b) => a + b, 0)
-                },
-                insights: {
-                    performance: "Top performing categories identified",
-                    recommendations: "Optimization opportunities detected", 
-                    predictions: "Growth forecasts generated"
-                }
-            };
-            
-            const dataStr = JSON.stringify(insightsData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `ai-insights-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            URL.revokeObjectURL(url);
-            
-            showNotification('AI Insights exported successfully!', 'success');
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `alert alert-${type} position-fixed`;
-            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            notification.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
-                    ${message}
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Theme toggle functionality
-        let isDarkMode = localStorage.getItem('darkMode') === 'true';
-        
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            localStorage.setItem('darkMode', isDarkMode);
-            
-            // Update icon
-            const icon = document.getElementById('themeToggle').querySelector('i');
-            icon.className = isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-            
-            // Update chart colors for dark mode
-            updateChartsForTheme();
-        }
-        
-        function updateChartsForTheme() {
-            const textColor = isDarkMode ? '#e8e9ea' : '#2c3e50';
-            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-            
-            Object.values(charts).forEach(chart => {
-                if (chart && chart.options) {
-                    // Update text colors
-                    if (chart.options.plugins && chart.options.plugins.legend) {
-                        chart.options.plugins.legend.labels.color = textColor;
-                    }
-                    
-                    // Update scales
-                    if (chart.options.scales) {
-                        Object.values(chart.options.scales).forEach(scale => {
-                            if (scale.ticks) scale.ticks.color = textColor;
-                            if (scale.grid) scale.grid.color = gridColor;
-                        });
-                    }
-                    
-                    chart.update('none');
-                }
-            });
-        }
-        
-        function initializeTheme() {
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                const icon = document.getElementById('themeToggle').querySelector('i');
-                icon.className = 'bi bi-sun-fill';
-            }
-        }
-
-        // Event Listeners
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize theme first
-            initializeTheme();
-            
-            // Hide loading overlay
             setTimeout(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 initializeCharts();
-            }, 1500);
-            
-            // Add animation classes
-            const elements = document.querySelectorAll('.fade-in-up');
-            elements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                }, index * 200);
+                calculateStats();
+                populateTopCategories();
+                populateTopContributors();
+                initializeDatePicker();
+            }, 800);
+
+            document.querySelectorAll('.time-btn:not([data-range="custom"])').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('dateRangeDisplay').classList.remove('show');
+                    selectedDateRange = { start: null, end: null };
+                    // Here you could filter data based on the selected range
+                    const range = this.dataset.range;
+                    filterDataByRange(range);
+                });
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('tab-' + tabId).classList.add('active');
+                    if (tabId === 'products' && !charts.categoryDetail) initProductsTabCharts();
+                    if (tabId === 'systems' && !charts.systemHealthDetail) initSystemsTabCharts();
+                    if (tabId === 'activity' && !charts.projectDetail) initActivityTabCharts();
+                });
             });
         });
 
-        // Responsive chart resizing
-        window.addEventListener('resize', function() {
-            Object.values(charts).forEach(chart => {
-                if (chart && chart.resize) {
-                    chart.resize();
+        function initializeDatePicker() {
+            const customDateBtn = document.getElementById('customDateBtn');
+            const datePickerDropdown = document.getElementById('datePickerDropdown');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+
+            // Set max date to today
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.max = today;
+            endDateInput.max = today;
+
+            // Toggle dropdown and position it with fixed positioning
+            customDateBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isShowing = datePickerDropdown.classList.contains('show');
+                
+                if (!isShowing) {
+                    // Position the dropdown relative to the button using fixed positioning
+                    const btnRect = customDateBtn.getBoundingClientRect();
+                    const dropdownWidth = 300;
+                    
+                    // Calculate position - prefer right-aligned, but ensure it stays on screen
+                    let rightPos = window.innerWidth - btnRect.right;
+                    if (btnRect.right < dropdownWidth) {
+                        // If not enough space on right, align to left edge of button
+                        datePickerDropdown.style.left = btnRect.left + 'px';
+                        datePickerDropdown.style.right = 'auto';
+                    } else {
+                        datePickerDropdown.style.right = rightPos + 'px';
+                        datePickerDropdown.style.left = 'auto';
+                    }
+                    datePickerDropdown.style.top = (btnRect.bottom + 8) + 'px';
+                }
+                
+                datePickerDropdown.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!datePickerDropdown.contains(e.target) && !customDateBtn.contains(e.target)) {
+                    datePickerDropdown.classList.remove('show');
                 }
             });
-        });
 
-        // Prevent right-click context menu
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
+            // Prevent dropdown close when clicking inside
+            datePickerDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Date preset buttons
+            document.querySelectorAll('.date-preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const preset = this.dataset.preset;
+                    const endDate = new Date();
+                    let startDate = new Date();
+
+                    switch(preset) {
+                        case '7d': startDate.setDate(endDate.getDate() - 7); break;
+                        case '14d': startDate.setDate(endDate.getDate() - 14); break;
+                        case '30d': startDate.setDate(endDate.getDate() - 30); break;
+                        case '60d': startDate.setDate(endDate.getDate() - 60); break;
+                        case '90d': startDate.setDate(endDate.getDate() - 90); break;
+                        case '6m': startDate.setMonth(endDate.getMonth() - 6); break;
+                    }
+
+                    startDateInput.value = startDate.toISOString().split('T')[0];
+                    endDateInput.value = endDate.toISOString().split('T')[0];
+                });
+            });
+
+            // Validate date range
+            startDateInput.addEventListener('change', function() {
+                if (endDateInput.value && this.value > endDateInput.value) {
+                    endDateInput.value = this.value;
+                }
+                endDateInput.min = this.value;
+            });
+        }
+
+        function applyDateRange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                showToast('Please select both start and end dates', 'warning');
+                return;
+            }
+
+            selectedDateRange = { start: startDate, end: endDate };
+
+            // Update UI
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('customDateBtn').classList.add('active');
+            document.getElementById('datePickerDropdown').classList.remove('show');
+
+            // Format and display date range
+            const startFormatted = formatDate(startDate);
+            const endFormatted = formatDate(endDate);
+            document.getElementById('dateRangeText').textContent = `${startFormatted} - ${endFormatted}`;
+            document.getElementById('dateRangeDisplay').classList.add('show');
+
+            // Filter data
+            filterDataByRange('custom', startDate, endDate);
+            showToast(`Showing data from ${startFormatted} to ${endFormatted}`, 'success');
+        }
+
+        function clearDateRange() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('dateRangeDisplay').classList.remove('show');
+            document.getElementById('datePickerDropdown').classList.remove('show');
+            
+            // Reset to All Time
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.time-btn[data-range="all"]').classList.add('active');
+            selectedDateRange = { start: null, end: null };
+            filterDataByRange('all');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function filterDataByRange(range, startDate = null, endDate = null) {
+            // Build URL with current stream and new date range
+            const currentStream = '{{ selected_stream|escapejs }}';
+            let url = window.location.pathname + '?';
+            let params = [];
+            
+            if (currentStream) {
+                params.push('stream=' + encodeURIComponent(currentStream));
+            }
+            
+            params.push('range=' + encodeURIComponent(range));
+            
+            if (range === 'custom' && startDate && endDate) {
+                params.push('start=' + encodeURIComponent(startDate));
+                params.push('end=' + encodeURIComponent(endDate));
+            }
+            
+            // Reload page with new parameters
+            window.location.href = url + params.join('&');
+        }
+
+        function initializeCharts() {
+            // Filter out status counts with 0 values for cleaner charts
+            const filteredStatus = Object.entries(statusCounts).filter(([k, v]) => v > 0);
+            const statusLabels = filteredStatus.map(([k]) => k);
+            const statusValues = filteredStatus.map(([, v]) => v);
+            const statusColors = { 'Active': colors.success, 'Not Active': '#94a3b8', 'Scraped': colors.warning, 'Hand-Overed': colors.info, 'Issue': colors.danger };
+            const statusBgColors = statusLabels.map(l => statusColors[l] || colors.primary);
+            
+            charts.categoryUsage = new Chart(document.getElementById('categoryUsageChart'), { type: 'bar', data: { labels: categoryLabels.slice(0, 10), datasets: [{ label: 'Products', data: categoryCounts.slice(0, 10), backgroundColor: colors.primary, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } } } } });
+            charts.productStatus = new Chart(document.getElementById('productStatusChart'), { type: 'doughnut', data: { labels: statusLabels.length > 0 ? statusLabels : ['No Data'], datasets: [{ data: statusValues.length > 0 ? statusValues : [1], backgroundColor: statusValues.length > 0 ? statusBgColors : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } } });
+            charts.growthTrend = new Chart(document.getElementById('growthTrendChart'), { type: 'line', data: { labels: monthsArr.length > 0 ? monthsArr : ['No Data'], datasets: [{ label: 'Products Added', data: countsArr.length > 0 ? countsArr : [0], borderColor: colors.primary, backgroundColor: colors.primaryLight, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: colors.primary, pointBorderColor: '#fff', pointBorderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }, interaction: { intersect: false, mode: 'index' } } });
+            charts.systemHealth = new Chart(document.getElementById('systemHealthChart'), { 
+                type: 'doughnut', 
+                data: { 
+                    labels: Object.entries(systemHealth).filter(([k,v]) => v > 0).map(([k]) => k).length > 0 ? Object.entries(systemHealth).filter(([k,v]) => v > 0).map(([k]) => k) : ['No Data'], 
+                    datasets: [{ 
+                        data: Object.entries(systemHealth).filter(([k,v]) => v > 0).map(([,v]) => v).length > 0 ? Object.entries(systemHealth).filter(([k,v]) => v > 0).map(([,v]) => v) : [1], 
+                        backgroundColor: Object.entries(systemHealth).filter(([k,v]) => v > 0).length > 0 ? Object.entries(systemHealth).filter(([k,v]) => v > 0).map(([k]) => ({'Excellent': colors.success, 'Good': colors.info, 'Warning': colors.warning, 'Critical': colors.danger}[k])) : ['#e2e8f0'], 
+                        borderWidth: 0 
+                    }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 8, font: { size: 10 } } } } } 
+            });
+            charts.buildServer = new Chart(document.getElementById('buildServerChart'), { 
+                type: 'doughnut', 
+                data: { 
+                    labels: Object.entries(buildServerStatus).filter(([k,v]) => v > 0).map(([k]) => k).length > 0 ? Object.entries(buildServerStatus).filter(([k,v]) => v > 0).map(([k]) => k) : ['No Data'], 
+                    datasets: [{ 
+                        data: Object.entries(buildServerStatus).filter(([k,v]) => v > 0).map(([,v]) => v).length > 0 ? Object.entries(buildServerStatus).filter(([k,v]) => v > 0).map(([,v]) => v) : [1], 
+                        backgroundColor: Object.entries(buildServerStatus).filter(([k,v]) => v > 0).length > 0 ? Object.entries(buildServerStatus).filter(([k,v]) => v > 0).map(([k]) => ({'Active': colors.success, 'Inactive': '#94a3b8', 'Maintenance': colors.warning, 'Offline': colors.danger}[k])) : ['#e2e8f0'], 
+                        borderWidth: 0 
+                    }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 8, font: { size: 10 } } } } } 
+            });
+            charts.projectStatus = new Chart(document.getElementById('projectStatusChart'), { 
+                type: 'doughnut', 
+                data: { 
+                    labels: Object.entries(projectStatus).filter(([k,v]) => v > 0).map(([k]) => k).length > 0 ? Object.entries(projectStatus).filter(([k,v]) => v > 0).map(([k]) => k) : ['No Data'], 
+                    datasets: [{ 
+                        data: Object.entries(projectStatus).filter(([k,v]) => v > 0).map(([,v]) => v).length > 0 ? Object.entries(projectStatus).filter(([k,v]) => v > 0).map(([,v]) => v) : [1], 
+                        backgroundColor: Object.entries(projectStatus).filter(([k,v]) => v > 0).length > 0 ? Object.entries(projectStatus).filter(([k,v]) => v > 0).map(([k]) => ({'Running': colors.success, 'On Hold': colors.warning, 'Planned': colors.info}[k])) : ['#e2e8f0'], 
+                        borderWidth: 0 
+                    }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 8, font: { size: 10 } } } } } 
+            });
+            charts.subLevelUsage = new Chart(document.getElementById('subLevelUsageChart'), { type: 'bar', data: { labels: subLevelDistLabels.slice(0, 10), datasets: [{ label: 'Usage', data: subLevelDistCounts.slice(0, 10), backgroundColor: colors.purple, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } } } } });
+            charts.locationDist = new Chart(document.getElementById('locationDistChart'), { type: 'bar', data: { labels: locationDistRaw.map(l => l.name).slice(0, 10), datasets: [{ label: 'Products', data: locationDistRaw.map(l => l.product_count).slice(0, 10), backgroundColor: colors.info, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } } });
+        }
+
+        function initProductsTabCharts() {
+            charts.categoryDetail = new Chart(document.getElementById('categoryDetailChart'), { type: 'bar', data: { labels: categoryLabels, datasets: [{ label: 'Products', data: categoryCounts, backgroundColor: colors.primary, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } } });
+            charts.subLevelGrowth = new Chart(document.getElementById('subLevelGrowthChart'), { type: 'line', data: { labels: subLevelGrowthMonths, datasets: [{ label: 'Sub Levels Created', data: subLevelGrowthCounts, borderColor: colors.purple, backgroundColor: 'rgba(124, 58, 237, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+            
+            // Stream Distribution Chart
+            const streamLabels = streamProductDist.map(s => s.name);
+            const streamCounts = streamProductDist.map(s => s.product_count);
+            charts.streamDist = new Chart(document.getElementById('streamDistChart'), { 
+                type: 'pie', 
+                data: { 
+                    labels: streamLabels.length > 0 ? streamLabels : ['No Data'], 
+                    datasets: [{ data: streamCounts.length > 0 ? streamCounts : [1], backgroundColor: colors.palette, borderWidth: 0 }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12 } } } } 
+            });
+            
+            // Status Breakdown Chart (Polar Area)
+            const filteredStatus = Object.entries(statusCounts).filter(([k, v]) => v > 0);
+            const statusLabels = filteredStatus.map(([k]) => k);
+            const statusValues = filteredStatus.map(([, v]) => v);
+            const statusColors = { 'Active': colors.success, 'Not Active': '#94a3b8', 'Scraped': colors.warning, 'Hand-Overed': colors.info, 'Issue': colors.danger };
+            charts.statusBreakdown = new Chart(document.getElementById('statusBreakdownChart'), { 
+                type: 'polarArea', 
+                data: { 
+                    labels: statusLabels.length > 0 ? statusLabels : ['No Data'], 
+                    datasets: [{ data: statusValues.length > 0 ? statusValues : [1], backgroundColor: statusLabels.map(l => statusColors[l] || colors.primary) }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 8 } } } } 
+            });
+        }
+
+        function initSystemsTabCharts() {
+            charts.systemHealthDetail = new Chart(document.getElementById('systemHealthDetailChart'), { type: 'bar', data: { labels: Object.keys(systemHealth), datasets: [{ label: 'Systems', data: Object.values(systemHealth), backgroundColor: [colors.success, colors.info, colors.warning, colors.danger], borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+            charts.buildServerDetail = new Chart(document.getElementById('buildServerDetailChart'), { type: 'bar', data: { labels: Object.keys(buildServerStatus), datasets: [{ label: 'Servers', data: Object.values(buildServerStatus), backgroundColor: [colors.success, '#94a3b8', colors.warning, colors.danger], borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } });
+            
+            // Downtime by Type Chart
+            const dtLabels = Object.entries(downtimeByType).filter(([k,v]) => v > 0).map(([k]) => k);
+            const dtValues = Object.entries(downtimeByType).filter(([k,v]) => v > 0).map(([,v]) => v);
+            charts.downtimeType = new Chart(document.getElementById('downtimeTypeChart'), { 
+                type: 'bar', 
+                data: { 
+                    labels: dtLabels.length > 0 ? dtLabels : ['No Downtime'], 
+                    datasets: [{ label: 'Events', data: dtValues.length > 0 ? dtValues : [0], backgroundColor: colors.danger, borderRadius: 6 }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } } 
+            });
+            
+            // Floor Distribution Chart
+            const floorLabels = floorDistRaw.map(f => f.name);
+            const floorCounts = floorDistRaw.map(f => f.server_count);
+            console.log('Floor Data:', floorDistRaw, 'Labels:', floorLabels, 'Counts:', floorCounts);
+            charts.floorDist = new Chart(document.getElementById('floorDistChart'), { 
+                type: 'bar', 
+                data: { 
+                    labels: floorLabels.length > 0 ? floorLabels : ['No Floors'], 
+                    datasets: [{ label: 'Build Servers', data: floorCounts.length > 0 ? floorCounts : [0], backgroundColor: colors.info, borderRadius: 6 }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } } 
+            });
+        }
+
+        function initActivityTabCharts() {
+            charts.projectDetail = new Chart(document.getElementById('projectDetailChart'), { type: 'pie', data: { labels: Object.keys(projectStatus), datasets: [{ data: Object.values(projectStatus), backgroundColor: [colors.success, colors.warning, colors.info], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 12 } } } } } });
+            populateTopContributorsDetail();
+        }
+
+        function calculateStats() {
+            const total = countsArr.reduce((a, b) => a + b, 0);
+            document.getElementById('totalMonths').textContent = monthsArr.length;
+            document.getElementById('averageGrowth').textContent = countsArr.length > 0 ? Math.round(total / countsArr.length) : 0;
+            document.getElementById('peakGrowth').textContent = countsArr.length > 0 ? Math.max(...countsArr) : 0;
+            document.getElementById('totalGrowth').textContent = total;
+        }
+
+        function populateTopCategories() {
+            const container = document.getElementById('topCategoriesList');
+            const maxCount = Math.max(...categoryCounts, 1);
+            const sorted = categoryUsageRaw.slice().sort((a, b) => b.product_count - a.product_count).slice(0, 5);
+            container.innerHTML = sorted.map((cat, i) => `<div class="category-item"><div class="category-rank ${i === 0 ? 'top' : ''}">${i + 1}</div><div class="category-info"><div class="category-name">${cat.name}</div><div class="category-bar"><div class="category-bar-fill" style="width: ${(cat.product_count / maxCount) * 100}%"></div></div></div><div class="category-count">${cat.product_count}</div></div>`).join('');
+        }
+
+        function populateTopContributors() {
+            const container = document.getElementById('topContributorsList');
+            if (topContributors.length === 0) { container.innerHTML = '<p class="text-muted small">No activity in the last 30 days</p>'; return; }
+            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${(c.user__username || 'U').charAt(0).toUpperCase()}</div><div class="contributor-info"><div class="contributor-name">${c.user__username || 'Unknown'}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
+        }
+
+        function populateTopContributorsDetail() {
+            const container = document.getElementById('topContributorsDetailList');
+            if (topContributors.length === 0) { container.innerHTML = '<p class="text-muted small">No activity in the last 30 days</p>'; return; }
+            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${(c.user__username || 'U').charAt(0).toUpperCase()}</div><div class="contributor-info"><div class="contributor-name">${c.user__username || 'Unknown'}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
+        }
+
+        function toggleChartType(chartKey) { const chart = charts[chartKey]; if (!chart) return; const typeMap = { bar: 'line', line: 'bar', doughnut: 'pie', pie: 'polarArea', polarArea: 'doughnut' }; chart.config.type = typeMap[chart.config.type] || 'bar'; chart.update(); }
+        function downloadChart(chartKey) { const chart = charts[chartKey]; if (!chart) return; const link = document.createElement('a'); link.download = `${chartKey}_${new Date().toISOString().split('T')[0]}.png`; link.href = chart.toBase64Image(); link.click(); }
+
+        function exportDashboard() {
+            const exportData = { exportDate: new Date().toISOString(), categories: categoryUsageRaw, growth: monthsArr.map((m, i) => ({ month: m, count: countsArr[i] })), subLevels: subLevelDistRaw, statusCounts, systemHealth, buildServerStatus, projectStatus, totals: { products: parseInt('{{ total_products|default:0 }}'), categories: categoryLabels.length, systems: parseInt('{{ total_systems|default:0 }}'), buildServers: parseInt('{{ total_build_servers|default:0 }}'), projects: parseInt('{{ total_projects|default:0 }}') } };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `analytics_export_${new Date().toISOString().split('T')[0]}.json`; link.click();
+            showToast('Dashboard exported successfully!', 'success');
+        }
+
+        function refreshData() { showToast('Refreshing data...', 'info'); setTimeout(() => window.location.reload(), 500); }
+        function printDashboard() { window.print(); }
+
+        function showAIInsights() {
+            const totalProducts = parseInt('{{ total_products|default:0 }}');
+            const criticalSystems = parseInt('{{ system_health.Critical|default:0 }}');
+            const modal = `<div class="modal fade" id="insightsModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content" style="border-radius: 12px;"><div class="modal-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 12px 12px 0 0;"><h5 class="modal-title"><i class="fas fa-brain me-2"></i>AI-Powered Insights</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="row g-3"><div class="col-md-6"><div class="p-3 bg-light rounded border-start border-success border-4"><h6 class="text-success mb-2"><i class="fas fa-trophy me-2"></i>Top Performer</h6><p class="mb-0 small">${categoryLabels.length > 0 ? categoryLabels[0] + ' leads with ' + categoryCounts[0] + ' products (' + Math.round(categoryCounts[0]/Math.max(totalProducts, 1)*100) + '% of inventory)' : 'No data available'}</p></div></div><div class="col-md-6"><div class="p-3 bg-light rounded border-start border-warning border-4"><h6 class="text-warning mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Attention Needed</h6><p class="mb-0 small">${categoryCounts.length > 0 ? categoryLabels[categoryCounts.indexOf(Math.min(...categoryCounts))] + ' has low usage - consider review' : 'No data available'}</p></div></div><div class="col-md-6"><div class="p-3 bg-light rounded border-start border-primary border-4"><h6 class="text-primary mb-2"><i class="fas fa-chart-line me-2"></i>Growth Analysis</h6><p class="mb-0 small">Average growth: ${countsArr.length > 0 ? Math.round(countsArr.reduce((a,b)=>a+b,0)/countsArr.length) : 0} products/month</p></div></div><div class="col-md-6"><div class="p-3 bg-light rounded border-start border-info border-4"><h6 class="text-info mb-2"><i class="fas fa-balance-scale me-2"></i>Distribution</h6><p class="mb-0 small">Avg ${categoryLabels.length > 0 ? Math.round(totalProducts/categoryLabels.length) : 0} products per category</p></div></div>${criticalSystems > 0 ? '<div class="col-12"><div class="p-3 bg-danger bg-opacity-10 rounded border-start border-danger border-4"><h6 class="text-danger mb-2"><i class="fas fa-exclamation-circle me-2"></i>System Alert</h6><p class="mb-0 small">' + criticalSystems + ' system(s) require immediate attention</p></div></div>' : ''}<div class="col-12"><div class="p-3 bg-light rounded border-start border-4" style="border-color: var(--purple) !important;"><h6 class="mb-2" style="color: var(--purple);"><i class="fas fa-robot me-2"></i>Recommendations</h6><ul class="mb-0 small ps-3"><li>Maintain regular system health checks</li><li>Document product changes for traceability</li><li>Review low-usage categories periodically</li></ul></div></div></div></div></div></div></div>`;
+            document.getElementById('insightsModal')?.remove();
+            document.body.insertAdjacentHTML('beforeend', modal);
+            new bootstrap.Modal(document.getElementById('insightsModal')).show();
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColors = { success: '#059669', info: '#0066cc', warning: '#d97706', danger: '#dc2626' };
+            const icons = { success: 'check-circle', info: 'info-circle', warning: 'exclamation-triangle', danger: 'exclamation-circle' };
+            toast.style.cssText = `position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; background: ${bgColors[type] || bgColors.info}; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; animation: slideIn 0.3s ease;`;
+            toast.innerHTML = `<i class="fas fa-${icons[type] || icons.info}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
     </script>
 </body>
 </html>

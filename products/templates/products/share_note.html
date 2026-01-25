@@ -5,250 +5,833 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Share Note - IGT MoS Inventory</title>
     {% load static %}
-    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
-    
-    <!-- Modern CSS Framework and Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
-            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.15);
-            --shadow-heavy: 0 16px 48px rgba(31, 38, 135, 0.25);
-            --border-radius: 20px;
-            --philips-blue: #0077c8;
-            --philips-light-blue: #00a8ff;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-dark: #004999;
+        --primary-light: #e6f0fa;
+        --success: #22c55e;
+        --success-dark: #16a34a;
+        --success-light: #f0fdf4;
+        --warning: #f59e0b;
+        --warning-light: #fffbeb;
+        --info: #0ea5e9;
+        --info-light: #f0f9ff;
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-subtle: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --radius: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .share-page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--bg-body) 0%, #e2e8f0 100%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 1.5rem 1.5rem;
+    }
+
+    .share-content-wrapper {
+        max-width: 900px;
+        width: 100%;
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            min-height: 100vh;
-            color: var(--text-primary);
-            overflow-x: hidden;
-            padding: 20px 0;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .share-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-heavy);
-            border: 1px solid var(--glass-border);
-            overflow: hidden;
+    }
+
+    /* Breadcrumb Navigation */
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        background: var(--primary-light);
+    }
+
+    .breadcrumb-item a i {
+        margin-right: 0.375rem;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-muted);
+        margin: 0 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb-item.current {
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Main Share Card */
+    .share-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+    }
+
+    /* Header Banner */
+    .header-banner {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .header-banner i {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.25rem;
+    }
+
+    .header-banner span {
+        color: white;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    /* Card Header */
+    .card-header-section {
+        padding: 1.75rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-subtle);
+    }
+
+    .card-header-section h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header-section h1 .icon-wrapper {
+        width: 42px;
+        height: 42px;
+        background: var(--primary-light);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-header-section h1 .icon-wrapper i {
+        color: var(--primary);
+        font-size: 1.125rem;
+    }
+
+    .card-header-section p {
+        margin: 0.5rem 0 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        padding-left: 54px;
+    }
+
+    /* Card Body */
+    .card-body-section {
+        padding: 2rem;
+    }
+
+    /* Two Column Layout */
+    .share-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .share-grid {
+            grid-template-columns: 1fr;
         }
-        
-        .share-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 2rem;
-            text-align: center;
+    }
+
+    /* Note Preview Card */
+    .note-preview-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        height: fit-content;
+    }
+
+    .note-preview-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--primary) 0%, var(--info) 100%);
+    }
+
+    .note-preview-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, #dbeafe 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .note-icon-wrapper i {
+        color: var(--primary);
+        font-size: 1.25rem;
+    }
+
+    .note-details {
+        flex: 1;
+    }
+
+    .note-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+    }
+
+    .note-content-preview {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .note-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        padding-top: 1rem;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    .note-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .note-meta-item i {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+
+    /* Message Section */
+    .message-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .section-label i {
+        color: var(--primary);
+    }
+
+    .message-textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        resize: vertical;
+        min-height: 100px;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .message-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    .message-textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    /* Users Selection Section */
+    .users-section {
+        flex: 1;
+    }
+
+    .users-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .users-count {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.625rem;
+        border-radius: 20px;
+        margin-left: 0.5rem;
+    }
+
+    .btn-select-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        background: var(--success-light);
+        color: var(--success-dark);
+        border: 1px solid #bbf7d0;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-select-all:hover {
+        background: #dcfce7;
+        border-color: var(--success);
+    }
+
+    .btn-select-all.deselect {
+        background: var(--bg-subtle);
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+
+    /* Search Box */
+    .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    /* Users List */
+    .users-list {
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        background: var(--bg-card);
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .user-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-item:hover {
+        background: var(--bg-subtle);
+    }
+
+    .user-item.selected {
+        background: var(--primary-light);
+        border-left: 3px solid var(--primary);
+    }
+
+    .user-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+    }
+
+    .user-avatar.blue { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .user-avatar.green { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .user-avatar.purple { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
+    .user-avatar.orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .user-avatar.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+    .user-avatar.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+        margin-bottom: 0.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-username {
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+    }
+
+    .no-users-message {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+
+    .no-users-message i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--border-color);
+    }
+
+    /* Selected Users Summary */
+    .selected-summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--info-light);
+        border: 1px solid #bae6fd;
+        border-radius: var(--radius);
+        margin-top: 1rem;
+        font-size: 0.8125rem;
+        color: #0369a1;
+    }
+
+    .selected-summary i {
+        color: var(--info);
+    }
+
+    .selected-summary strong {
+        color: #0c4a6e;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+    }
+
+    .btn-action {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: var(--bg-subtle);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    .btn-share {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 14px 0 rgba(0, 102, 204, 0.3);
+    }
+
+    .btn-share:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #003d7a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(0, 102, 204, 0.4);
+        color: white;
+    }
+
+    .btn-share:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .share-page-container {
+            padding: 1rem;
         }
-        
-        .share-body {
-            padding: 2rem;
+
+        .card-header-section,
+        .card-body-section {
+            padding: 1.25rem;
         }
-        
-        .note-preview {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e9ecef;
+
+        .card-header-section h1 {
+            font-size: 1.25rem;
         }
-        
-        .user-checkbox {
-            padding: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
-            background: white;
+
+        .card-header-section p {
+            padding-left: 0;
         }
-        
-        .user-checkbox:hover {
-            background: #f8f9fa;
-            border-color: var(--philips-blue);
+
+        .action-buttons {
+            flex-direction: column;
         }
-        
-        .user-checkbox input:checked + .user-info {
-            color: var(--philips-blue);
-            font-weight: 600;
+
+        .users-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
-        
-        .btn-share {
-            background: var(--primary-gradient);
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-share:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-light);
-            color: white;
-        }
-        
-        .btn-cancel {
-            background: #6c757d;
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cancel:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-            color: white;
-        }
-        
-        .select-all-btn {
-            background: var(--success-gradient);
-            border: none;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="share-container">
-            <div class="share-header">
-                <h2><i class="fas fa-share-alt me-3"></i>Share Note</h2>
+    }
+</style>
+
+<div class="share-page-container">
+    <div class="share-content-wrapper">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-item">
+                <a href="{% url 'notes_list' %}"><i class="fas fa-home"></i>Home</a>
             </div>
-            
-            <div class="share-body">
-                <!-- Note Preview -->
-                <div class="note-preview">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-sticky-note me-2"></i>{{ note.title }}</h5>
-                    <p class="text-muted mb-2">{{ note.content|truncatewords:30 }}</p>
-                    <small class="text-muted">
-                        <i class="fas fa-user me-1"></i>Created by {{ note.created_by.get_full_name|default:note.created_by.username }}
-                        <i class="fas fa-calendar ms-3 me-1"></i>{{ note.created_at|date:"M d, Y" }}
-                    </small>
-                </div>
-                
-                <!-- Share Form -->
-                <form method="post">
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <div class="breadcrumb-item">
+                <a href="{% url 'note_detail' note.pk %}"><i class="fas fa-sticky-note"></i>{{ note.title|truncatewords:3 }}</a>
+            </div>
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <div class="breadcrumb-item current">
+                <i class="fas fa-share-alt me-1"></i>Share
+            </div>
+        </nav>
+
+        <!-- Main Card -->
+        <div class="share-card">
+            <!-- Header Banner -->
+            <div class="header-banner">
+                <i class="fas fa-paper-plane"></i>
+                <span>Share your note with team members</span>
+            </div>
+
+            <!-- Card Header -->
+            <div class="card-header-section">
+                <h1>
+                    <div class="icon-wrapper">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    Share Note
+                </h1>
+                <p>Select team members to share this note with them.</p>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body-section">
+                <form method="post" id="shareForm">
                     {% csrf_token %}
                     
-                    <!-- Message Input -->
-                    <div class="mb-4">
-                        <label for="message" class="form-label fw-bold">
-                            <i class="fas fa-comment me-2"></i>Optional Message
-                        </label>
-                        <textarea class="form-control" id="message" name="message" rows="3" 
-                                placeholder="Add a personal message to include with the shared note..."></textarea>
-                    </div>
-                    
-                    <!-- User Selection -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <label class="form-label fw-bold mb-0">
-                                <i class="fas fa-users me-2"></i>Select Users to Share With
-                            </label>
-                            <button type="button" class="btn select-all-btn" id="selectAllUsers">
-                                <i class="fas fa-check-double me-1"></i>Select All
-                            </button>
-                        </div>
-                        
-                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 10px; padding: 1rem;">
-                            {% for user in users %}
-                            <div class="user-checkbox d-flex align-items-center">
-                                <input type="checkbox" name="users" value="{{ user.id }}" id="user_{{ user.id }}" class="me-3">
-                                <div class="user-info flex-grow-1">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white me-3" 
-                                             style="width: 40px; height: 40px; font-weight: bold;">
-                                            {{ user.username|first|upper }}
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
-                                            <small class="text-muted">@{{ user.username }}</small>
-                                        </div>
+                    <div class="share-grid">
+                        <!-- Left Column: Note Preview & Message -->
+                        <div>
+                            <!-- Note Preview -->
+                            <div class="note-preview-card">
+                                <div class="note-preview-header">
+                                    <div class="note-icon-wrapper">
+                                        <i class="fas fa-sticky-note"></i>
+                                    </div>
+                                    <div class="note-details">
+                                        <h3 class="note-title">{{ note.title }}</h3>
                                     </div>
                                 </div>
+                                <p class="note-content-preview">{{ note.content|truncatewords:40 }}</p>
+                                <div class="note-meta">
+                                    <span class="note-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        {{ note.created_by.get_full_name|default:note.created_by.username }}
+                                    </span>
+                                    <span class="note-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        {{ note.created_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
                             </div>
-                            {% empty %}
-                            <div class="text-center text-muted py-3">
-                                <i class="fas fa-users fa-2x mb-2"></i>
-                                <p>No other users available</p>
+
+                            <!-- Optional Message -->
+                            <div class="message-section" style="margin-top: 1.5rem;">
+                                <label class="section-label">
+                                    <i class="fas fa-comment"></i>
+                                    Add a Message (Optional)
+                                </label>
+                                <textarea class="message-textarea" name="message" id="message" 
+                                    placeholder="Write a personal message to include with the shared note..."></textarea>
                             </div>
-                            {% endfor %}
+                        </div>
+
+                        <!-- Right Column: User Selection -->
+                        <div class="users-section">
+                            <div class="users-header">
+                                <label class="section-label" style="margin-bottom: 0;">
+                                    <i class="fas fa-users"></i>
+                                    Select Recipients
+                                    <span class="users-count" id="usersCount">{{ users|length }} users</span>
+                                </label>
+                                <button type="button" class="btn-select-all" id="selectAllBtn">
+                                    <i class="fas fa-check-double"></i>
+                                    Select All
+                                </button>
+                            </div>
+
+                            <!-- Search Box -->
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="userSearch" placeholder="Search users...">
+                            </div>
+
+                            <!-- Users List -->
+                            <div class="users-list" id="usersList">
+                                {% for user in users %}
+                                <label class="user-item" data-username="{{ user.username|lower }}" data-fullname="{{ user.get_full_name|lower }}">
+                                    <input type="checkbox" name="users" value="{{ user.id }}" class="user-checkbox" id="user_{{ user.id }}">
+                                    <div class="user-avatar {% cycle 'blue' 'green' 'purple' 'orange' 'pink' 'teal' %}">
+                                        {{ user.username|first|upper }}
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                                        <div class="user-username">@{{ user.username }}</div>
+                                    </div>
+                                </label>
+                                {% empty %}
+                                <div class="no-users-message">
+                                    <i class="fas fa-users-slash"></i>
+                                    <p>No other users available to share with</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Selected Summary -->
+                            <div class="selected-summary" id="selectedSummary" style="display: none;">
+                                <i class="fas fa-info-circle"></i>
+                                <span><strong id="selectedCount">0</strong> user(s) selected to receive this note</span>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-3 justify-content-end">
-                        <a href="{% url 'note_detail' note.pk %}" class="btn btn-cancel">
-                            <i class="fas fa-times me-2"></i>Cancel
+                    <div class="action-buttons">
+                        <a href="{% url 'note_detail' note.pk %}" class="btn-action btn-cancel">
+                            <i class="fas fa-arrow-left"></i>
+                            Cancel
                         </a>
-                        <button type="submit" class="btn btn-share">
-                            <i class="fas fa-share-alt me-2"></i>Share Note
+                        <button type="submit" class="btn-action btn-share" id="shareBtn" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                            Share Note
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectAllBtn = document.getElementById('selectAllUsers');
-            const userCheckboxes = document.querySelectorAll('input[name="users"]');
-            
-            selectAllBtn.addEventListener('click', function() {
-                const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
-                
-                userCheckboxes.forEach(cb => {
-                    cb.checked = !allChecked;
-                });
-                
-                this.innerHTML = allChecked ? 
-                    '<i class="fas fa-check-double me-1"></i>Select All' : 
-                    '<i class="fas fa-times me-1"></i>Deselect All';
-            });
-            
-            // Update select all button based on individual selections
-            userCheckboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
-                    const noneChecked = Array.from(userCheckboxes).every(cb => !cb.checked);
-                    
-                    if (allChecked) {
-                        selectAllBtn.innerHTML = '<i class="fas fa-times me-1"></i>Deselect All';
-                    } else if (noneChecked) {
-                        selectAllBtn.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
-                    } else {
-                        selectAllBtn.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
-                    }
-                });
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const userCheckboxes = document.querySelectorAll('input[name="users"]');
+    const shareBtn = document.getElementById('shareBtn');
+    const selectedSummary = document.getElementById('selectedSummary');
+    const selectedCount = document.getElementById('selectedCount');
+    const userSearch = document.getElementById('userSearch');
+    const userItems = document.querySelectorAll('.user-item');
+
+    function updateUI() {
+        const checkedCount = document.querySelectorAll('input[name="users"]:checked').length;
+        const allChecked = checkedCount === userCheckboxes.length && userCheckboxes.length > 0;
+        
+        // Update button state
+        shareBtn.disabled = checkedCount === 0;
+        
+        // Update select all button
+        if (allChecked) {
+            selectAllBtn.innerHTML = '<i class="fas fa-times"></i> Deselect All';
+            selectAllBtn.classList.add('deselect');
+        } else {
+            selectAllBtn.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+            selectAllBtn.classList.remove('deselect');
+        }
+        
+        // Update selected summary
+        if (checkedCount > 0) {
+            selectedSummary.style.display = 'flex';
+            selectedCount.textContent = checkedCount;
+        } else {
+            selectedSummary.style.display = 'none';
+        }
+        
+        // Update visual selection state
+        userItems.forEach(item => {
+            const checkbox = item.querySelector('.user-checkbox');
+            if (checkbox.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
         });
-    </script>
+    }
+
+    // Select All button
+    selectAllBtn.addEventListener('click', function() {
+        const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
+        userCheckboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+        updateUI();
+    });
+
+    // Individual checkbox changes
+    userCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateUI);
+    });
+
+    // Search functionality
+    userSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        userItems.forEach(item => {
+            const username = item.dataset.username || '';
+            const fullname = item.dataset.fullname || '';
+            
+            if (username.includes(searchTerm) || fullname.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Initial UI update
+    updateUI();
+});
+</script>
 </body>
 </html>

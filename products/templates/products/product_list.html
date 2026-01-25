@@ -9,60 +9,221 @@
   <meta charset="UTF-8" />
   <title>Product List</title>
   <link rel="stylesheet" href="/static/products/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    :root {
+      --primary: #005fa3;
+      --primary-light: #e3f0fa;
+      --primary-dark: #003e6b;
+      --accent: #00b4d8;
+      --accent-light: #90e0ef;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
     body, html {
       margin: 0;
       padding: 0;
-      color: #222;
+      color: var(--text-primary);
       font-size: 1rem;
-      background: #fff;
+      background: var(--bg-secondary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     a { text-decoration: none; }
     img { vertical-align: middle; }
 
+    /* Animated Background */
+    .page-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+    }
+    
+    .page-background::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 80%, rgba(0, 180, 216, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(0, 95, 163, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+      animation: bgFloat 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, 2%) rotate(1deg); }
+      66% { transform: translate(-1%, 1%) rotate(-1deg); }
+    }
+
     .top-bar {
-      color: #222;
+      color: var(--text-primary);
       font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-shadow: var(--shadow-md);
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.9rem 2.5rem;
-      background: #fff;
-      border-bottom: 1px solid #e0e3e7;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       box-sizing: border-box;
       z-index: 1000;
-  }
+    }
     .top-bar a {
-      color: #005fa3;
+      color: var(--primary);
       font-weight: 600;
       margin-right: 1.5rem;
+      transition: color 0.2s ease;
     }
     .top-bar a:hover {
-      text-decoration: underline;
+      color: var(--primary-dark);
     }
     .logout-btn {
       padding: 0.4rem 1.2rem;
-      background: #005fa3;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
-      border-radius: 4px;
+      border-radius: var(--radius-sm);
       font-weight: 500;
+      transition: all 0.2s ease;
     }
     .logout-btn:hover {
-      background: #003e6b;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
 
     .product-bg {
       padding-top: 90px;
+      position: relative;
     }
     .container {
       max-width: 1700px;
       margin: 1rem auto 0;
-      padding: 2.5rem 0.5rem 1rem;
+      padding: 2.5rem 1.5rem 1rem;
+    }
+
+    /* Stats Dashboard */
+    .stats-dashboard {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 2rem;
+      margin: 0 auto 2rem auto;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      max-width: 1665px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stats-dashboard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+    }
+    
+    .stats-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    
+    .stats-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.2) 100%);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+    
+    .stats-title {
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+    
+    .stats-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: flex-start;
+    }
+    
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .stat-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px currentColor;
+    }
+    
+    .stat-indicator.active { background: var(--success); color: var(--success); }
+    .stat-indicator.not-active { background: var(--warning); color: var(--warning); }
+    .stat-indicator.scraped { background: var(--danger); color: var(--danger); }
+    .stat-indicator.hand-overed { background: var(--primary); color: var(--primary); }
+    .stat-indicator.issue { background: #ff9800; color: #ff9800; }
+    
+    .stat-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
     }
 
     .top-actions {
@@ -72,45 +233,398 @@
       margin-bottom: 1.5rem;
       flex-wrap: wrap;
       gap: 1rem;
-      padding-left: 1rem;
+      padding: 0 0.5rem;
     }
+    
     .add-btn-text {
-      padding: 0.5rem 1.2rem;
-      background: #005fa3;
+      padding: 0.65rem 1.5rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       font-weight: 600;
       font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
     }
+    
     .add-btn-text:hover {
-      background: #003e6b;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Category Selector */
+    .category-selector {
+      position: relative;
+    }
+    
+    .category-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-primary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .category-row:hover, .category-row:focus-within {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .category-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      color: #fff;
+      font-size: 1rem;
+    }
+    
+    .category-select {
+      border: none;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: transparent;
+      cursor: pointer;
+      min-width: 180px;
+      outline: none;
+    }
+    
+    .category-select:focus {
+      outline: none;
+    }
+    
+    /* Modern Filter Card */
+    .filter-card {
+      position: relative;
+    }
+    
+    .filter-form {
+      position: relative;
+    }
+    
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-primary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .filter-row:hover, .filter-row:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 95, 163, 0.1);
+    }
+    
+    .filter-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: #fff;
+      font-size: 1rem;
+    }
+    
+    .filter-select {
+      border: none;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: transparent;
+      cursor: pointer;
+      min-width: 180px;
+      outline: none;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+    }
+    
+    /* Filter Popup */
+    .filter-popup {
+      position: absolute;
+      top: -30px;
+      right: calc(100% + 12px);
+      display: none;
+      min-width: 320px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+      z-index: 1100;
+      overflow: hidden;
+      animation: popupSlide 0.25s ease;
+    }
+    
+    @keyframes popupSlide {
+      from {
+        opacity: 0;
+        transform: translateX(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .filter-section {
+      display: none;
+      padding: 1.25rem;
+    }
+    
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .filter-section-header i {
+      font-size: 0.85rem;
+    }
+    
+    /* Search Input */
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    
+    .search-input-wrapper:focus-within {
+      border-color: var(--primary);
+      background: var(--bg-primary);
+    }
+    
+    .search-input {
+      flex: 1;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      background: transparent;
+      outline: none;
+      color: var(--text-primary);
+    }
+    
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .search-submit-btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .search-submit-btn:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+    
+    /* Date Inputs */
+    .date-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .date-field {
+      flex: 1;
+    }
+    
+    .date-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .date-field input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+    
+    .date-field input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-primary);
+    }
+    
+    .date-separator {
+      color: var(--text-muted);
+      padding-top: 1.5rem;
+    }
+    
+    /* Location Select */
+    .location-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .location-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-primary);
+    }
+    
+    /* Active Filter Banner */
+    .active-filter-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.08) 100%);
+      border: 1px solid rgba(0, 95, 163, 0.15);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      max-width: fit-content;
+    }
+    
+    .filter-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .filter-badge i {
+      font-size: 0.7rem;
+    }
+    
+    .filter-details {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .filter-tag i {
+      color: var(--primary);
+      font-size: 0.75rem;
+    }
+    
+    .clear-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      margin-left: auto;
+    }
+    
+    .clear-filter-btn:hover {
+      background: var(--danger);
+      color: #fff;
     }
 
     .search-bar input {
-      padding: 0.5rem 1rem;
-      border: 1px solid #cfd8dc;
-      border-radius: 6px;
-      width: 220px;
+      padding: 0.6rem 1.2rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      width: 260px;
       font-size: 1rem;
+      transition: all 0.2s ease;
     }
+    
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 95, 163, 0.1);
+    }
+    
     .search-bar button {
-      padding: 0.5rem 1.2rem;
+      padding: 0.6rem 1.4rem;
       margin-left: 0.5rem;
-      background: #0077c8;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
       color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       font-size: 1rem;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
+    
     .search-bar button:hover {
-      background: #005fa3;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
 
     .product-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
+      gap: 1.5rem;
     }
     @media (max-width: 1200px) {
       .product-grid {
@@ -122,55 +636,87 @@
         grid-template-columns: 1fr;
       }
     }
+    
     .product-card {
-      background: #fff;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-      border-radius: 12px;
-      padding: 2rem;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       width: 100%;
       max-width: 100%;
-      box-sizing: border-box; /* Include padding in width calculation */
-      overflow-wrap: break-word; /* Handle very long words */
-      word-wrap: break-word; /* Legacy support */
-    }
-    .product-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    }
-    .product-card h3 {
-      margin: 0 0 0.5rem;
-      color: #005fa3;
-      font-size: 1.25rem;
-      font-weight: 600;
-      word-break: break-word; /* Allow long text to break */
-      overflow-wrap: break-word; /* Wrap long words */
-      white-space: normal; /* Allow text to wrap to multiple lines */
-      line-height: 1.3; /* Better line spacing for wrapped text */
-    }
-    .serial, .desc, .created {
-      margin: 0.4rem 0;
-      font-size: 1rem;
-      word-break: break-word; /* Allow long text to break */
-      overflow-wrap: break-word; /* Wrap long words */
-      white-space: normal; /* Allow text to wrap to multiple lines */
-      line-height: 1.4; /* Better line spacing for wrapped text */
-    }
-    .serial { 
-      color: #005fa3; 
-      font-weight: 500;
-      word-break: break-all; /* Break long IDs/serial numbers aggressively */
-    }
-    .desc { 
-      color: #333;
-      max-width: 100%; /* Ensure description doesn't overflow */
-    }
-    .created { 
-      color: #888; 
-      font-size: 0.95rem;
+      box-sizing: border-box;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      border: 1px solid var(--border-color);
+      position: relative;
     }
     
-    /* Additional styles for 12NC and location fields */
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+      border-color: rgba(0, 95, 163, 0.2);
+    }
+    
+    .product-card:hover::before {
+      opacity: 1;
+    }
+    
+    .product-card h3 {
+      margin: 0 0 0.5rem;
+      color: var(--primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.3;
+    }
+    
+    .serial, .desc, .created {
+      margin: 0.4rem 0;
+      font-size: 0.95rem;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+    }
+    
+    .serial { 
+      color: var(--accent); 
+      font-weight: 600;
+      word-break: break-all;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .desc { 
+      color: var(--text-secondary);
+      max-width: 100%;
+    }
+    
+    .created { 
+      color: var(--text-muted); 
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
     .twelve-nc, .location {
       word-break: break-word;
       overflow-wrap: break-word;
@@ -180,159 +726,362 @@
     }
     
     .twelve-nc {
-      word-break: break-all; /* Break long 12NC numbers aggressively */
+      word-break: break-all;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .location {
+      color: var(--primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .action-links {
       display: flex;
-      gap: 0.7rem;
-      margin-top: 0.8rem;
+      gap: 0.6rem;
+      margin-top: 1rem;
       align-items: center;
       justify-content: flex-start;
+      flex-wrap: wrap;
     }
+    
     .edit-btn, .delete-btn, .history-btn {
-      padding: 0.35rem 1.1rem;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
       border: none;
       cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
     .edit-btn {
-      background: #ffc107;
-      color: #222;
+      background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+      color: var(--text-primary);
     }
     .edit-btn:hover {
-      background: #ffb300;
-      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
     }
     .delete-btn {
-      background: #dc3545;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: #fff;
     }
     .delete-btn:hover {
-      background: #a71d2a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
     }
     .history-btn {
-      background: #17a2b8;
+      background: linear-gradient(135deg, var(--info) 0%, #2563eb 100%);
       color: #fff;
     }
     .history-btn:hover {
-      background: #117a8b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
 
     .status-btn {
-      padding: 0.35rem 1.1rem;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-weight: 500;
+      padding: 0.35rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
       border: none;
-      pointer-events: none; /* Prevent mouse/touch interactions */
-      cursor: default;      /* Show default cursor instead of pointer */
+      pointer-events: none;
+      cursor: default;
       margin-right: 0.5rem;
-      background: #e0e3e7;
-      color: #222;
-      transition: background 0.2s, color 0.2s;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
     }
-    .status-active { background: #28a745; color: #fff; }
-    .status-notactive { background: #ffc107; color: #222; }
-    .status-Scraped { background: #dc3545; color: #fff; }
-    .status-handovered { background: #005fa3; color: #fff; }
-    .status-btn:hover { filter: brightness(0.95); }
+    
+    .status-active { 
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%); 
+      color: #fff; 
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    .status-notactive { 
+      background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%); 
+      color: #fff; 
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    .status-Scraped { 
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%); 
+      color: #fff; 
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    .status-handovered { 
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+      color: #fff; 
+      box-shadow: 0 2px 8px rgba(0, 95, 163, 0.3);
+    }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
       z-index: 2000;
     }
     .modal-content {
-      background: #fff;
-      border-radius: 12px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
       padding: 2rem;
-      max-width: 420px;
+      max-width: 480px;
       width: 90%;
-      box-shadow: 0 8px 32px rgba(31,38,135,0.1);
+      box-shadow: var(--shadow-xl);
       position: relative;
+      animation: modalSlideIn 0.3s ease;
     }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     .modal-close {
       position: absolute;
       right: 1rem;
       top: 1rem;
       font-size: 1.5rem;
-      color: #888;
+      color: var(--text-muted);
       cursor: pointer;
+      transition: color 0.2s ease;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
     }
     .modal-close:hover {
-      color: #dc3545;
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
     }
-
-    /* Ensure the search form is a positioned container so the overlay can anchor to it */
-    .search-bar form { position: relative; }
-
-    /* Filter controls should overlay content, not push it down */
-    .filter-controls {
+    
+    /* View Details Link */
+    .view-details-link {
+      color: var(--primary);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .view-details-link::after {
+      content: '';
       position: absolute;
-      top: calc(100% + 8px);
-      /* Center the overlay relative to the form and constrain its width so it cannot extend beyond the surrounding container */
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding: 0.75rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      z-index: 1100; /* sit above product cards and other content */
-      min-width: 320px;
-      /* Use a constrained width that will not overflow the main container or viewport */
-      width: min(720px, calc(100% - 1rem));
-      max-width: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.2s ease;
     }
-
-    /* Slightly constrain inner controls so overlay doesn't become too wide on large screens */
-    .filter-controls .filter-product input,
-    .filter-controls select,
-    .filter-controls input[type="date"] {
-      max-width: 100%;
+    
+    .view-details-link:hover {
+      color: var(--primary-dark);
+    }
+    
+    .view-details-link:hover::after {
+      width: 100%;
+    }
+    
+    /* System and Project Tags */
+    .system-tag-container {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-width: 40%;
+      min-width: 180px;
+    }
+    
+    .system-card, .project-card {
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    
+    .system-card {
+      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.15) 100%);
+      border: 1px solid var(--primary);
+      box-shadow: 0 3px 12px rgba(0, 95, 163, 0.2);
+    }
+    
+    .system-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 95, 163, 0.3);
+    }
+    
+    .project-card {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 1px solid #f59e0b;
+      box-shadow: 0 3px 12px rgba(245, 158, 11, 0.2);
+    }
+    
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+    }
+    
+    .tag-header {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 0.25rem;
+    }
+    
+    /* Handover and Issue Info Boxes */
+    .info-box {
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    
+    .info-box.handover {
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, #e2e8f0 100%);
+      border: 1px solid var(--border-color);
+    }
+    
+    .info-box.issue {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      color: #92400e;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      color: var(--border-color);
+    }
+    
+    /* Toast Styles */
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 0.7rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      animation: toastSlideIn 0.3s ease;
+    }
+    
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .toast-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 0 0 1rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .toast-close:hover {
+      opacity: 1;
     }
 
   </style>
 </head>
 <body>
+  <div class="page-background"></div>
   <div class="product-bg">
-    <div class="product-counter" style="background-color:#f8fafc; border-radius:8px; padding:1rem 1.5rem; margin:0 auto 1.5rem auto; box-shadow:0 2px 10px rgba(0,0,0,0.05); border:1px solid #e0e3e7; max-width: 1665px;">
-      <div style="display:flex; flex-direction:column; gap:1rem;">
-        <div style="font-weight:700; font-size:1.2rem; color:#005fa3;">
-          Total Products: <span style="color:#0077c8;">{{ total_count }}</span>
+    <!-- Stats Dashboard -->
+    <div class="stats-dashboard">
+      <div class="stats-header">
+        <div class="stats-icon">
+          <i class="fas fa-boxes-stacked"></i>
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:flex-start;">
-          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:120px;">
-            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#28a745;"></div>
-            <span style="font-weight:600; color:#333;">Active: {{ status_counts.Active }}</span>
+        <div>
+          <div class="stats-title">Total Products: {{ total_count }}</div>
+        </div>
+        
+        <!-- Category Selector in Dashboard -->
+        <div class="category-selector" style="margin-left: auto;">
+          <div class="category-row">
+            <div class="category-icon-box">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <select id="categorySelect" class="category-select" onchange="changeCategory(this.value)">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:140px;">
-            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#ffc107;"></div>
-            <span style="font-weight:600; color:#333;">Not Active: {{ status_counts|get_item:"Not Active" }}</span>
-          </div>
-          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:120px;">
-            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#dc3545;"></div>
-            <span style="font-weight:600; color:#333;">Scraped: {{ status_counts.Scraped }}</span>
-          </div>
-          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:150px;">
-            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#005fa3;"></div>
-            <span style="font-weight:600; color:#333;">Hand-Overed: {{ status_counts|get_item:"Hand-Overed" }}</span>
-          </div>
-          <div class="counter-item" style="display:flex; align-items:center; gap:0.5rem; min-width:160px;">
-            <div class="status-indicator" style="width:12px; height:12px; border-radius:50%; background-color:#ff9800;"></div>
-            <span style="font-weight:600; color:#333;">Issue in the System: {{ status_counts.Issue }}</span>
-          </div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-indicator active"></div>
+          <span class="stat-label">Active: {{ status_counts.Active }}</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-indicator not-active"></div>
+          <span class="stat-label">Not Active: {{ status_counts|get_item:"Not Active" }}</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-indicator scraped"></div>
+          <span class="stat-label">Scraped: {{ status_counts.Scraped }}</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-indicator hand-overed"></div>
+          <span class="stat-label">Hand-Overed: {{ status_counts|get_item:"Hand-Overed" }}</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-indicator issue"></div>
+          <span class="stat-label">Issue in System: {{ status_counts.Issue }}</span>
         </div>
       </div>
     </div>
@@ -340,48 +1089,66 @@
     <div class="container">      
 	  <div class="top-actions">
         {% if request.GET.category %}
-          <a href="/stream/{{ selected_stream }}/products/add/?category={{ request.GET.category }}" class="add-btn-text">+ Add Product</a>
+          <a href="/stream/{{ selected_stream }}/products/add/?category={{ request.GET.category }}" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
         {% else %}
-          <a href="/stream/{{ selected_stream }}/products/add/" class="add-btn-text">+ Add Product</a>
+          <a href="/stream/{{ selected_stream }}/products/add/" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
         {% endif %}
-        <div class="search-bar">
-          <form method="get" style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
-            <div style="display:flex;align-items:center;gap:0.75rem;">
-              <label for="filterType" style="font-weight:600;color:#005fa3;font-size:1.1rem;margin-top:1px;">Filter Data</label>
-              <select name="filter_type" id="filterType" style="padding:0.45rem;border:1px solid #cfd8dc;border-radius:6px;font-size:0.95rem;min-width:220px;">
-                <option value="" {% if not request.GET.filter_type %}selected{% endif %}>-- Select filter --</option>
-                <option value="product" {% if request.GET.filter_type == 'product' %}selected{% endif %}>Field Search</option>
+        
+        <!-- Modern Filter Card -->
+        <div class="filter-card">
+          <form method="get" class="filter-form">
+            <div class="filter-row">
+              <div class="filter-icon-box">
+                <i class="fas fa-sliders-h"></i>
+              </div>
+              <select name="filter_type" id="filterType" class="filter-select">
+                <option value="" {% if not request.GET.filter_type %}selected{% endif %}>All Products</option>
+                <option value="product" {% if request.GET.filter_type == 'product' %}selected{% endif %}>Search by Name</option>
                 <option value="date" {% if request.GET.filter_type == 'date' %}selected{% endif %}>Filter by Date</option>
                 <option value="location" {% if request.GET.filter_type == 'location' %}selected{% endif %}>Filter by Location</option>
               </select>
             </div>
 
-            <!-- Filter controls appear below the dropdown as an overlay (absolute) so dropdown doesn't move -->
-            <div class="filter-controls">
+            <!-- Filter controls popup -->
+            <div class="filter-popup">
               <!-- Product search -->
-              <div class="filter-product" style="display:none;align-items:center;gap:0.5rem;">
-                <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search products…" style="padding:0.5rem;border:1px solid #cfd8dc;border-radius:6px;width:320px;" />
+              <div class="filter-product filter-section">
+                <div class="filter-section-header">
+                  <i class="fas fa-search"></i>
+                  <span>Search Products</span>
+                </div>
+                <div class="search-input-wrapper">
+                  <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Type to search..." class="search-input" />
+                  <button type="submit" class="search-submit-btn"><i class="fas fa-arrow-right"></i></button>
+                </div>
               </div>
 
               <!-- Date Filter -->
-              <div class="filter-date" style="display:none;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;">From:</label>
-                  <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" 
-                         style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem;" />
+              <div class="filter-date filter-section">
+                <div class="filter-section-header">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>Date Range</span>
                 </div>
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;  margin-left:0.6rem;
-                  margin-right:0.5rem">To:</label>
-                  <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" 
-                         style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem;" />
+                <div class="date-inputs">
+                  <div class="date-field">
+                    <label>From</label>
+                    <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" />
+                  </div>
+                  <div class="date-separator"><i class="fas fa-arrow-right"></i></div>
+                  <div class="date-field">
+                    <label>To</label>
+                    <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" />
+                  </div>
                 </div>
               </div>
 
               <!-- Location Filter -->
-              <div class="filter-location" style="display:none;align-items:center;gap:0.5rem;">
-                <label style="font-size: 0.9rem; color: #005fa3; font-weight: 600;">Location:</label>
-                <select name="location" style="padding: 0.4rem; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 0.9rem; min-width: 220px;">
+              <div class="filter-location filter-section">
+                <div class="filter-section-header">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Location</span>
+                </div>
+                <select name="location" class="location-select">
                   <option value="">All Locations</option>
                   {% for location in locations %}
                     <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
@@ -392,60 +1159,61 @@
               </div>
             </div>
 
-          </form>      </div>      </div>
+          </form>
+        </div>
+      </div>
 
     <!-- Active Filter Display -->
-    {% if request.GET.filter_type %}
-    <div class="active-filters" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem; margin-bottom: 1rem;">
-      <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; font-size: 0.9rem;">
-        <i class="fas fa-filter" style="color: #005fa3;"></i>
-        <span style="font-weight: 600; color: #005fa3;">Active Filter:</span>
-        
+    {% if request.GET.filter_type and request.GET.q or request.GET.start_date or request.GET.end_date or request.GET.location %}
+    <div class="active-filter-banner">
+      <div class="filter-badge">
+        <i class="fas fa-filter"></i>
+        <span>Filtered</span>
+      </div>
+      <div class="filter-details">
         {% if request.GET.filter_type == 'product' and request.GET.q %}
-          <span style="color: #333;">Product Search: <strong>"{{ request.GET.q }}"</strong></span>
+          <span class="filter-tag"><i class="fas fa-search"></i> "{{ request.GET.q }}"</span>
         {% elif request.GET.filter_type == 'date' %}
-          <span style="color: #333;">Date Range: 
-            {% if request.GET.start_date %}<strong>From {{ request.GET.start_date }}</strong>{% endif %}
-            {% if request.GET.end_date %}<strong>{% if request.GET.start_date %} To {% endif %}{{ request.GET.end_date }}</strong>{% endif %}
-          </span>
+          {% if request.GET.start_date %}
+            <span class="filter-tag"><i class="fas fa-calendar"></i> From {{ request.GET.start_date }}</span>
+          {% endif %}
+          {% if request.GET.end_date %}
+            <span class="filter-tag"><i class="fas fa-calendar"></i> To {{ request.GET.end_date }}</span>
+          {% endif %}
         {% elif request.GET.filter_type == 'location' and request.GET.location %}
-          <span style="color: #333;">Location: 
-            <strong>
-              {% for location in locations %}
-                {% if location.id|stringformat:"s" == request.GET.location %}{{ location.name }}{% endif %}
-              {% endfor %}
-            </strong>
+          <span class="filter-tag"><i class="fas fa-map-marker-alt"></i> 
+            {% for location in locations %}
+              {% if location.id|stringformat:"s" == request.GET.location %}{{ location.name }}{% endif %}
+            {% endfor %}
           </span>
         {% endif %}
-        
-        <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" 
-           style="margin-left: auto; color: #dc3545; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.3rem;">
-          <i class="fas fa-times"></i> Clear Filter
-        </a>
       </div>
+      <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" class="clear-filter-btn">
+        <i class="fas fa-times"></i> Clear
+      </a>
     </div>
     {% endif %}
 
     {% if messages %}
-    <div class="toast-container animate__animated animate__fadeInRight" style="list-style:none;padding:0;max-width: 1665px;position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+    <div class="toast-container" style="list-style:none;padding:0;max-width: 1665px;position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
         {% for message in messages %}
             {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}
-            <div class="toast messages-danger animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#f8d7da;color:#721c24;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+            <div class="toast messages-danger" style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;border-left:4px solid var(--danger);">
                 <i class="fas fa-exclamation-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
                 {{ message }}
-                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#721c24;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+                <button type="button" class="toast-close" style="color:#991b1b;"><i class="fas fa-times"></i></button>
             </div>
             {% elif 'added' in message|lower or 'deleted' in message|lower or message.tags == 'success' %}
-            <div class="toast messages-success animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#d4edda;color:#155724;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+            <div class="toast messages-success" style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);color:#065f46;border-left:4px solid var(--success);">
                 <i class="fas fa-check-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
                 {{ message }}
-                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#155724;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+                <button type="button" class="toast-close" style="color:#065f46;"><i class="fas fa-times"></i></button>
             </div>
             {% else %}
-            <div class="toast messages animate__animated animate__fadeIn" style="padding:1rem 1.5rem;border-radius:12px;margin-bottom:0.7rem;font-size:1.13rem;font-weight:600;background:#e3f0fa;color:#005fa3;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.08);display:flex;align-items:center;">
+            <div class="toast messages" style="background:linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.2) 100%);color:var(--primary-dark);border-left:4px solid var(--primary);">
                 <i class="fas fa-info-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
                 {{ message }}
-                <button type="button" class="toast-close" style="margin-left:auto;background:none;border:none;color:#005fa3;font-size:1.2rem;cursor:pointer;padding:0 0 0 1rem;"><i class="fas fa-times"></i></button>
+                <button type="button" class="toast-close" style="color:var(--primary-dark);"><i class="fas fa-times"></i></button>
             </div>
             {% endif %}
         {% endfor %}
@@ -456,19 +1224,17 @@
 
       <div class="product-grid">
         {% for product in products %}
-          <div class="product-card" style="position:relative; box-shadow:0 4px 24px rgba(0,95,163,0.10); border:1.5px solid #e0e3e7; border-radius:16px; padding:2.2rem 2.2rem 1.5rem 2.2rem; margin-bottom:1.5rem; word-wrap: break-word; overflow-wrap: break-word;">
+          <div class="product-card">
             <!-- Top-right overlay section for system tags and projects -->
             {% if product.system_tags.exists %}
-            <div style="position:absolute; top:1rem; right:1rem; display:flex; flex-direction:column; gap:0.6rem; justify-content:flex-start; align-items:flex-end; max-width:40%; min-width:200px;">
+            <div class="system-tag-container">
               
               <!-- System Tags Container -->
-              <div style="background:linear-gradient(135deg, #e7f3ff 0%, #d6efff 100%); border:1px solid #005fa3; border-radius:12px; padding:0.5rem 0.7rem; font-size:0.8rem; box-shadow:0 3px 12px rgba(0,95,163,0.25); width:100%; max-width:180px; transition:all 0.3s ease;"
-                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(0,95,163,0.35)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(0,95,163,0.25)';">
+              <div class="system-card">
                 
                 <!-- System Header -->
-                <div style="color:#003d6b; font-weight:700; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; border-bottom:1px solid rgba(0,95,163,0.2); padding-bottom:0.2rem;">
-                  <i class="fas fa-server" style="font-size:0.7rem; color:#005fa3;"></i>
+                <div class="tag-header" style="color: var(--primary-dark);">
+                  <i class="fas fa-server" style="font-size:0.7rem; color:var(--primary);"></i>
                   <span style="letter-spacing:0.3px;">System Assigned</span>
                 </div>
                 
@@ -476,7 +1242,7 @@
                 <div style="display:flex; flex-direction:column; gap:0.2rem;">
                   {% for system_tag in product.system_tags.all %}
                     <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
-                      <div style="color:#005fa3; font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+                      <div style="color:var(--primary); font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
                         {{ system_tag.system.name }} - {{ system_tag.tag_name }}
                       </div>
                     </div>
@@ -487,12 +1253,10 @@
               <!-- Project Assignment Cards -->
               {% for system_tag in product.system_tags.all %}
                 {% if system_tag.projects.exists %}
-                  <div style="background:linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border:1px solid #ffb300; border-radius:12px; padding:0.5rem 0.7rem; font-size:0.8rem; box-shadow:0 3px 12px rgba(255,179,0,0.25); width:100%; max-width:180px; transition:all 0.3s ease;"
-                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(255,179,0,0.35)';"
-                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 12px rgba(255,179,0,0.25)';">
+                  <div class="project-card">
                     
                     <!-- Project Header -->
-                    <div style="color:#e65100; font-weight:700; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.3rem; font-size:0.75rem; border-bottom:1px solid rgba(230,81,0,0.2); padding-bottom:0.2rem;">
+                    <div class="tag-header" style="color: #e65100;">
                       <i class="fas fa-project-diagram" style="font-size:0.7rem; color:#ff9800;"></i>
                       <span style="letter-spacing:0.3px;">Project Aligned</span>
                     </div>
@@ -501,7 +1265,7 @@
                     <div style="display:flex; flex-direction:column; gap:0.2rem;">
                       {% for project in system_tag.projects.all %}
                         <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
-                          <div style="color:#333; font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+                          <div style="color:var(--text-primary); font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
                             {{ project.name }}
                           </div>
                         </div>
@@ -512,45 +1276,55 @@
               {% endfor %}
             </div>
             {% endif %}
-            <h3 style="font-size:1.3rem; font-weight:700; color:#005fa3; margin-bottom:0.3rem; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.3; padding-right:{% if product.system_tags.exists %}50%{% else %}0{% endif %};">Product Name: {{ product.name }}</h3>
-            <div class="serial" style="font-size:1.05rem; color:#0077c8; font-weight:600; margin-bottom:0.2rem; word-break:break-all; overflow-wrap:break-word; white-space:normal; line-height:1.4;">Product ID: {{ product.serial_number }}</div>
-            {% if product.twelve_nc %}
-            <div class="twelve-nc" style="color:#555; font-size:1rem; margin-bottom:0.4rem; font-weight:600; word-break:break-all; overflow-wrap:break-word; white-space:normal; line-height:1.4;">12NC Information: {{ product.twelve_nc }}</div>
-            {% endif %}
-            <div class="desc" style="color:#444; font-size:1.01rem; margin-bottom:0.2rem; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.4;">
-              <b>Description:</b><br>{{ product.description|linebreaksbr }}
+            <h3 style="font-size:1.15rem; font-weight:700; color:var(--primary); margin-bottom:0.4rem; padding-right:{% if product.system_tags.exists %}50%{% else %}0{% endif %};"><i class="fas fa-cube" style="margin-right:0.4rem; opacity:0.7;"></i>{{ product.name }}</h3>
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.25rem 0.7rem; background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border:1px solid #7dd3fc; border-radius:20px; font-size:0.8rem; font-weight:600; color:#0369a1; margin-bottom:0.5rem;">
+              <i class="fas fa-folder" style="font-size:0.7rem;"></i>
+              {{ product.category.name }}
             </div>
-            <div class="created" style="color:#888; font-size:0.97rem; margin-bottom:0.5rem; word-break:break-word; overflow-wrap:break-word; white-space:normal;">Added: {{ product.created_at|date:'Y-m-d H:i' }}</div>
-            <div class="location" style="color:#005fa3; font-size:1.01rem; margin-bottom:0.5rem; font-weight:600; word-break:break-word; overflow-wrap:break-word; white-space:normal; line-height:1.4;">
-              Location: {% if product.location %}{{ product.location.name }}{% else %}No location assigned{% endif %}
+            <div class="serial" style="font-size:0.95rem; margin-bottom:0.3rem;"><i class="fas fa-fingerprint" style="opacity:0.6;"></i> {{ product.serial_number }}</div>
+            {% if product.twelve_nc %}
+            <div class="twelve-nc" style="font-size:0.9rem; margin-bottom:0.4rem;"><i class="fas fa-barcode" style="margin-right:0.4rem; opacity:0.6;"></i>12NC: {{ product.twelve_nc }}</div>
+            {% endif %}
+            <div class="desc" style="font-size:0.95rem; margin-bottom:0.3rem; color:var(--text-secondary);">
+              <b style="color:var(--text-primary);">Description:</b><br>{{ product.description|linebreaksbr }}
+            </div>
+            <div class="created"><i class="far fa-clock"></i> Added: {{ product.created_at|date:'Y-m-d H:i' }}</div>
+            <div class="location" style="font-size:0.95rem; margin:0.4rem 0;">
+              <i class="fas fa-map-marker-alt"></i>
+              {% if product.location %}{{ product.location.name }}{% else %}No location assigned{% endif %}
             </div>
             {% if product.status == 'Hand-Overed' %}
-              <div style="background:#f4f6fa; border-radius:8px; padding:0.7rem 1rem; margin-bottom:0.5rem; font-size:0.99rem; color:#333; border:1px solid #e0e3e7;">
+              <div class="info-box handover">
                 <div><strong>To which team?</strong> {{ product.handover_team_type }}</div>
                 {% if product.handover_team_type == 'External' and product.handover_external_team %}
                   <div><strong>External Team:</strong> {{ product.handover_external_team }}</div>
                 {% endif %}
-                <div><strong>Name of the assignee / Owner:</strong> {{ product.handover_owner }}</div>
+                <div><strong>Assignee / Owner:</strong> {{ product.handover_owner }}</div>
               </div>
             {% endif %}
             {% if product.status == 'Issue' and product.issue_description %}
-              <div style="background:#fff3cd; border-radius:8px; padding:0.7rem 1rem; margin-bottom:0.5rem; font-size:0.99rem; color:#856404; border:1px solid #ffeeba;">
-                <strong>Issue Description:</strong><br>{{ product.issue_description|linebreaksbr }}
+              <div class="info-box issue">
+                <strong><i class="fas fa-exclamation-triangle"></i> Issue:</strong><br>{{ product.issue_description|linebreaksbr }}
               </div>
             {% endif %}
-            <a href="{% url 'product_detail_stream' selected_stream product.pk %}" style="color:#005fa3; margin-top:0.5rem; font-weight:800; display:inline-block;">View Details</a>            <div class="action-links" style="margin-top:0.7rem; align-items:center; display:flex; gap:0.7rem; justify-content: flex-start;">
-              <a href="{% url 'product_edit_stream' selected_stream product.pk %}" class="edit-btn">Edit</a>
+            <a href="{% url 'product_detail_stream' selected_stream product.pk %}" class="view-details-link"><i class="fas fa-eye"></i> View Details</a>
+            <div class="action-links">
+              <a href="{% url 'product_edit_stream' selected_stream product.pk %}" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
               {% if user|can_delete_products %}
-                <a href="{% url 'product_delete_stream' selected_stream product.pk %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="delete-btn">Delete</a>
+                <a href="{% url 'product_delete_stream' selected_stream product.pk %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="delete-btn"><i class="fas fa-trash-alt"></i> Delete</a>
               {% endif %}
-              <button type="button" class="history-btn" onclick="openHistoryModal('{{ product.pk }}')">History</button>
-              <div class="status-btn {% if product.status == 'Active' %}status-active{% elif product.status == 'Not Active' %}status-notactive{% elif product.status == 'Scraped' %}status-Scraped{% elif product.status == 'Hand-Overed' %}status-handovered{% endif %}" style="margin-bottom:0; margin-left:0.5rem; text-align:center; display:flex; align-items:center; justify-content:center; min-width:130px;">
-                {% if product.status == 'Issue' %}Issue in the System{% else %}{{ product.status }}{% endif %}
+              <button type="button" class="history-btn" onclick="openHistoryModal('{{ product.pk }}')"><i class="fas fa-history"></i> History</button>
+              <div class="status-btn {% if product.status == 'Active' %}status-active{% elif product.status == 'Not Active' %}status-notactive{% elif product.status == 'Scraped' %}status-Scraped{% elif product.status == 'Hand-Overed' %}status-handovered{% endif %}" style="margin-left:0.5rem;">
+                {% if product.status == 'Issue' %}Issue in System{% else %}{{ product.status }}{% endif %}
               </div>
             </div>
           </div>
         {% empty %}
-          <div style="text-align:center;color:#888;margin-top: 4rem; display: flex; justify-content: center; align-items: center; height: 120px;">No products found.</div>
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="fas fa-box-open"></i>
+            <h3 style="color: var(--text-secondary); margin: 0;">No products found</h3>
+            <p style="color: var(--text-muted); margin: 0;">Try adjusting your filters or add a new product.</p>
+          </div>
         {% endfor %}
       </div>
     </div>
@@ -559,12 +1333,21 @@
   <div id="historyModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeHistoryModal()">&times;</span>
-      <h3 style="color:#005fa3;">History</h3>
+      <h3 style="color:var(--primary); display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-history"></i> History</h3>
       <div id="historyContent">Loading...</div>
     </div>
   </div>
 
   <script>
+    // Category change function
+    function changeCategory(categoryId) {
+      let url = '/stream/{{ selected_stream }}/products/';
+      if (categoryId) {
+        url += '?category=' + categoryId;
+      }
+      window.location.href = url;
+    }
+
     function openHistoryModal(productId) {
       const modal = document.getElementById('historyModal');
       modal.style.display = 'flex';
@@ -592,10 +1375,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.querySelector('.search-bar form');
+      const form = document.querySelector('.filter-form');
       if (!form) return;
 
       const filterType = form.querySelector('select[name="filter_type"]');
+      const filterPopup = form.querySelector('.filter-popup');
       const productDiv = form.querySelector('.filter-product');
       const dateDiv = form.querySelector('.filter-date');
       const locDiv = form.querySelector('.filter-location');
@@ -606,117 +1390,99 @@
       const locationSelect = form.querySelector('select[name="location"]');
 
       const submitDebounced = debounce(() => form.submit(), 400);
-      // Use a slightly longer delay to avoid accidental submits while the user is deleting characters.
       const submitEmptyDebounced = debounce(() => {
-        // Ensure the q input is empty before submitting so URL has no q param
         const qInput = form.querySelector('input[name="q"]');
         if (qInput) qInput.value = '';
-        // Reset filter type to "— Select filter —" when search is cleared
         if (filterType) filterType.value = '';
-        // Hide filter controls
         showFor('');
         form.submit();
       }, 300);
 
       function showFor(type) {
-        // ensure overlay is hidden by default
-        const fc = form.querySelector('.filter-controls');
-        const pg = document.querySelector('.product-grid');
-        if (!fc) return;
+        if (!filterPopup) return;
+        
+        // Hide all sections first
+        productDiv.style.display = 'none';
+        dateDiv.style.display = 'none';
+        locDiv.style.display = 'none';
+        
         if (type === 'product') {
-          productDiv.style.display = 'flex';
-          dateDiv.style.display = 'none';
-          locDiv.style.display = 'none';
-          fc.style.display = 'flex';
+          productDiv.style.display = 'block';
+          filterPopup.style.display = 'block';
         } else if (type === 'date') {
-          productDiv.style.display = 'none';
-          dateDiv.style.display = 'flex';
-          locDiv.style.display = 'none';
-          fc.style.display = 'flex';
+          dateDiv.style.display = 'block';
+          filterPopup.style.display = 'block';
         } else if (type === 'location') {
-          productDiv.style.display = 'none';
-          dateDiv.style.display = 'none';
-          locDiv.style.display = 'flex';
-          fc.style.display = 'flex';
+          locDiv.style.display = 'block';
+          filterPopup.style.display = 'block';
         } else {
-          // hide overlay entirely
-          productDiv.style.display = 'none';
-          dateDiv.style.display = 'none';
-          locDiv.style.display = 'none';
-          fc.style.display = 'none';
+          filterPopup.style.display = 'none';
         }
       }
 
-      // No layout recalculation needed because the overlay floats above content.
-
-      // initialize based on query param or default to none
+      // Initialize based on query param
       const initial = (filterType && filterType.value) ? filterType.value : '';
       showFor(initial);
 
-      // If this navigation is a page reload, clear filter-related query params and reset UI
+      // Handle page reload
       try {
         const navEntries = (performance.getEntriesByType && performance.getEntriesByType('navigation')) || [];
         const isReload = (navEntries.length && navEntries[0].type === 'reload') || (performance.navigation && performance.navigation.type === 1);
         if (isReload) {
           const params = new URLSearchParams(window.location.search);
           const category = params.get('category');
-          // Remove filter params
           params.delete('filter_type');
           params.delete('q');
           params.delete('start_date');
           params.delete('end_date');
           params.delete('location');
-          // Build new URL (preserve category if present)
           let newUrl = `/stream/{{ selected_stream }}/products/`;
           if (category) newUrl += `?category=${category}`;
-          // Navigate to the cleaned URL so the server re-renders the unfiltered list
           window.location.replace(newUrl);
         }
       } catch (e) { /* ignore */ }
 
-      // If product filter was active on load, focus the search input and place caret at end
+      // Focus input on product filter
       if (initial === 'product' && input) {
         try {
           input.focus();
           input.selectionStart = input.selectionEnd = input.value ? input.value.length : 0;
-        } catch (e) { /* ignore in browsers that don't support selection APIs */ }
+        } catch (e) {}
       }
 
+      // Filter type change
       filterType && filterType.addEventListener('change', () => {
-        // Clear all filter fields when filter type changes
         if (input) input.value = '';
         if (start) start.value = '';
         if (end) end.value = '';
         if (locationSelect) locationSelect.selectedIndex = 0;
-        // Remove all query params except filter_type and category (if present)
+        
         const params = new URLSearchParams(window.location.search);
         const filterTypeVal = filterType.value;
         const category = params.get('category');
         let url = `/stream/{{ selected_stream }}/products/`;
         if (category) url += `?category=${category}&filter_type=${filterTypeVal}`;
-        else url += `?filter_type=${filterTypeVal}`;
+        else if (filterTypeVal) url += `?filter_type=${filterTypeVal}`;
         window.location.href = url;
         showFor(filterType.value);
-        // focus first control for convenience
+        
         if (filterType.value === 'product' && input) input.focus();
         if (filterType.value === 'date' && start) start.focus();
         if (filterType.value === 'location' && locationSelect) locationSelect.focus();
       });
 
+      // Search input handling
       if (input) {
         input.addEventListener('input', () => {
           if (filterType.value !== 'product') return;
           const val = input.value || '';
           if (val.trim().length === 0) {
-            // Schedule the "clear" submit to show all products
             submitEmptyDebounced();
             return;
           }
-          // If user typed again, cancel the pending empty-submit implicitly by calling the other debounced submit
           submitDebounced();
         });
 
-        // Submit immediately on Enter key (useful when user wants instant search)
         input.addEventListener('keydown', (ev) => {
           if (ev.key === 'Enter' && filterType.value === 'product') {
             ev.preventDefault();
@@ -725,39 +1491,34 @@
         });
       }
 
-      [start, end].forEach(el => {
-        // Ensure 'To' date (end) is never earlier than 'From' date (start)
-        if (start) {
-          start.addEventListener('change', () => {
-            try {
-              // set minimum allowed on end input
-              if (end) end.min = start.value;
-              // if end is set and earlier than start, correct it to start
-              if (end && end.value && start.value && end.value < start.value) {
-                end.value = start.value;
-              }
-            } catch (e) { /* ignore */ }
-            if (filterType.value === 'date') form.submit();
-          });
-        }
-        if (end) {
-          end.addEventListener('change', () => {
-            try {
-              // If end is earlier than start, snap it to start and show a brief visual cue
-              if (start && start.value && end.value < start.value) {
-                end.value = start.value;
-                // Briefly flash a red border to indicate correction
-                const old = end.style.border;
-                end.style.border = '2px solid #dc3545';
-                setTimeout(() => { end.style.border = old; }, 800);
-              }
-            } catch (e) { /* ignore */ }
-            if (filterType.value === 'date') form.submit();
-          });
-        }
-      });
+      // Date inputs
+      if (start) {
+        start.addEventListener('change', () => {
+          try {
+            if (end) end.min = start.value;
+            if (end && end.value && start.value && end.value < start.value) {
+              end.value = start.value;
+            }
+          } catch (e) {}
+          if (filterType.value === 'date') form.submit();
+        });
+      }
+      
+      if (end) {
+        end.addEventListener('change', () => {
+          try {
+            if (start && start.value && end.value < start.value) {
+              end.value = start.value;
+              const old = end.style.border;
+              end.style.border = '2px solid #dc3545';
+              setTimeout(() => { end.style.border = old; }, 800);
+            }
+          } catch (e) {}
+          if (filterType.value === 'date') form.submit();
+        });
+      }
 
-      // Submit when location is changed while location filter is active
+      // Location select
       if (locationSelect) {
         locationSelect.addEventListener('change', () => {
           if (filterType && filterType.value === 'location') {
@@ -766,17 +1527,11 @@
         });
       }
 
-      // Close filter popup when clicking outside of it
+      // Close popup on outside click
       document.addEventListener('click', (event) => {
-        const filterControls = form.querySelector('.filter-controls');
-        const filterTypeSelect = form.querySelector('select[name="filter_type"]');
-        
-        // Check if filter controls are currently visible
-        if (filterControls && filterControls.style.display !== 'none') {
-          // Check if click is outside both filter controls and filter type select
-          if (!filterControls.contains(event.target) && !filterTypeSelect.contains(event.target)) {
-            // Hide the filter popup without changing the filter type value
-            // This preserves the selected filter type in the dropdown
+        const filterCard = document.querySelector('.filter-card');
+        if (filterPopup && filterPopup.style.display !== 'none') {
+          if (!filterCard.contains(event.target)) {
             showFor('');
           }
         }

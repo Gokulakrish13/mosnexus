@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Allocation Tree - {{ selected_stream }}</title>
     {% load static %}
     {% load product_filters %}
@@ -47,13 +48,205 @@
         width: 100%;
         box-sizing: border-box;
         z-index: 1000;
-    }        .top-bar .logout-btn {
-            margin-left: 1.2rem;
+    }
+    
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .logo-section img {
+        height: 32px;
+        width: auto;
+        margin-right: 1rem;
+    }
+    
+    /* Navigation Links */
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+    
+    .nav-links a, .nav-links button {
+        color: #005fa3;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 1.08rem;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        position: relative;
+    }
+    
+    .nav-links a:hover {
+        color: #003d7a;
+        transform: translateY(-1px);
+    }
+    
+    .nav-links a::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #005fa3;
+        transition: width 0.3s ease;
+    }
+    
+    .nav-links a:hover::after {
+        width: 100%;
+    }
+    
+    /* Hamburger Menu */
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 4px;
+        padding: 8px;
+        z-index: 1002;
+    }
+    
+    .hamburger span {
+        width: 25px;
+        height: 3px;
+        background: #005fa3;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(7px, 7px);
+    }
+    
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+    
+    /* Mobile Menu */
+    .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 66px;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 999;
+        max-height: calc(100vh - 66px);
+        overflow-y: auto;
+    }
+    
+    .mobile-menu.active {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
         }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .mobile-menu a {
+        display: block;
+        padding: 1rem 2rem;
+        color: #005fa3;
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s ease;
+    }
+    
+    .mobile-menu a:hover {
+        background: #f4f6f8;
+    }
+    
+    .mobile-user-info {
+        display: none;
+        padding: 1rem 2rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e3e7;
+    }
+    
+    .top-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .top-bar .logout-btn {
+        margin-left: 1.2rem;
+        padding: 0.5rem 1rem;
+        background: #dc3545;
+        color: #fff;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background 0.2s ease;
+    }
+    
+    .top-bar .logout-btn:hover {
+        background: #c82333;
+    }
 
-        .hidden {
-            display: none !important;
-        }
+    .hidden {
+        display: none !important;
+    }
+    
+    /* More Dropdown */
+    .more-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .more-dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #fff;
+        border: 1px solid #e0e3e7;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        min-width: 200px;
+        z-index: 1001;
+        margin-top: 0.5rem;
+    }
+    
+    .more-dropdown-content.active {
+        display: block;
+    }
+    
+    .more-dropdown-content a {
+        display: block;
+        color: #005fa3;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.08rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .more-dropdown-content a:last-child {
+        border-bottom: none;
+    }
+    
+    .more-dropdown-content a:hover {
+        background: #f4f6f8;
+    }
     
     /* Allocation Tree Specific Styles */
     .tree-container {
@@ -965,18 +1158,85 @@
     background: #f0f4f8 !important;
 }
 
-@media (max-width: 768px) {
-    .more-nav-content {
-        right: 10px !important;
-        top: 60px !important;
-        max-width: 200px !important;
-        min-width: 180px !important;
+#moreNavModal a:hover {
+    background: #f0f4f8 !important;
+}
+
+/* Comprehensive Responsive Design */
+
+/* At 1400px - start reducing spacing */
+@media (max-width: 1400px) {
+    .nav-links {
+        gap: 1rem;
     }
     
-    .tag-actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
+    .nav-links a, .nav-links button {
+        font-size: 0.95rem;
+    }
+    
+    .tree-container {
+        padding: 12px;
+    }
+    
+    .system-card {
+        padding: 16px;
+    }
+}
+
+/* Responsive Design - Progressive collapse via JavaScript */
+
+/* Show hamburger when any items are hidden */
+.has-overflow .hamburger {
+    display: flex !important;
+}
+
+/* Items hidden by overflow detection */
+.nav-links > .nav-hidden {
+    display: none !important;
+}
+
+/* Mobile menu items - only show those that are hidden in nav */
+.mobile-menu .mobile-nav-item {
+    display: none;
+}
+
+.mobile-menu .mobile-nav-item.mobile-visible {
+    display: block;
+}
+
+/* Always show user info in mobile menu when hamburger is active */
+.has-overflow .mobile-user-info {
+    display: block;
+}
+
+/* Smaller screens */
+@media (max-width: 768px) {
+    .logo-section img {
+        height: 28px;
+    }
+    
+    .top-bar {
+        padding: 0.7rem 1rem;
+    }
+    
+    .tree-container {
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .system-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .system-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .tag-container {
+        margin-left: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
     }
     
     .btn-tree {
@@ -984,18 +1244,189 @@
         padding: 8px 12px;
     }
     
+    .component-list {
+        margin-left: 10px;
+    }
+    
+    .component-item {
+        padding: 12px;
+    }
+    
+    .component-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
     .component-actions {
         flex-direction: row;
         justify-content: center;
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+        margin: 10% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    
+    .tree-section-title {
+        font-size: 1rem;
+    }
+    
+    .allocation-info {
+        padding: 15px;
     }
 }
 
+/* Small Mobile Devices */
 @media (max-width: 480px) {
+    .logo-section img {
+        height: 24px;
+    }
+    
+    .mobile-menu a {
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .component-list {
+        margin-left: 10px;
+    }
+    
+    .component-item {
+        padding: 12px;
+    }
+    
+    .component-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .component-actions {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+        margin: 10% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    
     .more-nav-content {
-        right: 5px !important;
-        top: 55px !important;
-        max-width: 95vw !important;
-        min-width: 160px !important;
+        right: 10px !important;
+        top: 60px !important;
+        max-width: 200px !important;
+        min-width: 180px !important;
+    }
+    
+    .tree-section-title {
+        font-size: 1rem;
+    }
+    
+    .allocation-info {
+        padding: 15px;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    .top-bar {
+        padding: 0.5rem;
+    }
+    
+    .top-left img {
+        height: 24px;
+    }
+    
+    .top-left a,
+    .top-left button {
+        font-size: 0.85rem;
+        padding: 0.4rem 0;
+    }
+    
+    .top-right {
+        font-size: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .logout-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .tree-container {
+        padding: 8px;
+    }
+    
+    .system-card {
+        padding: 12px;
+    }
+    
+    .system-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .tag-container {
+        margin-left: 5px;
+        padding: 10px;
+    }
+    
+    .tag-name {
+        font-size: 1rem;
+    }
+    
+    .component-list {
+        margin-left: 5px;
+    }
+    
+    .component-item {
+        padding: 10px;
+    }
+    
+    .component-name {
+        font-size: 0.9rem;
     }
     
     .btn-tree {
@@ -1003,49 +1434,174 @@
         padding: 6px 10px;
         gap: 4px;
     }
+    
+    .btn-icon {
+        min-width: 28px;
+        min-height: 28px;
+        font-size: 0.75em;
+    }
+    
+    .modal-content {
+        width: 98%;
+        padding: 15px;
+        margin: 5% auto;
+    }
+    
+    .modal-header {
+        padding: 12px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 12px;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group label {
+        font-size: 0.85rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+    
+    .modal-actions {
+        gap: 8px;
+        flex-direction: column;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+    }
+    
+    .more-nav-content {
+        right: 5px !important;
+        top: 55px !important;
+        max-width: 95vw !important;
+        min-width: 160px !important;
+    }
+    
+    .tree-section-title {
+        font-size: 0.95rem;
+    }
+    
+    .component-type {
+        font-size: 0.8em;
+    }
+    
+    .no-tags-message,
+    .no-items-message {
+        padding: 30px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .allocation-info {
+        padding: 12px;
+    }
+    
+    .allocation-item {
+        padding: 10px 0;
+        font-size: 0.9rem;
+    }
+}
+
+/* Touch-Friendly Improvements for All Mobile Devices */
+@media (max-width: 768px) {
+    /* Minimum touch target sizes */
+    button,
+    a,
+    .btn,
+    .btn-tree,
+    .btn-icon {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Better spacing for touch */
+    .tag-actions button,
+    .component-actions button {
+        margin: 4px 0;
+    }
+    
+    /* Larger form inputs for mobile */
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Hamburger menu would go here if implemented */
 }
 </style>
 </head>
 <body>
 {% with stream=stream|default:selected_stream|default:' ' %}
-<div class="top-bar" style="width:100%;max-width:100%;overflow:hidden;">
-    <div class="top-left" style="flex-wrap:nowrap;overflow:hidden;">
-        <img src="/static/products/philips.png" alt="Philips Logo" style="height:32px;width:auto;margin-right:1.2rem;vertical-align:middle;flex-shrink:0;">
-        <a href="/dashboard/" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">Home</a>
-        <a href="{% url 'category_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Categories</a>
-        <a href="{% url 'product_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Products</a>
-        {% if user|is_admin %}
-        <a href="{% url 'sub_level_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Sub-Level Data</a>
-        <a href="{% url 'sub_level_tool_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Sub-Level Tools</a>
-        {% endif %}
-        <a href="{% url 'location_list_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Location</a>
-        <a href="{% url 'system_allocation_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} System Allocation</a>
-        <a href="{% url 'allocation_tree_stream' stream %}" onclick="window.location.reload(); return false;" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;white-space:nowrap;">{{ stream }} Allocation Tree</a>
-        <!-- More button as popup modal -->
-        <button id="moreNavBtn" style="color:#005fa3;font-weight:600;text-decoration:none;margin-right:1.5rem;font-size:1.08rem;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;white-space:nowrap;" tabindex="0">
-            More <span style="font-size:0.8rem;">&#x25BC;</span>
-        </button>
-        <div id="moreNavModal" class="modal" style="z-index:10001;background:none;pointer-events:none;">
-            <div class="modal-content" style="max-width:250px;padding:15px 15px 10px 15px;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:absolute;top:50px;right:280px;pointer-events:auto;">
-                <div class="modal-header" style="margin-bottom:8px;padding-bottom:8px;">
-                    <!-- <h2 style="font-size:1em;color:#005fa3;margin:0;"><i class="fas fa-ellipsis-h"></i> More Navigation</h2> -->
-                    <button class="close-btn" onclick="closeModal('moreNavModal')">&times;</button>
-                </div>
-                <!-- <div style="display:flex;flex-direction:column;gap:8px;">
-                    {% if user|can_manage_users %}
-                    <a href="/users/" style="color:#005fa3;font-weight:600;text-decoration:none;padding:0.6rem 1rem;font-size:1em;border-radius:6px;">Users</a>
-                    {% endif %}
-                    <a href="{% url 'faq_stream' stream %}" style="color:#005fa3;font-weight:600;text-decoration:none;padding:0.6rem 1rem;font-size:1em;border-radius:6px;">Help / FAQ</a>
-                </div> -->
-            </div>
+<div class="top-bar">
+    <div class="logo-section">
+        <img src="/static/products/philips.png" alt="Philips Logo">
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     </div>
-    <div class="top-right" style="flex-shrink:0;">
+    
+    <!-- Desktop Navigation -->
+    <div class="nav-links">
+        <a href="/dashboard/" data-nav-id="home">Home</a>
+        <a href="{% url 'category_list_stream' stream %}" data-nav-id="categories">{{ stream }} Categories</a>
+        <a href="{% url 'product_list_stream' stream %}" data-nav-id="products">{{ stream }} Products</a>
+        {% if user|is_admin %}
+        <a href="{% url 'sub_level_list_stream' stream %}" data-nav-id="sublevel">{{ stream }} Sub-Level Data</a>
+        <a href="{% url 'sub_level_tool_list_stream' stream %}" data-nav-id="subleveltools">{{ stream }} Sub-Level Tools</a>
+        {% endif %}
+        <a href="{% url 'location_list_stream' stream %}" data-nav-id="location">{{ stream }} Location</a>
+        <a href="{% url 'system_allocation_stream' stream %}" data-nav-id="allocation">{{ stream }} System Allocation</a>
+        <a href="{% url 'allocation_tree_stream' stream %}" data-nav-id="tree" onclick="window.location.reload(); return false;">{{ stream }} Allocation Tree</a>
+    </div>
+    
+    <div class="top-right">
         {% if user.is_authenticated %}
-            <strong>{{ user.username }}</strong> | Last login: <strong>{{ user.last_login|date:'Y-m-d H:i:s' }}</strong>
+            &nbsp;<strong>{{ user.username }}</strong> | Last login: <strong>{{ user.last_login|date:'Y-m-d H:i:s' }}</strong>
             <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
         {% endif %}
     </div>
+</div>
+
+<!-- Mobile Menu - Only shows items that overflow from nav -->
+<div class="mobile-menu" id="mobileMenu">
+    {% if user.is_authenticated %}
+    <div class="mobile-user-info">
+        <strong>{{ user.username }}</strong><br>
+        <small>Last login: {{ user.last_login|date:'Y-m-d H:i:s' }}</small>
+    </div>
+    {% endif %}
+    <a href="/dashboard/" class="mobile-nav-item" data-nav-id="home">Home</a>
+    <a href="{% url 'category_list_stream' stream %}" class="mobile-nav-item" data-nav-id="categories">{{ stream }} Categories</a>
+    <a href="{% url 'product_list_stream' stream %}" class="mobile-nav-item" data-nav-id="products">{{ stream }} Products</a>
+    {% if user|is_admin %}
+    <a href="{% url 'sub_level_list_stream' stream %}" class="mobile-nav-item" data-nav-id="sublevel">{{ stream }} Sub-Level Data</a>
+    <a href="{% url 'sub_level_tool_list_stream' stream %}" class="mobile-nav-item" data-nav-id="subleveltools">{{ stream }} Sub-Level Tools</a>
+    {% endif %}
+    <a href="{% url 'location_list_stream' stream %}" class="mobile-nav-item" data-nav-id="location">{{ stream }} Location</a>
+    <a href="{% url 'system_allocation_stream' stream %}" class="mobile-nav-item" data-nav-id="allocation">{{ stream }} System Allocation</a>
+    <a href="{% url 'allocation_tree_stream' stream %}" class="mobile-nav-item" data-nav-id="tree" onclick="window.location.reload(); return false;">{{ stream }} Allocation Tree</a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}" class="mobile-nav-item mobile-visible" style="color:#dc3545;">Logout</a>
+    {% endif %}
 </div>
 {% endwith %}
 
@@ -1329,6 +1885,26 @@
             </div>
             {% endif %}
             </div>
+            
+            <!-- System Modification History - Separate Container -->
+            <div class="container mt-4" style="margin-bottom: 50px;">
+                <div class="system-card">
+                    <div class="tree-section-title" style="display: flex; justify-content: space-between; align-items: center; padding: 0; margin-bottom: 10px;">
+                        <span style="font-size: 1.1em; font-weight: 600; color: #333;">
+                            <i class="fas fa-clock-rotate-left" style="color: #2196f3;"></i> Modification History
+                        </span>
+                        <button onclick="toggleSystemHistory({{ system_data.system.id }})" class="btn-tree btn-secondary-tree" style="font-size: 0.8em; padding: 0.3rem 0.8rem;">
+                            <i class="fas fa-chevron-down" id="historyIcon-{{ system_data.system.id }}"></i> 
+                            <span id="historyText-{{ system_data.system.id }}">Show</span>
+                        </button>
+                    </div>
+                    <div id="historyPanel-{{ system_data.system.id }}" style="display: none; margin-top: 10px;">
+                        <div id="historyContent-{{ system_data.system.id }}" style="text-align: center; padding: 1rem; color: #666;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading history...
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
     {% endif %}
@@ -1348,6 +1924,118 @@
         </div>
     {% endif %}
 </div>
+
+<script>
+// Track which systems have loaded history
+const loadedHistory = {};
+
+function toggleSystemHistory(systemId) {
+    const panel = document.getElementById('historyPanel-' + systemId);
+    const icon = document.getElementById('historyIcon-' + systemId);
+    const text = document.getElementById('historyText-' + systemId);
+    
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Hide';
+        
+        // Load history if not already loaded
+        if (!loadedHistory[systemId]) {
+            loadSystemHistory(systemId);
+        }
+    } else {
+        panel.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Show';
+    }
+}
+
+function loadSystemHistory(systemId) {
+    const contentDiv = document.getElementById('historyContent-' + systemId);
+    
+    fetch(`/stream/{{ stream }}/allocation-tree/history/${systemId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.history.length > 0) {
+                let html = `
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e0e3e7; border-radius: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                            <thead style="background: #f8f9fa; position: sticky; top: 0;">
+                                <tr>
+                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Date</th>
+                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">User</th>
+                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Action</th>
+                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.history.forEach((entry, index) => {
+                    const bgColor = index % 2 === 0 ? '#fff' : '#fafbfc';
+                    let actionBadge = '';
+                    
+                    switch(entry.action) {
+                        case 'created':
+                            actionBadge = '<span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-plus-circle"></i> Created</span>';
+                            break;
+                        case 'updated':
+                            actionBadge = '<span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-edit"></i> Updated</span>';
+                            break;
+                        case 'deleted':
+                            actionBadge = '<span style="background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-trash"></i> Deleted</span>';
+                            break;
+                        case 'item_added':
+                            actionBadge = '<span style="background: #cce5ff; color: #004085; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-link"></i> Added</span>';
+                            break;
+                        case 'item_removed':
+                            actionBadge = '<span style="background: #e2e3e5; color: #383d41; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-unlink"></i> Removed</span>';
+                            break;
+                    }
+                    
+                    const details = entry.item_name 
+                        ? `<span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">${entry.item_type}</span> ${entry.item_name}`
+                        : entry.description;
+                    
+                    html += `
+                        <tr style="border-bottom: 1px solid #f0f0f0; background: ${bgColor};">
+                            <td style="padding: 8px 12px; white-space: nowrap;">
+                                <span style="color: #666;">${entry.date}</span><br>
+                                <small style="color: #999;">${entry.time}</small>
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                <span style="background: #e7f3ff; color: #005fa3; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.85em;">
+                                    ${entry.user}
+                                </span>
+                            </td>
+                            <td style="padding: 8px 12px;">${actionBadge}</td>
+                            <td style="padding: 8px 12px; color: #555;">${details}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+                contentDiv.innerHTML = html;
+            } else {
+                contentDiv.innerHTML = `
+                    <div style="text-align: center; padding: 1.5rem; color: #666; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p style="margin: 0;">No modification history for this system yet.</p>
+                    </div>
+                `;
+            }
+            loadedHistory[systemId] = true;
+        })
+        .catch(error => {
+            console.error('Error loading history:', error);
+            contentDiv.innerHTML = `
+                <div style="text-align: center; padding: 1rem; color: #dc3545;">
+                    <i class="fas fa-exclamation-circle"></i> Failed to load history
+                </div>
+            `;
+        });
+}
+</script>
 
 <!-- Create Tag Modal -->
 <div id="createTagModal" class="modal">
@@ -1419,6 +2107,145 @@
 </div>
 
 <script>
+// Hamburger Menu Toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+    });
+    
+    // Close mobile menu when clicking a link
+    const mobileLinks = mobileMenu.querySelectorAll('a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        });
+    });
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        }
+    });
+}
+
+// ====== PROGRESSIVE COLLAPSE NAVIGATION ======
+// Only hides items that don't fit - keeps visible items in navbar
+(function() {
+    const topBar = document.querySelector('.top-bar');
+    const navLinks = document.querySelector('.nav-links');
+    const logoSection = document.querySelector('.logo-section');
+    const topRight = document.querySelector('.top-right');
+    const mobileMenuEl = document.getElementById('mobileMenu');
+    
+    if (!topBar || !navLinks || !logoSection) return;
+    
+    // Get all nav items (links only, not dropdowns)
+    const navItems = Array.from(navLinks.querySelectorAll(':scope > a[data-nav-id]'));
+    const mobileItems = mobileMenuEl ? Array.from(mobileMenuEl.querySelectorAll('.mobile-nav-item[data-nav-id]')) : [];
+    
+    function checkNavOverflow() {
+        // First, show all items to measure
+        navItems.forEach(item => item.classList.remove('nav-hidden'));
+        mobileItems.forEach(item => item.classList.remove('mobile-visible'));
+        topBar.classList.remove('has-overflow');
+        
+        // Calculate available width
+        const topBarWidth = topBar.offsetWidth;
+        const logoWidth = logoSection.offsetWidth;
+        const topRightWidth = topRight ? topRight.offsetWidth : 0;
+        const hamburgerWidth = 50; // Reserve space for hamburger when it appears
+        const padding = 80; // Extra padding/margin buffer
+        
+        let availableWidth = topBarWidth - logoWidth - topRightWidth - padding;
+        
+        // Measure each item and hide from the end if they don't fit
+        let totalWidth = 0;
+        const gap = 24; // 1.5rem gap between items
+        let hasHiddenItems = false;
+        
+        // First pass: calculate total width needed
+        const itemWidths = navItems.map(item => {
+            return item.offsetWidth;
+        });
+        
+        // If we need to hide items, account for hamburger space
+        let tempTotal = itemWidths.reduce((sum, w, i) => sum + w + (i > 0 ? gap : 0), 0);
+        if (tempTotal > availableWidth) {
+            availableWidth -= hamburgerWidth;
+        }
+        
+        // Second pass: determine which items to hide (from the end)
+        totalWidth = 0;
+        let lastVisibleIndex = -1;
+        
+        for (let i = 0; i < navItems.length; i++) {
+            const itemWidth = itemWidths[i] + (i > 0 ? gap : 0);
+            if (totalWidth + itemWidth <= availableWidth) {
+                totalWidth += itemWidth;
+                lastVisibleIndex = i;
+            } else {
+                break;
+            }
+        }
+        
+        // Hide items that don't fit and show them in mobile menu
+        navItems.forEach((item, index) => {
+            const navId = item.getAttribute('data-nav-id');
+            const mobileItem = mobileItems.find(m => m.getAttribute('data-nav-id') === navId);
+            
+            if (index > lastVisibleIndex) {
+                // This item doesn't fit - hide in nav, show in mobile
+                item.classList.add('nav-hidden');
+                if (mobileItem) mobileItem.classList.add('mobile-visible');
+                hasHiddenItems = true;
+            } else {
+                // This item fits - show in nav, hide in mobile
+                item.classList.remove('nav-hidden');
+                if (mobileItem) mobileItem.classList.remove('mobile-visible');
+            }
+        });
+        
+        // Show/hide hamburger based on whether any items are hidden
+        if (hasHiddenItems) {
+            topBar.classList.add('has-overflow');
+        } else {
+            topBar.classList.remove('has-overflow');
+            // Close mobile menu if no items are hidden
+            if (hamburger && mobileMenu) {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+            }
+        }
+    }
+    
+    // Check on load
+    checkNavOverflow();
+    
+    // Check on window resize with debounce
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(checkNavOverflow, 50);
+    });
+    
+    // Also check when fonts are loaded
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(checkNavOverflow);
+    }
+    
+    // Recheck after short delay for any late rendering
+    setTimeout(checkNavOverflow, 300);
+    setTimeout(checkNavOverflow, 1000);
+})();
+
 const stream = '{{ selected_stream }}';
 
 function showSystemDetails(systemId) {
@@ -1682,18 +2509,6 @@ async function removeItem(tagId, itemType, itemId) {
         alert('Error: ' + error.message);
     }
 }
-
-// More navigation popup modal functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const moreNavBtn = document.getElementById('moreNavBtn');
-    const moreNavModal = document.getElementById('moreNavModal');
-    if (moreNavBtn && moreNavModal) {
-        moreNavBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            moreNavModal.style.display = 'block';
-        });
-    }
-});
 
 // Restore active system view after page reload
 window.addEventListener('DOMContentLoaded', function() {

@@ -1,783 +1,1155 @@
 {% load static %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<title>Build Servers Management Dashboard</title>
-<style>
-    /* Philips Logo */
-    .philips-logo {
-        height: 90px;
-        width: auto;
-        position: absolute;
-        top: 45px;
-        right: 30px;
-        z-index: 900;
-    }
-    
-    /* Home Icon */
-    .home-icon {
-        position: absolute;
-        top: 50px;
-        right: 130px;
-        z-index: 901;
-        transition: all 0.3s ease;
-    }
-    .home-icon:hover {
-        transform: scale(1.1);
-    }
-    .home-icon img {
-        height: 45px;
-        width: 45px;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        background: white;
-        border-radius: 10px;
-        padding: 8px;
-    }
-
-    body {
-        background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
-        min-height: 100vh;
-        padding-top: 0px;
-    }
-    
-    .dashboard-header {
-        background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
-        color: white;
-        padding: 1.5rem 2rem;
-        border-radius: 15px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 25px rgba(0, 95, 163, 0.2);
-    }
-    
-    .stream-card {
-        background: white;
-        border-radius: 15px;
-        padding: 1.2rem 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        border: 1px solid #e9ecef;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .stream-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(45deg, #005fa3, #0066cc, #0080ff);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    
-    .stream-card:hover::before {
-        opacity: 1;
-    }
-    
-    .stream-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 95, 163, 0.2);
-        border-color: #005fa3;
-    }
-    
-    .stream-card .card-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #005fa3 0%, #0066cc 100%);
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        box-shadow: 0 4px 15px rgba(0, 95, 163, 0.3);
-    }
-    
-    .stream-card .card-icon i {
-        font-size: 1.5rem;
-        color: white;
-    }
-    
-    .stream-card h4 {
-        color: #2c3e50;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        font-size: 1.2rem;
-    }
-    
-    .stream-card p {
-        color: #6c757d;
-        margin-bottom: 1.2rem;
-        line-height: 1.6;
-        font-size: 0.9rem;
-    }
-    
-    .stream-card .btn-access {
-        background: linear-gradient(135deg, #005fa3 0%, #0066cc 100%);
-        border: none;
-        color: white;
-        font-weight: 600;
-        padding: 1rem 2.5rem;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 15px rgba(0, 95, 163, 0.3);
-    }
-    
-    .stream-card .btn-access:hover {
-        background: linear-gradient(135deg, #004080 0%, #0056b3 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 95, 163, 0.4);
-    }
-    
-    .stats-section {
-        background: white;
-        border-radius: 15px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        margin-top: 3rem;
-    }
-    
-    .stats-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border-radius: 12px;
-        padding: 1rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        border: 1px solid #e9ecef;
-        height: 100%;
-    }
-    
-    .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    
-    .stats-card.primary { border-left: 4px solid #005fa3; }
-    .stats-card.success { border-left: 4px solid #28a745; }
-    .stats-card.info { border-left: 4px solid #17a2b8; }
-    .stats-card.warning { border-left: 4px solid #ffc107; }
-    
-    .stats-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.5rem;
-        font-size: 1.2rem;
-    }
-    
-    .stats-icon.primary { background: rgba(0, 95, 163, 0.1); color: #005fa3; }
-    .stats-icon.success { background: rgba(40, 167, 69, 0.1); color: #28a745; }
-    .stats-icon.info { background: rgba(23, 162, 184, 0.1); color: #17a2b8; }
-    .stats-icon.warning { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-    
-    .stats-number {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin-bottom: 0.3rem;
-        line-height: 1;
-    }
-    
-    .stats-label {
-        color: #6c757d;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.75rem;
-    }
-    
-    /* Info Button Styles */
-    .info-icon {
-        position: absolute;
-        top: 50px;
-        right: 200px;
-        z-index: 901;
-        transition: all 0.3s ease;
-    }
-    
-    .info-icon:hover {
-        transform: scale(1.1);
-    }
-    
-    .info-icon img {
-        height: 45px;
-        width: 45px;
-        background: white;
-        border-radius: 50%;
-        padding: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .info-icon img:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    /* Modal Styles */
-    .info-modal {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.6);
-        animation: fadeIn 0.3s;
-        backdrop-filter: blur(2px);
-    }
-    
-    .info-modal-content {
-        background: white;
-        color: #333;
-        margin: 2% auto;
-        padding: 2.5rem;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 850px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-        animation: slideIn 0.3s;
-        position: relative;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-    }
-    
-    .info-modal-close {
-        color: #333;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        position: absolute;
-        right: 20px;
-        top: 15px;
-        transition: all 0.3s ease;
-    }
-    
-    .info-modal-close:hover {
-        transform: scale(1.2);
-        opacity: 0.7;
-    }
-    
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
-    
-    @keyframes slideIn {
-        from {transform: translateY(-50px); opacity: 0;}
-        to {transform: translateY(0); opacity: 1;}
-    }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-    
-    .feature-card {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 1.5rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-    }
-    
-    .feature-card:hover {
-        background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-3px);
-    }
-    
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        opacity: 0.9;
-    }
-    
-    .feature-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin-bottom: 0.8rem;
-    }
-    
-    .feature-description {
-        opacity: 0.9;
-        line-height: 1.5;
-    }
-    
-    /* Popup Feature Grid */
-    .features-grid-popup {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.5rem;
-        margin-top: 2rem;
-    }
-    
-    .feature-card-popup {
-        text-align: center;
-        padding: 1.5rem;
-        background: rgba(0, 95, 163, 0.1);
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0, 95, 163, 0.2);
-    }
-    
-    .feature-card-popup:hover {
-        background: rgba(0, 95, 163, 0.15);
-        transform: translateY(-5px);
-    }
-    
-    .feature-icon-popup {
-        width: 60px;
-        height: 60px;
-        background: rgba(0, 95, 163, 0.2);
-        color: #005fa3;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 1.5rem;
-    }
-    
-    .feature-title-popup {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    
-    .feature-description-popup {
-        font-size: 0.85rem;
-        color: #666;
-        line-height: 1.4;
-    }
-    
-    /* System Overview Styles */
-    .system-overview-section {
-        margin-top: 2rem;
-    }
-    
-    .overview-card {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
-        transition: all 0.3s ease;
-    }
-    
-    .overview-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 35px rgba(40, 167, 69, 0.3);
-    }
-    
-    .overview-stats {
-        text-align: center;
-    }
-    
-    .metric-card {
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 15px;
-        padding: 1rem 0.8rem;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    
-    .metric-card:hover {
-        background: rgba(255, 255, 255, 0.25);
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
-    }
-    
-    .metric-number {
-        font-size: 2rem;
-        font-weight: 800;
-        line-height: 1;
-        margin-bottom: 0.5rem;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .metric-label {
-        font-size: 0.8rem;
-        opacity: 0.95;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .stat-item {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        padding: 1rem;
-        backdrop-filter: blur(10px);
-    }
-    
-    .stat-number {
-        font-size: 1.8rem;
-        font-weight: 800;
-        line-height: 1;
-        margin-bottom: 0.3rem;
-    }
-    
-    .stat-label {
-        font-size: 0.75rem;
-        opacity: 0.9;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-    }
-    
-    .no-streams {
-        text-align: center;
-        padding: 5rem 2rem;
-        color: #6c757d;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    
-    .no-streams i {
-        font-size: 5rem;
-        margin-bottom: 2rem;
-        opacity: 0.5;
-        color: #005fa3;
-    }
-    
-    .no-streams h3 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: #2c3e50;
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-header {
-            padding: 2rem 1rem;
-            text-align: center;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Servers Management Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        /* ========== CSS Variables ========== */
+        :root {
+            /* Primary Colors - Corporate Blue */
+            --primary-700: #0043a4;
+            --primary-600: #0052cc;
+            --primary-500: #0066cc;
+            --primary-400: #3d8bfd;
+            --primary-300: #6ea8fe;
+            --primary-200: #9ec5fe;
+            --primary-100: #cfe2ff;
+            --primary-50: #e7f1ff;
+            
+            /* Accent Colors */
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-purple: #8b5cf6;
+            --accent-indigo: #6366f1;
+            
+            /* Neutrals */
+            --neutral-900: #0f172a;
+            --neutral-800: #1e293b;
+            --neutral-700: #334155;
+            --neutral-600: #475569;
+            --neutral-500: #64748b;
+            --neutral-400: #94a3b8;
+            --neutral-300: #cbd5e1;
+            --neutral-200: #e2e8f0;
+            --neutral-100: #f1f5f9;
+            --neutral-50: #f8fafc;
+            --white: #ffffff;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #0052cc 0%, #06b6d4 100%);
+            --gradient-header: linear-gradient(135deg, #0043a4 0%, #0066cc 50%, #06b6d4 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            --gradient-amber: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --gradient-rose: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 30px rgba(0, 102, 204, 0.2);
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
         }
-        
-        .stream-card {
+
+        /* ========== Base Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ========== App Container ========== */
+        .app-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== Top Navigation ========== */
+        .top-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-md);
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+
+        .back-btn:hover {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--neutral-500);
+            text-decoration: none;
+            transition: var(--transition-fast);
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav .current {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+        }
+
+        .nav-btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .nav-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .philips-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        /* ========== Hero Section ========== */
+        .hero-section {
+            background: var(--gradient-header);
+            padding: 1.75rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title h1 {
+            color: var(--white);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .hero-title .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9375rem;
+            max-width: 600px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 0.875rem 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+            min-width: 110px;
+            transition: var(--transition-base);
+        }
+
+        .hero-stat-card:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .hero-stat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto 0.5rem;
+        }
+
+        .hero-stat-value {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1;
+            margin-bottom: 0.125rem;
+        }
+
+        .hero-stat-label {
+            font-size: 0.6875rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== Main Content ========== */
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* ========== Section Headers ========== */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.5rem;
         }
-        
-        .features-grid {
-            grid-template-columns: 1fr;
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-    }
-</style>
 
-{% block content %}
-<div class="container-fluid py-4">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header shadow-lg">
-        <!-- Info Icon -->
-        <div class="info-icon" id="infoButton" title="About Build Servers Management">
-            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/info-circle-fill.svg" alt="Info">
-        </div>
+        .section-title h2 {
+            font-size: 1.375rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin: 0;
+        }
 
-        <!-- Home Icon -->
-        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
-            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
-        </a>
+        .section-title p {
+            font-size: 0.875rem;
+            color: var(--neutral-500);
+            margin: 0.25rem 0 0;
+        }
 
-        <!-- Philips Logo -->
-        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
-        
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="mb-0">
-                    <i class="fas fa-server me-3"></i>
-                    Build Servers Management
-                </h1>
-                <p class="mb-0 mt-2 opacity-75">Advanced Build Server Infrastructure Management System</p>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex justify-content-end">
+        .section-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            background: var(--primary-100);
+            color: var(--primary-600);
+        }
 
+        /* ========== Capability Cards ========== */
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .capability-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid var(--neutral-200);
+            transition: var(--transition-slow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .capability-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .capability-card.blue::before { background: var(--gradient-primary); }
+        .capability-card.green::before { background: var(--gradient-success); }
+        .capability-card.purple::before { background: var(--gradient-purple); }
+        .capability-card.amber::before { background: var(--gradient-amber); }
+
+        .capability-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .capability-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+        }
+
+        .capability-card.blue .capability-icon {
+            background: var(--primary-100);
+            color: var(--primary-600);
+        }
+
+        .capability-card.green .capability-icon {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .capability-card.purple .capability-icon {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        .capability-card.amber .capability-icon {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .capability-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--neutral-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .capability-label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== Stream Cards ========== */
+        .streams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stream-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            padding: 1.75rem;
+            border: 1px solid var(--neutral-200);
+            transition: var(--transition-slow);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .stream-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: var(--transition-base);
+        }
+
+        .stream-card:hover::before {
+            opacity: 1;
+        }
+
+        .stream-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            border-color: var(--primary-200);
+        }
+
+        .stream-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.25rem;
+            position: relative;
+        }
+
+        .stream-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-xl);
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 102, 204, 0.25);
+            transition: var(--transition-slow);
+        }
+
+        .stream-card:hover .stream-icon {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(0, 102, 204, 0.35);
+        }
+
+        .stream-icon-ring {
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px dashed var(--primary-300);
+            border-radius: var(--radius-xl);
+            opacity: 0;
+            transition: var(--transition-base);
+            animation: spin 20s linear infinite;
+        }
+
+        .stream-card:hover .stream-icon-ring {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .stream-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--neutral-800);
+            margin-bottom: 0.375rem;
+        }
+
+        .stream-label {
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+            margin-bottom: 0;
+        }
+
+        .stream-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--neutral-100);
+            border-radius: var(--radius-full);
+            color: var(--neutral-400);
+            margin: 1rem auto 0;
+            transition: var(--transition-base);
+        }
+
+        .stream-card:hover .stream-arrow {
+            background: var(--primary-100);
+            color: var(--primary-600);
+            transform: translateX(4px);
+        }
+
+        /* ========== Empty State ========== */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            border: 2px dashed var(--neutral-300);
+        }
+
+        .empty-state-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--neutral-100);
+            border-radius: var(--radius-2xl);
+            color: var(--neutral-400);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--neutral-700);
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state p {
+            color: var(--neutral-500);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ========== Info Modal ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: var(--neutral-100);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neutral-500);
+            transition: var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-description {
+            font-size: 1rem;
+            color: var(--neutral-600);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .feature-card {
+            background: var(--neutral-50);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--neutral-200);
+            transition: var(--transition-base);
+        }
+
+        .feature-card:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-lg);
+            background: var(--primary-100);
+            color: var(--primary-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .feature-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+            line-height: 1.5;
+        }
+
+        /* ========== Alert Messages ========== */
+        .alert-container {
+            max-width: 1400px;
+            margin: 1rem auto 0;
+            padding: 0 2rem;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .alert .btn-close {
+            margin-left: auto;
+        }
+
+        /* ========== Responsive Design ========== */
+        @media (max-width: 1200px) {
+            .capabilities-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-subtitle {
+                margin: 0 auto;
+            }
+
+            .hero-stats {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-actions {
+                gap: 0.5rem;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-title h1 {
+                font-size: 1.75rem;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .capabilities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .streams-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== Animations ========== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .capability-card, .stream-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .capability-card:nth-child(1) { animation-delay: 0.1s; }
+        .capability-card:nth-child(2) { animation-delay: 0.15s; }
+        .capability-card:nth-child(3) { animation-delay: 0.2s; }
+        .capability-card:nth-child(4) { animation-delay: 0.25s; }
+
+        .stream-card:nth-child(1) { animation-delay: 0.3s; }
+        .stream-card:nth-child(2) { animation-delay: 0.35s; }
+        .stream-card:nth-child(3) { animation-delay: 0.4s; }
+        .stream-card:nth-child(4) { animation-delay: 0.45s; }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <a href="{% url 'dashboard' %}" class="back-btn" title="Back to Dashboard">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                </a>
+                <div class="breadcrumb-nav">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <span class="current">Build Servers</span>
                 </div>
             </div>
-        </div>
-    </div>
+            <div class="nav-actions">
+                <button class="nav-btn nav-btn-ghost" onclick="openInfoModal()">
+                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+                    About
+                </button>
+                <a href="{% url 'dashboard' %}" class="nav-btn nav-btn-primary">
+                    <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+                    Dashboard
+                </a>
+                <img src="{% static 'products/philips.png' %}" alt="Philips" class="philips-logo">
+            </div>
+        </nav>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+        <!-- Alert Messages -->
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" style="width: 18px; height: 18px;"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        {% endfor %}
-    {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    
-
-    <!-- Info Popup Modal -->
-    <div id="infoModal" class="info-modal">
-        <div class="info-modal-content">
-            <span class="info-modal-close">&times;</span>
-            <h3 class="mb-3">
-                <i class="fas fa-info-circle me-2"></i>About Build Servers Management
-            </h3>
-            <p class="mb-3 lead">
-                Comprehensive infrastructure management platform for build servers with real-time monitoring, 
-                detailed tracking, and advanced analytics across multiple streams.
-            </p>
-            
-            <div class="features-grid-popup">
-                <div class="feature-card-popup">
-                    <div class="feature-icon-popup">
-                        <i class="fas fa-server"></i>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-title">
+                        <div class="icon-box">
+                            <i data-lucide="server" style="width: 24px; height: 24px; color: white;"></i>
+                        </div>
+                        <h1>Build Servers Management</h1>
                     </div>
-                    <div class="feature-title-popup">Server Tracking</div>
-                    <div class="feature-description-popup">
-                        Complete hostname, IP address, and location management with detailed specifications
+                    <p class="hero-subtitle">Advanced infrastructure management platform with real-time monitoring and analytics.</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <i data-lucide="layers" style="width: 18px; height: 18px; color: white;"></i>
+                        </div>
+                        <div class="hero-stat-value">{{ streams|length }}</div>
+                        <div class="hero-stat-label">Streams</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <i data-lucide="shield-check" style="width: 18px; height: 18px; color: white;"></i>
+                        </div>
+                        <div class="hero-stat-value">100%</div>
+                        <div class="hero-stat-label">Secure</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <i data-lucide="activity" style="width: 18px; height: 18px; color: white;"></i>
+                        </div>
+                        <div class="hero-stat-value">24/7</div>
+                        <div class="hero-stat-label">Monitoring</div>
                     </div>
                 </div>
-                
-                <div class="feature-card-popup">
-                    <div class="feature-icon-popup">
-                        <i class="fas fa-users"></i>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Capabilities Section -->
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <i data-lucide="zap" style="width: 22px; height: 22px;"></i>
                     </div>
-                    <div class="feature-title-popup">Ownership Management</div>
-                    <div class="feature-description-popup">
-                        Track owners, contacts, and responsible teams for each build server
+                    <div>
+                        <h2>System Capabilities</h2>
+                        <p>Key features and metrics of the build servers management platform</p>
                     </div>
                 </div>
-                
-                <div class="feature-card-popup">
-                    <div class="feature-icon-popup">
-                        <i class="fas fa-chart-line"></i>
+            </div>
+
+            <div class="capabilities-grid">
+                <div class="capability-card blue">
+                    <div class="capability-icon">
+                        <i data-lucide="layers" style="width: 24px; height: 24px;"></i>
                     </div>
-                    <div class="feature-title-popup">Stream Separation</div>
-                    <div class="feature-description-popup">
-                        Organized by PIC/HIC streams for better access control and management
+                    <div class="capability-value">{{ streams|length }}</div>
+                    <div class="capability-label">Available Streams</div>
+                </div>
+                <div class="capability-card green">
+                    <div class="capability-icon">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="capability-value">100%</div>
+                    <div class="capability-label">Secure Access</div>
+                </div>
+                <div class="capability-card purple">
+                    <div class="capability-icon">
+                        <i data-lucide="search" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="capability-value">∞</div>
+                    <div class="capability-label">Search & Filter</div>
+                </div>
+                <div class="capability-card amber">
+                    <div class="capability-icon">
+                        <i data-lucide="download" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="capability-value">24/7</div>
+                    <div class="capability-label">Export Ready</div>
+                </div>
+            </div>
+
+            {% if streams %}
+            <!-- Streams Section -->
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <i data-lucide="git-branch" style="width: 22px; height: 22px;"></i>
+                    </div>
+                    <div>
+                        <h2>Select a Stream</h2>
+                        <p>Choose a stream to access and manage its build servers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="streams-grid">
+                {% for stream in streams %}
+                <a href="{% url 'build_servers_list' stream=stream.name %}" class="stream-card">
+                    <div class="stream-icon-wrapper">
+                        <div class="stream-icon">
+                            <i data-lucide="server" style="width: 28px; height: 28px; color: white;"></i>
+                        </div>
+                        <div class="stream-icon-ring"></div>
+                    </div>
+                    <div class="stream-name">{{ stream.name }}</div>
+                    <div class="stream-label">Build Server Stream</div>
+                    <div class="stream-arrow">
+                        <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="alert-triangle" style="width: 48px; height: 48px;"></i>
+                </div>
+                <h3>No Streams Available</h3>
+                <p>You don't have access to any streams or no streams are configured. Contact your administrator for access.</p>
+                <button class="btn btn-primary">
+                    <i data-lucide="mail" style="width: 18px; height: 18px;"></i>
+                    Contact Administrator
+                </button>
+            </div>
+            {% endif %}
+        </main>
+
+        <!-- Info Modal -->
+        <div class="modal-overlay" id="infoModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i data-lucide="info" style="width: 22px; height: 22px; color: var(--primary-600);"></i>
+                        About Build Servers Management
+                    </div>
+                    <button class="modal-close" onclick="closeInfoModal()">
+                        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-description">
+                        Comprehensive infrastructure management platform for build servers with real-time monitoring, 
+                        detailed tracking, and advanced analytics across multiple streams. Manage your entire server 
+                        infrastructure from a single, unified dashboard.
+                    </p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i data-lucide="server" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div class="feature-title">Server Tracking</div>
+                            <div class="feature-description">
+                                Complete hostname, IP address, and location management with detailed specifications
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div class="feature-title">Ownership</div>
+                            <div class="feature-description">
+                                Track owners, contacts, and responsible teams for each build server
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i data-lucide="git-branch" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div class="feature-title">Stream Separation</div>
+                            <div class="feature-description">
+                                Organized by streams for better access control and management
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Statistics Section -->
-        <div class="stats-section">
-            <div class="row align-items-center mb-4">
-                <div class="col-md-8">
-                    <h3 class="mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>System Overview
-                    </h3>
-                    <p class="text-muted mb-0">Key metrics and capabilities of the build servers management system</p>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="stats-card primary">
-                        <div class="stats-icon primary">
-                            <i class="fas fa-stream"></i>
-                        </div>
-                        <div class="stats-number text-primary">{{ streams|length }}</div>
-                        <div class="stats-label">Available Streams</div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="stats-card success">
-                        <div class="stats-icon success">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="stats-number text-success">100%</div>
-                        <div class="stats-label">Secure Access</div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="stats-card info">
-                        <div class="stats-icon info">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="stats-number text-info">∞</div>
-                        <div class="stats-label">Search & Filter</div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="stats-card warning">
-                        <div class="stats-icon warning">
-                            <i class="fas fa-download"></i>
-                        </div>
-                        <div class="stats-number text-warning">24/7</div>
-                        <div class="stats-label">Export Ready</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </br>
-    </br>
-
-    {% if streams %}
-        <!-- Stream Selection -->
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <!-- <h2 class="display-6 mb-4 text-dark">Select a Stream</h2> -->
-                <p class="lead text-muted mb-5">Choose a stream to access and manage its build servers</p>
-            </div>
-        </div>
-
-        <div class="row g-4 justify-content-center">
-            {% for stream in streams %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="stream-card text-center">
-                        <div class="card-icon">
-                            <i class="fas fa-stream"></i>
-                        </div>
-                        <h4>{{ stream.name }} Stream</h4>
-                        <a href="{% url 'build_servers_list' stream=stream.name %}" class="btn btn-access">
-                            <i class="fas fa-arrow-right me-2"></i>Access Servers
-                        </a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-
-        
-    {% else %}
-        <div class="no-streams">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>No Streams Available</h3>
-            <p class="lead">You don't have access to any streams or no streams are configured.</p>
-            <p>Contact your administrator to get access to build servers management.</p>
-            <button class="btn btn-primary btn-lg mt-3">
-                <i class="fas fa-envelope me-2"></i>Contact Administrator
-            </button>
-        </div>
-    {% endif %}
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Animate cards on scroll
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
         });
 
-        document.querySelectorAll('.stream-card, .stats-card').forEach((card) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
+        // Modal functions
+        function openInfoModal() {
+            document.getElementById('infoModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
 
-        // Add hover effects to stream cards
-        $('.stream-card').hover(
-            function() {
-                $(this).find('.btn-access').addClass('animate__pulse');
-            },
-            function() {
-                $(this).find('.btn-access').removeClass('animate__pulse');
-            }
-        );
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
 
-        // Smooth scrolling for anchors
-        $('a[href^="#"]').on('click', function(event) {
-            var target = $(this.getAttribute('href'));
-            if( target.length ) {
-                event.preventDefault();
-                $('html, body').stop().animate({
-                    scrollTop: target.offset().top - 100
-                }, 1000);
+        // Close modal on outside click
+        document.getElementById('infoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeInfoModal();
             }
         });
-        
-        // Info Modal functionality
-        const infoButton = document.getElementById('infoButton');
-        const infoModal = document.getElementById('infoModal');
-        const closeModal = document.querySelector('.info-modal-close');
-        
-        console.log('Info button:', infoButton);
-        console.log('Info modal:', infoModal);
-        console.log('Close modal:', closeModal);
-        
-        // Open modal when info button is clicked
-        if (infoButton && infoModal) {
-            infoButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Info button clicked');
-                infoModal.style.display = 'block';
-                infoModal.style.visibility = 'visible';
-                infoModal.style.opacity = '1';
-                document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                console.log('Modal should be visible now');
-            });
-        }
-        
-        // Close modal when close button is clicked
-        if (closeModal && infoModal) {
-            closeModal.addEventListener('click', function() {
-                console.log('Close button clicked');
-                infoModal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Restore scrolling
-            });
-        }
-        
-        // Close modal when clicking outside of it
-        if (infoModal) {
-            window.addEventListener('click', function(event) {
-                if (event.target === infoModal) {
-                    console.log('Clicked outside modal');
-                    infoModal.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // Restore scrolling
-                }
-            });
-        }
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && infoModal && infoModal.style.display === 'block') {
-                console.log('Escape key pressed');
-                infoModal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Restore scrolling
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeInfoModal();
             }
         });
-        
+
         // Function to handle stream selection for floor management
         window.selectStreamForFloors = function() {
             {% if streams %}
                 if ({{ streams|length }} === 1) {
-                    // If only one stream, go directly to that stream's floor management
                     window.location.href = "{% url 'floor_list' stream=streams.0.name %}";
                 } else {
-                    // Show stream selection if multiple streams
                     alert('Please select a stream first by clicking on a stream card below.');
                 }
             {% else %}
                 alert('No streams available for floor management.');
             {% endif %}
         }
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

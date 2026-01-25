@@ -1,135 +1,1661 @@
 {% load static %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
-    body {
-        background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
-        min-height: 100vh;
-        padding-top: 20px;
+    /* ============================================
+       DESIGN SYSTEM - PHILIPS CORPORATE THEME
+       ============================================ */
+    
+    :root {
+        /* Primary Colors - Philips Blue */
+        --primary-50: #e6f0fa;
+        --primary-100: #cce0f5;
+        --primary-200: #99c2eb;
+        --primary-300: #66a3e0;
+        --primary-400: #3385d6;
+        --primary-500: #0066cc;
+        --primary-600: #0058b3;
+        --primary-700: #0050aa;
+        --primary-800: #003d80;
+        --primary-900: #002952;
+        
+        /* Neutral Colors */
+        --neutral-25: #fafbfc;
+        --neutral-50: #f8f9fa;
+        --neutral-100: #f1f3f4;
+        --neutral-200: #e8eaed;
+        --neutral-300: #dadce0;
+        --neutral-400: #bdc1c6;
+        --neutral-500: #9aa0a6;
+        --neutral-600: #80868b;
+        --neutral-700: #5f6368;
+        --neutral-800: #3c4043;
+        --neutral-900: #202124;
+        
+        /* Semantic Colors */
+        --success-50: #e6f4ea;
+        --success-100: #ceead6;
+        --success-500: #34a853;
+        --success-600: #1e8e3e;
+        --success-700: #188038;
+        --warning-50: #fef7e0;
+        --warning-100: #feefc3;
+        --warning-500: #fbbc04;
+        --warning-600: #f9ab00;
+        --error-50: #fce8e6;
+        --error-100: #fad2cf;
+        --error-500: #ea4335;
+        --error-600: #d93025;
+        --info-50: #e8f0fe;
+        --info-100: #d2e3fc;
+        --info-500: #4285f4;
+        --info-600: #1a73e8;
+        
+        /* Shadows */
+        --shadow-xs: 0 1px 2px rgba(60, 64, 67, 0.1);
+        --shadow-sm: 0 1px 3px rgba(60, 64, 67, 0.1), 0 1px 2px rgba(60, 64, 67, 0.06);
+        --shadow-md: 0 4px 6px rgba(60, 64, 67, 0.1), 0 2px 4px rgba(60, 64, 67, 0.06);
+        --shadow-lg: 0 10px 15px rgba(60, 64, 67, 0.1), 0 4px 6px rgba(60, 64, 67, 0.05);
+        --shadow-xl: 0 20px 25px rgba(60, 64, 67, 0.1), 0 10px 10px rgba(60, 64, 67, 0.04);
+        
+        /* Border Radius */
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+        --radius-2xl: 20px;
+        
+        /* Transitions */
+        --transition-fast: 150ms ease;
+        --transition-base: 200ms ease;
+        --transition-slow: 300ms ease;
     }
     
-    .header-card {
-        background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--neutral-100);
+        color: var(--neutral-900);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
+    
+    /* ============================================
+       TOP NAVIGATION
+       ============================================ */
+    
+    .top-nav {
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+        padding: 0 2rem;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+    }
+    
+    .nav-brand svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .brand-title {
+        font-size: 1.125rem;
+        font-weight: 600;
         color: white;
+        letter-spacing: -0.025em;
+    }
+    
+    .brand-subtitle {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 400;
+    }
+    
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .breadcrumb-nav a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+        display: flex;
+        align-items: center;
+    }
+    
+    .breadcrumb-nav a:hover {
+        color: white;
+    }
+    
+    .breadcrumb-nav .current {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .stream-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: var(--radius-md);
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* ============================================
+       HERO SECTION
+       ============================================ */
+    
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+        padding: 1.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+    
+    .hero-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .hero-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+    
+    .hero-text h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .hero-text h1 i {
+        width: 28px;
+        height: 28px;
+        opacity: 0.9;
+    }
+    
+    .hero-text p {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 500px;
+    }
+    
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .btn-hero {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    
+    .btn-hero i {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .btn-hero-primary {
+        background: white;
+        color: var(--primary-700);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-hero-primary:hover {
+        background: var(--neutral-50);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--primary-800);
+    }
+    
+    .btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+    
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-md);
+        padding: 0.875rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all var(--transition-base);
+    }
+    
+    .stat-card:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-icon.total {
+        background: rgba(66, 133, 244, 0.3);
+    }
+    
+    .stat-icon.active {
+        background: rgba(52, 168, 83, 0.3);
+    }
+    
+    .stat-icon.inactive {
+        background: rgba(154, 160, 166, 0.3);
+    }
+    
+    .stat-icon i {
+        width: 18px;
+        height: 18px;
+        color: white;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        line-height: 1;
+        margin-bottom: 0.125rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+    }
+    
+    /* ============================================
+       MAIN CONTENT
+       ============================================ */
+    
+    .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
         padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Alert Messages */
+    .alert-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .alert i {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+    
+    .alert-success {
+        background: var(--success-50);
+        color: var(--success-700);
+        border: 1px solid var(--success-100);
+    }
+    
+    .alert-error, .alert-danger {
+        background: var(--error-50);
+        color: var(--error-600);
+        border: 1px solid var(--error-100);
+    }
+    
+    .alert-warning {
+        background: var(--warning-50);
+        color: var(--warning-600);
+        border: 1px solid var(--warning-100);
+    }
+    
+    .alert-info {
+        background: var(--info-50);
+        color: var(--info-600);
+        border: 1px solid var(--info-100);
+    }
+    
+    .alert-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        opacity: 0.6;
+        transition: opacity var(--transition-fast);
+    }
+    
+    .alert-close:hover {
+        opacity: 1;
+    }
+    
+    /* ============================================
+       TOOLBAR
+       ============================================ */
+    
+    .content-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+    
+    .search-box {
+        position: relative;
+        max-width: 320px;
+        flex: 1;
+    }
+    
+    .search-box svg,
+    .search-box i {
+        position: absolute;
+        left: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        color: var(--neutral-500);
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        border: 2px solid var(--neutral-200);
+        border-radius: var(--radius-md);
+        background: white;
+        transition: all var(--transition-fast);
+        color: var(--neutral-900);
+    }
+    
+    .search-input::placeholder {
+        color: var(--neutral-400);
+        font-weight: 400;
+        opacity: 1;
+    }
+    
+    .search-input:hover {
+        border-color: var(--neutral-300);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+    
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        font-family: inherit;
+        background: white;
+        color: var(--neutral-700);
+        border: 2px solid var(--neutral-200);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+    
+    .filter-btn:hover {
+        border-color: var(--neutral-300);
+        background: var(--neutral-50);
+    }
+    
+    .filter-btn.active {
+        background: var(--primary-50);
+        border-color: var(--primary-500);
+        color: var(--primary-700);
+    }
+    
+    .filter-btn i {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        font-family: inherit;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    
+    .btn i {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    /* ============================================
+       FLOOR GRID
+       ============================================ */
+    
+    .floor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
     }
     
     .floor-card {
         background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        border-left: 4px solid #28a745;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        overflow: hidden;
+        transition: all var(--transition-base);
+        position: relative;
     }
     
     .floor-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+        border-color: var(--primary-200);
     }
     
     .floor-card.inactive {
-        border-left-color: #6c757d;
         opacity: 0.7;
     }
     
+    .floor-card.inactive:hover {
+        opacity: 1;
+    }
+    
+    .floor-status-bar {
+        height: 4px;
+        background: var(--success-500);
+    }
+    
+    .floor-card.inactive .floor-status-bar {
+        background: var(--neutral-400);
+    }
+    
+    .floor-content {
+        padding: 1.5rem;
+    }
+    
+    .floor-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .floor-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .floor-card.inactive .floor-icon {
+        background: linear-gradient(135deg, var(--neutral-200) 0%, var(--neutral-100) 100%);
+    }
+    
+    .floor-icon i {
+        width: 28px;
+        height: 28px;
+        color: var(--primary-600);
+    }
+    
+    .floor-card.inactive .floor-icon i {
+        color: var(--neutral-500);
+    }
+    
+    .floor-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 100px;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .floor-status.active {
+        background: var(--success-50);
+        color: var(--success-700);
+    }
+    
+    .floor-status.inactive {
+        background: var(--neutral-100);
+        color: var(--neutral-600);
+    }
+    
+    .floor-status i {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .floor-info {
+        margin-bottom: 1rem;
+    }
+    
+    .floor-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--neutral-900);
+        margin-bottom: 0.375rem;
+    }
+    
+    .floor-description {
+        font-size: 0.9375rem;
+        color: var(--neutral-600);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .floor-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--neutral-100);
+        margin-bottom: 1rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: var(--neutral-500);
+    }
+    
+    .meta-item i {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Server Usage Info */
+    .usage-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: var(--neutral-600);
+        cursor: pointer;
+        position: relative;
+        padding: 0.5rem 0;
+    }
+
+    .usage-info:hover {
+        color: var(--primary-600);
+    }
+
+    .usage-info i {
+        width: 16px;
+        height: 16px;
+    }
+
+    .usage-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 0.5rem;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Server List Tooltip */
+    .server-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 0;
+        background: var(--neutral-800);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        min-width: 220px;
+        max-width: 320px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(5px);
+        transition: all 150ms ease;
+    }
+
+    .server-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 20px;
+        border: 8px solid transparent;
+        border-top-color: var(--neutral-800);
+    }
+
+    .usage-info:hover .server-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .server-tooltip-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--neutral-600);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .server-tooltip-title i {
+        width: 14px;
+        height: 14px;
+    }
+
+    .server-tooltip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .server-tooltip-list li {
+        padding: 0.375rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .server-tooltip-list li:last-child {
+        border-bottom: none;
+    }
+
+    .server-tooltip-list a {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: inherit;
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        margin: -0.25rem -0.5rem;
+        border-radius: 4px;
+        transition: background 150ms ease;
+    }
+
+    .server-tooltip-list a:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .server-tooltip-list .server-name {
+        font-weight: 500;
+    }
+
+    .server-tooltip-list .server-ip {
+        font-size: 0.75rem;
+        color: var(--neutral-400);
+    }
+
+    .server-tooltip-list a:hover .server-ip {
+        color: var(--neutral-300);
+    }
+
+    .server-tooltip-empty {
+        color: var(--neutral-400);
+        font-style: italic;
+        margin: 0;
+    }
+    
+    .floor-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
     .btn-action {
-        border-radius: 20px;
-        padding: 0.4rem 1rem;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
         font-size: 0.875rem;
-        margin: 0 0.25rem;
+        font-weight: 600;
+        font-family: inherit;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+    }
+    
+    .btn-action i {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .btn-edit {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border: 2px solid var(--primary-100);
+    }
+    
+    .btn-edit:hover {
+        background: var(--primary-100);
+        border-color: var(--primary-200);
+        color: var(--primary-800);
+    }
+    
+    .btn-delete {
+        background: var(--error-50);
+        color: var(--error-600);
+        border: 2px solid var(--error-100);
+    }
+    
+    .btn-delete:hover {
+        background: var(--error-100);
+        border-color: var(--error-200);
+        color: var(--error-700);
+    }
+    
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+    
+    .empty-state {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        border: 2px dashed var(--neutral-300);
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--neutral-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .empty-icon i {
+        width: 40px;
+        height: 40px;
+        color: var(--neutral-400);
+    }
+    
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--neutral-800);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-description {
+        font-size: 0.9375rem;
+        color: var(--neutral-600);
+        margin-bottom: 1.5rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* ============================================
+       ADD FLOOR MODAL
+       ============================================ */
+    
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-base);
+        padding: 1rem;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: scale(0.95) translateY(20px);
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .modal-overlay.active .modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .modal-title i {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        color: white;
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-close i {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--neutral-800);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-label i {
+        width: 16px;
+        height: 16px;
+        color: var(--primary-600);
+    }
+    
+    .required-star {
+        color: var(--error-500);
+    }
+    
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        border: 2px solid var(--neutral-200);
+        border-radius: var(--radius-md);
+        background: var(--neutral-50);
+        transition: all var(--transition-fast);
+    }
+    
+    .form-input:hover,
+    .form-textarea:hover {
+        border-color: var(--neutral-300);
+        background: white;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-help {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.375rem;
+        font-size: 0.8125rem;
+        color: var(--neutral-500);
+    }
+    
+    .form-help i {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--neutral-50);
+        border-radius: var(--radius-md);
+        border: 2px solid var(--neutral-200);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+    
+    .checkbox-wrapper:hover {
+        border-color: var(--primary-300);
+        background: var(--primary-50);
+    }
+    
+    .checkbox-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--primary-600);
+    }
+    
+    .checkbox-label {
+        flex: 1;
+    }
+    
+    .checkbox-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--neutral-800);
+    }
+    
+    .checkbox-description {
+        font-size: 0.8125rem;
+        color: var(--neutral-600);
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        background: var(--neutral-50);
+        border-top: 1px solid var(--neutral-200);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: var(--neutral-700);
+        border: 2px solid var(--neutral-300);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--neutral-50);
+        border-color: var(--neutral-400);
+        color: var(--neutral-800);
+    }
+    
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    
+    @media (max-width: 1024px) {
+        .hero-content {
+            flex-direction: column;
+        }
+        
+        .hero-actions {
+            width: 100%;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .top-nav {
+            padding: 0 1rem;
+        }
+        
+        .breadcrumb-nav {
+            display: none;
+        }
+        
+        .hero-section {
+            padding: 2rem 1rem;
+        }
+        
+        .hero-text h1 {
+            font-size: 1.5rem;
+        }
+        
+        .hero-actions {
+            flex-direction: column;
+        }
+        
+        .btn-hero {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .main-content {
+            padding: 1rem;
+        }
+        
+        .content-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .toolbar-left {
+            flex-direction: column;
+        }
+        
+        .search-box {
+            max-width: 100%;
+        }
+        
+        .toolbar-right {
+            justify-content: stretch;
+        }
+        
+        .toolbar-right .btn {
+            flex: 1;
+        }
+        
+        .floor-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+{% endblock %}
 
-<div class="container">
-    <!-- Header -->
-    <div class="header-card">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="mb-0">
-                    <i class="fas fa-building me-2"></i>Floor Management - {{ stream_obj.name }} Stream
+{% block content %}
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <div class="nav-left">
+        <a href="{% url 'home' %}" class="nav-brand">
+            <!-- Philips Shield Logo -->
+            <svg viewBox="0 0 36 36" fill="none">
+                <path d="M18 2L4 8v10c0 9.33 5.97 18.06 14 20 8.03-1.94 14-10.67 14-20V8L18 2z" fill="rgba(255,255,255,0.2)"/>
+                <path d="M18 5L7 10v8c0 7.73 4.94 14.96 11 16.5V5z" fill="rgba(255,255,255,0.3)"/>
+                <circle cx="18" cy="16" r="6" fill="white"/>
+                <circle cx="18" cy="16" r="3" fill="#0050aa"/>
+            </svg>
+        </a>
+        
+        <div class="breadcrumb-nav">
+            <a href="{% url 'home' %}">
+                <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+            </a>
+            <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: rgba(255,255,255,0.4);"></i>
+            <a href="{% url 'build_servers_dashboard' %}">Build Servers</a>
+            <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: rgba(255,255,255,0.4);"></i>
+            <a href="{% url 'build_servers_list' stream=stream %}">{{ stream }}</a>
+            <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: rgba(255,255,255,0.4);"></i>
+            <span class="current">Floors</span>
+        </div>
+    </div>
+    
+    <div class="nav-actions">
+        <div class="stream-badge">
+            <i data-lucide="layers" style="width: 16px; height: 16px;"></i>
+            {{ stream }} Stream
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>
+                    <i data-lucide="building-2"></i>
+                    Floor Management
                 </h1>
-                <p class="mb-0 mt-2 opacity-75">Manage building floors for {{ stream_obj.name }} stream build servers</p>
+                <p>Manage building floors and locations for {{ stream_obj.name }} stream build servers. Configure physical locations to organize your infrastructure.</p>
             </div>
-            <div>
-                <a href="{% url 'floor_create' stream=stream %}" class="btn btn-light btn-lg">
-                    <i class="fas fa-plus me-1"></i> Add Floor
+            <div class="hero-actions">
+                <button class="btn-hero btn-hero-primary" onclick="openModal()">
+                    <i data-lucide="plus"></i>
+                    Add New Floor
+                </button>
+                <a href="{% url 'build_servers_list' stream=stream %}" class="btn-hero btn-hero-secondary">
+                    <i data-lucide="arrow-left"></i>
+                    Back to Servers
                 </a>
-                <a href="{% url 'build_servers_dashboard' %}" class="btn btn-outline-light btn-lg ms-2">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-                </a>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i data-lucide="building-2"></i>
+                </div>
+                <div class="stat-value">{{ floors.count }}</div>
+                <div class="stat-label">Total Floors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <div class="stat-value" id="activeCount">0</div>
+                <div class="stat-label">Active Floors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon inactive">
+                    <i data-lucide="pause-circle"></i>
+                </div>
+                <div class="stat-value" id="inactiveCount">0</div>
+                <div class="stat-label">Inactive Floors</div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- Messages -->
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Alert Messages -->
     {% if messages %}
+    <div class="alert-container">
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        <div class="alert alert-{{ message.tags }}">
+            {% if message.tags == 'success' %}
+            <i data-lucide="check-circle"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <i data-lucide="alert-circle"></i>
+            {% elif message.tags == 'warning' %}
+            <i data-lucide="alert-triangle"></i>
+            {% else %}
+            <i data-lucide="info"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+            </button>
+        </div>
         {% endfor %}
+    </div>
     {% endif %}
-
-    <!-- Floor List -->
-    <div class="row">
-        <div class="col-12">
-            {% if floors %}
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3><i class="fas fa-list me-2"></i>All Floors ({{ floors.count }})</h3>
+    
+    <!-- Toolbar -->
+    <div class="content-toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search floors...">
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">
+                    <i data-lucide="list"></i>
+                    All
+                </button>
+                <button class="filter-btn" data-filter="active">
+                    <i data-lucide="check-circle"></i>
+                    Active
+                </button>
+                <button class="filter-btn" data-filter="inactive">
+                    <i data-lucide="pause-circle"></i>
+                    Inactive
+                </button>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <a href="{% url 'floor_create' stream=stream %}" class="btn btn-primary">
+                <i data-lucide="plus"></i>
+                Add Floor
+            </a>
+        </div>
+    </div>
+    
+    <!-- Floor Grid -->
+    {% if floors %}
+    <div class="floor-grid" id="floorGrid">
+        {% for floor in floors %}
+        <div class="floor-card {% if not floor.is_active %}inactive{% endif %}" 
+             data-status="{% if floor.is_active %}active{% else %}inactive{% endif %}"
+             data-name="{{ floor.name|lower }}">
+            <div class="floor-status-bar"></div>
+            <div class="floor-content">
+                <div class="floor-header">
+                    <div class="floor-icon">
+                        <i data-lucide="building-2"></i>
+                    </div>
+                    <span class="floor-status {% if floor.is_active %}active{% else %}inactive{% endif %}">
+                        {% if floor.is_active %}
+                        <i data-lucide="check"></i>
+                        Active
+                        {% else %}
+                        <i data-lucide="pause"></i>
+                        Inactive
+                        {% endif %}
+                    </span>
                 </div>
                 
-                {% for floor in floors %}
-                    <div class="floor-card {% if not floor.is_active %}inactive{% endif %}">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="mb-1">
-                                    {{ floor.name }}
-                                    {% if not floor.is_active %}
-                                        <span class="badge bg-secondary ms-2">Inactive</span>
-                                    {% else %}
-                                        <span class="badge bg-success ms-2">Active</span>
-                                    {% endif %}
-                                </h5>
-                                {% if floor.description %}
-                                    <p class="text-muted mb-1">{{ floor.description }}</p>
-                                {% endif %}
-                                <small class="text-muted">
-                                    Created: {{ floor.created_at|date:"M d, Y H:i" }}
-                                    {% if floor.updated_at != floor.created_at %}
-                                        | Updated: {{ floor.updated_at|date:"M d, Y H:i" }}
-                                    {% endif %}
-                                </small>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <a href="{% url 'floor_edit' stream=stream floor_id=floor.id %}" class="btn btn-outline-primary btn-action">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </a>
-                                <a href="{% url 'floor_delete' stream=stream floor_id=floor.id %}" class="btn btn-outline-danger btn-action">
-                                    <i class="fas fa-trash me-1"></i>Delete
-                                </a>
-                            </div>
-                        </div>
+                <div class="floor-info">
+                    <h3 class="floor-name">{{ floor.name }}</h3>
+                    {% if floor.description %}
+                    <p class="floor-description">{{ floor.description }}</p>
+                    {% else %}
+                    <p class="floor-description" style="color: var(--neutral-400); font-style: italic;">No description provided</p>
+                    {% endif %}
+                </div>
+                
+                <div class="floor-meta">
+                    <div class="meta-item">
+                        <i data-lucide="calendar"></i>
+                        <span>Created {{ floor.created_at|date:"M d, Y" }}</span>
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-building fa-3x text-muted mb-3"></i>
-                    <h3 class="text-muted">No Floors Found</h3>
-                    <p class="text-muted">Get started by adding your first floor.</p>
-                    <a href="{% url 'floor_create' stream=stream %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-plus me-2"></i>Add First Floor
+                    {% if floor.updated_at != floor.created_at %}
+                    <div class="meta-item">
+                        <i data-lucide="refresh-cw"></i>
+                        <span>Updated {{ floor.updated_at|date:"M d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Server Usage Info -->
+                <div class="usage-info">
+                    <i data-lucide="server"></i>
+                    Used by
+                    <span class="usage-count">{{ floor.buildserver_set.count }}</span>
+                    servers
+                    <!-- Server List Tooltip -->
+                    <div class="server-tooltip">
+                        <div class="server-tooltip-title">
+                            <i data-lucide="server"></i>
+                            Servers on {{ floor.name }}
+                        </div>
+                        {% if floor.buildserver_set.all %}
+                        <ul class="server-tooltip-list">
+                            {% for server in floor.buildserver_set.all %}
+                            <li>
+                                <a href="{% url 'build_server_detail' stream=stream server_id=server.id %}">
+                                    <span class="server-name">{{ server.hostname }}</span>
+                                    <span class="server-ip">{{ server.ip_address }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="server-tooltip-empty">No servers on this floor</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="floor-actions">
+                    <a href="{% url 'floor_edit' stream=stream floor_id=floor.id %}" class="btn-action btn-edit">
+                        <i data-lucide="edit-3"></i>
+                        Edit
+                    </a>
+                    <a href="{% url 'floor_delete' stream=stream floor_id=floor.id %}" class="btn-action btn-delete">
+                        <i data-lucide="trash-2"></i>
+                        Delete
                     </a>
                 </div>
-            {% endif %}
+            </div>
         </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i data-lucide="building-2"></i>
+        </div>
+        <h3 class="empty-title">No Floors Found</h3>
+        <p class="empty-description">Get started by adding your first floor to organize your build server infrastructure.</p>
+        <a href="{% url 'floor_create' stream=stream %}" class="btn btn-primary">
+            <i data-lucide="plus"></i>
+            Add First Floor
+        </a>
+    </div>
+    {% endif %}
+</main>
+
+<!-- Add Floor Modal -->
+<div class="modal-overlay" id="addFloorModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i data-lucide="plus-circle"></i>
+                Add New Floor
+            </h2>
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <form method="post" action="{% url 'floor_create' stream=stream %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="modal_name">
+                        <i data-lucide="type"></i>
+                        Floor Name
+                        <span class="required-star">*</span>
+                    </label>
+                    <input type="text" name="name" id="modal_name" class="form-input" placeholder="e.g., Floor 1, Ground Floor, Basement" required>
+                    <div class="form-help">
+                        <i data-lucide="info"></i>
+                        Enter a unique name for this floor
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modal_description">
+                        <i data-lucide="file-text"></i>
+                        Description
+                    </label>
+                    <textarea name="description" id="modal_description" class="form-textarea" placeholder="Optional description of this floor location..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" name="is_active" id="modal_is_active" class="checkbox-input" checked>
+                        <div class="checkbox-label">
+                            <div class="checkbox-title">Active Status</div>
+                            <div class="checkbox-description">Enable this floor for selection in build servers</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="save"></i>
+                    Create Floor
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Calculate stats
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.floor-card');
+        let activeCount = 0;
+        let inactiveCount = 0;
+        
+        cards.forEach(card => {
+            if (card.dataset.status === 'active') {
+                activeCount++;
+            } else {
+                inactiveCount++;
+            }
+        });
+        
+        document.getElementById('activeCount').textContent = activeCount;
+        document.getElementById('inactiveCount').textContent = inactiveCount;
+    });
+    
+    // Modal functions
+    function openModal() {
+        document.getElementById('addFloorModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            document.getElementById('modal_name').focus();
+        }, 200);
+    }
+    
+    function closeModal() {
+        document.getElementById('addFloorModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    // Close modal on overlay click
+    document.getElementById('addFloorModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.floor-card');
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            if (name.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+    
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            const cards = document.querySelectorAll('.floor-card');
+            
+            cards.forEach(card => {
+                if (filter === 'all') {
+                    card.style.display = '';
+                } else if (card.dataset.status === filter) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

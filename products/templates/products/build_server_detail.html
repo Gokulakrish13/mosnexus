@@ -1,868 +1,1596 @@
 {% load static %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-<title>Build Server Detail</title>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ server.hostname }} - Build Server Details</title>
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    body {
-        background: #ffffff;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        min-height: 100vh;
-        overflow-x: hidden;
-    }
-    
-    .glass-container {
-        background: #ffffff;
-        border: 1px solid #e0e6ed;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-    
-    .dashboard-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        background: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        padding: 1rem 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .nav-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .nav-brand {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #495057;
-        text-decoration: none;
-    }
-    
-    .nav-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .btn-glass {
-        background: #e9ecef;
-        border: 1px solid #ced4da;
-        color: #495057;
-        padding: 0.75rem 1.5rem;
-        border-radius: 50px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        font-weight: 500;
-    }
-    
-    .btn-glass:hover {
-        background: #dee2e6;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        color: #495057;
-        text-decoration: none;
-    }
-    
-    .main-content {
-        margin-top: 90px;
-        padding: 1.5rem;
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-        background: #f8f9fa;
-        border-radius: 15px;
-        min-height: calc(100vh - 120px);
-    }
-    
-    .server-hero {
-        text-align: center;
-        margin-bottom: 2rem;
-        position: relative;
-    }
-    
-    .server-icon {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-    }
-    
-    .server-icon i {
-        font-size: 3rem;
-        color: white;
-    }
-    
-    .server-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: #2c3e50;
-        margin-bottom: 0.8rem;
-        text-shadow: none;
-    }
-    
-    .server-subtitle {
-        font-size: 1.1rem;
-        color: #6c757d;
-        margin-bottom: 1.5rem;
-    }
-    
-    .status-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 1.1rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .status-active {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    }
-    
-    .status-inactive {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: white;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-    }
-    
-    .status-maintenance {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-        color: #212529;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-    }
-    
-    .status-offline {
-        background: linear-gradient(135deg, #6c757d, #495057);
-        color: white;
-        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-    }
-    
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .info-card {
-        background: #ffffff;
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        padding: 1.5rem;
-        transition: all 0.2s ease;
-        position: relative;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-    
-    .info-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #007bff, #0056b3);
-        border-radius: 12px 12px 0 0;
-    }
-    
-    .info-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-    
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .card-icon {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
-    }
-    
-    .card-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin: 0;
-    }
-    
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        font-weight: 600;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-    
-    .info-value {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .copy-btn {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 0.4rem;
-        color: #6c757d;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .copy-btn:hover {
-        background: #e9ecef;
-        color: #495057;
-        transform: scale(1.05);
-    }
-    
-    .spec-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-    
-    .spec-item {
-        text-align: center;
-        padding: 1.2rem;
-        background: #f8f9fa;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
-    }
-    
-    .spec-item:hover {
-        background: #e9ecef;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .spec-icon {
-        font-size: 2.5rem;
-        color: #007bff;
-        margin-bottom: 0.7rem;
-    }
-    
-    .spec-value {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #2c3e50;
-        margin-bottom: 0.4rem;
-    }
-    
-    .spec-label {
-        font-size: 0.85rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .tag-cloud {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-        margin-top: 1.5rem;
-    }
-    
-    .tag {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        padding: 0.6rem 1.2rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
-        transition: all 0.3s ease;
-    }
-    
-    .tag:hover {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.35);
-    }
-    
-    .timeline {
-        position: relative;
-        padding-left: 2rem;
-    }
-    
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: linear-gradient(180deg, #007bff, #0056b3);
-    }
-    
-    .timeline-item {
-        position: relative;
-        margin-bottom: 1.5rem;
-        background: #f8f9fa;
-        padding: 1.2rem;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -2.75rem;
-        top: 1.5rem;
-        width: 12px;
-        height: 12px;
-        background: #007bff;
-        border-radius: 50%;
-        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
-    }
-    
-    .warning-banner {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
-    }
-    
-    .warning-icon {
-        font-size: 2rem;
-    }
-    
-    .action-panel {
-        background: #f8f9fa;
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        margin-top: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .btn-danger {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.25);
-    }
-    
-    .btn-danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-        border: 1px solid #6c757d;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-secondary:hover {
-        background: #5a6268;
-        border-color: #5a6268;
-        transform: translateY(-2px);
-        color: white;
-        text-decoration: none;
-    }
-    
-    @media (max-width: 768px) {
-        .main-content {
-            padding: 1rem;
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - CSS VARIABLES
+           ============================================ */
+        :root {
+            /* Primary Colors - Philips Blue */
+            --primary-900: #001429;
+            --primary-800: #00295c;
+            --primary-700: #0043a4;
+            --primary-600: #0052cc;
+            --primary-500: #0066cc;
+            --primary-400: #3d8bfd;
+            --primary-300: #6ea8fe;
+            --primary-200: #9ec5fe;
+            --primary-100: #cfe2ff;
+            --primary-50: #e7f1ff;
+            
+            /* Neutrals */
+            --neutral-900: #0f172a;
+            --neutral-800: #1e293b;
+            --neutral-700: #334155;
+            --neutral-600: #475569;
+            --neutral-500: #64748b;
+            --neutral-400: #94a3b8;
+            --neutral-300: #cbd5e1;
+            --neutral-200: #e2e8f0;
+            --neutral-100: #f1f5f9;
+            --neutral-50: #f8fafc;
+            --white: #ffffff;
+            
+            /* Semantic Colors */
+            --success-700: #15803d;
+            --success-600: #16a34a;
+            --success-500: #22c55e;
+            --success-100: #dcfce7;
+            --success-50: #f0fdf4;
+            
+            --warning-700: #a16207;
+            --warning-600: #ca8a04;
+            --warning-500: #eab308;
+            --warning-100: #fef9c3;
+            --warning-50: #fefce8;
+            
+            --error-700: #b91c1c;
+            --error-600: #dc2626;
+            --error-500: #ef4444;
+            --error-100: #fee2e2;
+            --error-50: #fef2f2;
+            
+            --info-600: #0284c7;
+            --info-100: #e0f2fe;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 24px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
         }
-        
-        .dashboard-grid {
-            grid-template-columns: 1fr;
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .server-title {
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============================================
+           TOP NAVIGATION
+           ============================================ */
+        .top-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--neutral-500);
+            text-decoration: none;
+            transition: var(--transition-fast);
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav .separator {
+            color: var(--neutral-400);
+        }
+
+        .breadcrumb-nav .current {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+        }
+
+        .nav-btn-primary {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            color: var(--white);
+        }
+
+        .nav-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stream-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-50);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .philips-logo {
+            height: 28px;
+            width: auto;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-600) 50%, #0891b2 100%);
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .server-identity {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .server-icon-large {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .server-icon-large i {
+            width: 40px;
+            height: 40px;
+            color: var(--white);
+        }
+
+        .server-info h1 {
             font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
         }
-        
+
+        .server-location {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9375rem;
+        }
+
+        .server-location span {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .server-location i {
+            width: 16px;
+            height: 16px;
+            opacity: 0.75;
+        }
+
+        .status-badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge-large.active {
+            background: var(--success-500);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .status-badge-large.inactive {
+            background: var(--neutral-500);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.4);
+        }
+
+        .status-badge-large.maintenance {
+            background: var(--warning-500);
+            color: var(--neutral-900);
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
+        }
+
+        .status-badge-large.offline {
+            background: var(--error-500);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge-large i {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Quick Stats in Hero */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .hero-stat {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition-base);
+        }
+
+        .hero-stat:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .hero-stat-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.375rem;
+        }
+
+        .hero-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-stat-value i {
+            width: 18px;
+            height: 18px;
+            opacity: 0.75;
+        }
+
+        /* ============================================
+           WARNING BANNER
+           ============================================ */
+        .warning-banner {
+            max-width: 1400px;
+            margin: -1rem auto 0;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .warning-card {
+            background: linear-gradient(135deg, var(--warning-500) 0%, #f59e0b 100%);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .warning-icon-box {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .warning-icon-box i {
+            width: 24px;
+            height: 24px;
+            color: var(--neutral-900);
+        }
+
+        .warning-content h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--neutral-900);
+            margin-bottom: 0.125rem;
+        }
+
+        .warning-content p {
+            font-size: 0.875rem;
+            color: var(--neutral-800);
+            opacity: 0.9;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ============================================
+           INFO GRID
+           ============================================ */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            transition: var(--transition-base);
+        }
+
+        .info-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .info-card-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--white) 100%);
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .info-card-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-card-icon i {
+            width: 22px;
+            height: 22px;
+            color: var(--white);
+        }
+
+        .info-card-icon.green {
+            background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+        }
+
+        .info-card-icon.purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .info-card-icon.orange {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+
+        .info-card-icon.cyan {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        .info-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+        }
+
+        .info-card-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 0;
+            border-bottom: 1px solid var(--neutral-100);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--neutral-500);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: var(--neutral-100);
+            border: 1px solid var(--neutral-200);
+            color: var(--neutral-500);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
+            color: var(--primary-600);
+        }
+
+        .copy-btn i {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ============================================
+           SPECS CARD (Full Width)
+           ============================================ */
+        .specs-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .specs-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--white) 100%);
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+
+        .spec-item {
+            padding: 1.5rem;
+            text-align: center;
+            border-right: 1px solid var(--neutral-100);
+            border-bottom: 1px solid var(--neutral-100);
+            transition: var(--transition-base);
+        }
+
+        .spec-item:nth-child(4n) {
+            border-right: none;
+        }
+
+        .spec-item:nth-last-child(-n+4) {
+            border-bottom: none;
+        }
+
+        .spec-item:hover {
+            background: var(--neutral-50);
+        }
+
+        .spec-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary-50);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .spec-icon i {
+            width: 28px;
+            height: 28px;
+            color: var(--primary-600);
+        }
+
+        .spec-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neutral-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .spec-label {
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================
+           TIMELINE CARD
+           ============================================ */
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+        }
+
+        .timeline-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--white) 100%);
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .timeline-body {
+            padding: 1.5rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-200) 100%);
+            border-radius: 1px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.25rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-500);
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .timeline-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.375rem;
+        }
+
+        .timeline-action {
+            font-weight: 600;
+            color: var(--neutral-800);
+            font-size: 0.9375rem;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--neutral-500);
+            background: var(--neutral-100);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .timeline-user {
+            font-size: 0.8125rem;
+            color: var(--neutral-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-details {
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+        }
+
+        .empty-timeline {
+            text-align: center;
+            padding: 2rem;
+            color: var(--neutral-400);
+        }
+
+        .empty-timeline i {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           DATES GRID
+           ============================================ */
+        .dates-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+
+        .date-item {
+            padding: 1.25rem;
+            text-align: center;
+            border-right: 1px solid var(--neutral-100);
+            transition: var(--transition-base);
+        }
+
+        .date-item:last-child {
+            border-right: none;
+        }
+
+        .date-item:hover {
+            background: var(--neutral-50);
+        }
+
+        .date-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--neutral-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+        }
+
+        .date-icon i {
+            width: 24px;
+            height: 24px;
+            color: var(--neutral-600);
+        }
+
+        .date-icon.warning {
+            background: var(--warning-100);
+        }
+
+        .date-icon.warning i {
+            color: var(--warning-600);
+        }
+
+        .date-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .date-label {
+            font-size: 0.75rem;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================
+           TAGS CARD
+           ============================================ */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.625rem;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: var(--white);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            transition: var(--transition-base);
+        }
+
+        .tag:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tag i {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ============================================
+           NOTES CARD
+           ============================================ */
+        .notes-content {
+            padding: 1.5rem;
+            font-size: 0.9375rem;
+            color: var(--neutral-700);
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           ACTION PANEL
+           ============================================ */
+        .action-panel {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .action-panel h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 1.5rem;
+        }
+
         .action-buttons {
-            flex-direction: column;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
-    }
-</style>
 
-{% block content %}
-<!-- Navigation -->
-<nav class="dashboard-nav">
-    <div class="nav-content">
-        <a href="{% url 'build_servers_list' stream=stream %}" class="nav-brand">
-            <i class="fas fa-server"></i> Server Dashboard
-        </a>
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .action-btn i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.25);
+        }
+
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.35);
+        }
+
+        .action-btn-danger {
+            background: linear-gradient(135deg, var(--error-500) 0%, var(--error-600) 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+        }
+
+        .action-btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+        }
+
+        .action-btn-secondary {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+            border: 2px solid var(--neutral-200);
+        }
+
+        .action-btn-secondary:hover {
+            background: var(--neutral-200);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================
+           TOAST NOTIFICATION
+           ============================================ */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--neutral-800);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success-600);
+        }
+
+        .toast i {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-card, .specs-card, .timeline-card, .action-panel {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .info-grid .info-card:nth-child(1) { animation-delay: 0.1s; }
+        .info-grid .info-card:nth-child(2) { animation-delay: 0.15s; }
+        .info-grid .info-card:nth-child(3) { animation-delay: 0.2s; }
+        .info-grid .info-card:nth-child(4) { animation-delay: 0.25s; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1200px) {
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .specs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .spec-item:nth-child(2n) {
+                border-right: none;
+            }
+            
+            .dates-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .date-item:nth-child(2n) {
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 1rem;
+            }
+            
+            .hero-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .server-identity {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .server-info h1 {
+                font-size: 1.5rem;
+            }
+            
+            .server-location {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero-top {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .specs-grid, .dates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .spec-item, .date-item {
+                border-right: none;
+                border-bottom: 1px solid var(--neutral-100);
+            }
+            
+            .spec-item:last-child, .date-item:last-child {
+                border-bottom: none;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-btn span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="breadcrumb-nav">
+                <a href="{% url 'home' %}">
+                    <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+                </a>
+                <i data-lucide="chevron-right" class="separator" style="width: 14px; height: 14px;"></i>
+                <a href="{% url 'build_servers_dashboard' %}">Build Servers</a>
+                <i data-lucide="chevron-right" class="separator" style="width: 14px; height: 14px;"></i>
+                <a href="{% url 'build_servers_list' stream=stream %}">{{ stream }}</a>
+                <i data-lucide="chevron-right" class="separator" style="width: 14px; height: 14px;"></i>
+                <span class="current">{{ server.hostname }}</span>
+            </div>
+        </div>
         <div class="nav-actions">
-            <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="btn-glass">
-                <i class="fas fa-edit"></i> Edit
+            <div class="stream-badge">
+                <i data-lucide="layers" style="width: 16px; height: 16px;"></i>
+                {{ stream }} Stream
+            </div>
+            <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="nav-btn nav-btn-ghost">
+                <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
+                <span>Edit</span>
             </a>
-            <a href="{% url 'build_servers_list' stream=stream %}" class="btn-glass">
-                <i class="fas fa-arrow-left"></i> Back
+            <a href="{% url 'build_servers_list' stream=stream %}" class="nav-btn nav-btn-primary">
+                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                <span>Back to List</span>
             </a>
+            <img src="{% static 'products/philips.png' %}" alt="Philips" class="philips-logo">
         </div>
-    </div>
-</nav>
+    </nav>
 
-<div class="main-content">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <!-- Warranty Warning -->
-    {% if server.is_warranty_expiring_soon %}
-        <div class="warning-banner">
-            <div class="warning-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div>
-                <h5 style="margin: 0; font-weight: 700;">Warranty Expiring Soon</h5>
-                <p style="margin: 0; opacity: 0.9;">This server's warranty expires in {{ server.days_until_warranty_expiry }} days on {{ server.warranty_expiry|date:"F d, Y" }}.</p>
-            </div>
-        </div>
-    {% endif %}
-
-    <!-- Server Hero Section -->
-    <div class="server-hero">
-        <div class="server-icon">
-            <i class="fas fa-server"></i>
-        </div>
-        <h1 class="server-title">{{ server.hostname }}</h1>
-        <p class="server-subtitle">
-            {{ server.location }} • {{ server.floor }} • {{ server.stream_type }}
-        </p>
-        <div class="status-indicator status-{{ server.status|lower }}">
-            <i class="fas fa-circle"></i>
-            {{ server.get_status_display }}
-        </div>
-    </div>
-
-    <!-- Dashboard Grid -->
-    <div class="dashboard-grid">
-        <!-- Basic Information Card -->
-        <div class="info-card">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-info-circle"></i>
-                </div>
-                <h3 class="card-title">Basic Information</h3>
-            </div>
-            
-            <div class="info-item">
-                <span class="info-label">Hostname</span>
-                <span class="info-value">{{ server.hostname }}</span>
-            </div>
-            
-            <div class="info-item">
-                <span class="info-label">IP Address</span>
-                <div class="info-value">
-                    {{ server.ip_address }}
-                    <button class="copy-btn" title="Copy IP" onclick="copyToClipboard('{{ server.ip_address }}')">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="info-item">
-                <span class="info-label">Location</span>
-                <span class="info-value">{{ server.location }}</span>
-            </div>
-            
-            <div class="info-item">
-                <span class="info-label">Floor</span>
-                <span class="info-value">{{ server.floor }}</span>
-            </div>
-            
-            <div class="info-item">
-                <span class="info-label">Owner</span>
-                <span class="info-value">{{ server.owner }}</span>
-            </div>
-        </div>
-
-        <!-- System Information Card -->
-        <div class="info-card">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-cogs"></i>
-                </div>
-                <h3 class="card-title">System Information</h3>
-            </div>
-            
-            {% if server.operating_system %}
-            <div class="info-item">
-                <span class="info-label">Operating System</span>
-                <span class="info-value">{{ server.operating_system }}</span>
-            </div>
-            {% endif %}
-            
-            {% if server.domain %}
-            <div class="info-item">
-                <span class="info-label">Domain</span>
-                <span class="info-value">{{ server.domain }}</span>
-            </div>
-            {% endif %}
-            
-            <div class="info-item">
-                <span class="info-label">SSH Port</span>
-                <span class="info-value">{{ server.ssh_port }}</span>
-            </div>
-            
-            {% if server.mac_address %}
-            <div class="info-item">
-                <span class="info-label">MAC Address</span>
-                <div class="info-value">
-                    {{ server.mac_address }}
-                    <button class="copy-btn" title="Copy MAC" onclick="copyToClipboard('{{ server.mac_address }}')">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-            
-            <div class="info-item">
-                <span class="info-label">Uptime</span>
-                <span class="info-value">{{ server.uptime_percentage }}%</span>
-            </div>
-        </div>
-
-        <!-- Contact Information Card -->
-        <div class="info-card animate__animated animate__fadeInLeft animate__delay-1s">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-address-book"></i>
-                </div>
-                <h3 class="card-title">Contact Information</h3>
-            </div>
-            
-            {% if server.primary_contact %}
-            <div class="info-item">
-                <span class="info-label">Primary Contact</span>
-                <span class="info-value">{{ server.primary_contact }}</span>
-            </div>
-            {% endif %}
-            
-            {% if server.secondary_contact %}
-            <div class="info-item">
-                <span class="info-label">Secondary Contact</span>
-                <span class="info-value">{{ server.secondary_contact }}</span>
-            </div>
-            {% endif %}
-            
-            {% if server.contact_email %}
-            <div class="info-item">
-                <span class="info-label">Contact Email</span>
-                <span class="info-value">
-                    <a href="mailto:{{ server.contact_email }}" style="color: white; text-decoration: none;">
-                        {{ server.contact_email }}
-                    </a>
-                </span>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Business Information Card -->
-        <div class="info-card animate__animated animate__fadeInRight animate__delay-1s">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <h3 class="card-title">Business Information</h3>
-            </div>
-            
-            {% if server.project_allocation %}
-            <div class="info-item">
-                <span class="info-label">Project Allocation</span>
-                <span class="info-value">{{ server.project_allocation }}</span>
-            </div>
-            {% endif %}
-            
-            {% if server.cost_center %}
-            <div class="info-item">
-                <span class="info-label">Cost Center</span>
-                <span class="info-value">{{ server.cost_center }}</span>
-            </div>
-            {% endif %}
-            
-            {% if server.purpose %}
-            <div class="info-item">
-                <span class="info-label">Purpose</span>
-                <span class="info-value">{{ server.purpose }}</span>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Technical Specifications -->
-    {% if server.cpu_cores or server.ram_gb or server.storage_gb %}
-    <div class="info-card animate__animated animate__fadeInUp animate__delay-2s">
-        <div class="card-header">
-            <div class="card-icon">
-                <i class="fas fa-microchip"></i>
-            </div>
-            <h3 class="card-title">Technical Specifications</h3>
-        </div>
-        <div class="spec-grid">
-            {% if server.cpu_cores %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-microchip"></i></div>
-                <div class="spec-value">{{ server.cpu_cores }}</div>
-                <div class="spec-label">CPU Cores</div>
-            </div>
-            {% endif %}
-            
-            {% if server.ram_gb %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-memory"></i></div>
-                <div class="spec-value">{{ server.ram_gb }} GB</div>
-                <div class="spec-label">RAM</div>
-            </div>
-            {% endif %}
-            
-            {% if server.storage_gb %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-hdd"></i></div>
-                <div class="spec-value">{{ server.storage_gb }} GB</div>
-                <div class="spec-label">Storage</div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Dates and Maintenance Timeline -->
-    <div class="info-card">
-        <div class="card-header">
-            <div class="card-icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <h3 class="card-title">Timeline & Maintenance</h3>
-        </div>
-        <div class="spec-grid">
-            {% if server.procurement_date %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-shopping-cart"></i></div>
-                <div class="spec-value">{{ server.procurement_date|date:"M d, Y" }}</div>
-                <div class="spec-label">Procurement</div>
-            </div>
-            {% endif %}
-            
-            {% if server.warranty_expiry %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-shield-alt"></i></div>
-                <div class="spec-value">{{ server.warranty_expiry|date:"M d, Y" }}</div>
-                <div class="spec-label">Warranty Expiry</div>
-            </div>
-            {% endif %}
-            
-            {% if server.last_maintenance %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-wrench"></i></div>
-                <div class="spec-value">{{ server.last_maintenance|date:"M d, Y" }}</div>
-                <div class="spec-label">Last Maintenance</div>
-            </div>
-            {% endif %}
-            
-            {% if server.next_maintenance %}
-            <div class="spec-item">
-                <div class="spec-icon"><i class="fas fa-calendar-check"></i></div>
-                <div class="spec-value">{{ server.next_maintenance|date:"M d, Y" }}</div>
-                <div class="spec-label">Next Maintenance</div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Tags -->
-    {% if server.tags %}
-    <div class="info-card">
-        <div class="card-header">
-            <div class="card-icon">
-                <i class="fas fa-tags"></i>
-            </div>
-            <h3 class="card-title">Tags</h3>
-        </div>
-        <div class="tag-cloud">
-            {% for tag in server.get_tag_list %}
-                <span class="tag">{{ tag }}</span>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Notes -->
-    {% if server.notes %}
-    <div class="info-card">
-        <div class="card-header">
-            <div class="card-icon">
-                <i class="fas fa-sticky-note"></i>
-            </div>
-            <h3 class="card-title">Notes</h3>
-        </div>
-        <p style="color: #495057; font-size: 1.1rem; line-height: 1.6;">{{ server.notes|linebreaks }}</p>
-    </div>
-    {% endif %}
-    </br>
-
-
-    <div class="dashboard-grid">
-        <!-- Recent History -->
-        <div class="info-card">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-history"></i>
-                </div>
-                <h3 class="card-title">Recent History</h3>
-            </div>
-            <div class="timeline">
-                {% for item in history %}
-                    <div class="timeline-item">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                            <strong style="color: #2c3e50;">{{ item.get_action_display }}</strong>
-                            <small style="color: #6c757d;">{{ item.timestamp|date:"M d, Y H:i" }}</small>
-                        </div>
-                        {% if item.user %}
-                            <div style="color: #495057; margin-bottom: 0.5rem;">by {{ item.user.username }}</div>
-                        {% endif %}
-                        {% if item.details %}
-                            <div style="color: #495057;">{{ item.details }}</div>
-                        {% endif %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-top">
+                <div class="server-identity">
+                    <div class="server-icon-large">
+                        <i data-lucide="server"></i>
                     </div>
-                {% empty %}
-                    <p style="color: #6c757d;">No history available.</p>
-                {% endfor %}
+                    <div class="server-info">
+                        <h1>{{ server.hostname }}</h1>
+                        <div class="server-location">
+                            <span>
+                                <i data-lucide="map-pin"></i>
+                                {{ server.location }}
+                            </span>
+                            <span>
+                                <i data-lucide="building-2"></i>
+                                {{ server.floor }}
+                            </span>
+                            <span>
+                                <i data-lucide="user"></i>
+                                {{ server.owner }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-badge-large {{ server.status|lower }}">
+                    {% if server.status == 'Active' %}
+                    <i data-lucide="check-circle"></i>
+                    {% elif server.status == 'Inactive' %}
+                    <i data-lucide="pause-circle"></i>
+                    {% elif server.status == 'Maintenance' %}
+                    <i data-lucide="wrench"></i>
+                    {% else %}
+                    <i data-lucide="wifi-off"></i>
+                    {% endif %}
+                    {{ server.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-label">IP Address</div>
+                    <div class="hero-stat-value">
+                        <i data-lucide="globe"></i>
+                        {{ server.ip_address }}
+                    </div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-label">Stream Type</div>
+                    <div class="hero-stat-value">
+                        <i data-lucide="layers"></i>
+                        {{ server.stream_type }}
+                    </div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-label">SSH Port</div>
+                    <div class="hero-stat-value">
+                        <i data-lucide="terminal"></i>
+                        {{ server.ssh_port }}
+                    </div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-label">Uptime</div>
+                    <div class="hero-stat-value">
+                        <i data-lucide="activity"></i>
+                        {{ server.uptime_percentage|default:"N/A" }}{% if server.uptime_percentage %}%{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Warning Banner -->
+    {% if server.is_warranty_expiring_soon %}
+    <div class="warning-banner">
+        <div class="warning-card">
+            <div class="warning-icon-box">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="warning-content">
+                <h4>Warranty Expiring Soon</h4>
+                <p>This server's warranty expires in {{ server.days_until_warranty_expiry }} days on {{ server.warranty_expiry|date:"F d, Y" }}. Consider renewal options.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Info Cards Grid -->
+        <div class="info-grid">
+            <!-- Basic Information -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon">
+                        <i data-lucide="info"></i>
+                    </div>
+                    <h3 class="info-card-title">Basic Information</h3>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-row">
+                        <span class="info-label">Hostname</span>
+                        <span class="info-value">{{ server.hostname }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">IP Address</span>
+                        <div class="info-value">
+                            {{ server.ip_address }}
+                            <button class="copy-btn" onclick="copyToClipboard('{{ server.ip_address }}')" title="Copy IP">
+                                <i data-lucide="copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">{{ server.location }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Floor</span>
+                        <span class="info-value">{{ server.floor }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Owner</span>
+                        <span class="info-value">{{ server.owner }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon green">
+                        <i data-lucide="cpu"></i>
+                    </div>
+                    <h3 class="info-card-title">System Information</h3>
+                </div>
+                <div class="info-card-body">
+                    {% if server.operating_system_ref %}
+                    <div class="info-row">
+                        <span class="info-label">Operating System</span>
+                        <span class="info-value">{{ server.operating_system_ref }}</span>
+                    </div>
+                    {% endif %}
+                    {% if server.domain %}
+                    <div class="info-row">
+                        <span class="info-label">Domain</span>
+                        <span class="info-value">{{ server.domain }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">SSH Port</span>
+                        <span class="info-value">{{ server.ssh_port }}</span>
+                    </div>
+                    {% if server.mac_address %}
+                    <div class="info-row">
+                        <span class="info-label">MAC Address</span>
+                        <div class="info-value">
+                            {{ server.mac_address }}
+                            <button class="copy-btn" onclick="copyToClipboard('{{ server.mac_address }}')" title="Copy MAC">
+                                <i data-lucide="copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon purple">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <h3 class="info-card-title">Contact Information</h3>
+                </div>
+                <div class="info-card-body">
+                    {% if server.primary_contact %}
+                    <div class="info-row">
+                        <span class="info-label">Primary Contact</span>
+                        <span class="info-value">{{ server.primary_contact }}</span>
+                    </div>
+                    {% endif %}
+                    {% if server.secondary_contact %}
+                    <div class="info-row">
+                        <span class="info-label">Secondary Contact</span>
+                        <span class="info-value">{{ server.secondary_contact }}</span>
+                    </div>
+                    {% endif %}
+                    {% if not server.primary_contact and not server.secondary_contact %}
+                    <div class="info-row">
+                        <span class="info-label" style="color: var(--neutral-400); font-style: italic;">No contact information available</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon orange">
+                        <i data-lucide="briefcase"></i>
+                    </div>
+                    <h3 class="info-card-title">Business Information</h3>
+                </div>
+                <div class="info-card-body">
+                    {% if server.project_allocation %}
+                    <div class="info-row">
+                        <span class="info-label">Project Allocation</span>
+                        <span class="info-value">{{ server.project_allocation }}</span>
+                    </div>
+                    {% endif %}
+                    {% if server.cost_center %}
+                    <div class="info-row">
+                        <span class="info-label">Cost Center</span>
+                        <span class="info-value">{{ server.cost_center }}</span>
+                    </div>
+                    {% endif %}
+                    {% if server.purpose %}
+                    <div class="info-row">
+                        <span class="info-label">Purpose</span>
+                        <span class="info-value">{{ server.purpose }}</span>
+                    </div>
+                    {% endif %}
+                    {% if not server.project_allocation and not server.cost_center and not server.purpose %}
+                    <div class="info-row">
+                        <span class="info-label" style="color: var(--neutral-400); font-style: italic;">No business information available</span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- Maintenance Logs -->
-        
-    </div>
-
-    <!-- Action Panel -->
-    <div class="action-panel">
-        <h3 style="color: #2c3e50; margin-bottom: 2rem; font-weight: 700;">Server Actions</h3>
-        <div class="action-buttons">
-            <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="btn-primary">
-                <i class="fas fa-edit"></i> Edit Server
-            </a>
-            <a href="{% url 'build_server_delete' stream=stream server_id=server.id %}" class="btn-danger">
-                <i class="fas fa-trash"></i> Delete Server
-            </a>
-            <a href="{% url 'build_servers_list' stream=stream %}" class="btn-secondary">
-                <i class="fas fa-list"></i> Back to List
-            </a>
+        <!-- Technical Specifications -->
+        {% if server.cpu_cores or server.ram_gb or server.storage_gb %}
+        <div class="specs-card">
+            <div class="specs-header">
+                <div class="info-card-icon cyan">
+                    <i data-lucide="gauge"></i>
+                </div>
+                <h3 class="info-card-title">Technical Specifications</h3>
+            </div>
+            <div class="specs-grid">
+                {% if server.cpu_cores %}
+                <div class="spec-item">
+                    <div class="spec-icon">
+                        <i data-lucide="cpu"></i>
+                    </div>
+                    <div class="spec-value">{{ server.cpu_cores }}</div>
+                    <div class="spec-label">CPU Cores</div>
+                </div>
+                {% endif %}
+                {% if server.ram_gb %}
+                <div class="spec-item">
+                    <div class="spec-icon">
+                        <i data-lucide="memory-stick"></i>
+                    </div>
+                    <div class="spec-value">{{ server.ram_gb }} GB</div>
+                    <div class="spec-label">RAM</div>
+                </div>
+                {% endif %}
+                {% if server.storage_gb %}
+                <div class="spec-item">
+                    <div class="spec-icon">
+                        <i data-lucide="hard-drive"></i>
+                    </div>
+                    <div class="spec-value">{{ server.storage_gb }} GB</div>
+                    <div class="spec-label">Storage</div>
+                </div>
+                {% endif %}
+                <div class="spec-item">
+                    <div class="spec-icon">
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="spec-value">{{ server.uptime_percentage|default:"N/A" }}{% if server.uptime_percentage %}%{% endif %}</div>
+                    <div class="spec-label">Uptime</div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+        {% endif %}
 
-{% block extra_js %}
-<script>
-    // Copy to clipboard function
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            alert('Copied: ' + text);
-        }, function(err) {
-            alert('Failed to copy');
-        });
-    }
-    $(document).ready(function() {
-        // Add tooltips
-        $('[data-toggle="tooltip"]').tooltip();
-    });
-</script>
-{% endblock %}
+        <!-- Timeline & Dates -->
+        <div class="specs-card">
+            <div class="specs-header">
+                <div class="info-card-icon">
+                    <i data-lucide="calendar"></i>
+                </div>
+                <h3 class="info-card-title">Important Dates</h3>
+            </div>
+            <div class="dates-grid">
+                {% if server.procurement_date %}
+                <div class="date-item">
+                    <div class="date-icon">
+                        <i data-lucide="shopping-cart"></i>
+                    </div>
+                    <div class="date-value">{{ server.procurement_date|date:"M d, Y" }}</div>
+                    <div class="date-label">Procurement</div>
+                </div>
+                {% endif %}
+                {% if server.warranty_expiry %}
+                <div class="date-item">
+                    <div class="date-icon {% if server.is_warranty_expiring_soon %}warning{% endif %}">
+                        <i data-lucide="shield"></i>
+                    </div>
+                    <div class="date-value">{{ server.warranty_expiry|date:"M d, Y" }}</div>
+                    <div class="date-label">Warranty Expiry</div>
+                </div>
+                {% endif %}
+                {% if server.last_maintenance %}
+                <div class="date-item">
+                    <div class="date-icon">
+                        <i data-lucide="wrench"></i>
+                    </div>
+                    <div class="date-value">{{ server.last_maintenance|date:"M d, Y" }}</div>
+                    <div class="date-label">Last Maintenance</div>
+                </div>
+                {% endif %}
+                {% if server.next_maintenance %}
+                <div class="date-item">
+                    <div class="date-icon">
+                        <i data-lucide="calendar-check"></i>
+                    </div>
+                    <div class="date-value">{{ server.next_maintenance|date:"M d, Y" }}</div>
+                    <div class="date-label">Next Maintenance</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Timeline Grid -->
+        <div class="timeline-grid">
+            <!-- Recent History -->
+            <div class="timeline-card">
+                <div class="timeline-header">
+                    <div class="info-card-icon">
+                        <i data-lucide="history"></i>
+                    </div>
+                    <h3 class="info-card-title">Recent History</h3>
+                </div>
+                <div class="timeline-body">
+                    {% if history %}
+                    <div class="timeline">
+                        {% for item in history %}
+                        <div class="timeline-item">
+                            <div class="timeline-item-header">
+                                <span class="timeline-action">{{ item.get_action_display }}</span>
+                                <span class="timeline-date">{{ item.timestamp|date:"M d, Y H:i" }}</span>
+                            </div>
+                            {% if item.user %}
+                            <div class="timeline-user">by {{ item.user.username }}</div>
+                            {% endif %}
+                            {% if item.details %}
+                            <div class="timeline-details">{{ item.details }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-timeline">
+                        <i data-lucide="inbox"></i>
+                        <p>No history available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tags & Notes -->
+            <div class="timeline-card">
+                <div class="timeline-header">
+                    <div class="info-card-icon purple">
+                        <i data-lucide="tag"></i>
+                    </div>
+                    <h3 class="info-card-title">Tags & Notes</h3>
+                </div>
+                {% if server.tags %}
+                <div class="tags-container">
+                    {% for tag in server.get_tag_list %}
+                    <span class="tag">
+                        <i data-lucide="hash"></i>
+                        {{ tag }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if server.notes %}
+                <div class="notes-content" {% if server.tags %}style="border-top: 1px solid var(--neutral-100);"{% endif %}>
+                    {{ server.notes|linebreaks }}
+                </div>
+                {% endif %}
+                {% if not server.tags and not server.notes %}
+                <div class="empty-timeline">
+                    <i data-lucide="file-text"></i>
+                    <p>No tags or notes available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div class="action-panel">
+            <h3>Server Actions</h3>
+            <div class="action-buttons">
+                <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" class="action-btn action-btn-primary">
+                    <i data-lucide="edit-3"></i>
+                    Edit Server
+                </a>
+                <a href="{% url 'build_server_delete' stream=stream server_id=server.id %}" class="action-btn action-btn-danger">
+                    <i data-lucide="trash-2"></i>
+                    Delete Server
+                </a>
+                <a href="{% url 'build_servers_list' stream=stream %}" class="action-btn action-btn-secondary">
+                    <i data-lucide="arrow-left"></i>
+                    Back to List
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i data-lucide="check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Copy to clipboard function with toast notification
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied: ' + text);
+            }, function(err) {
+                showToast('Failed to copy', true);
+            });
+        }
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.remove('success');
+                toast.style.background = '#dc2626';
+            } else {
+                toast.classList.add('success');
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

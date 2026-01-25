@@ -1,0 +1,1213 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operating Systems - {{ stream_obj.name }} Stream</title>
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - CSS VARIABLES
+           ============================================ */
+        :root {
+            /* Primary Colors - Philips Blue */
+            --primary-900: #001429;
+            --primary-800: #00295c;
+            --primary-700: #0043a4;
+            --primary-600: #0052cc;
+            --primary-500: #0066cc;
+            --primary-400: #3d8bfd;
+            --primary-300: #6ea8fe;
+            --primary-200: #9ec5fe;
+            --primary-100: #cfe2ff;
+            --primary-50: #e7f1ff;
+            
+            /* Accent Colors */
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-purple: #8b5cf6;
+            --accent-indigo: #6366f1;
+            
+            /* Neutrals */
+            --neutral-900: #0f172a;
+            --neutral-800: #1e293b;
+            --neutral-700: #334155;
+            --neutral-600: #475569;
+            --neutral-500: #64748b;
+            --neutral-400: #94a3b8;
+            --neutral-300: #cbd5e1;
+            --neutral-200: #e2e8f0;
+            --neutral-100: #f1f5f9;
+            --neutral-50: #f8fafc;
+            --white: #ffffff;
+            
+            /* Semantic Colors */
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #0043a4 0%, #0066cc 50%, #06b6d4 100%);
+            --gradient-hero: linear-gradient(135deg, #0043a4 0%, #0052cc 50%, #06b6d4 100%);
+            --gradient-card: linear-gradient(180deg, var(--white) 0%, var(--neutral-50) 100%);
+            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 40px rgba(0, 102, 204, 0.15);
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============================================
+           APP WRAPPER
+           ============================================ */
+        .app-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           TOP NAVIGATION
+           ============================================ */
+        .top-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--neutral-500);
+            text-decoration: none;
+            transition: var(--transition-fast);
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav .current {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stream-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-50);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+        }
+
+        .nav-btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .nav-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .philips-logo {
+            height: 28px;
+            width: auto;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero-section {
+            background: var(--gradient-hero);
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title h1 {
+            color: var(--white);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .hero-title .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+            max-width: 600px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+            min-width: 120px;
+            transition: var(--transition-base);
+        }
+
+        .hero-stat-card:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .hero-stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-stat-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* ============================================
+           TOOLBAR
+           ============================================ */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1.5px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            background: var(--white);
+            transition: var(--transition-base);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-400);
+        }
+
+        .filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            border: 1.5px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            background: var(--white);
+            color: var(--neutral-600);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--neutral-300);
+            background: var(--neutral-50);
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary-400);
+            background: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .view-toggle {
+            display: flex;
+            border: 1.5px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--white);
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--neutral-500);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .view-toggle button:hover {
+            background: var(--neutral-100);
+        }
+
+        .view-toggle button.active {
+            background: var(--primary-600);
+            color: var(--white);
+        }
+
+        /* ============================================
+           OS GRID
+           ============================================ */
+        .os-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .os-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            transition: var(--transition-base);
+            position: relative;
+        }
+
+        .os-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-200);
+        }
+
+        .os-card.inactive {
+            opacity: 0.7;
+        }
+
+        .os-card.inactive:hover {
+            opacity: 0.85;
+        }
+
+        .os-card-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--white) 100%);
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .os-icon-wrapper {
+            position: relative;
+        }
+
+        .os-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .os-icon.windows { background: linear-gradient(135deg, #0078d4 0%, #00a4ef 100%); }
+        .os-icon.linux { background: linear-gradient(135deg, #e95420 0%, #ff7f50 100%); }
+        .os-icon.macos { background: linear-gradient(135deg, #333333 0%, #555555 100%); }
+        .os-icon.centos { background: linear-gradient(135deg, #932279 0%, #262577 100%); }
+        .os-icon.redhat { background: linear-gradient(135deg, #cc0000 0%, #ee0000 100%); }
+
+        .os-status-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid var(--white);
+            background: var(--success);
+        }
+
+        .os-status-dot.inactive {
+            background: var(--neutral-400);
+        }
+
+        .os-header-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .os-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 0.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .os-version-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            background: var(--primary-100);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .os-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .os-status-badge.active {
+            background: var(--success-light);
+            color: #065f46;
+        }
+
+        .os-status-badge.inactive {
+            background: var(--neutral-200);
+            color: var(--neutral-600);
+        }
+
+        .os-card-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .os-description {
+            font-size: 0.875rem;
+            color: var(--neutral-600);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .os-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .os-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+        }
+
+        .os-meta-item i {
+            color: var(--neutral-400);
+        }
+
+        .os-card-footer {
+            padding: 1rem 1.5rem;
+            background: var(--neutral-50);
+            border-top: 1px solid var(--neutral-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .usage-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--neutral-600);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .usage-info:hover {
+            color: var(--primary-600);
+        }
+
+        .usage-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 0.5rem;
+            background: var(--primary-100);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Server List Tooltip */
+        .server-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 0;
+            background: var(--neutral-800);
+            color: var(--white);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            min-width: 220px;
+            max-width: 320px;
+            box-shadow: var(--shadow-xl);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: var(--transition-fast);
+        }
+
+        .server-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            border: 8px solid transparent;
+            border-top-color: var(--neutral-800);
+        }
+
+        .usage-info:hover .server-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .server-tooltip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--neutral-600);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .server-tooltip-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .server-tooltip-list li {
+            padding: 0.375rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .server-tooltip-list li:last-child {
+            border-bottom: none;
+        }
+
+        .server-tooltip-list a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: inherit;
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            margin: -0.25rem -0.5rem;
+            border-radius: 4px;
+            transition: background 150ms ease;
+        }
+
+        .server-tooltip-list a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .server-tooltip-list .server-name {
+            font-weight: 500;
+        }
+
+        .server-tooltip-list .server-ip {
+            font-size: 0.75rem;
+            color: var(--neutral-400);
+        }
+
+        .server-tooltip-list a:hover .server-ip {
+            color: var(--neutral-300);
+        }
+
+        .server-tooltip-empty {
+            color: var(--neutral-400);
+            font-style: italic;
+        }
+
+        .os-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .action-btn-edit {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .action-btn-edit:hover {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        .action-btn-delete {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .action-btn-delete:hover {
+            background: #fecaca;
+            color: #dc2626;
+        }
+
+        /* ============================================
+           EMPTY STATE
+           ============================================ */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 2px dashed var(--neutral-200);
+        }
+
+        .empty-state-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--neutral-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--neutral-400);
+        }
+
+        .empty-state h3 {
+            font-size: 1.375rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--neutral-500);
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .empty-state .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+
+        .empty-state .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ============================================
+           ALERTS
+           ============================================ */
+        .alert-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem 0;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.5rem;
+            border: none;
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background: var(--danger-light);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: var(--warning-light);
+            color: #92400e;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .os-card {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .os-card:nth-child(1) { animation-delay: 0.05s; }
+        .os-card:nth-child(2) { animation-delay: 0.1s; }
+        .os-card:nth-child(3) { animation-delay: 0.15s; }
+        .os-card:nth-child(4) { animation-delay: 0.2s; }
+        .os-card:nth-child(5) { animation-delay: 0.25s; }
+        .os-card:nth-child(6) { animation-delay: 0.3s; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .hero-stats {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .os-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 1rem;
+                height: 56px;
+            }
+
+            .hero-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .os-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-actions {
+                gap: 0.5rem;
+            }
+
+            .nav-btn span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <div class="breadcrumb-nav">
+                    <a href="{% url 'home' %}">
+                        <i data-lucide="home" style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <a href="{% url 'build_servers_dashboard' %}">Build Servers</a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <a href="{% url 'build_servers_list' stream=stream %}">{{ stream }}</a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <span class="current">Operating Systems</span>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <div class="stream-badge">
+                    <i data-lucide="layers" style="width: 16px; height: 16px;"></i>
+                    {{ stream }} Stream
+                </div>
+                <a href="{% url 'build_servers_list' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="server" style="width: 16px; height: 16px;"></i>
+                    <span>Servers</span>
+                </a>
+                <a href="{% url 'floor_list' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="building-2" style="width: 16px; height: 16px;"></i>
+                    <span>Floors</span>
+                </a>
+                <a href="{% url 'operating_system_create' stream=stream %}" class="nav-btn nav-btn-primary">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    <span>Add OS</span>
+                </a>
+                <img src="{% static 'products/philips.png' %}" alt="Philips" class="philips-logo">
+            </div>
+        </nav>
+
+        <!-- Alert Messages -->
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}alert-circle{% else %}alert-triangle{% endif %}" style="width: 18px; height: 18px;"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-title">
+                        <div class="icon-box">
+                            <i data-lucide="monitor" style="width: 28px; height: 28px; color: white;"></i>
+                        </div>
+                        <h1>Operating Systems Management</h1>
+                    </div>
+                    <p class="hero-subtitle">
+                        Configure and manage operating systems available for {{ stream_obj.name }} stream build servers. 
+                        Define OS versions, track usage, and ensure standardization across your infrastructure.
+                    </p>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">{{ operating_systems.count }}</div>
+                        <div class="hero-stat-label">Total OS</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">{{ operating_systems|length }}</div>
+                        <div class="hero-stat-label">Active</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">{{ stream }}</div>
+                        <div class="hero-stat-label">Stream</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% if operating_systems %}
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon" style="width: 18px; height: 18px;"></i>
+                        <input type="text" id="searchInput" placeholder="Search operating systems...">
+                    </div>
+                    <button class="filter-btn" id="filterActive">
+                        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                        Active Only
+                    </button>
+                </div>
+                <div class="view-toggle">
+                    <button class="active" id="gridView" title="Grid View">
+                        <i data-lucide="layout-grid" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <button id="listView" title="List View">
+                        <i data-lucide="list" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- OS Grid -->
+            <div class="os-grid" id="osGrid">
+                {% for os in operating_systems %}
+                <div class="os-card {% if not os.is_active %}inactive{% endif %}" 
+                     data-name="{{ os.name|lower }}" 
+                     data-version="{{ os.version|lower|default:'' }}"
+                     data-active="{% if os.is_active %}true{% else %}false{% endif %}">
+                    <div class="os-card-header">
+                        <div class="os-icon-wrapper">
+                            <div class="os-icon {% if 'windows' in os.name|lower %}windows{% elif 'ubuntu' in os.name|lower or 'linux' in os.name|lower %}linux{% elif 'centos' in os.name|lower %}centos{% elif 'red hat' in os.name|lower %}redhat{% elif 'mac' in os.name|lower %}macos{% endif %}">
+                                <i data-lucide="{% if 'windows' in os.name|lower %}monitor{% elif 'linux' in os.name|lower or 'ubuntu' in os.name|lower %}terminal{% else %}cpu{% endif %}" style="width: 28px; height: 28px;"></i>
+                            </div>
+                            <div class="os-status-dot {% if not os.is_active %}inactive{% endif %}"></div>
+                        </div>
+                        <div class="os-header-info">
+                            <div class="os-name">
+                                {{ os.name }}
+                                {% if os.version %}
+                                <span class="os-version-badge">v{{ os.version }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="os-status-badge {% if os.is_active %}active{% else %}inactive{% endif %}">
+                                <i data-lucide="{% if os.is_active %}check{% else %}pause{% endif %}" style="width: 10px; height: 10px;"></i>
+                                {% if os.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="os-card-body">
+                        <p class="os-description">
+                            {% if os.description %}
+                                {{ os.description }}
+                            {% else %}
+                                Operating system configuration for {{ stream_obj.name }} stream build servers.
+                            {% endif %}
+                        </p>
+                        <div class="os-meta">
+                            <div class="os-meta-item">
+                                <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                Created {{ os.created_at|date:"M d, Y" }}
+                            </div>
+                            {% if os.updated_at != os.created_at %}
+                            <div class="os-meta-item">
+                                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                                Updated {{ os.updated_at|date:"M d, Y" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="os-card-footer">
+                        <div class="usage-info">
+                            <i data-lucide="server" style="width: 16px; height: 16px;"></i>
+                            Used by
+                            <span class="usage-count">{{ os.build_servers.count }}</span>
+                            servers
+                            <!-- Server List Tooltip -->
+                            <div class="server-tooltip">
+                                <div class="server-tooltip-title">
+                                    <i data-lucide="server" style="width: 14px; height: 14px;"></i>
+                                    Servers using {{ os.name }}
+                                </div>
+                                {% if os.build_servers.all %}
+                                <ul class="server-tooltip-list">
+                                    {% for server in os.build_servers.all %}
+                                    <li>
+                                        <a href="{% url 'build_server_detail' stream=stream server_id=server.id %}">
+                                            <span class="server-name">{{ server.hostname }}</span>
+                                            <span class="server-ip">{{ server.ip_address }}</span>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="server-tooltip-empty">No servers using this OS</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="os-actions">
+                            <a href="{% url 'operating_system_edit' stream=stream os_id=os.id %}" class="action-btn action-btn-edit" title="Edit">
+                                <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                            </a>
+                            <a href="{% url 'operating_system_delete' stream=stream os_id=os.id %}" class="action-btn action-btn-delete" title="Delete">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="monitor" style="width: 48px; height: 48px;"></i>
+                </div>
+                <h3>No Operating Systems Configured</h3>
+                <p>Get started by adding your first operating system for the {{ stream_obj.name }} stream. This will allow you to standardize OS configurations across your build servers.</p>
+                <a href="{% url 'operating_system_create' stream=stream %}" class="btn-primary">
+                    <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                    Add First Operating System
+                </a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        $(document).ready(function() {
+            // Search functionality
+            $('#searchInput').on('input', function() {
+                filterCards();
+            });
+
+            // Active filter toggle
+            let showActiveOnly = false;
+            $('#filterActive').on('click', function() {
+                showActiveOnly = !showActiveOnly;
+                $(this).toggleClass('active', showActiveOnly);
+                filterCards();
+            });
+
+            function filterCards() {
+                const searchTerm = $('#searchInput').val().toLowerCase().trim();
+                
+                $('.os-card').each(function() {
+                    const $card = $(this);
+                    const name = String($card.attr('data-name') || '').toLowerCase();
+                    const version = String($card.attr('data-version') || '').toLowerCase();
+                    const isActive = $card.attr('data-active') === 'true';
+                    
+                    // Check if search term matches name or version
+                    const matchesSearch = searchTerm === '' || 
+                                          name.indexOf(searchTerm) !== -1 || 
+                                          version.indexOf(searchTerm) !== -1;
+                    const matchesFilter = !showActiveOnly || isActive;
+                    
+                    if (matchesSearch && matchesFilter) {
+                        $card.show();
+                    } else {
+                        $card.hide();
+                    }
+                });
+            }
+
+            // View toggle (grid/list) - for future enhancement
+            $('#gridView').on('click', function() {
+                $(this).addClass('active');
+                $('#listView').removeClass('active');
+                $('#osGrid').css('grid-template-columns', 'repeat(auto-fill, minmax(380px, 1fr))');
+            });
+
+            $('#listView').on('click', function() {
+                $(this).addClass('active');
+                $('#gridView').removeClass('active');
+                $('#osGrid').css('grid-template-columns', '1fr');
+            });
+        });
+    </script>
+</body>
+</html>

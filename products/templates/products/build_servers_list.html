@@ -1,532 +1,1318 @@
 {% load static %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<title>Build Servers Management</title>
-<style>
-    /* Philips Logo */
-    .philips-logo {
-        height: 90px;
-        width: auto;
-        position: absolute;
-        top: 30px;
-        right: 30px;
-        z-index: 900;
-    }
-    
-    /* Home Icon */
-    .home-icon {
-        position: absolute;
-        top: 35px;
-        right: 140px;
-        z-index: 901;
-        transition: all 0.3s ease;
-    }
-    .home-icon:hover {
-        transform: scale(1.1);
-    }
-    .home-icon img {
-        height: 45px;
-        width: 45px;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        background: white;
-        border-radius: 10px;
-        padding: 8px;
-    }
-    
-    /* Back Button */
-    .back-button {
-        position: absolute;
-        top: 35px;
-        right: 200px;
-        z-index: 901;
-        transition: all 0.3s ease;
-    }
-    .back-button:hover {
-        transform: scale(1.1);
-    }
-    .back-button img {
-        height: 45px;
-        width: 45px;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        background: white;
-        border-radius: 10px;
-        padding: 8px;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Servers Management | {{ stream }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ========== CSS Variables ========== */
+        :root {
+            /* Primary Colors - Corporate Blue */
+            --primary-700: #0043a4;
+            --primary-600: #0052cc;
+            --primary-500: #0066cc;
+            --primary-400: #3d8bfd;
+            --primary-300: #6ea8fe;
+            --primary-200: #9ec5fe;
+            --primary-100: #cfe2ff;
+            --primary-50: #e7f1ff;
+            
+            /* Accent Colors */
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-purple: #8b5cf6;
+            
+            /* Status Colors */
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #06b6d4;
+            --info-light: #cffafe;
+            
+            /* Neutrals */
+            --neutral-900: #0f172a;
+            --neutral-800: #1e293b;
+            --neutral-700: #334155;
+            --neutral-600: #475569;
+            --neutral-500: #64748b;
+            --neutral-400: #94a3b8;
+            --neutral-300: #cbd5e1;
+            --neutral-200: #e2e8f0;
+            --neutral-100: #f1f5f9;
+            --neutral-50: #f8fafc;
+            --white: #ffffff;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #0052cc 0%, #06b6d4 100%);
+            --gradient-header: linear-gradient(135deg, #0043a4 0%, #0066cc 50%, #06b6d4 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 20px rgba(0, 102, 204, 0.15);
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
+        }
 
-    body {
-        background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
-        min-height: 100vh;
-        padding-top: 0px;
-    }
-    
-    .dashboard-header {
-        background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .filter-section {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .table-container {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .badge-status {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    .badge-active { background: #d4edda; color: #155724; }
-    .badge-inactive { background: #f8d7da; color: #721c24; }
-    .badge-maintenance { background: #fff3cd; color: #856404; }
-    .badge-offline { background: #f1f3f4; color: #495057; }
-    
-    .server-card {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        border: 1px solid #e9ecef;
-        border-left: 4px solid transparent;
-    }
-    
-    .server-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 95, 163, 0.2);
-        border-left-color: #005fa3;
-    }
-    
-    .server-card.status-active {
-        border-left-color: #28a745;
-    }
-    
-    .server-card.status-inactive {
-        border-left-color: #dc3545;
-    }
-    
-    .server-card.status-maintenance {
-        border-left-color: #ffc107;
-    }
-    
-    .server-card.status-offline {
-        border-left-color: #6c757d;
-    }
-    
-    .toolbar-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-    
-    .btn-action {
-        padding: 0.375rem 0.75rem;
-        border-radius: 5px;
-        transition: all 0.3s;
-    }
-    
-    .btn-action:hover {
-        transform: scale(1.05);
-    }
-    
-    .warning-expiry {
-        color: #856404;
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-    }
-    
-    .server-info {
-        font-size: 0.875rem;
-        color: #6c757d;
-    }
-    
-    .stats-card {
-        background: white;
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: transform 0.3s;
-        border-left: 4px solid;
-    }
-    .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    .stats-card.total { border-left-color: #6c757d; }
-    .stats-card.active { border-left-color: #28a745; }
-    .stats-card.inactive { border-left-color: #dc3545; }
-    .stats-card.maintenance { border-left-color: #ffc107; }
-    .stats-card.offline { border-left-color: #6c757d; }
-    
-    .stats-number {
-        font-size: 1.8rem;
-        font-weight: bold;
-        margin: 0;
-    }
-    .stats-label {
-        color: #6c757d;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 0.2rem;
-    }
-    
-    @media print {
-        .no-print { display: none !important; }
-        .server-card { break-inside: avoid; }
-    }
-</style>
+        /* ========== Base Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
-<div class="container-fluid py-4">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header shadow-lg">
-        <!-- Back Button -->
-        <a href="{% url 'build_servers_dashboard' %}" title="Back to Server Dashboard" class="back-button">
-            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/arrow-left-circle-fill.svg" alt="Back">
-        </a>
-        
-        <!-- Home Icon -->
-        <a href="/dashboard/" title="Go to Dashboard" class="home-icon">
-            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
-        </a>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
 
-        <!-- Philips Logo -->
-        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
-        
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="mb-0">
-                    <i class="fas fa-server me-2"></i>
-                    {{ stream }} Build Servers
-                </h1>
-                <p class="mb-0 mt-2 opacity-75">Advanced Server Management & Monitoring for {{ stream }} Stream</p>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex justify-content-end" style="margin-right: 60px;">
-                    <div class="btn-group" role="group" style="margin-top: 35px;">
-                        <a href="{% url 'floor_list' stream=stream %}" class="btn btn-info btn-lg me-2">
-                            <i class="fas fa-building me-1"></i> Manage Floors
-                        </a>
-                        <a href="{% url 'build_server_create' stream=stream %}" class="btn btn-light btn-lg">
-                            <i class="fas fa-plus me-1"></i> Add Server
-                        </a>
-                        <button type="button" class="btn btn-light btn-lg dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'build_servers_export' stream=stream %}">
-                                <i class="fas fa-file-excel text-success me-2"></i>Export to Excel
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="fas fa-file-pdf text-danger me-2"></i>Export to PDF
-                            </a></li>
-                        </ul>
-                    </div>
+        /* ========== App Container ========== */
+        .app-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== Top Navigation ========== */
+        .top-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-md);
+            background: var(--neutral-100);
+            color: var(--neutral-600);
+            text-decoration: none;
+            transition: var(--transition-base);
+        }
+
+        .back-btn:hover {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--neutral-500);
+            text-decoration: none;
+            transition: var(--transition-fast);
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-600);
+        }
+
+        .breadcrumb-nav .current {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stream-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+        }
+
+        .nav-btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .nav-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .philips-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        /* ========== Hero Section ========== */
+        .hero-section {
+            background: var(--gradient-header);
+            padding: 1.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .hero-title .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Stats Pills in Hero */
+        .stats-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition-base);
+        }
+
+        .stat-pill:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .stat-pill-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+        }
+
+        .stat-pill-icon.total { background: rgba(255, 255, 255, 0.2); color: var(--white); }
+        .stat-pill-icon.active { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        .stat-pill-icon.inactive { background: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+        .stat-pill-icon.maintenance { background: rgba(245, 158, 11, 0.3); color: #fcd34d; }
+        .stat-pill-icon.offline { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
+
+        .stat-pill-content {
+            text-align: left;
+        }
+
+        .stat-pill-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1;
+        }
+
+        .stat-pill-label {
+            font-size: 0.625rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+        }
+
+        /* ========== Main Content ========== */
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* ========== Filter Toolbar ========== */
+        .filter-toolbar {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+        }
+
+        .filter-toolbar-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 280px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.75rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: var(--transition-base);
+            background: var(--neutral-50);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+            background: var(--white);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-400);
+        }
+
+        .filter-select {
+            padding: 0.625rem 2.25rem 0.625rem 1rem;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--neutral-50);
+            cursor: pointer;
+            transition: var(--transition-base);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            min-width: 140px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+            background-color: var(--white);
+        }
+
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+            border: 1px solid var(--neutral-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neutral-200);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* ========== Server Cards Grid ========== */
+        .servers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .servers-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .servers-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin: 0;
+        }
+
+        .servers-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--primary-100);
+            color: var(--primary-700);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* ========== Server Card ========== */
+        .server-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            transition: var(--transition-slow);
+            position: relative;
+        }
+
+        .server-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .server-card.status-active::before { background: var(--gradient-success); }
+        .server-card.status-inactive::before { background: var(--gradient-danger); }
+        .server-card.status-maintenance::before { background: var(--gradient-warning); }
+        .server-card.status-offline::before { background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%); }
+
+        .server-card-header {
+            padding: 1.25rem 1.5rem;
+            background: var(--neutral-50);
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .server-info-main {
+            flex: 1;
+        }
+
+        .server-hostname {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 0.375rem;
+        }
+
+        .server-hostname .icon {
+            color: var(--primary-500);
+        }
+
+        .server-ip {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--neutral-500);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge.active {
+            background: var(--success-light);
+            color: #047857;
+        }
+
+        .status-badge.inactive {
+            background: var(--danger-light);
+            color: #b91c1c;
+        }
+
+        .status-badge.maintenance {
+            background: var(--warning-light);
+            color: #b45309;
+        }
+
+        .status-badge.offline {
+            background: var(--neutral-200);
+            color: var(--neutral-600);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.active .status-dot { background: #10b981; }
+        .status-badge.inactive .status-dot { background: #ef4444; }
+        .status-badge.maintenance .status-dot { background: #f59e0b; }
+        .status-badge.offline .status-dot { background: #64748b; }
+
+        .server-card-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .server-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--neutral-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--neutral-800);
+        }
+
+        .server-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--neutral-200);
+        }
+
+        .spec-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--neutral-100);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            color: var(--neutral-600);
+        }
+
+        .spec-tag i {
+            color: var(--primary-500);
+        }
+
+        .warranty-warning {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 0.875rem;
+            background: var(--warning-light);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            color: #92400e;
+            margin-bottom: 1rem;
+        }
+
+        .server-card-footer {
+            padding: 1rem 1.5rem;
+            background: var(--neutral-50);
+            border-top: 1px solid var(--neutral-100);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+            text-decoration: none;
+        }
+
+        .action-btn-view {
+            background: var(--info-light);
+            color: #0891b2;
+        }
+
+        .action-btn-view:hover {
+            background: var(--info);
+            color: var(--white);
+        }
+
+        .action-btn-edit {
+            background: var(--warning-light);
+            color: #d97706;
+        }
+
+        .action-btn-edit:hover {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .action-btn-delete {
+            background: var(--danger-light);
+            color: #dc2626;
+        }
+
+        .action-btn-delete:hover {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        /* ========== Empty State ========== */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 2px dashed var(--neutral-300);
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--neutral-100);
+            border-radius: var(--radius-xl);
+            color: var(--neutral-400);
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--neutral-500);
+            margin-bottom: 1.5rem;
+        }
+
+        /* ========== Alert Messages ========== */
+        .alert-container {
+            max-width: 1400px;
+            margin: 1rem auto 0;
+            padding: 0 2rem;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        .alert-danger {
+            background: var(--danger-light);
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .alert-warning {
+            background: var(--warning-light);
+            border: 1px solid #fde68a;
+            color: #b45309;
+        }
+
+        .alert .btn-close {
+            margin-left: auto;
+        }
+
+        /* ========== Scroll to Top ========== */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-base);
+            z-index: 1000;
+        }
+
+        .scroll-top-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .scroll-top-btn.visible {
+            display: flex;
+        }
+
+        /* ========== Responsive Design ========== */
+        @media (max-width: 1024px) {
+            .hero-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .stats-pills {
+                gap: 0.75rem;
+            }
+
+            .servers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-actions {
+                gap: 0.5rem;
+            }
+
+            .filter-toolbar-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-left {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .filter-right {
+                justify-content: center;
+            }
+
+            .servers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-pill {
+                flex: 1;
+                min-width: 140px;
+            }
+        }
+
+        /* ========== Print Styles ========== */
+        @media print {
+            .no-print { display: none !important; }
+            .server-card { break-inside: avoid; }
+            .top-nav { position: static; }
+            .hero-section { background: none; color: black; }
+        }
+
+        /* ========== Animations ========== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .server-card {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .server-card:nth-child(1) { animation-delay: 0.05s; }
+        .server-card:nth-child(2) { animation-delay: 0.1s; }
+        .server-card:nth-child(3) { animation-delay: 0.15s; }
+        .server-card:nth-child(4) { animation-delay: 0.2s; }
+        .server-card:nth-child(5) { animation-delay: 0.25s; }
+        .server-card:nth-child(6) { animation-delay: 0.3s; }
+        .server-card:nth-child(7) { animation-delay: 0.35s; }
+        .server-card:nth-child(8) { animation-delay: 0.4s; }
+        .server-card:nth-child(9) { animation-delay: 0.45s; }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-nav no-print">
+            <div class="nav-brand">
+                <a href="{% url 'build_servers_dashboard' %}" class="back-btn" title="Back to Dashboard">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                </a>
+                <div class="breadcrumb-nav">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <a href="{% url 'build_servers_dashboard' %}">Build Servers</a>
+                    <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--neutral-400);"></i>
+                    <span class="current">{{ stream }} Servers</span>
                 </div>
             </div>
-        </div>
-    </div>
+            <div class="nav-actions">
+                <div class="stream-badge">
+                    <i data-lucide="layers" style="width: 16px; height: 16px;"></i>
+                    {{ stream }} Stream
+                </div>
+                <a href="{% url 'floor_list' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="building-2" style="width: 16px; height: 16px;"></i>
+                    Manage Floors
+                </a>
+                <a href="{% url 'operating_system_list' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="monitor" style="width: 16px; height: 16px;"></i>
+                    Manage OS
+                </a>
+                <a href="{% url 'build_servers_export' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                    Export
+                </a>
+                <a href="{% url 'build_server_create' stream=stream %}" class="nav-btn nav-btn-primary">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    Add Server
+                </a>
+                <img src="{% static 'products/philips.png' %}" alt="Philips" class="philips-logo">
+            </div>
+        </nav>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+        <!-- Alert Messages -->
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}alert-circle{% else %}alert-triangle{% endif %}" style="width: 18px; height: 18px;"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        {% endfor %}
-    {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-2">
-            <div class="stats-card total">
-                <div class="stats-number text-secondary">{{ servers.count }}</div>
-                <div class="stats-label">Total Servers</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card active">
-                <div class="stats-number text-success">{{ status_counts.Active|default:0 }}</div>
-                <div class="stats-label">Active</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card inactive">
-                <div class="stats-number text-danger">{{ status_counts.Inactive|default:0 }}</div>
-                <div class="stats-label">Inactive</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card maintenance">
-                <div class="stats-number text-warning">{{ status_counts.Maintenance|default:0 }}</div>
-                <div class="stats-label">Maintenance</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card offline">
-                <div class="stats-number text-danger">{{ status_counts.Offline|default:0 }}</div>
-                <div class="stats-label">Offline</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="stats-card" style="border-left-color: #17a2b8;">
-                <div class="stats-number" style="color: #17a2b8;">{{ stream }}</div>
-                <div class="stats-label">Stream</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="filter-section no-print">
-        <form method="get" id="filterForm" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-search me-1"></i>Search</label>
-                <input type="text" class="form-control" name="search"  
-                       placeholder="Hostname, IP, Location, Owner...">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label"><i class="fas fa-filter me-1"></i>Status</label>
-                <select class="form-select" name="status">
-                    <option value="">All Statuses</option>
-                    {% for status_code, status_display in status_choices %}
-                        <option value="{{ status_code }}" {% if current_filters.status == status_code %}selected{% endif %}>
-                            {{ status_display }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label"><i class="fas fa-building me-1"></i>Floor</label>
-                <select class="form-select" name="floor">
-                    <option value="">All Floors</option>
-                    {% for floor_code, floor_display in floor_choices %}
-                        <option value="{{ floor_code }}" {% if current_filters.floor == floor_code %}selected{% endif %}>
-                            {{ floor_display }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">&nbsp;</label>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filter
-                    </button>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-title">
+                    <div class="icon-box">
+                        <i data-lucide="server" style="width: 22px; height: 22px; color: white;"></i>
+                    </div>
+                    <h1>{{ stream }} Build Servers</h1>
                 </div>
-            </div>
-        </form>
-    </div>
-    <!-- Servers Display -->
-    <div class="table-container">
-        <div class="toolbar-section no-print">
-            <div class="d-flex align-items-center">
-                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Server List</h5>
-                <span class="badge bg-secondary ms-2">{{ servers.count }} servers</span>
-            </div>
-            <div class="action-buttons">
-                <button type="button" class="btn btn-outline-primary btn-action" onclick="refreshData()">
-                    <i class="fas fa-sync-alt me-1"></i>Refresh
-                </button>
-                <a href="{% url 'build_servers_dashboard' %}" class="btn btn-outline-secondary btn-action">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                </a>
-            </div>
-        </div>
-
-        <div class="row g-4" id="serversContainer">
-            {% for server in servers %}
-                <div class="col-lg-6 col-xl-4 mb-4">
-                    <div class="server-card status-{{ server.status|lower }} shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom" style="border-radius:10px 10px 0 0; padding:1rem 1.25rem;">
-                            <div>
-                                <h6 class="card-title mb-1 fw-bold">
-                                    <i class="fas fa-server text-primary me-1"></i>
-                                    {{ server.hostname }}
-                                </h6>
-                                <small class="text-muted"><i class="fas fa-network-wired me-1"></i>{{ server.ip_address }}</small>
-                            </div>
-                            <span class="badge-status badge-{{ server.status|lower }} px-3 py-2" style="font-size:1rem;" title="{{ server.get_status_display }}">
-                                {{ server.get_status_display }}
-                            </span>
+                <p class="hero-subtitle">Server Management & Monitoring for {{ stream }} Stream</p>
+                
+                <div class="stats-pills">
+                    <div class="stat-pill">
+                        <div class="stat-pill-icon total">
+                            <i data-lucide="server" style="width: 16px; height: 16px;"></i>
                         </div>
-                        <div class="card-body" style="padding:1.25rem;">
-                            <div class="server-info mb-3">
-                                <div class="row g-2">
-                                    <div class="col-6 mb-2">
-                                        <strong><i class="fas fa-map-marker-alt text-danger"></i> Location:</strong><br>
-                                        <span class="text-dark fw-semibold">{{ server.location }}</span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <strong><i class="fas fa-building text-info"></i> Floor:</strong><br>
-                                        <span class="text-dark fw-semibold">{{ server.floor.name|default:"Not specified" }}</span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <strong><i class="fas fa-user text-success"></i> Owner:</strong><br>
-                                        <span class="text-dark fw-semibold">{{ server.owner }}</span>
-                                    </div>
-                                    {% if server.operating_system %}
-                                        <div class="col-12 mb-2">
-                                            <strong><i class="fas fa-desktop text-primary"></i> OS:</strong> 
-                                            <span class="text-dark fw-semibold">{{ server.operating_system }}</span>
-                                        </div>
-                                    {% endif %}
-                                    {% if server.cpu_cores and server.ram_gb %}
-                                        <div class="col-12 mb-2">
-                                            <strong><i class="fas fa-microchip text-info"></i> Specs:</strong> 
-                                            <span class="text-dark fw-semibold">{{ server.cpu_cores }} CPU, {{ server.ram_gb }}GB RAM</span>
-                                            {% if server.storage_gb %}
-                                                <span class="text-dark fw-semibold">, {{ server.storage_gb }}GB Storage</span>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            {% if server.is_warranty_expiring_soon %}
-                                <div class="warning-expiry mb-3">
-                                    <i class="fas fa-exclamation-triangle"></i> 
-                                    Warranty expires in {{ server.days_until_warranty_expiry }} days
-                                </div>
-                            {% endif %}
-
-                            <div class="action-buttons mt-2">
-                                <a href="{% url 'build_server_detail' stream=stream server_id=server.id %}" 
-                                   class="btn btn-sm btn-info btn-action" title="View Details" data-bs-toggle="tooltip" data-bs-placement="top">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" 
-                                   class="btn btn-sm btn-warning btn-action" title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'build_server_delete' stream=stream server_id=server.id %}" 
-                                   class="btn btn-sm btn-danger btn-action" title="Delete" data-bs-toggle="tooltip" data-bs-placement="top"
-                                   onclick="return confirm('Are you sure you want to delete this server?')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
+                        <div class="stat-pill-content">
+                            <div class="stat-pill-value">{{ servers.count }}</div>
+                            <div class="stat-pill-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-icon active">
+                            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <div class="stat-pill-content">
+                            <div class="stat-pill-value">{{ status_counts.Active|default:0 }}</div>
+                            <div class="stat-pill-label">Active</div>
+                        </div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-icon inactive">
+                            <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <div class="stat-pill-content">
+                            <div class="stat-pill-value">{{ status_counts.Inactive|default:0 }}</div>
+                            <div class="stat-pill-label">Inactive</div>
+                        </div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-icon maintenance">
+                            <i data-lucide="wrench" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <div class="stat-pill-content">
+                            <div class="stat-pill-value">{{ status_counts.Maintenance|default:0 }}</div>
+                            <div class="stat-pill-label">Maintenance</div>
+                        </div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-icon offline">
+                            <i data-lucide="wifi-off" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <div class="stat-pill-content">
+                            <div class="stat-pill-value">{{ status_counts.Offline|default:0 }}</div>
+                            <div class="stat-pill-label">Offline</div>
                         </div>
                     </div>
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="text-center py-5">
-                        <i class="fas fa-server fa-4x text-muted mb-4"></i>
-                        <h4 class="text-muted">No Build Servers Found</h4>
-                        <p class="text-muted mb-4">No servers match your current filters, or no servers have been added to this stream yet.</p>
-                        <a href="{% url 'build_server_create' stream=stream %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-plus me-2"></i>Add Your First Server
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Filter Toolbar -->
+            <div class="filter-toolbar no-print">
+                <form method="get" id="filterForm">
+                    <div class="filter-toolbar-inner">
+                        <div class="filter-left">
+                            <div class="search-box">
+                                <i data-lucide="search" class="search-icon" style="width: 16px; height: 16px;"></i>
+                                <input type="text" name="search" placeholder="Search hostname, IP, location, owner..." 
+                                       value="{{ current_filters.search|default:'' }}">
+                            </div>
+                            <select class="filter-select" name="status">
+                                <option value="">All Statuses</option>
+                                {% for status_code, status_display in status_choices %}
+                                <option value="{{ status_code }}" {% if current_filters.status == status_code %}selected{% endif %}>
+                                    {{ status_display }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <select class="filter-select" name="floor">
+                                <option value="">All Floors</option>
+                                {% for floor_code, floor_display in floor_choices %}
+                                <option value="{{ floor_code }}" {% if current_filters.floor == floor_code %}selected{% endif %}>
+                                    {{ floor_display }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="filter" style="width: 16px; height: 16px;"></i>
+                                Apply Filters
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                                Clear
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="refreshData()">
+                                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Servers Header -->
+            <div class="servers-header">
+                <div class="servers-title">
+                    <h2>Server List</h2>
+                    <span class="servers-count">
+                        <i data-lucide="server" style="width: 14px; height: 14px;"></i>
+                        {{ servers.count }} servers
+                    </span>
+                </div>
+            </div>
+
+            <!-- Servers Grid -->
+            <div class="servers-grid" id="serversContainer">
+                {% for server in servers %}
+                <div class="server-card status-{{ server.status|lower }}">
+                    <div class="server-card-header">
+                        <div class="server-info-main">
+                            <div class="server-hostname">
+                                <i data-lucide="server" class="icon" style="width: 18px; height: 18px;"></i>
+                                {{ server.hostname }}
+                            </div>
+                            <div class="server-ip">
+                                <i data-lucide="network" style="width: 14px; height: 14px;"></i>
+                                {{ server.ip_address }}
+                            </div>
+                        </div>
+                        <span class="status-badge {{ server.status|lower }}">
+                            <span class="status-dot"></span>
+                            {{ server.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="server-card-body">
+                        <div class="server-details">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i data-lucide="map-pin" style="width: 12px; height: 12px; color: var(--danger);"></i>
+                                    Location
+                                </span>
+                                <span class="detail-value">{{ server.location }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i data-lucide="building-2" style="width: 12px; height: 12px; color: var(--info);"></i>
+                                    Floor
+                                </span>
+                                <span class="detail-value">{{ server.floor.name|default:"Not specified" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i data-lucide="user" style="width: 12px; height: 12px; color: var(--success);"></i>
+                                    Owner
+                                </span>
+                                <span class="detail-value">{{ server.owner }}</span>
+                            </div>
+                            {% if server.operating_system_ref %}
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i data-lucide="monitor" style="width: 12px; height: 12px; color: var(--accent-purple);"></i>
+                                    OS
+                                </span>
+                                <span class="detail-value">{{ server.operating_system_ref }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if server.cpu_cores or server.ram_gb or server.storage_gb %}
+                        <div class="server-specs">
+                            {% if server.cpu_cores %}
+                            <span class="spec-tag">
+                                <i data-lucide="cpu" style="width: 12px; height: 12px;"></i>
+                                {{ server.cpu_cores }} CPU
+                            </span>
+                            {% endif %}
+                            {% if server.ram_gb %}
+                            <span class="spec-tag">
+                                <i data-lucide="memory-stick" style="width: 12px; height: 12px;"></i>
+                                {{ server.ram_gb }}GB RAM
+                            </span>
+                            {% endif %}
+                            {% if server.storage_gb %}
+                            <span class="spec-tag">
+                                <i data-lucide="hard-drive" style="width: 12px; height: 12px;"></i>
+                                {{ server.storage_gb }}GB Storage
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if server.is_warranty_expiring_soon %}
+                        <div class="warranty-warning">
+                            <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i>
+                            Warranty expires in {{ server.days_until_warranty_expiry }} days
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="server-card-footer">
+                        <a href="{% url 'build_server_detail' stream=stream server_id=server.id %}" 
+                           class="action-btn action-btn-view" title="View Details">
+                            <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <a href="{% url 'build_server_edit' stream=stream server_id=server.id %}" 
+                           class="action-btn action-btn-edit" title="Edit">
+                            <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <a href="{% url 'build_server_delete' stream=stream server_id=server.id %}" 
+                           class="action-btn action-btn-delete" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this server?')">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                         </a>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
+                {% empty %}
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-state-icon">
+                        <i data-lucide="server-off" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <h3>No Build Servers Found</h3>
+                    <p>No servers match your current filters, or no servers have been added to this stream yet.</p>
+                    <a href="{% url 'build_server_create' stream=stream %}" class="btn btn-primary">
+                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                        Add Your First Server
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <!-- Scroll to Top Button -->
+        <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
+            <i data-lucide="chevron-up" style="width: 24px; height: 24px;"></i>
+        </button>
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<script>
-    function applyFilters() {
-        $('#filterForm').submit();
-    }
-
-    function clearFilters() {
-        window.location.href = `{% url 'build_servers_list' stream=stream %}`;
-    }
-
-    function refreshData() {
-        window.location.reload();
-    }
-
-    $(document).ready(function() {
-        // Animate cards on load
-        $('.server-card').each(function(index) {
-            $(this).css({
-                'opacity': '0',
-                'transform': 'translateY(20px)'
-            });
-            
-            $(this).delay(index * 100).animate({
-                'opacity': '1'
-            }, 600, function() {
-                $(this).css('transform', 'translateY(0)');
-            });
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
         });
 
-        // Auto-submit filter form
-        $('#filterForm select, #filterForm input[name="search"]').on('change input', function() {
-            clearTimeout(window.filterTimeout);
-            window.filterTimeout = setTimeout(function() {
-                applyFilters();
-            }, 500);
-        });
+        function applyFilters() {
+            document.getElementById('filterForm').submit();
+        }
 
-        // Handle search on Enter key
-        $('#filterForm input[name="search"]').on('keypress', function(e) {
-            if (e.which === 13) {
-                e.preventDefault();
-                applyFilters();
-            }
-        });
+        function clearFilters() {
+            window.location.href = "{% url 'build_servers_list' stream=stream %}";
+        }
 
-        // Add tooltips
-        $('[title]').tooltip();
-        
-        // Auto-refresh every 5 minutes
-        setTimeout(function() {
-            refreshData();
-        }, 300000);
+        function refreshData() {
+            window.location.reload();
+        }
 
-        // Smooth scroll to top button
-        $(window).scroll(function() {
-            if ($(this).scrollTop() > 300) {
-                $('#scrollToTop').fadeIn();
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Scroll to top button visibility
+        window.addEventListener('scroll', function() {
+            const scrollBtn = document.getElementById('scrollTopBtn');
+            if (window.scrollY > 300) {
+                scrollBtn.classList.add('visible');
             } else {
-                $('#scrollToTop').fadeOut();
+                scrollBtn.classList.remove('visible');
             }
         });
 
-        // Add scroll to top button
-        $('body').append(`
-            <button id="scrollToTop" class="btn btn-primary position-fixed" 
-                    style="bottom: 20px; right: 20px; z-index: 999; display: none; border-radius: 50%; width: 50px; height: 50px;">
-                <i class="fas fa-arrow-up"></i>
-            </button>
-        `);
+        // Auto-submit filter form with debounce
+        $(document).ready(function() {
+            let filterTimeout;
+            
+            $('#filterForm select').on('change', function() {
+                applyFilters();
+            });
 
-        $('#scrollToTop').click(function() {
-            $('html, body').animate({scrollTop: 0}, 800);
+            $('#filterForm input[name="search"]').on('input', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(function() {
+                    applyFilters();
+                }, 500);
+            });
+
+            $('#filterForm input[name="search"]').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    applyFilters();
+                }
+            });
+
+            // Auto-refresh every 5 minutes
+            setTimeout(function() {
+                refreshData();
+            }, 300000);
         });
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

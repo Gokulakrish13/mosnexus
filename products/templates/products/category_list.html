@@ -6,353 +6,1116 @@
     <meta charset="UTF-8">
     <title>Categories</title>
     <link rel="stylesheet" href="/static/products/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html {
-            color: #222;
-            font-size: 1rem;
-            background: #f5f7fa;
+        :root {
+            --primary: #005fa3;
+            --primary-dark: #004578;
+            --primary-light: #e8f4fc;
+            --accent: #00b4d8;
+            --accent-2: #7c3aed;
+            --accent-3: #f59e0b;
+            --accent-gradient: linear-gradient(135deg, #005fa3 0%, #00b4d8 100%);
+            --purple-gradient: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-main: #ffffff;
+            --bg-card: #ffffff;
+            --bg-toolbar: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --shadow-glow: 0 0 20px rgba(0, 95, 163, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-        }
-        
-        .top-bar {
-            color: #222;
-            font-size: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2.5rem;
-            background: #fff;
-            border-bottom: 1px solid #e0e3e7;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
             box-sizing: border-box;
-            z-index: 1000;
+        }
+
+        body, html {
+            color: var(--text-primary);
+            font-size: 1rem;
+            background: var(--bg-main);
         }
 
         .category-bg {
             padding-top: 80px;
-            background: #f5f7fa;
+            background: #ffffff;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle background accents */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            pointer-events: none;
+            animation: blobFloat 20s ease-in-out infinite;
+        }
+
+        .bg-blob-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(0, 95, 163, 0.08);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-blob-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 180, 216, 0.06);
+            bottom: 20%;
+            left: -50px;
+            animation-delay: -7s;
+        }
+
+        .bg-blob-3 {
+            width: 250px;
+            height: 250px;
+            background: rgba(124, 58, 237, 0.05);
+            top: 50%;
+            right: 10%;
+            animation-delay: -14s;
+        }
+
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 30px) scale(1.02); }
         }
 
         .category-list-container {
-            max-width: 1450px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
-        .search-toolbar {
+        /* Page Header - Enhanced */
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .page-title .title-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            box-shadow: 0 8px 24px rgba(0, 95, 163, 0.35);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Stats Cards - Enhanced */
+        .page-stats {
+            display: flex;
             gap: 1rem;
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius-sm);
+            box-shadow: none;
+            text-align: center;
+            min-width: 90px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-item.purple::before {
+            background: var(--purple-gradient);
+        }
+
+        .stat-item.orange::before {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-item.purple .stat-value {
+            background: var(--purple-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Search & Filter Toolbar - Enhanced */
+        .search-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: #f8fafc;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: none;
+            border: 1px solid var(--border-color);
         }
 
         .search-form {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             align-items: center;
             flex: 1;
-            min-width: 300px;
+            min-width: 280px;
+            max-width: 450px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            font-size: 0.85rem;
+            z-index: 2;
+        }
+
+        .search-input-wrapper:focus-within i {
+            color: var(--primary);
         }
 
         .search-input {
-            flex: 1;
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid #e0e3e7;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem !important;
+            border-radius: 50px;
+            border: 2px solid #e2e8f0;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: #f8fafc;
+        }
+
+        .search-input::placeholder {
+            padding-left: 0;
+            color: var(--text-secondary);
+            opacity: 0.7;
         }
 
         .search-input:focus {
-            border-color: #005fa3;
+            border-color: var(--accent);
             outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.15);
+        }
+
+        .search-btn {
+            padding: 0.85rem 1.5rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.4);
         }
 
         .toolbar-actions {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 2px;
+        }
+
+        .view-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-btn:hover:not(.active) {
+            color: var(--primary);
+        }
+
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-chip:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-chip .count {
+            background: rgba(255,255,255,0.2);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .filter-chip.active .count {
+            background: rgba(255,255,255,0.3);
         }
 
         .sort-control {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            min-width: 250px;
-            margin-left: 2.5rem; /* Move sort and dropdown to the right */
+            gap: 0.5rem;
         }
 
         .sort-control label {
-            font-size: 1.35rem;
-            color: #444;
-            white-space: nowrap;
-            position: relative;
-            top: -4px; /* Move sort label font a little up */
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .sort-select {
-            padding: 0.6rem 0.8rem;
-            border-radius: 6px;
-            border: 1px solid #e0e3e7;
-            background: #fff;
-            min-width: 180px;
-            font-size: 1.15rem;
-            color: #333;
+            padding: 0.6rem 2.25rem 0.6rem 1rem;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 1rem center;
+            appearance: none;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .sort-select:focus {
+            border-color: var(--primary);
+            outline: none;
         }
 
         .checkbox-control {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            padding: 0.6rem 0;
-            font-size: 1.25rem;
-            color: #222;
-            font-weight: 600;
-            white-space: nowrap;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            top: -4px;
         }
 
         .checkbox-control input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            border: 2px solid #e0e3e7;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
             cursor: pointer;
-        }
-
-        .checkbox-control label {
-            font-size: 1.25rem;
-            font-weight: 600;
-            position: relative;
-            top: -5px; /* Move 'Select All' label font a little up */
         }
 
         .bulk-actions {
             display: flex;
             gap: 0.5rem;
-            margin-left: 1.5rem;
         }
 
         .bulk-btn {
-            padding: 0.7rem 1.2rem;
+            padding: 0.6rem 1rem;
             border-radius: 8px;
             border: none;
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
         .bulk-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
         .bulk-btn.delete {
-            background: #dc3545;
-            color: #fff;
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
         }
 
-        .bulk-btn.export {
-            background: #28a745;
-            color: #fff;
-        }
-
-        .add-btn {
-            display: inline-block;
-            padding: 0.7rem 1.5rem; /* Reduced size */
-            background: #005fa3;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.95rem; /* Reduced font size */
-            font-weight: 600;
-            border: none;
-            transition: all 0.2s;
-            margin-bottom: 2rem;
-        }
-
-        .add-btn:hover {
-            background: #004c82;
+        .bulk-btn.delete:not(:disabled):hover {
+            background: var(--danger);
+            color: white;
             transform: translateY(-2px);
         }
 
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* updated to match card width */
-            gap: 2rem;
-            margin-top: 2rem;
+        .bulk-btn.export {
+            background: #f0fdf4;
+            color: var(--success);
+            border: 1px solid #bbf7d0;
         }
 
+        .bulk-btn.export:not(:disabled):hover {
+            background: var(--success);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.75rem;
+            background: var(--accent-gradient);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            transition: var(--transition);
+            box-shadow: 0 6px 20px rgba(0, 95, 163, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 95, 163, 0.4);
+        }
+
+        .add-btn i {
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .add-btn:hover i {
+            transform: rotate(90deg);
+        }
+
+        .results-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .results-info strong {
+            color: var(--text-primary);
+        }
+
+        /* Category Grid - Enhanced */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-grid.list-view {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        /* Card Styles - Grid View */
         .category-card {
-            background: #fff;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border-radius: 12px;
-            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
+            transition: var(--transition);
             cursor: pointer;
-            min-height: 280px; /* increased height for wrapping text */
-            max-width: 220px; /* increased width to accommodate longer text */
-            width: 220px; /* fixed width for consistency */
             position: relative;
-            box-sizing: border-box; /* ensure padding is included in width */
-            overflow: hidden; /* prevent content overflow outside card */
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .category-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .category-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .category-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+
+        .category-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .category-card:hover::after {
+            opacity: 0.03;
+        }
+
+        /* List View Styles */
+        .category-grid.list-view .category-card {
+            flex-direction: row;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .category-grid.list-view .category-card:hover {
+            transform: translateX(8px);
+        }
+
+        .category-grid.list-view .card-header {
+            margin-bottom: 0;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .category-grid.list-view .card-checkbox-wrapper {
+            align-self: center;
+            margin-left: 1rem;
+        }
+
+        .category-grid.list-view .card-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .category-grid.list-view .card-content .category-name {
+            flex: 1;
+            min-width: 150px;
+            margin-bottom: 0;
+        }
+
+        .category-grid.list-view .card-content .category-serial {
+            flex-shrink: 0;
+        }
+
+        .category-grid.list-view .card-content .status-badge {
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+
+        .category-grid.list-view .card-footer {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+            flex-shrink: 0;
+            min-width: 180px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
         }
 
         .category-icon {
-            margin-bottom: 1.2rem;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #d4e8f7 100%);
+            border-radius: var(--radius-lg);
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
+            transition: var(--transition-bounce);
+            position: relative;
         }
 
         .category-icon img {
-            height: 40px;
+            height: 36px;
             width: auto;
-            transition: transform 0.2s;
+            transition: var(--transition);
         }
 
-        .category-card:hover .category-icon img {
-            transform: scale(1.05);
+        .category-icon .icon-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .category-card:hover .category-icon {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 8px 24px rgba(0, 95, 163, 0.25);
+        }
+
+        .card-checkbox-wrapper {
+            position: relative;
+        }
+
+        .card-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .card-checkbox:checked {
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            flex: 1;
         }
 
         .category-name {
-            font-size: 1.2rem; /* slightly smaller for better fit */
+            font-size: 1.2rem;
             font-weight: 700;
-            color: #005fa3;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
-            text-align: center;
-            overflow: visible; /* allow text to wrap */
-            text-overflow: clip; /* no truncation */
-            white-space: normal; /* allow wrapping */
-            word-break: break-word; /* break long words if needed */
-            overflow-wrap: break-word; /* wrap long words */
-            line-height: 1.2; /* better line spacing */
-            max-width: 100%;
-            padding: 0 4px; /* small padding for better appearance */
+            line-height: 1.3;
+            word-break: break-word;
+            transition: var(--transition);
+        }
+
+        .category-card:hover .category-name {
+            color: var(--primary);
         }
 
         .category-serial {
-            font-size: 0.85rem; /* slightly smaller for better fit */
-            color: #666;
-            text-align: center;
-            overflow: visible; /* show all text */
-            text-overflow: clip; /* no truncation */
-            white-space: normal; /* allow wrapping */
-            word-break: break-all; /* break long words/numbers aggressively */
-            overflow-wrap: break-word; /* wrap long words */
-            hyphens: none; /* don't hyphenate numbers */
-            width: 100%; /* ensure full width usage */
-            margin: 0.5rem 0; /* add some margin for spacing */
-            padding: 0 8px; /* padding to avoid touching edges */
-            line-height: 1.1; /* better line spacing */
-            box-sizing: border-box;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 0.4rem 0.75rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            word-break: break-all;
         }
 
-        /* Responsive adjustments for larger screens */
-        @media (min-width: 1200px) {
-            .category-card {
-                min-height: 210px; /* even taller on larger screens for more text */
-            }
+        .category-serial i {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.75rem;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .status-badge i {
+            font-size: 0.6rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
         }
 
         .product-count {
-            position: absolute;
-            left: 1rem;
-            bottom: 1rem;
-            font-size: 0.8rem;
-            color: #fff;
-            background: #005fa3;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .product-count .count-badge {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 28px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 180, 216, 0.3);
         }
 
         .card-actions {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            display: none;
+            display: flex;
             gap: 0.5rem;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: var(--transition);
         }
 
         .category-card:hover .card-actions {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .action-btn.preview {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            color: var(--success);
+        }
+
+        .action-btn.preview:hover {
+            background: var(--success);
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .action-btn.edit {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #d4e8f7 100%);
+            color: var(--primary);
+        }
+
+        .action-btn.edit:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .action-btn.delete {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+            color: white;
+            transform: scale(1.15);
+        }
+
+        /* Quick Preview Modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preview-modal.active {
             display: flex;
         }
 
-        .card-actions a {
-            color: #005fa3;
-            background: #e3eefd;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .preview-header {
+            padding: 1.5rem;
+            background: var(--accent-gradient);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .preview-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .preview-body {
+            padding: 1.5rem;
+        }
+
+        .preview-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+        }
+
+        .preview-row label {
+            font-weight: 600;
+            color: var(--text-secondary);
             font-size: 0.85rem;
-            font-weight: 500;
+        }
+
+        .preview-row span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-btn {
+            flex: 1;
+            padding: 0.85rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             text-decoration: none;
-            transition: all 0.2s;
         }
 
-        .card-actions a:hover {
-            background: #cce0fb;
+        .preview-btn.primary {
+            background: var(--accent-gradient);
+            color: white;
         }
 
-        .card-actions a.delete {
-            background: #ffeaea;
-            color: #dc3545;
-            font-size: 0.85rem;
-            padding: 0.2rem 0.5rem;
+        .preview-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.4);
         }
 
-        .card-actions a.delete:hover {
-            background: #ffd5d5;
+        .preview-btn.secondary {
+            background: #f1f5f9;
+            color: var(--text-primary);
         }
 
+        .preview-btn.secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Pagination - Enhanced */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
             margin-top: 3rem;
         }
 
-        .pagination a {
-            padding: 0.7rem 1.2rem;
-            background: #fff;
-            color: #005fa3;
-            border-radius: 8px;
+        .pagination a, .pagination span {
+            padding: 0.7rem 1.25rem;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 50px;
             text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .pagination a:hover {
-            background: #f0f7ff;
+            background: var(--accent-gradient);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
         }
 
-        @media (max-width: 768px) {
+        .pagination .page-info {
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State - Enhanced */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            grid-column: 1/-1;
+        }
+
+        .empty-state .empty-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .empty-state .empty-icon i {
+            font-size: 3rem;
+            color: #94a3b8;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
             .search-toolbar {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .search-form {
+                max-width: none;
+            }
+
+            .toolbar-actions {
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-stats {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .toolbar-actions {
@@ -361,131 +1124,238 @@
                 gap: 1rem;
             }
 
-            .sort-control {
-                min-width: auto;
+            .view-toggle, .filter-chips {
+                justify-content: center;
             }
 
-            .sort-select {
-                min-width: 150px;
-                flex: 1;
-            }
-
-            .checkbox-control {
-                padding: 0.4rem 0;
+            .sort-control, .checkbox-control, .bulk-actions {
+                justify-content: space-between;
             }
 
             .category-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* slightly smaller on mobile */
-                gap: 1rem;
+                grid-template-columns: 1fr;
             }
 
             .category-card {
-                padding: 0.7rem;
-                min-height: 240px; /* increased height for mobile wrapping */
-                max-width: 95%;
-                width: auto; /* allow flexibility on mobile */
+                padding: 1.25rem;
             }
 
-            .category-icon img {
-                height: 30px;
+            .card-actions {
+                opacity: 1;
+                transform: translateX(0);
             }
 
-            .checkbox-control, .bulk-actions {
-                margin-left: 0;
-            }
-
-            .card-actions a, .card-actions a.delete {
-                font-size: 0.8rem;
-                padding: 0.15rem 0.4rem;
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
 
-        /* On very small screens allow the serial to wrap instead of truncating */
-        @media (max-width: 420px) {
-            .category-serial {
-                -webkit-line-clamp: unset;
-                line-clamp: unset;
-                max-height: none;
-                overflow: visible;
-                text-overflow: clip;
-                font-size: 0.9rem;
-                white-space: normal;
-            }
-            .category-card { max-width: 100%; }
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
 <body>
+    <!-- Background blobs -->
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+    <div class="bg-blob bg-blob-3"></div>
+
     <div class="category-bg">
         <div class="category-list-container">
-            <div class="search-toolbar">
-                <form method="get" action="" class="search-form" id="categorylist-search-form">
-                    <input type="text" name="q" id="category-search-input" value="{{ q|default:'' }}" placeholder="Search categories..." class="search-input" autocomplete="off">
-                    <button type="submit" class="add-btn" style="margin: 0;">Search</button>
-                </form>
-
-                <div class="toolbar-actions">
-                    <div class="sort-control">
-                        <label>Sort:</label>
-                        <select id="category-sort" class="sort-select">
-                            <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest</option>
-                            <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
-                            <option value="product_count" {% if selected_sort == 'product_count' %}selected{% endif %}>Most products</option>
-                        </select>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <div class="title-icon">
+                        <i class="fas fa-folder-open"></i>
                     </div>
-
-                    <div class="checkbox-control">
-                        <input type="checkbox" id="select-all-checkbox">
-                        <label for="select-all-checkbox">Select All</label>
+                    <div>
+                        <h1>{{ selected_stream }} Categories</h1>
                     </div>
-
-                    <div class="bulk-actions">
-                        <button id="bulk-delete-btn" class="bulk-btn delete" disabled>Delete Selected</button>
-                        <button id="bulk-export-btn" class="bulk-btn export" disabled>Export Selected</button>
+                </div>
+                <div class="page-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ categories|length }}</div>
+                        <div class="stat-label">Total Categories</div>
                     </div>
                 </div>
             </div>
 
-            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+            <!-- Search Toolbar -->
+            <div class="search-toolbar">
+                <form method="get" action="" class="search-form" id="categorylist-search-form">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="q" id="category-search-input" value="{{ q|default:'' }}" placeholder="Search categories... " class="search-input" autocomplete="off">
+                    </div>
+                    <button type="submit" class="search-btn"><i class="fas fa-search"></i> Search</button>
+                </form>
 
-            <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn">+ Add Category</a>
-            {% endif %}
+                <div class="toolbar-actions">
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Grid View"><i class="fas fa-th-large"></i></button>
+                        <button class="view-btn" data-view="list" title="List View"><i class="fas fa-list"></i></button>
+                    </div>
+
+                    <!-- Filter Chips -->
+                    <div class="filter-chips">
+                        <button class="filter-chip active" data-filter="all">
+                            <i class="fas fa-asterisk"></i> All
+                        </button>
+                        <button class="filter-chip" data-filter="with-products">
+                            <i class="fas fa-box"></i> With Products
+                        </button>
+                        <button class="filter-chip" data-filter="empty">
+                            <i class="fas fa-box-open"></i> Empty
+                        </button>
+                    </div>
+
+                    <div class="sort-control">
+                        <select id="category-sort" class="sort-select">
+                            <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                            <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
+                            <option value="-name" {% if selected_sort == '-name' %}selected{% endif %}>Name (Z–A)</option>
+                            <option value="product_count" {% if selected_sort == 'product_count' %}selected{% endif %}>Most Products</option>
+                            <option value="-product_count" {% if selected_sort == '-product_count' %}selected{% endif %}>Least Products</option>
+                        </select>
+                    </div>
+
+                    <label class="checkbox-control">
+                        <input type="checkbox" id="select-all-checkbox">
+                        Select All
+                    </label>
+
+                    <div class="bulk-actions">
+                        <button id="bulk-delete-btn" class="bulk-btn delete" disabled><i class="fas fa-trash"></i> Delete</button>
+                        <button id="bulk-export-btn" class="bulk-btn export" disabled><i class="fas fa-download"></i> Export</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn"><i class="fas fa-plus"></i> Add Category</a>
+                {% endif %}
+                <div class="results-info">
+                    Showing <strong id="visible-count">{{ categories|length }}</strong> of <strong>{{ categories|length }}</strong> categories
+                </div>
+            </div>
 
             <div class="category-grid" id="category-grid">
                 {% for category in categories %}
-                <div class="category-card" data-name="{{ category.name|lower }}" data-serial="{{ category.serial_number|lower }}" data-id="{{ category.id }}">
-                    <input type="checkbox" class="card-checkbox" value="{{ category.id }}" style="position:absolute; left:1rem; top:1rem; transform:scale(1.2);">
-                    <a href="/stream/{{ selected_stream }}/products/?category={{ category.id }}" style="text-decoration: none; color: inherit; display:block;">
+                <div class="category-card" 
+                     data-name="{{ category.name|lower }}" 
+                     data-serial="{{ category.serial_number|lower }}" 
+                     data-id="{{ category.id }}"
+                     data-product-count="{{ category.product_count|default:0 }}"
+                     style="animation-delay: {{ forloop.counter0|stringformat:'d' }}00ms;">
+                    <div class="card-header">
                         <div class="category-icon">
-                            <img src="/static/products/philips.png" alt="Philips Logo">
+                            {% if forloop.counter|divisibleby:4 %}
+                            <i class="fas fa-microchip" style="font-size: 1.75rem; color: var(--primary);"></i>
+                            {% elif forloop.counter|divisibleby:3 %}
+                            <i class="fas fa-server" style="font-size: 1.75rem; color: var(--accent-2);"></i>
+                            {% elif forloop.counter|divisibleby:2 %}
+                            <i class="fas fa-database" style="font-size: 1.75rem; color: var(--accent);"></i>
+                            {% else %}
+                            <i class="fas fa-cube" style="font-size: 1.75rem; color: var(--primary);"></i>
+                            {% endif %}
+                            {% if category.product_count|default:0 > 10 %}
+                            <span class="icon-badge"><i class="fas fa-star"></i></span>
+                            {% endif %}
                         </div>
-                        <div class="category-name">{{ category.name }}</div>
-                        <div class="category-serial">{{ category.serial_number }}</div>
+                        <div class="card-checkbox-wrapper">
+                            <input type="checkbox" class="card-checkbox" value="{{ category.id }}">
+                        </div>
+                    </div>
+                    <a href="/stream/{{ selected_stream }}/products/?category={{ category.id }}" style="text-decoration: none; color: inherit;">
+                        <div class="card-content">
+                            <div class="category-name">{{ category.name }}</div>
+                            <div class="category-serial"><i class="fas fa-hashtag"></i> {{ category.serial_number }}</div>
+                        </div>
                     </a>
-                    <div class="product-count">{{ category.product_count|default:0 }}</div>
-                    <div class="card-actions">
-                        <a href="{% url 'category_edit_stream' selected_stream category.id %}" title="Edit Category">✎</a>
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        <a href="{% url 'category_delete_stream' selected_stream category.id %}" title="Delete Category" class="delete">🗑</a>
-                        {% endif %}
+                    <div class="card-footer">
+                        <div class="product-count">
+                            <i class="fas fa-box"></i>
+                            <span class="count-badge">{{ category.product_count|default:0 }}</span>
+                            Products
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn preview" title="Quick Preview" onclick="showPreview({{ category.id }}, '{{ category.name|escapejs }}', '{{ category.serial_number|escapejs }}', {{ category.product_count|default:0 }})"><i class="fas fa-eye"></i></button>
+                            <a href="{% url 'category_edit_stream' selected_stream category.id %}" class="action-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
+                            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                            <a href="{% url 'category_delete_stream' selected_stream category.id %}" class="action-btn delete" title="Delete"><i class="fas fa-trash"></i></a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <div style="text-align: center; color: #666; grid-column: 1/-1; padding: 3rem;">No categories found.</div>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3>No categories found</h3>
+                    <p>Get started by creating your first category</p>
+                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                    <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn"><i class="fas fa-plus"></i> Add Category</a>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
 
             {% if page_obj %}
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">← Previous</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}"><i class="fas fa-chevron-left"></i> Previous</a>
                 {% endif %}
-                <span style="color: #666;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next →</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next <i class="fas fa-chevron-right"></i></a>
                 {% endif %}
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Preview Modal -->
+    <div class="preview-modal" id="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h3 id="preview-title">Category Preview</h3>
+                <button class="preview-close" onclick="closePreview()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="preview-body">
+                <div class="preview-info">
+                    <div class="preview-row">
+                        <label>Name</label>
+                        <span id="preview-name">-</span>
+                    </div>
+                    <div class="preview-row">
+                        <label>Serial Number</label>
+                        <span id="preview-serial">-</span>
+                    </div>
+                    <div class="preview-row">
+                        <label>Products</label>
+                        <span id="preview-products">-</span>
+                    </div>
+                </div>
+                <div class="preview-actions">
+                    <a href="#" id="preview-view-btn" class="preview-btn primary"><i class="fas fa-arrow-right"></i> View Products</a>
+                    <button class="preview-btn secondary" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -500,19 +1370,92 @@
             };
         }
 
-        // Client-side live fuzzy filter (works on current page cards)
+        // Quick Preview Modal
+        let currentPreviewId = null;
+
+        function showPreview(id, name, serial, productCount) {
+            currentPreviewId = id;
+            document.getElementById('preview-name').textContent = name;
+            document.getElementById('preview-serial').textContent = serial;
+            document.getElementById('preview-products').textContent = productCount + ' products';
+            document.getElementById('preview-view-btn').href = '/stream/{{ selected_stream }}/products/?category=' + id;
+            document.getElementById('preview-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentPreviewId = null;
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('preview-modal').classList.contains('active')) {
+                closePreview();
+            }
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('preview-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+
+        // Client-side live fuzzy filter
         function liveFilter() {
             const q = document.getElementById('category-search-input').value.trim().toLowerCase();
             const cards = document.querySelectorAll('#category-grid .category-card');
+            let visibleCount = 0;
             cards.forEach(card => {
                 const name = card.dataset.name || '';
                 const serial = card.dataset.serial || '';
                 if (!q || name.includes(q) || serial.includes(q)) {
                     card.style.display = '';
+                    visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+            // Apply current filter
+            applyFilter();
+        }
+
+        // Filter functionality
+        function applyFilter() {
+            const activeFilter = document.querySelector('.filter-chip.active').dataset.filter;
+            const cards = document.querySelectorAll('#category-grid .category-card');
+            const q = document.getElementById('category-search-input').value.trim().toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const productCount = parseInt(card.dataset.productCount) || 0;
+                const name = card.dataset.name || '';
+                const serial = card.dataset.serial || '';
+                
+                // Check filter condition
+                let matchesFilter = true;
+                if (activeFilter === 'with-products') {
+                    matchesFilter = productCount > 0;
+                } else if (activeFilter === 'empty') {
+                    matchesFilter = productCount === 0;
+                }
+                // 'all' filter matches everything
+
+                // Check search condition
+                const matchesSearch = !q || name.includes(q) || serial.includes(q);
+
+                // Show only if both conditions are met
+                if (matchesFilter && matchesSearch) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('visible-count').textContent = visibleCount;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -521,14 +1464,43 @@
             const selectAll = document.getElementById('select-all-checkbox');
             const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
             const bulkExportBtn = document.getElementById('bulk-export-btn');
+            const grid = document.getElementById('category-grid');
+
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const view = this.dataset.view;
+                    if (view === 'list') {
+                        grid.classList.add('list-view');
+                    } else {
+                        grid.classList.remove('list-view');
+                    }
+                    // Save preference
+                    localStorage.setItem('category-view', view);
+                });
+            });
+
+            // Restore view preference
+            const savedView = localStorage.getItem('category-view');
+            if (savedView === 'list') {
+                document.querySelector('.view-btn[data-view="list"]').click();
+            }
+
+            // Filter chips
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter();
+                });
+            });
 
             if (searchInput) {
-                // Debounced live filter for client-side experience
                 searchInput.addEventListener('input', debounce(function(e){
-                    liveFilter();
-                    // If user clears, also submit to server to reset filter
+                    applyFilter();
                     if (this.value.trim() === '') {
-                        // Keep short-circuit to avoid navigation if on page>1
                         const url = new URL(window.location.href);
                         url.searchParams.delete('q');
                         url.searchParams.delete('page');
@@ -536,17 +1508,15 @@
                     }
                 }, 200));
 
-                // Submit form on Enter to perform server-side search (for full dataset)
-                document.getElementById('categorylist-search-form').addEventListener('submit', function(e){
-                    // allow normal submit
-                });
-
                 // Focus search with '/'
                 document.addEventListener('keydown', function(e){
-                    if (e.key === '/'){
-                        e.preventDefault();
-                        searchInput.focus();
-                        searchInput.select();
+                    if (e.key === '/' && !e.ctrlKey && !e.metaKey){
+                        const active = document.activeElement;
+                        if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                            searchInput.focus();
+                            searchInput.select();
+                        }
                     }
                 });
             }
@@ -570,7 +1540,6 @@
 
             document.querySelectorAll('.card-checkbox').forEach(cb => {
                 cb.addEventListener('change', updateBulkState);
-                // Prevent card click navigating when clicking on checkbox
                 cb.addEventListener('click', function(e){ e.stopPropagation(); });
             });
 
@@ -614,12 +1583,12 @@
                     body: JSON.stringify({ids: ids})
                 }).then(r=>r.json()).then(data=>{
                     if (data.success){
-                        // remove deleted cards from DOM
                         ids.forEach(id => {
                             const card = document.querySelector('.category-card[data-id="'+id+'"]');
                             if (card) card.remove();
                         });
                         alert('Deleted '+data.deleted+' categories.');
+                        applyFilter();
                     } else {
                         alert('Error: '+(data.error||'Unable to delete'));
                     }
@@ -630,7 +1599,6 @@
             bulkExportBtn.addEventListener('click', function(){
                 const ids = Array.from(document.querySelectorAll('.card-checkbox:checked')).map(c=>c.value);
                 if (!ids.length) return;
-                // Submit to export endpoint and download
                 fetch(`/stream/${encodeURIComponent('{{ selected_stream }}')}/categories/export-csv/`, {
                     method: 'POST',
                     headers: {
@@ -656,20 +1624,30 @@
             // Keyboard shortcut: N -> new category (admins only)
             document.addEventListener('keydown', function(e){
                 if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey){
-                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-
-                    window.location.href = '/stream/{{ selected_stream }}/categories/add/';
-                    {% endif %}
+                    const active = document.activeElement;
+                    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
+                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                        window.location.href = '/stream/{{ selected_stream }}/categories/add/';
+                        {% endif %}
+                    }
                 }
             });
 
-        });
-    </script>
+            // Initial filter application
+            applyFilter();
 
-    <script>
-    //   document.addEventListener('contextmenu', function (e) {
-    //     e.preventDefault();
-    //   });
+            // Staggered card animation on load
+            const cards = document.querySelectorAll('.category-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
     </script>
   </body>
 </html>

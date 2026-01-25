@@ -1,187 +1,972 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Details - {{ system.sr_no }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #0066cc;
+            --primary-light: #0077e6;
+            --primary-dark: #004d99;
+            --accent: #0891b2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-secondary: #f1f5f9;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
             min-height: 100vh;
         }
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0,95,163,0.08);
-            margin-top: 2rem;
+
+        /* Corporate Navigation */
+        .corporate-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
         }
-        .card-header.bg-primary {
-            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%) !important;
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .card-header.bg-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+
+        .nav-logo {
+            height: 32px;
+            opacity: 0.95;
         }
-        .btn-warning {
-            background: #ffc107;
-            border: none;
-            color: #212529;
-        }
-        .btn-warning:hover {
-            background: #e0a800;
-            color: #212529;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            border: none;
-        }
-        .btn-secondary:hover {
-            background: #495057;
-        }
-        .badge.bg-success, .badge.bg-primary, .badge.bg-warning, .badge.bg-danger, .badge.bg-info {
+
+        .nav-title {
             font-size: 1rem;
-            padding: 0.5em 1em;
-            border-radius: 1em;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-title-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 5.5rem 2rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Header */
+        .hero-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .hero-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .hero-icon {
+            width: 72px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .hero-text h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hero-text p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .hero-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hero-btn.edit {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-btn.edit:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .hero-btn.back {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-btn.back:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Hero Status Badge - Special styling for dark background */
+        .hero-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .hero-status-badge.available::before {
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+        }
+
+        .hero-status-badge.allocated::before {
+            background: #60a5fa;
+            box-shadow: 0 0 8px #60a5fa;
+        }
+
+        .hero-status-badge.maintenance::before {
+            background: #fbbf24;
+            box-shadow: 0 0 8px #fbbf24;
+        }
+
+        .hero-status-badge.offline::before {
+            background: #f87171;
+            box-shadow: 0 0 8px #f87171;
+        }
+
+        .hero-status-badge.reserved::before {
+            background: #a78bfa;
+            box-shadow: 0 0 8px #a78bfa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-badge.available {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.allocated {
+            background: rgba(59, 130, 246, 0.15);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-badge.maintenance {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge.reserved {
+            background: rgba(139, 92, 246, 0.15);
+            color: #7c3aed;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Priority Badge */
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .priority-badge.low {
+            background: rgba(14, 165, 233, 0.15);
+            color: #0284c7;
+        }
+
+        .priority-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+        }
+
+        .priority-badge.high {
+            background: rgba(249, 115, 22, 0.15);
+            color: #ea580c;
+        }
+
+        .priority-badge.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg-secondary);
+        }
+
+        .card-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .card-header-icon.primary {
+            background: rgba(0, 102, 204, 0.1);
+            color: var(--primary);
+        }
+
+        .card-header-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .card-header-icon.info {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--info);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Detail Grid */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .detail-label i {
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .detail-value.mono {
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: var(--primary);
+        }
+
+        .detail-value.empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Description/Notes Box */
+        .text-box {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Weekly Data Table */
+        .weekly-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .weekly-table thead th {
+            padding: 0.85rem 1rem;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .weekly-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .weekly-table tbody tr:hover {
+            background: rgba(0, 102, 204, 0.03);
+        }
+
+        .weekly-table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        .weekly-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .week-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .week-year {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Utilization Bar */
+        .util-cell {
+            min-width: 120px;
+        }
+
+        .util-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .util-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .util-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .util-fill.low { background: linear-gradient(90deg, #10b981, #34d399); }
+        .util-fill.medium { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .util-fill.high { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Hours Badge */
+        .hours-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.35rem 0.65rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .hours-badge span {
+            color: var(--text-muted);
+        }
+
+        /* History Timeline */
+        .history-timeline {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .history-item {
+            position: relative;
+            padding-left: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-left: 2px solid var(--border-color);
+            margin-left: 0.5rem;
+        }
+
+        .history-item:last-child {
+            border-left-color: transparent;
+            padding-bottom: 0;
+        }
+
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+        }
+
+        .history-time {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .history-action {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+        }
+
+        .history-user {
+            font-size: 0.75rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .history-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        /* Custom Scrollbar */
+        .history-timeline::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-timeline::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 3px;
+        }
+
+        .history-timeline::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .history-timeline::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-actions {
+                width: 100%;
+            }
+
+            .hero-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .corporate-nav {
+                padding: 0.5rem 1rem;
+            }
+
+            .main-container {
+                padding: 5rem 1rem 1.5rem;
+            }
+
+            .hero-header {
+                padding: 1.5rem;
+            }
+
+            .hero-info {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .weekly-table {
+                font-size: 0.85rem;
+            }
+
+            .weekly-table thead th,
+            .weekly-table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <!-- System Information Card -->
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-server me-2"></i>System: {{ system.sr_no }}
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <strong>Status:</strong>
-                            <span class="badge bg-{% if system.system_availability == 'available' %}success{% elif system.system_availability == 'allocated' %}primary{% else %}warning{% endif %} ms-2">
+    <!-- Corporate Navigation -->
+    <nav class="corporate-nav">
+        <div class="nav-brand">
+            <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
+            <span class="nav-title">
+                System Management
+            </span>
+        </div>
+        <div class="nav-actions">
+            <a href="{% url 'holistic_system_edit' system.id %}" class="nav-btn" title="Edit System">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'holistic_dashboard' %}" class="nav-btn" title="Back to Dashboard">
+                <i class="fas fa-th-large"></i>
+            </a>
+            <a href="/dashboard/" class="nav-btn" title="Go to Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Header -->
+        <div class="hero-header">
+            <div class="hero-content">
+                <div class="hero-info">
+                    <div class="hero-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="hero-text">
+                        <h1>
+                            {{ system.sr_no }}
+                            <span class="hero-status-badge {{ system.system_availability|lower }}">
                                 {{ system.get_system_availability_display }}
                             </span>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Priority:</strong>
-                            <span class="badge bg-{% if system.priority == 'critical' %}danger{% elif system.priority == 'high' %}warning{% else %}info{% endif %} ms-2">
-                                {{ system.get_priority_display }}
-                            </span>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Allocation to Sl No:</strong> {{ system.allocation_to_sl_no|default:"-" }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Location:</strong> {{ system.location_info|default:"-" }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>STMi Number:</strong> {{ system.stmi_number|default:"-" }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>System Owner:</strong> {{ system.system_owner|default:"-" }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>ECR Number:</strong> {{ system.ecr_number|default:"-" }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Test Engineer:</strong> {{ system.test_engineer|default:"-" }}
-                        </div>
-                        {% if system.description %}
-                        <div class="col-12">
-                            <strong>Description:</strong>
-                            <p class="mt-2">{{ system.description }}</p>
-                        </div>
-                        {% endif %}
-                        {% if system.notes %}
-                        <div class="col-12">
-                            <strong>Notes:</strong>
-                            <p class="mt-2">{{ system.notes }}</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mt-4">
-                        <a href="{% url 'holistic_system_edit' system.id %}" class="btn btn-warning">
-                            <i class="fas fa-edit me-1"></i>Edit
-                        </a>
-                        <a href="{% url 'holistic_dashboard' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Back to List
-                        </a>
+                        </h1>
+                        <p>System ID: #{{ system.id }} • Last updated: {{ system.updated_at|date:"M d, Y" }}</p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Weekly Data -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Weekly Data</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Week</th>
-                                    <th>Status</th>
-                                    <th>Utilization</th>
-                                    <th>Assigned To</th>
-                                    <th>Hours Used</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for week in weekly_data %}
-                                <tr>
-                                    <td><strong>W{{ week.week_number }} {{ week.year }}</strong></td>
-                                    <td>{{ week.allocation_status|default:"-" }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar {% if week.utilization_percentage < 60 %}bg-success{% elif week.utilization_percentage < 85 %}bg-warning{% else %}bg-danger{% endif %}" 
-                                                 style="width: {{ week.utilization_percentage }}%">
-                                                {{ week.utilization_percentage }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ week.assigned_to|default:"-" }}</td>
-                                    <td>{{ week.hours_used }}/{{ week.availability_hours }} hrs</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No weekly data available</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="hero-actions">
+                    <a href="{% url 'holistic_system_edit' system.id %}" class="hero-btn edit">
+                        <i class="fas fa-edit"></i>
+                        Edit System
+                    </a>
+                    <a href="{% url 'holistic_dashboard' %}" class="hero-btn back">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to List
+                    </a>
                 </div>
             </div>
         </div>
-        
-        <!-- History Sidebar -->
-        <div class="col-lg-4">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>History</h5>
-                </div>
-                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                    {% for record in history %}
-                    <div class="border-bottom pb-2 mb-2">
-                        <small class="text-muted">{{ record.timestamp|date:"Y-m-d H:i" }}</small>
-                        <p class="mb-0"><strong>{{ record.action|title }}</strong></p>
-                        <small>{{ record.user.username }}</small>
-                        {% if record.details %}
-                        <p class="mb-0 small text-muted">{{ record.details }}</p>
-                        {% endif %}
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- System Information Card -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-header-icon primary">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <span class="card-title">System Information</span>
                     </div>
-                    {% empty %}
-                    <p class="text-muted text-center">No history available</p>
-                    {% endfor %}
+                    <div class="card-body">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-barcode"></i> Serial Number</span>
+                                <span class="detail-value mono">{{ system.sr_no }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-flag"></i> Priority</span>
+                                <span class="priority-badge {{ system.priority|lower }}">
+                                    {{ system.get_priority_display }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-link"></i> Allocation to Sl No</span>
+                                <span class="detail-value {% if not system.allocation_to_sl_no %}empty{% endif %}">
+                                    {{ system.allocation_to_sl_no|default:"Not specified" }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                                <span class="detail-value {% if not system.location_info %}empty{% endif %}">
+                                    {{ system.location_info|default:"Not specified" }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-hashtag"></i> STMi Number</span>
+                                <span class="detail-value {% if not system.stmi_number %}empty{% endif %}">
+                                    {{ system.stmi_number|default:"Not specified" }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-user"></i> System Owner</span>
+                                <span class="detail-value {% if not system.system_owner %}empty{% endif %}">
+                                    {{ system.system_owner|default:"Not assigned" }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-file-contract"></i> ECR Number</span>
+                                <span class="detail-value {% if not system.ecr_number %}empty{% endif %}">
+                                    {{ system.ecr_number|default:"Not specified" }}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-user-cog"></i> Test Engineer</span>
+                                <span class="detail-value {% if not system.test_engineer %}empty{% endif %}">
+                                    {{ system.test_engineer|default:"Not assigned" }}
+                                </span>
+                            </div>
+                            {% if system.description %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-align-left"></i> Description</span>
+                                <div class="text-box">{{ system.description }}</div>
+                            </div>
+                            {% endif %}
+                            {% if system.notes %}
+                            <div class="detail-item full-width">
+                                <span class="detail-label"><i class="fas fa-sticky-note"></i> Notes</span>
+                                <div class="text-box">{{ system.notes }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Data Card -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-header-icon success">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <span class="card-title">Weekly Utilization Data</span>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="table-responsive">
+                            <table class="weekly-table">
+                                <thead>
+                                    <tr>
+                                        <th>Week</th>
+                                        <th>Status</th>
+                                        <th>Utilization</th>
+                                        <th>Assigned To</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for week in weekly_data %}
+                                    <tr>
+                                        <td>
+                                            <span class="week-label">W{{ week.week_number }}</span>
+                                            <span class="week-year">{{ week.year }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge {{ week.allocation_status|lower|default:'available' }}">
+                                                {{ week.allocation_status|default:"Available" }}
+                                            </span>
+                                        </td>
+                                        <td class="util-cell">
+                                            <div class="util-value">{{ week.utilization_percentage }}%</div>
+                                            <div class="util-bar">
+                                                <div class="util-fill {% if week.utilization_percentage < 60 %}low{% elif week.utilization_percentage < 85 %}medium{% else %}high{% endif %}" 
+                                                     style="width: {{ week.utilization_percentage }}%"></div>
+                                            </div>
+                                        </td>
+                                        <td>{{ week.assigned_to|default:"-" }}</td>
+                                        <td>
+                                            <span class="hours-badge">
+                                                {{ week.hours_used }}<span>/{{ week.availability_hours }} hrs</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <i class="fas fa-calendar-times"></i>
+                                                <p>No weekly data available for this system</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- History Card -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-header-icon info">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <span class="card-title">Activity History</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-timeline">
+                            {% for record in history %}
+                            <div class="history-item">
+                                <div class="history-time">
+                                    <i class="far fa-clock"></i> {{ record.timestamp|date:"M d, Y • H:i" }}
+                                </div>
+                                <div class="history-action">{{ record.action|title }}</div>
+                                <div class="history-user">
+                                    <i class="fas fa-user-circle"></i> {{ record.user.username }}
+                                </div>
+                                {% if record.details %}
+                                <div class="history-details">{{ record.details }}</div>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <p>No activity history available</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

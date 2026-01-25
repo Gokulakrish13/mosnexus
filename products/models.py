@@ -950,6 +950,41 @@ class SystemTag(models.Model):
         """Return total count of all tagged items"""
         return self.products.count() + self.sublevels.count() + self.sublevel_tools.count() + self.projects.count()
 
+class SystemTagHistory(models.Model):
+    """
+    History tracking for SystemTag modifications.
+    Records who made changes, when, and what was changed.
+    """
+    ACTION_CHOICES = [
+        ('created', 'Created'),
+        ('updated', 'Updated'),
+        ('deleted', 'Deleted'),
+        ('item_added', 'Item Added'),
+        ('item_removed', 'Item Removed'),
+    ]
+    ITEM_TYPE_CHOICES = [
+        ('product', 'Product'),
+        ('sublevel', 'Sub Level'),
+        ('sublevel_tool', 'Sub Level Tool'),
+        ('project', 'Project'),
+        ('tag', 'Tag'),
+    ]
+    system_tag = models.ForeignKey(SystemTag, on_delete=models.CASCADE, related_name='history', null=True, blank=True)
+    system_tag_name = models.CharField(max_length=255, help_text="Stored tag name for reference after deletion")
+    system_name = models.CharField(max_length=255, help_text="Stored system name for reference")
+    stream = models.ForeignKey('Stream', on_delete=models.CASCADE, related_name='tag_history')
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES, null=True, blank=True)
+    item_name = models.CharField(max_length=255, null=True, blank=True, help_text="Name of item added/removed")
+    item_id = models.IntegerField(null=True, blank=True, help_text="ID of item added/removed")
+    description = models.TextField(blank=True, help_text="Additional details about the change")
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ['-modified_at']
+        verbose_name_plural = 'System Tag Histories'
+    def __str__(self):
+        return f"{self.system_tag_name} - {self.get_action_display()} by {self.modified_by} at {self.modified_at}"
 class Project(models.Model):
     """
     Model to track projects with their status, duration, and other details.
@@ -1220,6 +1255,31 @@ class Floor(models.Model):
         return f"{self.name} ({self.stream.name})"
 
 
+class OperatingSystem(models.Model):
+    """
+    Model for managing operating systems dynamically per stream
+    """
+    name = models.CharField(max_length=100, verbose_name="Operating System Name")
+    version = models.CharField(max_length=50, blank=True, null=True, verbose_name="Version")
+    description = models.CharField(max_length=255, blank=True, null=True, verbose_name="Description")
+    stream = models.ForeignKey('Stream', on_delete=models.CASCADE, related_name='operating_systems', verbose_name="Stream")
+    is_active = models.BooleanField(default=True, verbose_name="Active")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        ordering = ['stream', 'name']
+        verbose_name = "Operating System"
+        verbose_name_plural = "Operating Systems"
+        unique_together = ('name', 'version', 'stream')  # OS name+version must be unique within a stream
+    def __str__(self):
+        if self.version:
+            return f"{self.name} {self.version}"
+        return self.name
+    def full_display(self):
+        """Return full display name with stream"""
+        if self.version:
+            return f"{self.name} {self.version} ({self.stream.name})"
+        return f"{self.name} ({self.stream.name})"
 class BuildServer(models.Model):
     """
     Model to track Build Servers information separated by stream (PIC/HIC)
@@ -1252,7 +1312,8 @@ class BuildServer(models.Model):
     
     # Additional server details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active', verbose_name="Status")
-    operating_system = models.CharField(max_length=255, blank=True, null=True, verbose_name="Operating System")
+    operating_system = models.CharField(max_length=255, blank=True, null=True, verbose_name="Operating System (Legacy)")
+    operating_system_ref = models.ForeignKey('OperatingSystem', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Operating System", related_name='build_servers')
     cpu_cores = models.IntegerField(blank=True, null=True, verbose_name="CPU Cores")
     ram_gb = models.IntegerField(blank=True, null=True, verbose_name="RAM (GB)")
     storage_gb = models.IntegerField(blank=True, null=True, verbose_name="Storage (GB)")

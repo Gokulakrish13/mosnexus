@@ -1,164 +1,906 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if edit %}Edit{% else %}Add{% endif %} Holistic System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #0066cc;
+            --primary-light: #0077e6;
+            --primary-dark: #004d99;
+            --accent: #0891b2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-secondary: #f1f5f9;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
             min-height: 100vh;
         }
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0,95,163,0.08);
-            margin-top: 3rem;
+
+        /* Corporate Navigation */
+        .corporate-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
         }
-        .card-header {
-            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
-            color: white;
-            border-radius: 16px 16px 0 0;
-            padding: 2rem 1.5rem 1.5rem 1.5rem;
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .form-label {
+
+        .nav-logo {
+            height: 32px;
+            opacity: 0.95;
+        }
+
+        .nav-title {
+            font-size: 1rem;
             font-weight: 600;
-            color: #005fa3;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .btn-primary {
-            background: #005fa3;
+
+        .nav-title-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 5.5rem 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Form Header */
+        .form-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        }
+
+        .form-header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .form-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-icon-wrapper i {
+            font-size: 1.75rem;
+            color: white;
+        }
+
+        .form-header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-header-text p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .progress-step.active {
+            background: rgba(0, 102, 204, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .progress-step.completed {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .progress-step i {
+            font-size: 0.75rem;
+        }
+
+        .step-connector {
+            width: 30px;
+            height: 2px;
+            background: var(--border-color);
+            align-self: center;
+        }
+
+        /* Form Body */
+        .form-body {
+            padding: 2rem 2.5rem;
+        }
+
+        /* Section */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--bg-secondary);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Form Fields */
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        .field-grid.two-col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .required-indicator {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .form-control, .form-select {
+            padding: 0.85rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+            background: var(--bg-card);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Input with Icon */
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon .form-control {
+            padding-left: 2.75rem;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Form Footer */
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-note {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-note i {
+            color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
             border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
         }
-        .btn-primary:hover {
-            background: #003d6b;
+
+        .btn-action.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
         }
-        .btn-secondary {
-            background: #6c757d;
-            border: none;
+
+        .btn-action.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.4);
         }
-        .btn-secondary:hover {
-            background: #495057;
+
+        .btn-action.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
         }
-        .required-star { color: #dc3545; }
+
+        .btn-action.secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Priority Select Styling */
+        .priority-select {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .priority-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .priority-option input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .priority-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .priority-label .priority-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-option input:checked + .priority-label {
+            border-color: currentColor;
+            background: var(--bg-card);
+        }
+
+        .priority-option.low .priority-label { color: #0ea5e9; }
+        .priority-option.low input:checked + .priority-label { border-color: #0ea5e9; background: rgba(14, 165, 233, 0.1); }
+
+        .priority-option.medium .priority-label { color: #f59e0b; }
+        .priority-option.medium input:checked + .priority-label { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+
+        .priority-option.high .priority-label { color: #f97316; }
+        .priority-option.high input:checked + .priority-label { border-color: #f97316; background: rgba(249, 115, 22, 0.1); }
+
+        .priority-option.critical .priority-label { color: #ef4444; }
+        .priority-option.critical input:checked + .priority-label { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        /* Status Select Cards */
+        .status-select {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        .status-option {
+            position: relative;
+        }
+
+        .status-option input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .status-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.75rem 0.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .status-label i {
+            font-size: 1rem;
+        }
+
+        .status-label .status-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-option input:checked + .status-label {
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-option.available .status-label { color: #10b981; }
+        .status-option.available input:checked + .status-label { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+
+        .status-option.allocated .status-label { color: #3b82f6; }
+        .status-option.allocated input:checked + .status-label { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+
+        .status-option.maintenance .status-label { color: #f59e0b; }
+        .status-option.maintenance input:checked + .status-label { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+
+        .status-option.offline .status-label { color: #ef4444; }
+        .status-option.offline input:checked + .status-label { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        .status-option.reserved .status-label { color: #8b5cf6; }
+        .status-option.reserved input:checked + .status-label { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .field-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .status-select {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .corporate-nav {
+                padding: 0.5rem 1rem;
+            }
+
+            .main-container {
+                padding: 5rem 1rem 1.5rem;
+            }
+
+            .form-header {
+                padding: 1.5rem;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .field-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-select {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .priority-select {
+                flex-wrap: wrap;
+            }
+
+            .priority-option {
+                min-width: calc(50% - 0.375rem);
+            }
+
+            .form-footer {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn-action {
+                flex: 1;
+            }
+
+            .progress-indicator {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .step-connector {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">
-                <i class="fas fa-{% if edit %}edit{% else %}plus{% endif %} me-2"></i>
-                {% if edit %}Edit System{% else %}Add New System{% endif %}
-            </h3>
+    <!-- Corporate Navigation -->
+    <nav class="corporate-nav">
+        <div class="nav-brand">
+            <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
+            <span class="nav-title">
+                System Management
+            </span>
         </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="row g-3">
-                    <!-- Core Information -->
-                    <div class="col-12">
-                        <h5 class="border-bottom pb-2 mb-3">Core Information</h5>
+        <div class="nav-actions">
+            <a href="{% url 'holistic_dashboard' %}" class="nav-btn" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="/dashboard/" class="nav-btn" title="Go to Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="form-card">
+            <!-- Form Header -->
+            <div class="form-header">
+                <div class="form-header-content">
+                    <div class="form-icon-wrapper">
+                        <i class="fas fa-{% if edit %}edit{% else %}plus-circle{% endif %}"></i>
                     </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">Serial Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="sr_no" 
-                               value="{{ system.sr_no }}" required>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">System Availability <span class="text-danger">*</span></label>
-                        <select class="form-select" name="system_availability" required>
-                            {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if system.system_availability == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">Priority</label>
-                        <select class="form-select" name="priority">
-                            <option value="low" {% if system.priority == 'low' %}selected{% endif %}>Low</option>
-                            <option value="medium" {% if system.priority == 'medium' %}selected{% endif %}>Medium</option>
-                            <option value="high" {% if system.priority == 'high' %}selected{% endif %}>High</option>
-                            <option value="critical" {% if system.priority == 'critical' %}selected{% endif %}>Critical</option>
-                        </select>
-                    </div>
-                    
-                    <!-- System Details -->
-                    <div class="col-12 mt-4">
-                        <h5 class="border-bottom pb-2 mb-3">System Details</h5>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Allocation to Sl No</label>
-                        <input type="text" class="form-control" name="allocation_to_sl_no" 
-                               value="{{ system.allocation_to_sl_no }}">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Location Info</label>
-                        <input type="text" class="form-control" name="location_info" 
-                               value="{{ system.location_info }}">
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">STMi Number</label>
-                        <input type="text" class="form-control" name="stmi_number" 
-                               value="{{ system.stmi_number }}">
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">System Owner</label>
-                        <input type="text" class="form-control" name="system_owner" 
-                               value="{{ system.system_owner }}">
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label class="form-label">ECR Number</label>
-                        <input type="text" class="form-control" name="ecr_number" 
-                               value="{{ system.ecr_number }}">
-                    </div>
-                    
-                    <div class="col-md-12">
-                        <label class="form-label">Test Engineer</label>
-                        <input type="text" class="form-control" name="test_engineer" 
-                               value="{{ system.test_engineer }}">
-                    </div>
-                    
-                    <!-- Additional Information -->
-                    <div class="col-12 mt-4">
-                        <h5 class="border-bottom pb-2 mb-3">Additional Information</h5>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" name="description" rows="3">{{ system.description }}</textarea>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Notes</label>
-                        <textarea class="form-control" name="notes" rows="3">{{ system.notes }}</textarea>
+                    <div class="form-header-text">
+                        <h1>{% if edit %}Edit System{% else %}Add New System{% endif %}</h1>
+                        <p>{% if edit %}Update system information and configuration{% else %}Enter system details to register a new holistic system{% endif %}</p>
                     </div>
                 </div>
-                
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save me-2"></i>
-                        {% if edit %}Update System{% else %}Create System{% endif %}
-                    </button>
-                    <a href="{% url 'holistic_dashboard' %}" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </a>
+            </div>
+
+            <!-- Form Body -->
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-body">
+                    <!-- Core Information Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <div class="section-title">Core Information</div>
+                                <div class="section-subtitle">Essential system identification details</div>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Serial Number <span class="required-indicator">*</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-barcode input-icon"></i>
+                                    <input type="text" class="form-control" name="sr_no" 
+                                           value="{{ system.sr_no }}" required placeholder="Enter serial number">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">
+                                    System Availability <span class="required-indicator">*</span>
+                                </label>
+                                <div class="status-select">
+                                    <div class="status-option available">
+                                        <input type="radio" name="system_availability" value="available" 
+                                               {% if system.system_availability == 'available' or not system.system_availability %}checked{% endif %}>
+                                        <label class="status-label">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span class="status-name">Available</span>
+                                        </label>
+                                    </div>
+                                    <div class="status-option allocated">
+                                        <input type="radio" name="system_availability" value="allocated"
+                                               {% if system.system_availability == 'allocated' %}checked{% endif %}>
+                                        <label class="status-label">
+                                            <i class="fas fa-user-check"></i>
+                                            <span class="status-name">Allocated</span>
+                                        </label>
+                                    </div>
+                                    <div class="status-option maintenance">
+                                        <input type="radio" name="system_availability" value="maintenance"
+                                               {% if system.system_availability == 'maintenance' %}checked{% endif %}>
+                                        <label class="status-label">
+                                            <i class="fas fa-tools"></i>
+                                            <span class="status-name">Maintenance</span>
+                                        </label>
+                                    </div>
+                                    <div class="status-option offline">
+                                        <input type="radio" name="system_availability" value="offline"
+                                               {% if system.system_availability == 'offline' %}checked{% endif %}>
+                                        <label class="status-label">
+                                            <i class="fas fa-power-off"></i>
+                                            <span class="status-name">Offline</span>
+                                        </label>
+                                    </div>
+                                    <div class="status-option reserved">
+                                        <input type="radio" name="system_availability" value="reserved"
+                                               {% if system.system_availability == 'reserved' %}checked{% endif %}>
+                                        <label class="status-label">
+                                            <i class="fas fa-lock"></i>
+                                            <span class="status-name">Reserved</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Priority Level</label>
+                                <div class="priority-select">
+                                    <div class="priority-option low">
+                                        <input type="radio" name="priority" value="low"
+                                               {% if system.priority == 'low' or not system.priority %}checked{% endif %}>
+                                        <label class="priority-label">
+                                            <i class="fas fa-arrow-down"></i>
+                                            <span class="priority-name">Low</span>
+                                        </label>
+                                    </div>
+                                    <div class="priority-option medium">
+                                        <input type="radio" name="priority" value="medium"
+                                               {% if system.priority == 'medium' %}checked{% endif %}>
+                                        <label class="priority-label">
+                                            <i class="fas fa-minus"></i>
+                                            <span class="priority-name">Medium</span>
+                                        </label>
+                                    </div>
+                                    <div class="priority-option high">
+                                        <input type="radio" name="priority" value="high"
+                                               {% if system.priority == 'high' %}checked{% endif %}>
+                                        <label class="priority-label">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span class="priority-name">High</span>
+                                        </label>
+                                    </div>
+                                    <div class="priority-option critical">
+                                        <input type="radio" name="priority" value="critical"
+                                               {% if system.priority == 'critical' %}checked{% endif %}>
+                                        <label class="priority-label">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span class="priority-name">Critical</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Details Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div>
+                                <div class="section-title">System Details</div>
+                                <div class="section-subtitle">Configuration and assignment information</div>
+                            </div>
+                        </div>
+
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label class="form-label">Allocation to Sl No</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-link input-icon"></i>
+                                    <input type="text" class="form-control" name="allocation_to_sl_no" 
+                                           value="{{ system.allocation_to_sl_no }}" placeholder="Enter allocation ID">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Location Info</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                    <input type="text" class="form-control" name="location_info" 
+                                           value="{{ system.location_info }}" placeholder="Enter location">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">STMi Number</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-hashtag input-icon"></i>
+                                    <input type="text" class="form-control" name="stmi_number" 
+                                           value="{{ system.stmi_number }}" placeholder="Enter STMi number">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">System Owner</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input type="text" class="form-control" name="system_owner" 
+                                           value="{{ system.system_owner }}" placeholder="Enter owner name">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">ECR Number</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-file-contract input-icon"></i>
+                                    <input type="text" class="form-control" name="ecr_number" 
+                                           value="{{ system.ecr_number }}" placeholder="Enter ECR number">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Test Engineer</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user-cog input-icon"></i>
+                                    <input type="text" class="form-control" name="test_engineer" 
+                                           value="{{ system.test_engineer }}" placeholder="Enter engineer name">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <div class="section-title">Additional Information</div>
+                                <div class="section-subtitle">Optional notes and descriptions</div>
+                            </div>
+                        </div>
+
+                        <div class="field-grid two-col">
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="4" 
+                                          placeholder="Enter system description...">{{ system.description }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" name="notes" rows="4"
+                                          placeholder="Enter additional notes...">{{ system.notes }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Footer -->
+                <div class="form-footer">
+                    <div class="footer-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Fields marked with <span class="required-indicator">*</span> are required</span>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'holistic_dashboard' %}" class="btn-action secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-action primary">
+                            <i class="fas fa-{% if edit %}save{% else %}plus{% endif %}"></i>
+                            {% if edit %}Update System{% else %}Create System{% endif %}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Progress indicator animation
+    document.querySelectorAll('.form-section').forEach((section, index) => {
+        section.addEventListener('focusin', () => {
+            document.querySelectorAll('.progress-step').forEach((step, stepIndex) => {
+                step.classList.remove('active', 'completed');
+                if (stepIndex < index) {
+                    step.classList.add('completed');
+                } else if (stepIndex === index) {
+                    step.classList.add('active');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

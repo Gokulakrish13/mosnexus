@@ -6,135 +6,400 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if is_edit %}Edit{% else %}Add New{% endif %} Build Server - {{ stream }} Stream</title>
     <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Global Styles */
+        /* ============================================
+           DESIGN SYSTEM - CSS VARIABLES
+           ============================================ */
+        :root {
+            /* Primary Colors - Philips Blue */
+            --primary-900: #0d2137;
+            --primary-800: #0a3a5c;
+            --primary-700: #0050aa;
+            --primary-600: #0066cc;
+            --primary-500: #0077cc;
+            --primary-400: #3399dd;
+            --primary-300: #66b3e8;
+            --primary-200: #99cef2;
+            --primary-100: #cce6f9;
+            --primary-50: #e6f3fc;
+            
+            /* Neutral Colors */
+            --neutral-900: #111827;
+            --neutral-800: #1f2937;
+            --neutral-700: #374151;
+            --neutral-600: #4b5563;
+            --neutral-500: #6b7280;
+            --neutral-400: #9ca3af;
+            --neutral-300: #d1d5db;
+            --neutral-200: #e5e7eb;
+            --neutral-100: #f3f4f6;
+            --neutral-50: #f9fafb;
+            --white: #ffffff;
+            
+            /* Semantic Colors */
+            --success-500: #10b981;
+            --success-100: #d1fae5;
+            --warning-500: #f59e0b;
+            --warning-100: #fef3c7;
+            --error-500: #ef4444;
+            --error-100: #fee2e2;
+            --info-500: #3b82f6;
+            --info-100: #dbeafe;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+            --gradient-hero: linear-gradient(135deg, var(--primary-800) 0%, var(--primary-600) 50%, #0891b2 100%);
+            --gradient-card: linear-gradient(180deg, var(--white) 0%, var(--neutral-50) 100%);
+            --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            --gradient-subtle: linear-gradient(135deg, var(--neutral-50) 0%, var(--white) 100%);
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+            --shadow-primary: 0 4px 14px rgba(0, 80, 170, 0.25);
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+        }
+
+        /* ============================================
+           GLOBAL STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+            line-height: 1.6;
             min-height: 100vh;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Philips Branding */
-        .philips-logo {
-            height: 60px;
-            width: auto;
-            position: absolute;
-            top: 20px;
-            right: 30px;
+        /* ============================================
+           TOP NAVIGATION
+           ============================================ */
+        .top-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0.75rem 1.5rem;
+            position: sticky;
+            top: 0;
             z-index: 1000;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
         }
 
-        .home-icon {
-            position: fixed;
-            top: 22px;
-            right: 112px;
-            z-index: 1001;
-            transition: all 0.3s ease;
-        }
-        .home-icon:hover { transform: scale(1.1); }
-        .home-icon img {
-            height: 36px;
-            width: 36px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-            background: white;
-            border-radius: 8px;
-            padding: 6px;
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Header Styles */
-        .form-header {
-            background: linear-gradient(135deg, #005fa3 0%, #003d6b 100%);
-            color: white;
-            padding: 1.5rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,95,163,0.3);
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--neutral-200);
+        }
+
+        .nav-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--neutral-500);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--neutral-600);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--primary-600);
+        }
+
+        .nav-breadcrumb .separator {
+            color: var(--neutral-300);
+        }
+
+        .nav-breadcrumb .current {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero-section {
+            background: var(--gradient-hero);
+            padding: 1.5rem 1.5rem;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
         }
 
-        .form-header::before {
+        .hero-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300"><path fill="rgba(255,255,255,0.1)" d="M0,150 Q250,50 500,150 T1000,150 V300 H0 Z"/></svg>');
-            background-size: cover;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
         }
 
-        .form-header .container {
+        .hero-container {
+            max-width: 1600px;
+            margin: 0 auto;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
-        /* Progress Indicator */
-        .progress-wizard {
-            background: white;
-            border-radius: 0 0 15px 15px;
-            padding: 1rem 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            border-top: 3px solid #005fa3;
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
         }
 
-        .progress-step {
+        .hero-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hero-icon-box {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e9ecef;
-            color: #6c757d;
-            font-weight: 600;
-            margin: 0 auto 0.5rem;
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-icon-box i {
+            color: var(--white);
+        }
+
+        .hero-title {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           PROGRESS WIZARD
+           ============================================ */
+        .progress-wizard {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            margin: -1.5rem auto 1.5rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+        }
+
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .progress-step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             cursor: pointer;
-            border: 2px solid transparent;
+            position: relative;
         }
 
-        .progress-step:hover {
-            background: #007bff;
-            color: white;
-            transform: scale(1.05);
-            border-color: #0056b3;
+        .progress-step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: calc(50% + 20px);
+            width: calc(100% - 40px);
+            height: 2px;
+            background: var(--neutral-200);
+            z-index: 0;
         }
 
-        .progress-step.active {
-            background: #005fa3;
-            color: white;
-            transform: scale(1.1);
+        .progress-step-item.completed:not(:last-child)::after {
+            background: var(--success-500);
         }
 
-        .progress-step.completed {
-            background: #28a745;
-            color: white;
+        .progress-step {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            background: var(--neutral-100);
+            border: 2px solid var(--neutral-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--neutral-500);
+            transition: all var(--transition-fast);
+            position: relative;
+            z-index: 1;
         }
 
-        /* Form Sections */
+        .progress-step-item:hover .progress-step {
+            border-color: var(--primary-400);
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .progress-step-item.active .progress-step {
+            background: var(--gradient-primary);
+            border-color: var(--primary-600);
+            color: var(--white);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .progress-step-item.completed .progress-step {
+            background: var(--gradient-success);
+            border-color: var(--success-500);
+            color: var(--white);
+        }
+
+        .progress-step-label {
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: var(--neutral-500);
+            margin-top: 0.375rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .progress-step-item.active .progress-step-label {
+            color: var(--primary-700);
+            font-weight: 600;
+        }
+
+        /* ============================================
+           MAIN CONTENT AREA
+           ============================================ */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem 2rem;
+        }
+
+        /* ============================================
+           FORM SECTIONS
+           ============================================ */
         .form-section {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,95,163,0.1);
-            transition: all 0.3s ease;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            transition: all var(--transition-base);
             position: relative;
             overflow: hidden;
+            animation: fadeInUp 0.4s ease forwards;
         }
 
         .form-section:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,95,163,0.15);
+            box-shadow: var(--shadow-md);
+            border-color: var(--neutral-300);
         }
 
         .form-section::before {
@@ -144,223 +409,350 @@
             left: 0;
             width: 4px;
             height: 100%;
-            background: linear-gradient(135deg, #005fa3, #007bff);
+            background: var(--gradient-primary);
+            border-radius: 4px 0 0 4px;
         }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section:nth-child(2) { animation-delay: 0.05s; }
+        .form-section:nth-child(3) { animation-delay: 0.1s; }
+        .form-section:nth-child(4) { animation-delay: 0.15s; }
+        .form-section:nth-child(5) { animation-delay: 0.2s; }
+        .form-section:nth-child(6) { animation-delay: 0.25s; }
+        .form-section:nth-child(7) { animation-delay: 0.3s; }
+        .form-section:nth-child(8) { animation-delay: 0.35s; }
+        .form-section:nth-child(9) { animation-delay: 0.4s; }
 
         .section-header {
             display: flex;
             align-items: center;
-            margin-bottom: 2rem;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid #f8f9fa;
+            border-bottom: 1px solid var(--neutral-100);
         }
 
         .section-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #005fa3, #007bff);
-            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
-            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .section-icon i {
+            color: var(--white);
         }
 
         .section-title {
             flex: 1;
-            margin: 0;
-            color: #2c3e50;
+            font-size: 1rem;
             font-weight: 600;
-            font-size: 1.25rem;
+            color: var(--neutral-800);
+            margin: 0;
         }
 
         .section-collapse {
-            background: none;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: var(--neutral-100);
             border: none;
-            color: #6c757d;
-            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
+            color: var(--neutral-500);
         }
 
-        .section-collapse:hover { color: #005fa3; }
+        .section-collapse:hover {
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+        }
 
-        /* Form Fields */
+        /* ============================================
+           FORM FIELDS
+           ============================================ */
         .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--neutral-700);
             margin-bottom: 0.5rem;
-            font-size: 0.95rem;
+        }
+
+        .form-label i {
+            color: var(--primary-500);
         }
 
         .required-field .form-label::after {
-            content: " *";
-            color: #dc3545;
-            font-weight: bold;
+            content: "*";
+            color: var(--error-500);
+            margin-left: 0.25rem;
+            font-weight: 700;
         }
 
         .form-control, .form-select {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
+            border: 1.5px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            color: var(--neutral-800);
+            background: var(--white);
+            transition: all var(--transition-fast);
+            width: 100%;
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: #005fa3;
-            box-shadow: 0 0 0 0.2rem rgba(0,95,163,0.25);
-            background: white;
-            transform: translateY(-1px);
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
+            outline: none;
         }
 
-        .form-control:valid {
-            border-color: #28a745;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='m2.3 6.73.7-.04 1.6-2.75 2.2-3.24-.81-.77L3.7 4.25l-.8-1.06-.81.77z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1rem 1rem;
-            padding-right: 2.5rem;
+        .form-control::placeholder {
+            color: var(--neutral-400);
         }
 
-        .input-group {
-            border-radius: 10px;
-            overflow: hidden;
+        .form-control.is-valid {
+            border-color: var(--success-500);
         }
 
-        .input-group-text {
-            background: #005fa3;
-            color: white;
-            border: none;
-            font-weight: 600;
-        }
-
-        /* Help Text */
-        .form-help {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .form-help i {
-            margin-right: 0.5rem;
-            color: #007bff;
-        }
-
-        /* Validation Styles */
-        .is-invalid {
-            border-color: #dc3545 !important;
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: var(--error-500);
             animation: shake 0.3s ease-in-out;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
 
+        .input-group {
+            position: relative;
+            display: flex;
+        }
+
+        .input-group .input-group-text {
+            background: var(--gradient-primary);
+            border: none;
+            color: var(--white);
+            padding: 0.625rem 0.875rem;
+            border-radius: var(--radius-md) 0 0 var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-group .form-control,
+        .input-group .form-select {
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            border-left: none;
+        }
+
+        /* Help Text */
+        .form-help {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            color: var(--neutral-500);
+            margin-top: 0.375rem;
+        }
+
+        .form-help i {
+            color: var(--primary-400);
+        }
+
+        /* Validation Feedback */
         .invalid-feedback {
             display: block;
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--error-500);
+            margin-top: 0.375rem;
         }
 
-        /* Smart Features */
+        /* Smart Suggestion */
         .smart-suggestion {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 8px;
-            padding: 0.75rem;
+            background: var(--info-100);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
             margin-top: 0.5rem;
-            font-size: 0.85rem;
-            color: #1565c0;
+            font-size: 0.75rem;
+            color: var(--info-500);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .auto-fill-indicator {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #28a745;
-            animation: pulse 1.5s infinite;
+        /* Tags System */
+        .tag-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            margin: 0.25rem 0.25rem 0.25rem 0;
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .tag-item .tag-remove {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity var(--transition-fast);
         }
 
-        /* Action Buttons */
-        .btn-group-actions {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,95,163,0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .tag-item .tag-remove:hover {
+            opacity: 1;
         }
 
-        .btn-group-actions:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,95,163,0.15);
+        /* ============================================
+           ACTION SECTION
+           ============================================ */
+        .action-section {
+            background: var(--gradient-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--neutral-200);
+            margin-top: 1.5rem;
         }
 
-        .btn-group-actions::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(135deg, #005fa3, #007bff);
+        .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        /* Remove body padding since action bar is no longer fixed */
-        body {
-            padding-bottom: 0;
+        .action-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .auto-save-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .auto-save-toggle label {
+            font-size: 0.8125rem;
+            color: var(--neutral-600);
+            cursor: pointer;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
+        }
+
+        .last-saved {
+            font-size: 0.75rem;
+            color: var(--neutral-400);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #005fa3, #007bff);
-            border: none;
-            border-radius: 10px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-primary);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,95,163,0.3);
+            box-shadow: 0 6px 20px rgba(0, 80, 170, 0.35);
+            color: var(--white);
         }
 
         .btn-secondary {
-            background: #6c757d;
-            border: none;
-            border-radius: 10px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
+            background: var(--neutral-200);
+            color: var(--neutral-700);
         }
 
-        /* Loading States */
+        .btn-secondary:hover {
+            background: var(--neutral-300);
+            color: var(--neutral-800);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--neutral-300);
+            color: var(--neutral-600);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-500);
+            color: var(--primary-600);
+            background: var(--primary-50);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+            color: var(--white);
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -368,12 +760,12 @@
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #005fa3;
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--neutral-200);
+            border-top: 3px solid var(--primary-600);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -381,218 +773,389 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Auto-save Indicator */
-        .auto-save-status {
-            position: fixed;
-            top: 145px;
-            right: 30px;
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 0.85rem;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .auto-save-status.show { opacity: 1; }
-        .auto-save-status.saving { color: #ffc107; }
-        .auto-save-status.saved { color: #28a745; }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .form-section { padding: 1.5rem; }
-            .section-icon { width: 40px; height: 40px; font-size: 1rem; }
-            .section-title { font-size: 1.1rem; }
-            .philips-logo { height: 40px; top: 15px; right: 15px; }
-            .home-icon { top: 15px; right: 65px; }
-            .home-icon img { height: 30px; width: 30px; }
-        }
-
-        /* Collapsible sections */
-        .collapse-content {
-            transition: all 0.3s ease;
-        }
-
-        /* Tags Input Styling */
-        .tags-container {
-            position: relative;
-        }
-
-        .tag-item {
-            display: inline-block;
-            background: #005fa3;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            margin: 0.25rem 0.25rem 0.25rem 0;
-            font-size: 0.85rem;
+        .loading-text {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--neutral-600);
             font-weight: 500;
         }
 
-        .tag-item .tag-remove {
-            margin-left: 0.5rem;
-            cursor: pointer;
-            opacity: 0.7;
+        /* ============================================
+           AUTO-SAVE STATUS
+           ============================================ */
+        .auto-save-status {
+            position: fixed;
+            top: 70px;
+            right: 24px;
+            background: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .tag-item .tag-remove:hover {
+        .auto-save-status.show {
             opacity: 1;
+            transform: translateY(0);
         }
-        
-        /* Ensure dropdown appears above all header elements */
+
+        .auto-save-status.saving {
+            color: var(--warning-500);
+        }
+
+        .auto-save-status.saved {
+            color: var(--success-500);
+        }
+
+        /* ============================================
+           DROPDOWN MENU
+           ============================================ */
         .dropdown-menu {
-            z-index: 1050 !important;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
         }
-        
-        .btn-group {
-            position: relative;
-            z-index: 1050;
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--neutral-700);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .dropdown-item:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-900);
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: var(--neutral-200);
+        }
+
+        /* ============================================
+           ALERTS
+           ============================================ */
+        .alert {
+            border-radius: var(--radius-md);
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: var(--success-100);
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background: var(--error-100);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: var(--warning-100);
+            color: #92400e;
+        }
+
+        /* ============================================
+           MODAL
+           ============================================ */
+        .modal-content {
+            border: none;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--neutral-200);
+            padding: 1rem 1.5rem;
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Preview Content */
+        .preview-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-700);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-table {
+            width: 100%;
+            font-size: 0.8125rem;
+        }
+
+        .preview-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--neutral-100);
+        }
+
+        .preview-table td:first-child {
+            color: var(--neutral-500);
+            width: 40%;
+        }
+
+        .preview-table td:last-child {
+            color: var(--neutral-800);
+            font-weight: 500;
+        }
+
+        /* Status indicator colors */
+        .status-active { color: var(--success-500); }
+        .status-inactive { color: var(--error-500); }
+        .status-maintenance { color: var(--warning-500); }
+        .status-offline { color: var(--neutral-500); }
+
+        /* ============================================
+           RESPONSIVE STYLES
+           ============================================ */
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .progress-steps {
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .progress-step-item {
+                min-width: 80px;
+            }
+
+            .action-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-left {
+                justify-content: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0.5rem 1rem;
+            }
+
+            .nav-breadcrumb span:not(.current):not(.separator) {
+                display: none;
+            }
+
+            .hero-section {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 1.25rem;
+            }
+
+            .progress-wizard {
+                margin: -1rem 1rem 1rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .main-content {
+                padding: 0 1rem 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Home Icon -->
-    <a href="{% url 'build_servers_list' stream=stream %}" title="Back to List" class="home-icon">
-    </a>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="text-center">
-            <div class="loading-spinner mb-3"></div>
-            <div class="text-muted">Processing...</div>
-        </div>
-    </div>
-
-    <!-- Auto-save Status -->
-    <div class="auto-save-status" id="autoSaveStatus">
-        <i class="fas fa-sync-alt me-2"></i>
-        <span class="status-text">Auto-saving...</span>
-    </div>
-
-{% block content %}
-<!-- Form Header -->
-<div class="form-header">
-    <div class="container-fluid">
-        <!-- Philips Logo -->
-        <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips Logo" class="philips-logo">
-        
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="display-5 mb-3">
-                    <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %} me-3"></i>
-                    {% if is_edit %}Edit Build Server{% else %}Add New Build Server{% endif %}
-                </h1>
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-light text-dark fs-6 me-3">
-                        <i class="fas fa-stream me-2"></i>{{ stream }} Stream
-                    </span>
-                    <small class="opacity-75">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Configure server details with smart validation and auto-save
-                    </small>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips" class="nav-logo">
+                <div class="nav-divider"></div>
+                <div class="nav-breadcrumb">
+                    <a href="{% url 'build_servers_dashboard' %}">
+                        <i data-lucide="layout-dashboard" style="width: 14px; height: 14px;"></i>
+                        Dashboard
+                    </a>
+                    <span class="separator">/</span>
+                    <a href="{% url 'build_servers_list' stream=stream %}">{{ stream }} Stream</a>
+                    <span class="separator">/</span>
+                    <span class="current">{% if is_edit %}Edit{% else %}Add{% endif %} Server</span>
                 </div>
             </div>
-            <div class="col-lg-4 text-end">
-                <div class="btn-group" role="group" style="margin-right: 80px; margin-top: 30px;">
-                    <a href="{% url 'build_servers_list' stream=stream %}" class="btn btn-light btn-lg">
-                        <i class="fas fa-arrow-left me-2"></i>Back to List
-                    </a>
-                    <button type="button" class="btn btn-light btn-lg dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v"></i>
+            <div class="nav-right">
+                <a href="{% url 'build_servers_list' stream=stream %}" class="nav-btn nav-btn-ghost">
+                    <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                    Back to List
+                </a>
+                <div class="dropdown">
+                    <button class="nav-btn nav-btn-ghost dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i data-lucide="more-vertical" style="width: 16px; height: 16px;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" onclick="resetForm()">
-                            <i class="fas fa-undo me-2"></i>Reset Form
+                        <li><a class="dropdown-item" href="#" onclick="resetForm(); return false;">
+                            <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                            Reset Form
                         </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="saveAsDraft()">
-                            <i class="fas fa-save me-2"></i>Save as Draft
+                        <li><a class="dropdown-item" href="#" onclick="saveAsDraft(); return false;">
+                            <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+                            Save as Draft
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportConfig()">
-                            <i class="fas fa-download me-2"></i>Export Configuration
+                        <li><a class="dropdown-item" href="#" onclick="exportConfig(); return false;">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                            Export Configuration
                         </a></li>
                     </ul>
                 </div>
             </div>
         </div>
+    </nav>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Auto-save Status -->
+    <div class="auto-save-status" id="autoSaveStatus">
+        <i data-lucide="loader-2" style="width: 14px; height: 14px;"></i>
+        <span class="status-text">Auto-saving...</span>
+    </div>
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-title-group">
+                <div class="hero-icon-box">
+                    <i data-lucide="{% if is_edit %}edit-3{% else %}plus-circle{% endif %}" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <h1 class="hero-title">{% if is_edit %}Edit Build Server{% else %}Add New Build Server{% endif %}</h1>
+                    <p class="hero-subtitle">Configure server details with smart validation</p>
+                </div>
+            </div>
+            <div class="hero-badge">
+                <i data-lucide="git-branch" style="width: 16px; height: 16px;"></i>
+                {{ stream }} Stream
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Progress Wizard -->
+<div class="progress-wizard">
+    <div class="progress-steps">
+        <div class="progress-step-item active" data-step="1" data-target="#section-1">
+            <div class="progress-step">1</div>
+            <span class="progress-step-label">Basic Info</span>
+        </div>
+        <div class="progress-step-item" data-step="2" data-target="#section-2">
+            <div class="progress-step">2</div>
+            <span class="progress-step-label">Stream & Status</span>
+        </div>
+        <div class="progress-step-item" data-step="3" data-target="#section-3">
+            <div class="progress-step">3</div>
+            <span class="progress-step-label">Technical Specs</span>
+        </div>
+        <div class="progress-step-item" data-step="4" data-target="#section-4">
+            <div class="progress-step">4</div>
+            <span class="progress-step-label">Network</span>
+        </div>
+        <div class="progress-step-item" data-step="5" data-target="#section-5">
+            <div class="progress-step">5</div>
+            <span class="progress-step-label">Business Info</span>
+        </div>
+        <div class="progress-step-item" data-step="6" data-target="#section-6">
+            <div class="progress-step">6</div>
+            <span class="progress-step-label">Contacts</span>
+        </div>
     </div>
 </div>
 
-<div class="container-fluid px-4">
+<div class="main-content">
     <!-- Messages -->
     {% if messages %}
-        <div class="row">
-            <div class="col-12">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+                <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-circle{% else %}info{% endif %}" style="width: 18px; height: 18px;"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        </div>
+        {% endfor %}
     {% endif %}
 
-    <!-- Progress Wizard -->
-    <div class="progress-wizard">
-        <div class="row text-center">
-            <div class="col-md-2">
-                <div class="progress-step active" data-step="1" data-target="#section-1" title="Go to Basic Information">
-                    1
-                </div>
-                <small class="text-muted">Basic Info</small>
-            </div>
-            <div class="col-md-2">
-                <div class="progress-step" data-step="2" data-target="#section-2" title="Go to Technical Specifications">
-                    2
-                </div>
-                <small class="text-muted">Technical</small>
-            </div>
-            <div class="col-md-2">
-                <div class="progress-step" data-step="3" data-target="#section-3" title="Go to Network Configuration">
-                    3
-                </div>
-                <small class="text-muted">Network</small>
-            </div>
-            <div class="col-md-2">
-                <div class="progress-step" data-step="4" data-target="#section-4" title="Go to Business Information">
-                    4
-                </div>
-                <small class="text-muted">Business</small>
-            </div>
-            <div class="col-md-2">
-                <div class="progress-step" data-step="5" data-target="#section-5" title="Go to Contact Information">
-                    5
-                </div>
-                <small class="text-muted">Contacts</small>
-            </div>
-            <div class="col-md-2">
-                <div class="progress-step" data-step="6" data-target="#section-6" title="Go to Maintenance Schedule">
-                    6
-                </div>
-                <small class="text-muted">Maintenance</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-container">
     <form method="post" id="serverForm" novalidate>
         {% csrf_token %}
         <input type="hidden" name="stream_type" id="stream_type" value="{{ stream }}">
         
-        <!-- Basic Information Section -->
+        <!-- Section 1: Basic Information -->
         <div class="form-section" data-section="1" id="section-1">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-info-circle"></i>
+                    <i data-lucide="info" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Basic Information</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#basicInfo">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
@@ -601,18 +1164,19 @@
                     <div class="col-lg-6">
                         <div class="form-group required-field">
                             <label class="form-label" for="hostname">
-                                <i class="fas fa-desktop me-2"></i>Machine Hostname
+                                <i data-lucide="monitor" style="width: 14px; height: 14px;"></i>
+                                Machine Hostname
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-server"></i>
+                                    <i data-lucide="server" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="hostname" name="hostname" 
                                        value="{% if is_edit %}{{ server.hostname }}{% endif %}" 
-                                       required data-smart-suggest="true">
+                                       placeholder="Enter hostname" required>
                             </div>
                             <div class="form-help">
-                                <i class="fas fa-lightbulb"></i>
+                                <i data-lucide="lightbulb" style="width: 12px; height: 12px;"></i>
                                 Unique hostname for the server (auto-suggested from IP)
                             </div>
                         </div>
@@ -621,37 +1185,40 @@
                     <div class="col-lg-6">
                         <div class="form-group required-field">
                             <label class="form-label" for="ip_address">
-                                <i class="fas fa-network-wired me-2"></i>IP Address
+                                <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                                IP Address
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-globe"></i>
+                                    <i data-lucide="network" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="ip_address" name="ip_address" 
                                        value="{% if is_edit %}{{ server.ip_address }}{% endif %}" 
-                                       pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" required
-                                       data-validate="ip">
+                                       pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" 
+                                       placeholder="192.168.1.100" required>
                             </div>
                             <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
+                                <i data-lucide="info" style="width: 12px; height: 12px;"></i>
                                 IPv4 address format (e.g., 192.168.1.100)
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="row g-4 mt-3">
+                <div class="row g-4 mt-2">
                     <div class="col-lg-4">
                         <div class="form-group required-field">
                             <label class="form-label" for="location">
-                                <i class="fas fa-map-marker-alt me-2"></i>Location
+                                <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+                                Location
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-building"></i>
+                                    <i data-lucide="building" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="location" name="location" 
-                                       value="{% if is_edit %}{{ server.location }}{% endif %}" required>
+                                       value="{% if is_edit %}{{ server.location }}{% endif %}" 
+                                       placeholder="Enter location" required>
                             </div>
                         </div>
                     </div>
@@ -659,11 +1226,12 @@
                     <div class="col-lg-4">
                         <div class="form-group required-field">
                             <label class="form-label" for="floor">
-                                <i class="fas fa-layer-group me-2"></i>Floor
+                                <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
+                                Floor
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-stairs"></i>
+                                    <i data-lucide="home" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <select class="form-select" id="floor" name="floor" required>
                                     <option value="">Select Floor</option>
@@ -680,17 +1248,19 @@
                     <div class="col-lg-4">
                         <div class="form-group required-field">
                             <label class="form-label" for="owner">
-                                <i class="fas fa-user-tie me-2"></i>Owner
+                                <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                                Owner
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user"></i>
+                                    <i data-lucide="user-circle" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="owner" name="owner" 
-                                       value="{% if is_edit %}{{ server.owner }}{% endif %}" required>
+                                       value="{% if is_edit %}{{ server.owner }}{% endif %}" 
+                                       placeholder="Owner name" required>
                             </div>
                             <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
+                                <i data-lucide="info" style="width: 12px; height: 12px;"></i>
                                 Person or team responsible for this server
                             </div>
                         </div>
@@ -699,29 +1269,42 @@
             </div>
         </div>
 
-        <!-- Stream and Status Section -->
+        <!-- Section 2: Stream & Status -->
         <div class="form-section" data-section="2" id="section-2">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-stream"></i>
+                    <i data-lucide="git-branch" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Stream Configuration & Status</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#streamStatus">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
             <div class="collapse show" id="streamStatus">
                 <div class="row g-4">
-                   
+                    <div class="col-lg-4">
+                        <div class="form-group required-field">
+                            <label class="form-label">
+                                <i data-lucide="git-branch" style="width: 14px; height: 14px;"></i>
+                                Stream
+                            </label>
+                            <div class="hero-badge" style="background: var(--gradient-primary); border: none;">
+                                <i data-lucide="git-branch" style="width: 16px; height: 16px;"></i>
+                                {{ stream }} Stream
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="col-lg-4">
                         <div class="form-group required-field">
                             <label class="form-label" for="status">
-                                <i class="fas fa-traffic-light me-2"></i>Status
+                                <i data-lucide="activity" style="width: 14px; height: 14px;"></i>
+                                Status
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-circle" id="statusIndicator"></i>
+                                    <i data-lucide="circle" style="width: 16px; height: 16px;" id="statusIndicator"></i>
                                 </span>
                                 <select class="form-select" id="status" name="status" required>
                                     {% for status_code, status_display in status_choices %}
@@ -739,25 +1322,28 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="operating_system">
-                                <i class="fab fa-windows me-2"></i>Operating System
+                                <i data-lucide="monitor" style="width: 14px; height: 14px;"></i>
+                                Operating System
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-desktop"></i>
+                                    <i data-lucide="cpu" style="width: 16px; height: 16px;"></i>
                                 </span>
-                                <input type="text" class="form-control" id="operating_system" name="operating_system" 
-                                       value="{% if is_edit %}{{ server.operating_system }}{% endif %}" 
-                                       placeholder="e.g., Windows Server 2019"
-                                       list="osList">
-                                <datalist id="osList">
-                                    <option value="Windows Server 2022">
-                                    <option value="Windows Server 2019">
-                                    <option value="Windows Server 2016">
-                                    <option value="Ubuntu 22.04 LTS">
-                                    <option value="Ubuntu 20.04 LTS">
-                                    <option value="CentOS 8">
-                                    <option value="Red Hat Enterprise Linux 9">
-                                </datalist>
+                                <select class="form-select" id="operating_system" name="operating_system">
+                                    <option value="">Select Operating System</option>
+                                    {% for os_id, os_name in operating_system_choices %}
+                                        <option value="{{ os_id }}" 
+                                                {% if is_edit and server.operating_system_ref and server.operating_system_ref.id == os_id %}selected{% endif %}>
+                                            {{ os_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="input-hint">
+                                <a href="{% url 'operating_system_list' stream=stream %}" target="_blank" class="text-primary">
+                                    <i data-lucide="settings" style="width: 12px; height: 12px;"></i>
+                                    Manage Operating Systems
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -765,15 +1351,15 @@
             </div>
         </div>
 
-        <!-- Technical Specifications Section -->
+        <!-- Section 3: Technical Specifications -->
         <div class="form-section" data-section="3" id="section-3">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-microchip"></i>
+                    <i data-lucide="cpu" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Technical Specifications</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#techSpecs">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
@@ -782,20 +1368,17 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="cpu_cores">
-                                <i class="fas fa-microchip me-2"></i>CPU Cores
+                                <i data-lucide="cpu" style="width: 14px; height: 14px;"></i>
+                                CPU Cores
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-processor"></i>
+                                    <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="number" class="form-control" id="cpu_cores" name="cpu_cores" 
                                        value="{% if is_edit %}{{ server.cpu_cores }}{% endif %}" 
                                        min="1" max="128" placeholder="8">
-                                <span class="input-group-text">cores</span>
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Number of CPU cores available
+                                <span class="input-group-text" style="background: var(--neutral-100); color: var(--neutral-600); border-radius: 0 var(--radius-md) var(--radius-md) 0;">cores</span>
                             </div>
                         </div>
                     </div>
@@ -803,20 +1386,17 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="ram_gb">
-                                <i class="fas fa-memory me-2"></i>RAM (GB)
+                                <i data-lucide="hard-drive" style="width: 14px; height: 14px;"></i>
+                                RAM (GB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-memory"></i>
+                                    <i data-lucide="database" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="number" class="form-control" id="ram_gb" name="ram_gb" 
                                        value="{% if is_edit %}{{ server.ram_gb }}{% endif %}" 
                                        min="1" max="1024" placeholder="16">
-                                <span class="input-group-text">GB</span>
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Total system memory in gigabytes
+                                <span class="input-group-text" style="background: var(--neutral-100); color: var(--neutral-600); border-radius: 0 var(--radius-md) var(--radius-md) 0;">GB</span>
                             </div>
                         </div>
                     </div>
@@ -824,20 +1404,17 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="storage_gb">
-                                <i class="fas fa-hdd me-2"></i>Storage (GB)
+                                <i data-lucide="hard-drive" style="width: 14px; height: 14px;"></i>
+                                Storage (GB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-database"></i>
+                                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="number" class="form-control" id="storage_gb" name="storage_gb" 
                                        value="{% if is_edit %}{{ server.storage_gb }}{% endif %}" 
                                        min="1" max="10240" placeholder="500">
-                                <span class="input-group-text">GB</span>
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Total storage capacity in gigabytes
+                                <span class="input-group-text" style="background: var(--neutral-100); color: var(--neutral-600); border-radius: 0 var(--radius-md) var(--radius-md) 0;">GB</span>
                             </div>
                         </div>
                     </div>
@@ -845,15 +1422,15 @@
             </div>
         </div>
 
-        <!-- Network Information Section -->
+        <!-- Section 4: Network Configuration -->
         <div class="form-section" data-section="4" id="section-4">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-network-wired"></i>
+                    <i data-lucide="network" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Network Configuration</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#networkInfo">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
@@ -862,19 +1439,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="mac_address">
-                                <i class="fas fa-ethernet me-2"></i>MAC Address
+                                <i data-lucide="wifi" style="width: 14px; height: 14px;"></i>
+                                MAC Address
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-network-wired"></i>
+                                    <i data-lucide="network" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="mac_address" name="mac_address" 
                                        value="{% if is_edit %}{{ server.mac_address }}{% endif %}" 
-                                       placeholder="00:00:00:00:00:00" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Physical network adapter address
+                                       placeholder="00:00:00:00:00:00">
                             </div>
                         </div>
                     </div>
@@ -882,19 +1456,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="domain">
-                                <i class="fas fa-globe-americas me-2"></i>Domain
+                                <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                                Domain
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-sitemap"></i>
+                                    <i data-lucide="share-2" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="domain" name="domain" 
                                        value="{% if is_edit %}{{ server.domain }}{% endif %}" 
                                        placeholder="company.local">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Network domain or workgroup
                             </div>
                         </div>
                     </div>
@@ -902,19 +1473,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="ssh_port">
-                                <i class="fas fa-terminal me-2"></i>SSH Port
+                                <i data-lucide="terminal" style="width: 14px; height: 14px;"></i>
+                                SSH Port
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-door-open"></i>
+                                    <i data-lucide="key" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="number" class="form-control" id="ssh_port" name="ssh_port" 
                                        value="{% if is_edit %}{{ server.ssh_port }}{% else %}22{% endif %}" 
                                        min="1" max="65535" placeholder="22">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                SSH service port number
                             </div>
                         </div>
                     </div>
@@ -922,15 +1490,15 @@
             </div>
         </div>
 
-        <!-- Business Information Section -->
+        <!-- Section 5: Business Information -->
         <div class="form-section" data-section="5" id="section-5">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-briefcase"></i>
+                    <i data-lucide="briefcase" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Business Information</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#businessInfo">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
@@ -939,41 +1507,39 @@
                     <div class="col-12">
                         <div class="form-group">
                             <label class="form-label" for="purpose">
-                                <i class="fas fa-bullseye me-2"></i>Purpose/Description
+                                <i data-lucide="target" style="width: 14px; height: 14px;"></i>
+                                Purpose/Description
                             </label>
-                            <div class="position-relative">
-                                <textarea class="form-control" id="purpose" name="purpose" rows="4" 
-                                          placeholder="Describe the server's purpose, usage, and any specific requirements..."
-                                          style="resize: vertical;">{% if is_edit %}{{ server.purpose }}{% endif %}</textarea>
-                                <small class="position-absolute bottom-0 end-0 me-3 mb-2 text-muted">
-                                    <span id="purposeCharCount">0</span>/500 characters
+                            <textarea class="form-control" id="purpose" name="purpose" rows="3" 
+                                      placeholder="Describe the server's purpose..."
+                                      style="resize: vertical;">{% if is_edit %}{{ server.purpose }}{% endif %}</textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <div class="form-help">
+                                    <i data-lucide="lightbulb" style="width: 12px; height: 12px;"></i>
+                                    Detailed description helps with resource planning
+                                </div>
+                                <small style="font-size: 0.6875rem; color: var(--neutral-400);">
+                                    <span id="purposeCharCount">0</span>/500
                                 </small>
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-lightbulb"></i>
-                                Detailed description helps with resource planning and maintenance
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="row g-4 mt-3">
+                <div class="row g-4 mt-2">
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label" for="project_allocation">
-                                <i class="fas fa-project-diagram me-2"></i>Project Allocation
+                                <i data-lucide="folder" style="width: 14px; height: 14px;"></i>
+                                Project Allocation
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-folder-open"></i>
+                                    <i data-lucide="folder-open" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="project_allocation" name="project_allocation" 
                                        value="{% if is_edit %}{{ server.project_allocation }}{% endif %}" 
                                        placeholder="Project or team assignment">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Associated project or team allocation
                             </div>
                         </div>
                     </div>
@@ -981,19 +1547,16 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label" for="cost_center">
-                                <i class="fas fa-calculator me-2"></i>Cost Center
+                                <i data-lucide="calculator" style="width: 14px; height: 14px;"></i>
+                                Cost Center
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-dollar-sign"></i>
+                                    <i data-lucide="dollar-sign" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="cost_center" name="cost_center" 
                                        value="{% if is_edit %}{{ server.cost_center }}{% endif %}" 
                                        placeholder="Financial cost center code">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Financial tracking and billing reference
                             </div>
                         </div>
                     </div>
@@ -1001,15 +1564,15 @@
             </div>
         </div>
 
-        <!-- Contact Information Section -->
+        <!-- Section 6: Contact Information -->
         <div class="form-section" data-section="6" id="section-6">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-address-book"></i>
+                    <i data-lucide="users" style="width: 20px; height: 20px;"></i>
                 </div>
                 <h4 class="section-title">Contact Information</h4>
                 <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#contactInfo">
-                    <i class="fas fa-chevron-up"></i>
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
@@ -1018,14 +1581,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="primary_contact">
-                                <i class="fas fa-user me-2"></i>Primary Contact
+                                <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                                Primary Contact
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user-circle"></i>
+                                    <i data-lucide="user-circle" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="primary_contact" name="primary_contact" 
-                                       value="{% if is_edit %}{{ server.primary_contact }}{% endif %}">
+                                       value="{% if is_edit %}{{ server.primary_contact }}{% endif %}"
+                                       placeholder="Primary contact name">
                             </div>
                         </div>
                     </div>
@@ -1033,14 +1598,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="secondary_contact">
-                                <i class="fas fa-users me-2"></i>Secondary Contact
+                                <i data-lucide="users" style="width: 14px; height: 14px;"></i>
+                                Secondary Contact
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user-friends"></i>
+                                    <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="text" class="form-control" id="secondary_contact" name="secondary_contact" 
-                                       value="{% if is_edit %}{{ server.secondary_contact }}{% endif %}">
+                                       value="{% if is_edit %}{{ server.secondary_contact }}{% endif %}"
+                                       placeholder="Secondary contact name">
                             </div>
                         </div>
                     </div>
@@ -1048,18 +1615,16 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label" for="contact_email">
-                                <i class="fas fa-envelope me-2"></i>Contact Email
+                                <i data-lucide="mail" style="width: 14px; height: 14px;"></i>
+                                Contact Email
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-at"></i>
+                                    <i data-lucide="at-sign" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="email" class="form-control" id="contact_email" name="contact_email" 
-                                       value="{% if is_edit %}{{ server.contact_email }}{% endif %}">
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                Primary email for server-related notifications
+                                       value="{% if is_edit %}{{ server.contact_email }}{% endif %}"
+                                       placeholder="email@company.com">
                             </div>
                         </div>
                     </div>
@@ -1067,179 +1632,125 @@
             </div>
         </div>
 
-        <!-- Dates and Maintenance Section -->
+        <!-- Section 7: Procurement & Tags -->
         <div class="form-section" data-section="7">
             <div class="section-header">
                 <div class="section-icon">
-                    <i class="fas fa-calendar-alt"></i>
+                    <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
                 </div>
-                <h4 class="section-title">Procurement Date</h4>
-                <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#maintenanceInfo">
-                    <i class="fas fa-chevron-up"></i>
+                <h4 class="section-title">Procurement Date & Tags</h4>
+                <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#procurementInfo">
+                    <i data-lucide="chevron-up" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
             
-            <div class="collapse show" id="maintenanceInfo">
+            <div class="collapse show" id="procurementInfo">
                 <div class="row g-4">
-                        <div class="col-lg-4">
-                            <div class="form-group required-field">
-                                <label class="form-label" for="stream_type">
-                                    <i class="fas fa-stream me-2"></i>Stream
-                                </label>
-                                <div>
-                                    <span class="badge bg-primary fs-6 px-3 py-2 mb-2" style="border-radius:8px;">
-                                        <i class="fas fa-stream me-2"></i>{{ stream }} Stream
-                                    </span>
-                                    <div style="height:12px;"></div>
-                                </div>
-                            </div>
-                        </div>
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label" for="procurement_date">
-                                <i class="fas fa-shopping-cart me-2"></i>Procurement Date
+                                <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+                                Procurement Date
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-calendar-plus"></i>
+                                    <i data-lucide="calendar-plus" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="date" class="form-control" id="procurement_date" name="procurement_date" 
                                        value="{% if is_edit and server.procurement_date %}{{ server.procurement_date|date:'Y-m-d' }}{% endif %}">
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label class="form-label" for="tags">
+                                <i data-lucide="tags" style="width: 14px; height: 14px;"></i>
+                                Tags
+                            </label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   value="{% if is_edit %}{{ server.tags }}{% endif %}" 
+                                   placeholder="Type and press Enter to add tags">
+                            <div id="tagsDisplay" class="mt-2"></div>
                             <div class="form-help">
-                                <i class="fas fa-info-circle"></i>
-                                When the server was purchased/acquired
+                                <i data-lucide="lightbulb" style="width: 12px; height: 12px;"></i>
+                                Press Enter to add each tag
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                
-            </div>
-        </div>
-
-        <!-- Additional Information Section -->
-        <div class="form-section" data-section="8">
-            <div class="section-header">
-                <div class="section-icon">
-                    <i class="fas fa-sticky-note"></i>
-                </div>
-                <h4 class="section-title">Additional Information & Tags</h4>
-                <button type="button" class="section-collapse" data-bs-toggle="collapse" data-bs-target="#additionalInfo">
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-            </div>
-            
-            <div class="collapse show" id="additionalInfo">
-                <div class="row g-4">
+                <div class="row g-4 mt-2">
                     <div class="col-12">
                         <div class="form-group">
                             <label class="form-label" for="notes">
-                                <i class="fas fa-comment-alt me-2"></i>Notes
+                                <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+                                Notes
                             </label>
-                            <div class="position-relative">
-                                <textarea class="form-control" id="notes" name="notes" rows="4" 
-                                          placeholder="Any additional notes, configurations, or special instructions..."
-                                          style="resize: vertical;">{% if is_edit %}{{ server.notes }}{% endif %}</textarea>
-                                <small class="position-absolute bottom-0 end-0 me-3 mb-2 text-muted">
-                                    <span id="notesCharCount">0</span>/1000 characters
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Additional notes or special instructions..."
+                                      style="resize: vertical;">{% if is_edit %}{{ server.notes }}{% endif %}</textarea>
+                            <div class="d-flex justify-content-end mt-1">
+                                <small style="font-size: 0.6875rem; color: var(--neutral-400);">
+                                    <span id="notesCharCount">0</span>/1000
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="row g-4 mt-3">
-                    <div class="col-12">
-                        <div class="form-group">
-                            <label class="form-label" for="tags">
-                                <i class="fas fa-tags me-2"></i>Tags
-                            </label>
-                            <div class="tags-container">
-                                <input type="text" class="form-control" id="tags" name="tags" 
-                                       value="{% if is_edit %}{{ server.tags }}{% endif %}" 
-                                       placeholder="Type tags and press Enter (e.g., production, backup, testing)">
-                                <div id="tagsDisplay" class="mt-2"></div>
-                            </div>
-                            <div class="form-help">
-                                <i class="fas fa-lightbulb"></i>
-                                Use tags to categorize and easily filter servers. Press Enter to add each tag.
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Action Buttons Section -->
-        <div class="form-section" data-section="9">
-            <div class="section-header">
-                <div class="section-icon">
-                    <i class="fas fa-check-circle"></i>
+        <!-- Action Section -->
+        <div class="action-section">
+            <div class="action-row">
+                <div class="action-left">
+                    <div class="auto-save-toggle">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enableAutoSave" checked>
+                            <label class="form-check-label" for="enableAutoSave">Auto-save</label>
+                        </div>
+                    </div>
+                    <div class="last-saved">
+                        <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                        Last saved: <span id="lastSavedTime">Never</span>
+                    </div>
                 </div>
-                <h4 class="section-title">Review & Submit</h4>
-            </div>
-            
-            <div class="btn-group-actions">
-                <div class="row align-items-center">
-                    <div class="col-lg-6">
-                        <div class="d-flex align-items-center">
-                            <div class="form-check form-switch me-4">
-                                <input class="form-check-input" type="checkbox" id="enableAutoSave" checked>
-                                <label class="form-check-label" for="enableAutoSave">
-                                    <i class="fas fa-save me-2"></i>Auto-save enabled
-                                </label>
-                            </div>
-                            <small class="text-muted">
-                                <i class="fas fa-clock me-1"></i>
-                                Last saved: <span id="lastSavedTime">Never</span>
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 text-end">
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-lg w-20" id="previewBtn">
-                                <i class="fas fa-eye me-2"></i>Preview
-                            </button>
-                            <a href="{% url 'build_servers_list' stream=stream %}" class="btn btn-secondary btn-lg w-20">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
-                            <button type="button" class="btn btn-outline-primary btn-lg w-20" id="saveAsDraftBtn">
-                                <i class="fas fa-save me-2"></i>Save as Draft
-                            </button>
-                            <button type="submit" class="btn btn-primary btn-lg w-20" id="submitBtn">
-                                <i class="fas fa-check me-2"></i>
-                                {% if is_edit %}Update Server{% else %}Create Server{% endif %}
-                            </button>
-                        </div>
-                    </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-outline" id="previewBtn">
+                        <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                        Preview
+                    </button>
+                    <a href="{% url 'build_servers_list' stream=stream %}" class="btn btn-secondary">
+                        <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success" id="submitBtn">
+                        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                        {% if is_edit %}Update Server{% else %}Create Server{% endif %}
+                    </button>
                 </div>
             </div>
         </div>
     </form>
-    </div>
 </div>
 
 <!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+<div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="previewModalLabel">
-                    <i class="fas fa-eye me-2"></i>Server Configuration Preview
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+                    Server Configuration Preview
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="previewContent">
-                <!-- Preview content will be populated by JavaScript -->
-            </div>
+            <div class="modal-body" id="previewContent"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Close
-                </button>
-                <button type="button" class="btn btn-primary" onclick="$('#serverForm').submit();">
-                    <i class="fas fa-save me-2"></i>
-                    {% if is_edit %}Update Server{% else %}Create Server{% endif %}
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="$('#serverForm').submit();">
+                    {% if is_edit %}Update{% else %}Create{% endif %} Server
                 </button>
             </div>
         </div>
@@ -1247,630 +1758,297 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<!-- Bootstrap 5 JS -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
+lucide.createIcons();
+
 $(document).ready(function() {
-    // Initialize form state
     let formData = {};
     let autoSaveEnabled = true;
     let autoSaveTimer;
-    const autoSaveInterval = 5000; // 5 seconds
+    const autoSaveInterval = 5000;
     
-    // Initialize character counters
     updateCharacterCount('#purpose', '#purposeCharCount', 500);
     updateCharacterCount('#notes', '#notesCharCount', 1000);
-    
-    // Initialize tags system
     initializeTagsSystem();
-    
-    // Initialize smart suggestions
-    initializeSmartSuggestions();
-    
-    // Initialize progress wizard
     updateProgressWizard();
-    
-    // Initialize status indicator
     updateStatusIndicator();
     
-    // Initialize warranty status check
-    checkWarrantyStatus();
+    if (autoSaveEnabled) startAutoSave();
     
-    // Auto-save functionality
-    if (autoSaveEnabled) {
-        startAutoSave();
-    }
-    
-    // Form validation and submission
     $('#serverForm').on('submit', function(e) {
         e.preventDefault();
         if (validateForm()) {
             showLoadingOverlay();
-            const form = this;
-            // Simulate API call delay
-            setTimeout(() => {
-                HTMLFormElement.prototype.submit.call(form);
-            }, 1000);
+            setTimeout(() => HTMLFormElement.prototype.submit.call(this), 800);
         }
     });
 
-    // Real-time validation
     $('input, select, textarea').on('input change', function() {
         validateField($(this));
         updateProgressWizard();
-        if (autoSaveEnabled && autoSaveTimer) {
+        if (autoSaveEnabled) {
             clearTimeout(autoSaveTimer);
             autoSaveTimer = setTimeout(performAutoSave, autoSaveInterval);
         }
     });
 
-    // IP address validation and hostname suggestion
     $('#ip_address').on('input', function() {
         const ip = $(this).val();
         const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-        
         if (ip && ipRegex.test(ip)) {
-            // Validate IP ranges
             const octets = ip.split('.').map(Number);
-            const isValid = octets.every(octet => octet >= 0 && octet <= 255);
-            
-            if (isValid) {
+            if (octets.every(o => o >= 0 && o <= 255)) {
                 $(this).removeClass('is-invalid').addClass('is-valid');
                 suggestHostname(ip);
             } else {
                 $(this).removeClass('is-valid').addClass('is-invalid');
-                showFieldError($(this), 'Invalid IP address range');
             }
         } else if (ip) {
             $(this).removeClass('is-valid').addClass('is-invalid');
-            showFieldError($(this), 'Invalid IP address format');
         } else {
             $(this).removeClass('is-valid is-invalid');
         }
     });
 
-    // MAC address formatting
     $('#mac_address').on('input', function() {
-        let value = $(this).val().replace(/[^0-9A-Fa-f]/g, '');
-        if (value.length > 12) value = value.substring(0, 12);
-        
-        let formatted = value.match(/.{1,2}/g);
-        if (formatted) {
-            $(this).val(formatted.join(':'));
-        }
+        let v = $(this).val().replace(/[^0-9A-Fa-f]/g, '').substring(0, 12);
+        let f = v.match(/.{1,2}/g);
+        if (f) $(this).val(f.join(':'));
     });
 
-    // Status change handler
-    $('#status').on('change', function() {
-        updateStatusIndicator();
-    });
-
-    // Warranty date validation
-    $('#warranty_expiry').on('change', function() {
-        checkWarrantyStatus();
-    });
-
-    // Section collapse handlers
-    $('.section-collapse').on('click', function() {
-        const icon = $(this).find('i');
-        const isExpanded = icon.hasClass('fa-chevron-down');
-        
-        icon.toggleClass('fa-chevron-up fa-chevron-down');
-        
-        // Animate icon rotation
-        icon.css('transform', isExpanded ? 'rotate(180deg)' : 'rotate(0deg)');
-    });
-
-    // Maintenance date suggestion
-    $('#suggestMaintenance').on('click', function() {
-        const lastMaintenance = new Date($('#last_maintenance').val());
-        if (lastMaintenance && !isNaN(lastMaintenance)) {
-            // Suggest 6 months from last maintenance
-            const nextMaintenance = new Date(lastMaintenance);
-            nextMaintenance.setMonth(nextMaintenance.getMonth() + 6);
-            $('#next_maintenance').val(nextMaintenance.toISOString().split('T')[0]);
-            
-            // Show success message
-            showSmartSuggestion('next_maintenance', 'Suggested maintenance date based on 6-month interval');
-        } else {
-            // Suggest 3 months from today if no last maintenance
-            const today = new Date();
-            const nextMaintenance = new Date(today);
-            nextMaintenance.setMonth(nextMaintenance.getMonth() + 3);
-            $('#next_maintenance').val(nextMaintenance.toISOString().split('T')[0]);
-            
-            showSmartSuggestion('next_maintenance', 'Suggested maintenance date (3 months from today)');
-        }
-    });
-
-    // Auto-save toggle
+    $('#status').on('change', updateStatusIndicator);
     $('#enableAutoSave').on('change', function() {
         autoSaveEnabled = $(this).is(':checked');
-        if (autoSaveEnabled) {
-            startAutoSave();
-        } else {
-            clearTimeout(autoSaveTimer);
-            hideAutoSaveStatus();
-        }
+        if (autoSaveEnabled) startAutoSave();
+        else clearTimeout(autoSaveTimer);
     });
-
-    // Preview functionality
     $('#previewBtn').on('click', function() {
         generatePreview();
         $('#previewModal').modal('show');
     });
 
-    // Draft save functionality
-    $('#saveAsDraftBtn').on('click', function() {
-        saveFormAsDraft();
-    });
-
-    // Progress wizard navigation
-    $('.progress-step').on('click', function() {
+    $('.progress-step-item').on('click', function() {
         const target = $(this).data('target');
-        const step = $(this).data('step');
-        
         if (target) {
-            // Smooth scroll to section
-            $('html, body').animate({
-                scrollTop: $(target).offset().top - 120 // Account for sticky progress bar
-            }, 500);
-            
-            // Update active step
-            $('.progress-step').removeClass('active');
+            $('html, body').animate({ scrollTop: $(target).offset().top - 120 }, 500);
+            $('.progress-step-item').removeClass('active');
             $(this).addClass('active');
         }
     });
 
-    // Update active step on scroll
     $(window).on('scroll', function() {
         const scrollTop = $(window).scrollTop();
-        const sections = $('.form-section');
-        
-        sections.each(function() {
+        $('.form-section').each(function() {
             const section = $(this);
             const sectionTop = section.offset().top - 150;
-            const sectionBottom = sectionTop + section.outerHeight();
-            const sectionId = section.attr('id');
             const stepNumber = section.data('section');
-            
-            if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
-                $('.progress-step').removeClass('active');
-                $(`.progress-step[data-step="${stepNumber}"]`).addClass('active');
+            if (scrollTop >= sectionTop && scrollTop < sectionTop + section.outerHeight() && stepNumber) {
+                $('.progress-step-item').removeClass('active');
+                $(`.progress-step-item[data-step="${stepNumber}"]`).addClass('active');
             }
         });
     });
 
-    // Utility Functions
     function validateForm() {
         let isValid = true;
-        const requiredFields = ['hostname', 'ip_address', 'location', 'floor', 'owner', 'stream_type', 'status'];
-        
-        requiredFields.forEach(fieldId => {
-            const field = $(`#${fieldId}`);
-            if (!field.val().trim()) {
-                field.addClass('is-invalid');
-                showFieldError(field, 'This field is required');
+        ['hostname', 'ip_address', 'location', 'floor', 'owner', 'status'].forEach(id => {
+            const f = $(`#${id}`);
+            if (!f.val() || !f.val().trim()) {
+                f.addClass('is-invalid');
                 isValid = false;
             }
         });
-
+        if (!isValid) {
+            const first = $('.is-invalid').first();
+            if (first.length) $('html, body').animate({ scrollTop: first.offset().top - 150 }, 500);
+        }
         return isValid;
     }
 
     function validateField(field) {
         const value = field.val();
-        const fieldId = field.attr('id');
-        
-        // Remove previous validation classes
         field.removeClass('is-invalid is-valid');
-        
-        // Required field validation
-        if (field.closest('.required-field').length && !value.trim()) {
-            if (field.is(':focus') === false) {
-                field.addClass('is-invalid');
-                showFieldError(field, 'This field is required');
-            }
+        if (field.closest('.required-field').length && (!value || !value.trim()) && !field.is(':focus')) {
+            field.addClass('is-invalid');
             return false;
         }
-        
-        // Field-specific validation
-        switch (fieldId) {
-            case 'ip_address':
-                const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-                if (value && !ipRegex.test(value)) {
-                    field.addClass('is-invalid');
-                    showFieldError(field, 'Invalid IP address format');
-                    return false;
-                }
-                break;
-                
-            case 'contact_email':
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (value && !emailRegex.test(value)) {
-                    field.addClass('is-invalid');
-                    showFieldError(field, 'Invalid email format');
-                    return false;
-                }
-                break;
-                
-            case 'mac_address':
-                const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-                if (value && !macRegex.test(value)) {
-                    field.addClass('is-invalid');
-                    showFieldError(field, 'Invalid MAC address format');
-                    return false;
-                }
-                break;
-        }
-        
-        if (value.trim()) {
-            field.addClass('is-valid');
-            hideFieldError(field);
-        }
-        
+        if (value && value.trim()) field.addClass('is-valid');
         return true;
     }
 
-    function showFieldError(field, message) {
-        // Remove existing error message
-        field.siblings('.invalid-feedback').remove();
-        
-        // Add new error message
-        field.after(`<div class="invalid-feedback">${message}</div>`);
-    }
-
-    function hideFieldError(field) {
-        field.siblings('.invalid-feedback').remove();
-    }
-
     function suggestHostname(ip) {
-        const hostname = $('#hostname');
-        if (!hostname.val().trim()) {
-            const suggestion = 'server-' + ip.replace(/\./g, '-');
-            hostname.val(suggestion);
-            showSmartSuggestion('hostname', 'Auto-suggested hostname based on IP address');
-        }
+        const h = $('#hostname');
+        if (!h.val().trim()) h.val('server-' + ip.replace(/\./g, '-'));
     }
 
-    function showSmartSuggestion(fieldId, message) {
-        const field = $(`#${fieldId}`);
-        const existingSuggestion = field.siblings('.smart-suggestion');
-        
-        if (existingSuggestion.length) {
-            existingSuggestion.remove();
+    function updateCharacterCount(sel, counter, max) {
+        const t = $(sel), c = $(counter);
+        function update() {
+            const len = t.val().length;
+            c.text(len);
+            c.css('color', len > max ? 'var(--error-500)' : len > max * 0.8 ? 'var(--warning-500)' : 'var(--neutral-400)');
         }
-        
-        const suggestion = $(`<div class="smart-suggestion"><i class="fas fa-lightbulb me-2"></i>${message}</div>`);
-        field.after(suggestion);
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            suggestion.fadeOut(() => suggestion.remove());
-        }, 5000);
-    }
-
-    function updateCharacterCount(textareaSelector, counterSelector, maxLength) {
-        const textarea = $(textareaSelector);
-        const counter = $(counterSelector);
-        
-        function updateCount() {
-            const currentLength = textarea.val().length;
-            counter.text(currentLength);
-            
-            if (currentLength > maxLength) {
-                counter.addClass('text-danger');
-                textarea.addClass('is-invalid');
-            } else {
-                counter.removeClass('text-danger');
-                textarea.removeClass('is-invalid');
-            }
-        }
-        
-        textarea.on('input', updateCount);
-        updateCount(); // Initial update
+        t.on('input', update);
+        update();
     }
 
     function initializeTagsSystem() {
-        const tagsInput = $('#tags');
-        const tagsDisplay = $('#tagsDisplay');
-        let tags = [];
-        
-        // Load existing tags
-        const existingTags = tagsInput.val();
-        if (existingTags) {
-            tags = existingTags.split(',').map(tag => tag.trim()).filter(tag => tag);
-            displayTags();
-        }
-        
-        tagsInput.on('keypress', function(e) {
-            if (e.which === 13) { // Enter key
+        const input = $('#tags'), display = $('#tagsDisplay');
+        let tags = input.val() ? input.val().split(',').map(t => t.trim()).filter(t => t) : [];
+        displayTags();
+        input.on('keypress', function(e) {
+            if (e.which === 13) {
                 e.preventDefault();
                 const tag = $(this).val().trim();
                 if (tag && !tags.includes(tag)) {
                     tags.push(tag);
                     $(this).val('');
                     displayTags();
-                    updateHiddenTagsInput();
+                    input.val(tags.join(', '));
                 }
             }
         });
-        
         function displayTags() {
-            tagsDisplay.empty();
-            tags.forEach((tag, index) => {
-                const tagElement = $(`
-                    <span class="tag-item">
-                        ${tag}
-                        <span class="tag-remove" data-index="${index}">
-                            <i class="fas fa-times"></i>
-                        </span>
-                    </span>
-                `);
-                tagsDisplay.append(tagElement);
+            display.empty();
+            tags.forEach((tag, i) => {
+                display.append(`<span class="tag-item">${tag}<span class="tag-remove" data-index="${i}"><i data-lucide="x" style="width:12px;height:12px;"></i></span></span>`);
             });
-            
-            // Add remove handlers
+            lucide.createIcons();
             $('.tag-remove').on('click', function() {
-                const index = $(this).data('index');
-                tags.splice(index, 1);
+                tags.splice($(this).data('index'), 1);
                 displayTags();
-                updateHiddenTagsInput();
+                input.val(tags.join(', '));
             });
         }
-        
-        function updateHiddenTagsInput() {
-            tagsInput.val(tags.join(', '));
-        }
-    }
-
-    function initializeSmartSuggestions() {
-        // Smart OS suggestions based on other fields
-        $('#stream_type, #project_allocation').on('change input', function() {
-            const streamType = $('#stream_type').val();
-            const project = $('#project_allocation').val().toLowerCase();
-            
-            let suggestedOS = '';
-            if (streamType === 'windows' || project.includes('windows')) {
-                suggestedOS = 'Windows Server 2022';
-            } else if (streamType === 'linux' || project.includes('linux')) {
-                suggestedOS = 'Ubuntu 22.04 LTS';
-            }
-            
-            if (suggestedOS && !$('#operating_system').val()) {
-                $('#operating_system').val(suggestedOS);
-                showSmartSuggestion('operating_system', `Suggested based on stream type: ${suggestedOS}`);
-            }
-        });
     }
 
     function updateProgressWizard() {
         const sections = [
             ['hostname', 'ip_address', 'location', 'floor', 'owner'],
-            ['stream_type', 'status'],
+            ['status', 'operating_system'],
             ['cpu_cores', 'ram_gb', 'storage_gb'],
             ['mac_address', 'domain', 'ssh_port'],
             ['purpose', 'project_allocation'],
-            ['primary_contact', 'contact_email'],
-            ['procurement_date', 'warranty_expiry']
+            ['primary_contact', 'contact_email']
         ];
-        
-        sections.forEach((sectionFields, index) => {
-            const step = index + 1;
-            const stepElement = $(`.progress-step[data-step="${step}"]`);
-            
-            const filledFields = sectionFields.filter(fieldId => {
-                const value = $(`#${fieldId}`).val();
-                return value && value.trim();
-            });
-            
-            const completionRate = filledFields.length / sectionFields.length;
-            
-            stepElement.removeClass('active completed');
-            if (completionRate === 1) {
-                stepElement.addClass('completed');
-            } else if (completionRate > 0) {
-                stepElement.addClass('active');
-            }
+        sections.forEach((fields, i) => {
+            const step = $(`.progress-step-item[data-step="${i + 1}"]`);
+            const filled = fields.filter(id => { const v = $(`#${id}`).val(); return v && v.trim(); });
+            step.removeClass('completed');
+            if (filled.length === fields.length) step.addClass('completed');
         });
     }
 
     function updateStatusIndicator() {
-        const status = $('#status').val();
-        const indicator = $('#statusIndicator');
-        
-        indicator.removeClass('text-success text-danger text-warning text-secondary');
-        
-        switch (status) {
-            case 'Active':
-                indicator.addClass('text-success');
-                break;
-            case 'Inactive':
-            case 'Offline':
-                indicator.addClass('text-danger');
-                break;
-            case 'Maintenance':
-                indicator.addClass('text-warning');
-                break;
-            default:
-                indicator.addClass('text-secondary');
-        }
-    }
-
-    function checkWarrantyStatus() {
-        const warrantyDate = new Date($('#warranty_expiry').val());
-        const today = new Date();
-        const statusElement = $('#warrantyStatus');
-        
-        if (!isNaN(warrantyDate)) {
-            const daysDiff = Math.ceil((warrantyDate - today) / (1000 * 60 * 60 * 24));
-            
-            if (daysDiff < 0) {
-                statusElement.html('<i class="fas fa-exclamation-triangle text-danger"></i> Warranty expired').addClass('text-danger');
-            } else if (daysDiff <= 30) {
-                statusElement.html(`<i class="fas fa-exclamation-triangle text-warning"></i> Expires in ${daysDiff} days`).addClass('text-warning');
-            } else {
-                statusElement.html(`<i class="fas fa-shield-alt text-success"></i> ${daysDiff} days remaining`).addClass('text-success');
-            }
-        }
+        const s = $('#status').val(), i = $('#statusIndicator');
+        i.removeClass('status-active status-inactive status-maintenance status-offline');
+        if (s === 'Active') i.addClass('status-active');
+        else if (s === 'Inactive' || s === 'Offline') i.addClass('status-inactive');
+        else if (s === 'Maintenance') i.addClass('status-maintenance');
+        else i.addClass('status-offline');
     }
 
     function startAutoSave() {
         autoSaveTimer = setInterval(() => {
-            if (formHasChanges()) {
-                performAutoSave();
-            }
+            if ($('#serverForm').serialize() !== formData) performAutoSave();
         }, autoSaveInterval);
-    }
-
-    function formHasChanges() {
-        const currentData = $('#serverForm').serialize();
-        return currentData !== formData;
     }
 
     function performAutoSave() {
         formData = $('#serverForm').serialize();
-        showAutoSaveStatus('saving');
-        
-        // Simulate auto-save API call
+        const el = $('#autoSaveStatus'), txt = el.find('.status-text');
+        el.removeClass('saving saved').addClass('saving show');
+        txt.text('Auto-saving...');
         setTimeout(() => {
-            showAutoSaveStatus('saved');
-            updateLastSavedTime();
+            el.removeClass('saving').addClass('saved');
+            txt.text('Auto-saved');
+            $('#lastSavedTime').text(new Date().toLocaleTimeString());
+            setTimeout(() => el.removeClass('show'), 3000);
         }, 1000);
-    }
-
-    function showAutoSaveStatus(status) {
-        const statusElement = $('#autoSaveStatus');
-        const statusText = statusElement.find('.status-text');
-        
-        statusElement.removeClass('saving saved').addClass(status + ' show');
-        
-        if (status === 'saving') {
-            statusText.text('Auto-saving...');
-        } else if (status === 'saved') {
-            statusText.text('Auto-saved');
-            setTimeout(() => {
-                statusElement.removeClass('show');
-            }, 3000);
-        }
-    }
-
-    function hideAutoSaveStatus() {
-        $('#autoSaveStatus').removeClass('show');
-    }
-
-    function updateLastSavedTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString();
-        $('#lastSavedTime').text(timeString);
     }
 
     function showLoadingOverlay() {
         $('#loadingOverlay').show().css('display', 'flex');
     }
 
-    function hideLoadingOverlay() {
-        $('#loadingOverlay').hide();
-    }
-
     function generatePreview() {
-        const formData = {
+        const d = {
             hostname: $('#hostname').val(),
             ip_address: $('#ip_address').val(),
             location: $('#location').val(),
             floor: $('#floor option:selected').text(),
             owner: $('#owner').val(),
-            stream_type: $('#stream_type option:selected').text(),
             status: $('#status option:selected').text(),
-            operating_system: $('#operating_system').val(),
+            operating_system: $('#operating_system option:selected').text(),
             cpu_cores: $('#cpu_cores').val(),
             ram_gb: $('#ram_gb').val(),
             storage_gb: $('#storage_gb').val(),
             purpose: $('#purpose').val(),
             tags: $('#tags').val()
         };
-        
-        const previewHTML = `
+        $('#previewContent').html(`
             <div class="row">
                 <div class="col-md-6">
-                    <h6><i class="fas fa-info-circle text-primary"></i> Basic Information</h6>
-                    <table class="table table-sm">
-                        <tr><td><strong>Hostname:</strong></td><td>${formData.hostname || 'Not specified'}</td></tr>
-                        <tr><td><strong>IP Address:</strong></td><td>${formData.ip_address || 'Not specified'}</td></tr>
-                        <tr><td><strong>Location:</strong></td><td>${formData.location || 'Not specified'}</td></tr>
-                        <tr><td><strong>Floor:</strong></td><td>${formData.floor || 'Not specified'}</td></tr>
-                        <tr><td><strong>Owner:</strong></td><td>${formData.owner || 'Not specified'}</td></tr>
-                    </table>
+                    <div class="preview-section">
+                        <div class="preview-section-title"><i data-lucide="info" style="width:16px;height:16px;"></i> Basic Information</div>
+                        <table class="preview-table">
+                            <tr><td>Hostname</td><td>${d.hostname || 'Not specified'}</td></tr>
+                            <tr><td>IP Address</td><td>${d.ip_address || 'Not specified'}</td></tr>
+                            <tr><td>Location</td><td>${d.location || 'Not specified'}</td></tr>
+                            <tr><td>Floor</td><td>${d.floor || 'Not specified'}</td></tr>
+                            <tr><td>Owner</td><td>${d.owner || 'Not specified'}</td></tr>
+                        </table>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <h6><i class="fas fa-cogs text-primary"></i> Technical Details</h6>
-                    <table class="table table-sm">
-                        <tr><td><strong>Stream Type:</strong></td><td>${formData.stream_type || 'Not specified'}</td></tr>
-                        <tr><td><strong>Status:</strong></td><td>${formData.status || 'Not specified'}</td></tr>
-                        <tr><td><strong>OS:</strong></td><td>${formData.operating_system || 'Not specified'}</td></tr>
-                        <tr><td><strong>CPU Cores:</strong></td><td>${formData.cpu_cores || 'Not specified'}</td></tr>
-                        <tr><td><strong>RAM:</strong></td><td>${formData.ram_gb ? formData.ram_gb + ' GB' : 'Not specified'}</td></tr>
-                    </table>
+                    <div class="preview-section">
+                        <div class="preview-section-title"><i data-lucide="cpu" style="width:16px;height:16px;"></i> Technical Details</div>
+                        <table class="preview-table">
+                            <tr><td>Status</td><td>${d.status || 'Not specified'}</td></tr>
+                            <tr><td>OS</td><td>${d.operating_system || 'Not specified'}</td></tr>
+                            <tr><td>CPU</td><td>${d.cpu_cores ? d.cpu_cores + ' cores' : 'Not specified'}</td></tr>
+                            <tr><td>RAM</td><td>${d.ram_gb ? d.ram_gb + ' GB' : 'Not specified'}</td></tr>
+                            <tr><td>Storage</td><td>${d.storage_gb ? d.storage_gb + ' GB' : 'Not specified'}</td></tr>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-12">
-                    <h6><i class="fas fa-clipboard-list text-primary"></i> Purpose & Tags</h6>
-                    <p><strong>Purpose:</strong> ${formData.purpose || 'Not specified'}</p>
-                    <p><strong>Tags:</strong> ${formData.tags || 'None'}</p>
+                    <div class="preview-section">
+                        <div class="preview-section-title"><i data-lucide="file-text" style="width:16px;height:16px;"></i> Purpose & Tags</div>
+                        <p style="color:var(--neutral-700);font-size:0.875rem;"><strong>Purpose:</strong> ${d.purpose || 'Not specified'}</p>
+                        <p style="color:var(--neutral-700);font-size:0.875rem;"><strong>Tags:</strong> ${d.tags || 'None'}</p>
+                    </div>
                 </div>
             </div>
-        `;
-        
-        $('#previewContent').html(previewHTML);
+        `);
+        lucide.createIcons();
     }
 
-    function saveFormAsDraft() {
-        showLoadingOverlay();
-        // Simulate draft save
-        setTimeout(() => {
-            hideLoadingOverlay();
-            alert('Form saved as draft successfully!');
-        }, 1000);
-    }
-
-    // Global utility functions
     window.resetForm = function() {
-        if (confirm('Are you sure you want to reset all form data?')) {
+        if (confirm('Reset all form data?')) {
             $('#serverForm')[0].reset();
             $('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
-            $('.smart-suggestion, .invalid-feedback').remove();
             $('#tagsDisplay').empty();
             updateProgressWizard();
         }
     };
-
     window.saveAsDraft = function() {
-        saveFormAsDraft();
+        showLoadingOverlay();
+        setTimeout(() => { $('#loadingOverlay').hide(); alert('Form saved as draft!'); }, 1000);
     };
-
     window.exportConfig = function() {
-        const config = {
-            hostname: $('#hostname').val(),
-            ip_address: $('#ip_address').val(),
-            // Add all other fields as needed
-        };
-        
-        const dataStr = JSON.stringify(config, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `server-config-${config.hostname || 'new'}.json`;
-        link.click();
+        const cfg = { hostname: $('#hostname').val(), ip_address: $('#ip_address').val() };
+        const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `server-config-${cfg.hostname || 'new'}.json`;
+        a.click();
     };
 });
 </script>
-{% endblock %}
-
 </body>
 </html>

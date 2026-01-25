@@ -7,11 +7,27 @@ let activeFloor = 2; // Default to 2nd floor
 let locationMarkers = {};
 let mapVisible = false; // Track if map view is visible
 let isDraggingMarker = false; // Flag to track marker dragging state
+let mapInitialized = false; // Track if map has been initialized
     
 // Initialize the map
 function initMap() {
-    if (!document.getElementById('floorMap')) {
+    const floorMapElement = document.getElementById('floorMap');
+    if (!floorMapElement) {
         console.error('Map container not found');
+        return;
+    }
+    
+    // Check if map container has dimensions
+    const containerRect = floorMapElement.getBoundingClientRect();
+    if (containerRect.width === 0 || containerRect.height === 0) {
+        console.warn('Map container has no dimensions, retrying in 200ms...');
+        setTimeout(initMap, 200);
+        return;
+    }
+    
+    // If map is already initialized, just invalidate size
+    if (map && mapInitialized) {
+        map.invalidateSize();
         return;
     }
     
@@ -28,6 +44,8 @@ function initMap() {
         maxZoom: isPicStream ? 3 : 2,
         zoomControl: true
     });
+    
+    mapInitialized = true;
     
     // Define map bounds
     // Use proper aspect ratio bounds for PIC stream to prevent stretching
@@ -138,29 +156,24 @@ function initMap() {
     renderFloorMarkers(activeFloor);
 }
 
-// Render markers for a specific floor
+// Render markers for all locations (floor filtering disabled)
 function renderFloorMarkers(floor) {
     // Clear any existing markers
     clearMarkers();
     
-    // Update the floor plan to show current floor
+    // Update the floor plan
     updateFloorPlan(floor);
     
     // Skip adding markers for PIC stream
     if (typeof currentStream !== 'undefined' && currentStream === 'PIC') {
-        updateFloorButtons(floor);
         return;
     }
     
-    // Add markers for all locations on the current floor
+    // Add markers for ALL locations (no floor filtering)
     Object.values(locationData).forEach(location => {
-        // Extract floor from location name
-        const locationFloor = getFloorFromName(location.name);
-        
-        if (locationFloor === floor) {
-            // Create marker with style based on location type
-            const locationType = location.type || getLocationType(location.name);
-            let markerIcon = getMarkerIcon(locationType);
+        // Create marker with style based on location type
+        const locationType = location.type || getLocationType(location.name);
+        let markerIcon = getMarkerIcon(locationType);
             
             let marker = L.marker(location.coords, {
                 icon: markerIcon,
@@ -206,11 +219,7 @@ function renderFloorMarkers(floor) {
             
             // Store marker reference for later removal
             locationMarkers[location.id] = marker;
-        }
     });
-    
-    // Update active floor button styling
-    updateFloorButtons(floor);
 }
 
 // Get appropriate marker icon based on location type
@@ -253,83 +262,16 @@ function clearMarkers() {
     locationMarkers = {};
 }
 
-// Generate floor buttons based on location data
+// Generate floor buttons - disabled since floor filtering is not used
 function generateFloorButtons() {
-    // Get unique floors from locations
-    const floors = [];
-    const floorSet = new Set();
-    
-    // Extract floor numbers from locationData
-    Object.values(locationData).forEach(location => {
-        // Extract floor from the name
-        const floorNum = getFloorFromName(location.name);
-        if (!floorSet.has(floorNum)) {
-            floors.push(floorNum);
-            floorSet.add(floorNum);
-        }
-    });
-    
-    // If no floors were found, add default floors
-    if (floors.length === 0) {
-        floors.push(1, 2, 3);
-    }
-    
-    // Sort floors numerically
-    floors.sort((a, b) => a - b);
-    
-    // Get the floor controls container
-    const floorControls = document.querySelector('.floor-controls');
-    if (!floorControls) return;
-    
-    // Clear existing buttons
-    floorControls.innerHTML = '';
-    
-    // Create a button for each floor
-    floors.forEach(floor => {
-        const btn = document.createElement('button');
-        btn.className = 'floor-btn';
-        btn.setAttribute('data-floor', floor);
-        
-        // Add the ordinal suffix
-        let suffix = 'th';
-        if (floor % 10 === 1 && floor % 100 !== 11) suffix = 'st';
-        else if (floor % 10 === 2 && floor % 100 !== 12) suffix = 'nd';
-        else if (floor % 10 === 3 && floor % 100 !== 13) suffix = 'rd';
-        
-        btn.textContent = `${floor}${suffix} Floor`;
-        
-        // Add click event
-        btn.addEventListener('click', function() {
-            const floorNum = parseInt(this.getAttribute('data-floor'));
-            activeFloor = floorNum;
-            renderFloorMarkers(floorNum);
-        });
-        
-        floorControls.appendChild(btn);
-    });
-    
-    // Set the first button as active
-    if (floors.length > 0) {
-        activeFloor = floors[0];
-        const firstBtn = floorControls.querySelector('.floor-btn');
-        if (firstBtn) {
-            firstBtn.classList.add('active');
-        }
-    }
+    // Floor buttons are disabled - all locations shown on single map
+    return;
 }
 
-// Update floor buttons to highlight active floor
+// Update floor buttons to highlight active floor - disabled
 function updateFloorButtons(activeFloor) {
-    document.querySelectorAll('.floor-btn').forEach(btn => {
-        const floor = parseInt(btn.getAttribute('data-floor'));
-        if (floor === activeFloor) {
-            btn.style.background = '#005fa3';
-            btn.style.color = 'white';
-        } else {
-            btn.style.background = '#e3f0fa';
-            btn.style.color = '#005fa3';
-        }
-    });
+    // Floor buttons are disabled
+    return;
 }
 
 // Show location details modal
@@ -479,53 +421,21 @@ function updateFloorPlan(floor) {
     ctx.fillText('LakeSide', canvasSize/4, 50);
     ctx.fillText('RoadSide', 3*canvasSize/4, 50);
     
-    // Draw room layouts that might differ by floor
+    // Draw room layouts
     ctx.strokeStyle = '#005fa3';
     ctx.lineWidth = 3;
     
-    // Rooms that appear on all floors
-    ctx.strokeRect(100, 100, 300, 300); // Common room 1
-    ctx.strokeRect(600, 100, 300, 300); // Common room 2
+    // Room areas
+    ctx.strokeRect(100, 100, 300, 300); // Room 1
+    ctx.strokeRect(600, 100, 300, 300); // Room 2
+    ctx.strokeRect(100, 500, 400, 200); // Room 3
+    ctx.strokeRect(550, 500, 350, 200); // Room 4
     
-    // Floor-specific rooms
-    if (floor === 1 || floor === 2) {
-        // Lower floors have more divided spaces
-        ctx.strokeRect(100, 500, 200, 200);
-        ctx.strokeRect(350, 500, 300, 200);
-        ctx.strokeRect(700, 500, 200, 200);
-    } else if (floor === 3 || floor === 4) {
-        // Middle floors have medium divisions
-        ctx.strokeRect(100, 500, 400, 200);
-        ctx.strokeRect(550, 500, 350, 200);
-    } else {
-        // Higher floors have more open plans
-        ctx.strokeRect(100, 500, 800, 200);
-    }
-    
-    // Add floor specific text
-    let floorDescription = '';
-    switch(floor) {
-        case 1:
-            floorDescription = '';
-            break;
-        case 2:
-            floorDescription = '';
-            break;
-        case 3:
-            floorDescription = '';
-            break;
-        case 4:
-            floorDescription = '';
-            break;
-        default:
-            floorDescription = '';
-    }
-    
-    // Add floor label with description
+    // Add location map label
     ctx.fillStyle = '#005fa3';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Floor ${floor}  ${floorDescription}`, 50, 950);
+    ctx.fillText('Location Map', 50, 950);
     
     // Create a data URL from the canvas or use custom image for PIC stream
     let imageUrl = canvas.toDataURL();
@@ -553,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mapView = document.getElementById('mapView');
     const tableView = document.getElementById('tableView');
     const cardView = document.getElementById('cardView');
+    const toggleViewBtn = document.getElementById('toggleView');
     
     // Initialize mapVisible variable based on the actual display state
     mapVisible = mapView && window.getComputedStyle(mapView).display === 'block';
@@ -560,6 +471,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update the toggle button icon to match the current state
     if (toggleMapViewBtn) {
         toggleMapViewBtn.querySelector('i').className = mapVisible ? 'fas fa-times' : 'fas fa-map';
+        if (mapVisible) {
+            toggleMapViewBtn.classList.add('active');
+        }
     }
     
     if (toggleMapViewBtn) {
@@ -579,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapView.style.display = 'none';
                 
                 // Show the previously active view (table or card)
-                if (document.getElementById('toggleView').querySelector('i').className.includes('list')) {
+                if (toggleViewBtn && toggleViewBtn.querySelector('i').className.includes('list')) {
                     cardView.style.display = 'block';
                 } else {
                     tableView.style.display = 'block';
@@ -588,8 +502,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapVisible = false;
                 console.log("Map hidden. mapVisible =", mapVisible);
                 
-                // Update icon to reflect that map can be opened
+                // Update icon and remove active class
                 this.querySelector('i').className = 'fas fa-map';
+                this.classList.remove('active');
             } else {
                 // Hide table and card views, show map view
                 tableView.style.display = 'none';
@@ -599,8 +514,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapVisible = true;
                 console.log("Map shown. mapVisible =", mapVisible);
                 
-                // Update icon to reflect that map can be closed
+                // Update icon and add active class
                 this.querySelector('i').className = 'fas fa-times';
+                this.classList.add('active');
+                
+                // Remove active class from toggle view button
+                if (toggleViewBtn) {
+                    toggleViewBtn.classList.remove('active');
+                }
                 
                 // Generate location data from DOM if it exists in window context
                 if (typeof populateLocationData === 'function') {
@@ -608,9 +529,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Initialize map if not already done
-                if (!map) {
+                if (!mapInitialized) {
                     setTimeout(() => {
                         initMap();
+                    }, 100);
+                } else if (map) {
+                    // Invalidate map size to fix rendering issues
+                    setTimeout(() => {
+                        map.invalidateSize();
                     }, 100);
                 }
             }

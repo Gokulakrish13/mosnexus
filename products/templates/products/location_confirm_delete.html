@@ -1,16 +1,371 @@
 {% extends 'products/base.html' %}
+{% load static %}
 {% block title %}Delete Location{% endblock %}
+
 {% block content %}
-<div class="form-bg" style="background:#f4f6f8;min-height:100vh;display:flex;justify-content:center;align-items:center;">
-    <div class="form-container" style="background:#fff;box-shadow:0 8px 32px rgba(0,95,163,0.13);border-radius:18px;padding:2.5rem;width:98%;max-width:480px;animation:fadeIn 0.5s ease-in-out;">
-        <a href="{% url 'location_list_stream' stream %}" style="display:block;margin-bottom:1.2rem;color:#005fa3;font-weight:600;text-decoration:underline;font-size:1.08rem;">&larr; Back to List</a>
-        <h2 style="font-size:2rem;font-weight:900;color:#dc3545;letter-spacing:0px;margin-bottom:2rem;">Delete Location</h2>
-        <p style="font-size:1.13rem;color:#333;margin-bottom:2rem;">Are you sure you want to delete the location <strong style="color:#005fa3;">{{ location.name }}</strong>?</p>
-        <form method="post" style="display:flex;gap:1.2rem;align-items:center;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger" style="font-size:1.13rem;padding:0.9rem 2rem;border-radius:8px;font-weight:700;">Delete</button>
-            <a href="{% url 'location_list_stream' stream %}" class="btn btn-warning" style="font-size:1.13rem;padding:0.9rem 2rem;border-radius:8px;font-weight:700;">Cancel</a>
-        </form>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-light: #0077e6;
+        --primary-dark: #004d99;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --danger-light: #fca5a5;
+        --warning: #f59e0b;
+        --bg-body: #ffffff;
+        --bg-card: #ffffff;
+        --bg-secondary: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .delete-page-container {
+        min-height: calc(100vh - 60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--bg-body);
+    }
+
+    .delete-card {
+        width: 100%;
+        max-width: 520px;
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Warning Header */
+    .warning-header {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .warning-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        animation: pulse-bg 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-bg {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.3; }
+    }
+
+    .warning-icon-wrapper {
+        position: relative;
+        z-index: 1;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: bounce-soft 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce-soft {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .warning-icon-wrapper i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .warning-title {
+        position: relative;
+        z-index: 1;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .warning-subtitle {
+        position: relative;
+        z-index: 1;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 400;
+    }
+
+    /* Card Body */
+    .card-body-content {
+        padding: 2rem;
+    }
+
+    /* Alert Box */
+    .alert-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+        border: 1px solid #fcd34d;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .alert-box i {
+        color: #b45309;
+        font-size: 1.1rem;
+        margin-top: 0.1rem;
+    }
+
+    .alert-box-content {
+        flex: 1;
+    }
+
+    .alert-box-title {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .alert-box-text {
+        font-size: 0.85rem;
+        color: #a16207;
+        line-height: 1.5;
+    }
+
+    /* Location Details Card */
+    .details-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .details-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .details-header i {
+        color: var(--primary);
+        font-size: 1rem;
+    }
+
+    .details-header span {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .location-name {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .location-icon {
+        width: 44px;
+        height: 44px;
+        background: rgba(0, 102, 204, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .location-info h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.2rem 0;
+    }
+
+    .location-info p {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-action {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .btn-action.danger {
+        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-action.danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-action.secondary {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    .btn-action.secondary:hover {
+        background: var(--bg-card);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Footer Note */
+    .footer-note {
+        text-align: center;
+        padding: 1rem 2rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+
+    .footer-note-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .footer-note-text i {
+        margin-right: 0.35rem;
+        color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .delete-page-container {
+            padding: 1rem;
+        }
+
+        .warning-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .warning-title {
+            font-size: 1.25rem;
+        }
+
+        .card-body-content {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="delete-page-container">
+    <div class="delete-card">
+        <!-- Warning Header -->
+        <div class="warning-header">
+            <div class="warning-icon-wrapper">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h1 class="warning-title">Delete Location</h1>
+            <p class="warning-subtitle">This action requires your confirmation</p>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body-content">
+            <!-- Alert Box -->
+            <div class="alert-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-box-content">
+                    <div class="alert-box-title">Permanent Action Warning</div>
+                    <div class="alert-box-text">
+                        This action cannot be undone. All data associated with this location will be permanently removed.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="details-card">
+                <div class="details-header">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Location to Delete</span>
+                </div>
+                <div class="location-name">
+                    <div class="location-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="location-info">
+                        <h4>{{ location.name }}</h4>
+                        <p>Location ID: #{{ location.id }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{% url 'location_list_stream' stream %}" class="btn-action secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <form method="post" style="flex: 1; display: flex;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action danger" style="width: 100%;">
+                        <i class="fas fa-trash-alt"></i>
+                        Delete Location
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="footer-note">
+            <p class="footer-note-text">
+                <i class="fas fa-info-circle"></i>
+                Need help? Contact your system administrator for assistance.
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}

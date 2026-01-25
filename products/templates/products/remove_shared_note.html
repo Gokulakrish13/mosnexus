@@ -1,53 +1,625 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove Shared Note - IGT MoS Inventory</title>
-    {% load static %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body style="background: white; min-height: 100vh; padding: 50px 0;">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card" style="border-radius: 20px; box-shadow: 0 16px 48px rgba(31, 38, 135, 0.25);">
-                    <div class="card-header text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0;">
-                        <h4><i class="fas fa-exclamation-triangle me-2"></i>Remove Shared Note</h4>
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-dark: #004999;
+        --primary-light: #e6f0fa;
+        --danger: #dc2626;
+        --danger-dark: #b91c1c;
+        --danger-light: #fef2f2;
+        --warning: #f59e0b;
+        --warning-light: #fffbeb;
+        --info: #0ea5e9;
+        --info-light: #f0f9ff;
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-subtle: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --radius: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .remove-page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--bg-body) 0%, #e2e8f0 100%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 1.5rem 1.5rem;
+    }
+
+    .remove-content-wrapper {
+        max-width: 900px;
+        width: 100%;
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Breadcrumb Navigation */
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        background: var(--primary-light);
+    }
+
+    .breadcrumb-item a i {
+        margin-right: 0.375rem;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-muted);
+        margin: 0 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb-item.current {
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Main Remove Card */
+    .remove-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+    }
+
+    /* Warning Banner */
+    .warning-banner {
+        background: linear-gradient(135deg, var(--warning-light) 0%, #fef3c7 100%);
+        border-bottom: 1px solid #fde68a;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .warning-banner i {
+        color: var(--warning);
+        font-size: 1.25rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .warning-banner span {
+        color: #92400e;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    /* Card Header */
+    .card-header-section {
+        padding: 1.75rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-subtle);
+    }
+
+    .card-header-section h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header-section h1 .icon-wrapper {
+        width: 42px;
+        height: 42px;
+        background: var(--danger-light);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-header-section h1 .icon-wrapper i {
+        color: var(--danger);
+        font-size: 1.125rem;
+    }
+
+    .card-header-section p {
+        margin: 0.5rem 0 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        padding-left: 54px;
+    }
+
+    /* Card Body */
+    .card-body-section {
+        padding: 2rem;
+    }
+
+    /* Note Preview Card */
+    .note-preview-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .note-preview-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--primary) 0%, var(--info) 100%);
+    }
+
+    .note-preview-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, #dbeafe 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .note-icon-wrapper i {
+        color: var(--primary);
+        font-size: 1.25rem;
+    }
+
+    .note-details {
+        flex: 1;
+    }
+
+    .note-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+    }
+
+    .note-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .note-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .note-meta-item i {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+
+    .shared-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        color: var(--primary-dark);
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        margin-top: 0.75rem;
+    }
+
+    .shared-badge i {
+        font-size: 0.6875rem;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: var(--info-light);
+        border: 1px solid #bae6fd;
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .info-box i {
+        color: var(--info);
+        font-size: 1rem;
+        margin-top: 0.125rem;
+    }
+
+    .info-box-content {
+        flex: 1;
+    }
+
+    .info-box-title {
+        font-weight: 600;
+        color: #0c4a6e;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-box-text {
+        color: #0369a1;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Checklist */
+    .impact-checklist {
+        background: var(--bg-subtle);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .impact-checklist-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .impact-checklist-title i {
+        color: var(--text-muted);
+    }
+
+    .impact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.5rem 0;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .impact-item:not(:last-child) {
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+    .impact-item i.fa-check-circle {
+        color: #22c55e;
+    }
+
+    .impact-item i.fa-times-circle {
+        color: var(--danger);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-action {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: var(--bg-subtle);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    .btn-remove {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-remove:hover {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, #991b1b 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-remove:active {
+        transform: translateY(0);
+    }
+
+    /* Confirmation checkbox */
+    .confirm-checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--warning-light);
+        border: 1px solid #fde68a;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        cursor: pointer;
+    }
+
+    .confirm-checkbox-wrapper:hover {
+        background: #fef3c7;
+    }
+
+    .confirm-checkbox {
+        width: 20px;
+        height: 20px;
+        margin-top: 2px;
+        accent-color: var(--warning);
+        cursor: pointer;
+    }
+
+    .confirm-label {
+        font-size: 0.875rem;
+        color: #92400e;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .remove-page-container {
+            padding: 1rem;
+        }
+
+        .card-header-section,
+        .card-body-section {
+            padding: 1.25rem;
+        }
+
+        .card-header-section h1 {
+            font-size: 1.25rem;
+        }
+
+        .card-header-section p {
+            padding-left: 0;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .note-preview-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="remove-page-container">
+    <div class="remove-content-wrapper">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-item">
+                <a href="{% url 'notes_list' %}"><i class="fas fa-home"></i>Home</a>
+            </div>
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <div class="breadcrumb-item">
+                <a href="{% url 'shared_notes' %}"><i class="fas fa-share-alt"></i>Shared Notes</a>
+            </div>
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <div class="breadcrumb-item current">
+                <i class="fas fa-unlink me-1"></i>Remove
+            </div>
+        </nav>
+
+        <!-- Main Card -->
+        <div class="remove-card">
+            <!-- Warning Banner -->
+            <div class="warning-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>You are about to remove a shared note from your list</span>
+            </div>
+
+            <!-- Card Header -->
+            <div class="card-header-section">
+                <h1>
+                    <div class="icon-wrapper">
+                        <i class="fas fa-unlink"></i>
                     </div>
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-share fa-3x text-muted mb-3"></i>
-                            <p>Are you sure you want to remove this shared note from your list?</p>
+                    Remove Shared Note
+                </h1>
+                <p>This action will remove the note from your shared notes list.</p>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body-section">
+                <!-- Note Preview -->
+                <div class="note-preview-card">
+                    <div class="note-preview-header">
+                        <div class="note-icon-wrapper">
+                            <i class="fas fa-sticky-note"></i>
                         </div>
-                        
-                        <div class="alert alert-light border">
-                            <h6 class="fw-bold">{{ shared_note.note.title }}</h6>
-                            <small class="text-muted">
-                                Shared by {{ shared_note.shared_by.get_full_name|default:shared_note.shared_by.username }}
-                                on {{ shared_note.shared_at|date:"M d, Y" }}
-                            </small>
+                        <div class="note-details">
+                            <h3 class="note-title">{{ shared_note.note.title }}</h3>
+                            <div class="note-meta">
+                                <span class="note-meta-item">
+                                    <i class="fas fa-user"></i>
+                                    {{ shared_note.shared_by.get_full_name|default:shared_note.shared_by.username }}
+                                </span>
+                                <span class="note-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ shared_note.shared_at|date:"M d, Y" }}
+                                </span>
+                            </div>
+                            <span class="shared-badge">
+                                <i class="fas fa-share"></i>
+                                Shared with you
+                            </span>
                         </div>
-                        
-                        <p class="text-muted small">
-                            <i class="fas fa-info-circle me-1"></i>
-                            This will only remove it from your shared list. The original note will remain unchanged.
-                        </p>
-                        
-                        <form method="post" class="text-center">
-                            {% csrf_token %}
-                            <a href="{% url 'shared_notes' %}" class="btn btn-secondary me-2">
-                                <i class="fas fa-times me-1"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Remove
-                            </button>
-                        </form>
                     </div>
                 </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="info-box-content">
+                        <div class="info-box-title">What happens when you remove?</div>
+                        <p class="info-box-text">This note will be removed from your shared notes list. The original note owned by the sender will remain completely unchanged.</p>
+                    </div>
+                </div>
+
+                <!-- Impact Checklist -->
+                <div class="impact-checklist">
+                    <div class="impact-checklist-title">
+                        <i class="fas fa-list-check"></i>
+                        Impact Summary
+                    </div>
+                    <div class="impact-item">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Note will be removed from your "Shared With Me" list</span>
+                    </div>
+                    <div class="impact-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Original note remains intact for the owner</span>
+                    </div>
+                    <div class="impact-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>The owner can share it with you again if needed</span>
+                    </div>
+                </div>
+
+                <!-- Action Form -->
+                <form method="post" id="removeForm">
+                    {% csrf_token %}
+                    
+                    <!-- Confirmation Checkbox -->
+                    <label class="confirm-checkbox-wrapper">
+                        <input type="checkbox" class="confirm-checkbox" id="confirmCheck" required>
+                        <span class="confirm-label">
+                            I understand that this will remove the shared note from my list and I want to proceed.
+                        </span>
+                    </label>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="{% url 'shared_notes' %}" class="btn-action btn-cancel">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Back
+                        </a>
+                        <button type="submit" class="btn-action btn-remove" id="removeBtn">
+                            <i class="fas fa-unlink"></i>
+                            Remove Note
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmCheck = document.getElementById('confirmCheck');
+    const removeBtn = document.getElementById('removeBtn');
+    
+    // Initially disable the remove button
+    removeBtn.disabled = true;
+    removeBtn.style.opacity = '0.5';
+    removeBtn.style.cursor = 'not-allowed';
+    
+    confirmCheck.addEventListener('change', function() {
+        if (this.checked) {
+            removeBtn.disabled = false;
+            removeBtn.style.opacity = '1';
+            removeBtn.style.cursor = 'pointer';
+        } else {
+            removeBtn.disabled = true;
+            removeBtn.style.opacity = '0.5';
+            removeBtn.style.cursor = 'not-allowed';
+        }
+    });
+});
+</script>
+{% endblock %}

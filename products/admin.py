@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, ProductHistory, Category, SubLevel, SubLevelHistory, SubLevelTool, SubLevelToolHistory, SystemTag, Project, HolisticSystem, HolisticWeeklyData, HolisticSystemHistory, Note, NoteAttachment, SharedNote, BuildServer, BuildServerHistory, BuildServerMaintenanceLog, Floor
+from .models import Product, ProductHistory, Category, SubLevel, SubLevelHistory, SubLevelTool, SubLevelToolHistory, SystemTag, Project, HolisticSystem, HolisticWeeklyData, HolisticSystemHistory, Note, NoteAttachment, SharedNote, BuildServer, BuildServerHistory, BuildServerMaintenanceLog, Floor, OperatingSystem
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -282,3 +282,10 @@ class BuildServerMaintenanceLogAdmin(admin.ModelAdmin):
     )
 
 # Register your models here.\n\n@admin.register(Floor)\nclass FloorAdmin(admin.ModelAdmin):\n    list_display = ('name', 'description', 'is_active', 'created_at')\n    search_fields = ('name', 'description')\n    list_filter = ('is_active', 'created_at')\n    readonly_fields = ('created_at', 'updated_at')
+@admin.register(OperatingSystem)
+class OperatingSystemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'version', 'stream', 'is_active', 'created_at')
+    search_fields = ('name', 'version', 'description')
+    list_filter = ('stream', 'is_active', 'created_at')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ['stream', 'name', 'version']

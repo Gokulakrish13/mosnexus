@@ -4,108 +4,374 @@
     <meta charset="UTF-8">
     <title>{% block title %}Delete Product{% endblock %}</title>
     <link rel="stylesheet" href="/static/products/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        /* Removed forced font-family styling. Only keep color, font-size, and .top-bar style. */
-        body, html {
-            color: #222;
-            font-size: 1rem;
-            background: #fff;
+        :root {
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --danger-light: #fef2f2;
+            --primary: #005fa3;
+            --primary-dark: #003e6b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
         }
-        .top-bar {
-            color: #222;
-            font-size: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.7rem 2.5rem;
-            background: #fff;
-            border-bottom: 1px solid #e0e3e7;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            box-sizing: border-box;
-            z-index: 1000;
-        }
-        body {
+
+        * {
             margin: 0;
-            background: #f4f6f8;
-            color: #222;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body, html {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-primary);
+            font-size: 1rem;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* Background */
         .delete-bg {
-            background: url('/static/products/background.jpg') no-repeat center center fixed;
-            background-size: cover;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
         }
+
+        /* Delete Card */
         .delete-container {
-            background: rgba(255,255,255,0.85);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-            border-radius: 16px;
-            padding: 2.5rem 2rem 2rem 2rem;
-            max-width: 420px;
-            width: 95vw;
-            margin: 60px auto 0 auto;
+            background: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 8px 40px rgba(239, 68, 68, 0.08);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2.5rem;
+            max-width: 480px;
+            width: 100%;
             text-align: center;
+            position: relative;
+            z-index: 10;
+            border: 1px solid var(--border-color);
+            animation: slideUp 0.5s ease-out;
         }
+
+        .delete-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--danger), var(--danger-dark));
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Warning Icon */
+        .warning-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--danger-light) 0%, #fee2e2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .warning-icon::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid var(--danger);
+            opacity: 0.3;
+            animation: ripple 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .warning-icon i {
+            font-size: 2.5rem;
+            color: var(--danger);
+        }
+
         .delete-container h2 {
-            margin-bottom: 1rem;
-            font-size: 2rem;
-            color: #dc3545;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 0.75rem;
         }
-        .delete-container p {
-            color: #333;
+
+        .delete-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Product Info Card */
+        .product-info {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #f1f5f9 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
             margin-bottom: 2rem;
+            text-align: left;
         }
-        .delete-btn, .cancel-btn {
-            padding: 0.6rem 1.5rem;
-            border-radius: 4px;
+
+        .product-info-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .product-info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: var(--text-primary);
             font-size: 1.1rem;
-            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .product-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .product-detail-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .product-detail-row i {
+            color: var(--text-muted);
+            width: 16px;
+            font-size: 0.8rem;
+        }
+
+        .product-detail-row span {
+            color: var(--text-secondary);
+        }
+
+        /* Warning Message */
+        .warning-message {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #f59e0b;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            text-align: left;
+        }
+
+        .warning-message i {
+            color: #f59e0b;
+            font-size: 1.25rem;
+            margin-top: 2px;
+        }
+
+        .warning-message p {
+            color: #92400e;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .delete-btn, .cancel-btn {
+            padding: 0.85rem 2rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
             text-decoration: none;
-            margin: 0 0.7rem;
             border: none;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            justify-content: center;
         }
+
         .delete-btn {
-            background: #dc3545;
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
             color: #fff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
+
         .delete-btn:hover {
-            background: #a71d2a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
+
+        .delete-btn:active {
+            transform: translateY(0);
+        }
+
         .cancel-btn {
-            background: #6c757d;
-            color: #fff;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
         }
+
         .cancel-btn:hover {
-            background: #495057;
+            background: var(--bg-primary);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .delete-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .delete-btn, .cancel-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <!-- Top bar content, if any -->
-    </div>
     <div class="delete-bg">
         <div class="delete-container">
+            <div class="warning-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            
             <h2>Delete Product</h2>
-            <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+            <p class="delete-subtitle">This action cannot be undone</p>
+
+            <div class="product-info">
+                <div class="product-info-header">
+                    <div class="product-info-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="product-name">{{ product.name }}</div>
+                </div>
+                <div class="product-details">
+                    {% if product.serial_number %}
+                    <div class="product-detail-row">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Serial: {{ product.serial_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.category %}
+                    <div class="product-detail-row">
+                        <i class="fas fa-folder"></i>
+                        <span>Category: {{ product.category.name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.location %}
+                    <div class="product-detail-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Location: {{ product.location.name }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="warning-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Are you sure you want to permanently delete this product? All associated data including history and attachments will be removed.</p>
+            </div>
+
             <form method="post" style="display:inline;">
                 {% csrf_token %}
                 <input type="hidden" name="query_params" value="{{ query_params }}">
-                <button type="submit" class="delete-btn">Delete</button>
+                <div class="button-group">
+                    <a href="{% url 'product_list_stream' stream %}{% if query_params %}?{{ query_params }}{% endif %}" class="cancel-btn">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="delete-btn">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </div>
             </form>
-            <a href="{% url 'product_list_stream' stream %}{% if query_params %}?{{ query_params }}{% endif %}" class="cancel-btn">Cancel</a>
+
+            <a href="{% url 'product_list_stream' stream %}{% if query_params %}?{{ query_params }}{% endif %}" class="back-link">
+                <i class="fas fa-chevron-left"></i> Back to Product List
+            </a>
         </div>
     </div>
-    <script>
-      document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-      });
-    </script>
 </body>
 </html>

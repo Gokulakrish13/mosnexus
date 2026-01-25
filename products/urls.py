@@ -63,6 +63,7 @@ urlpatterns = [
     path('stream/<str:stream>/system-allocation/nc-details/', views.get_nc_details, name='get_nc_details'),
     path('stream/<str:stream>/system-allocation/nc-details/save/', views.save_nc_details, name='save_nc_details'),
     path('stream/<str:stream>/system-allocation/nc-details/all/', views.get_all_nc_details, name='get_all_nc_details'),
+    path('stream/<str:stream>/system-allocation/historical-status/', views.get_historical_system_status, name='get_historical_system_status'),
     
     # Downtime tracking URLs
     path('stream/<str:stream>/downtime/', views.downtime_dashboard, name='downtime_dashboard'),
@@ -82,6 +83,7 @@ urlpatterns = [
     path('stream/<str:stream>/allocation-tree/delete-tag/<int:tag_id>/', views.delete_system_tag, name='delete_system_tag_stream'),
     path('stream/<str:stream>/allocation-tree/manage-items/<int:tag_id>/', views.manage_tag_items, name='manage_tag_items_stream'),
     path('stream/<str:stream>/allocation-tree/get-items/', views.get_available_items, name='get_available_items_stream'),
+    path('stream/<str:stream>/allocation-tree/history/<int:system_id>/', views.get_system_tag_history, name='get_system_tag_history_stream'),
     path('stream/delete/', views.delete_stream, name='delete_stream'),
     path('stream/<str:stream>/system/<int:system_id>/status-history/', views.system_status_history, name='system_status_history'),
     path('users/restore-backup/<int:backup_id>/', views.restore_user_backup, name='restore_user_backup'),
@@ -138,6 +140,7 @@ urlpatterns = [
     path('notes/<int:pk>/delete/', views.note_delete, name='note_delete'),
     path('notes/<int:pk>/share/', views.share_note, name='share_note'),
     path('notes/shared/', views.shared_notes, name='shared_notes'),
+    path('notes/shared-by-me/', views.shared_by_me, name='shared_by_me'),
     path('shared-notes/<int:pk>/remove/', views.remove_shared_note, name='remove_shared_note'),
     # Project Status URLs
     path('projects/', views.project_status, name='project_status'),
@@ -176,4 +179,8 @@ urlpatterns = [
     path('stream/<str:stream>/floors/create/', views.floor_create, name='floor_create'),
     path('stream/<str:stream>/floors/<int:floor_id>/edit/', views.floor_edit, name='floor_edit'),
     path('stream/<str:stream>/floors/<int:floor_id>/delete/', views.floor_delete, name='floor_delete'),
+    path('stream/<str:stream>/operating-systems/', views.operating_system_list, name='operating_system_list'),
+    path('stream/<str:stream>/operating-systems/create/', views.operating_system_create, name='operating_system_create'),
+    path('stream/<str:stream>/operating-systems/<int:os_id>/edit/', views.operating_system_edit, name='operating_system_edit'),
+    path('stream/<str:stream>/operating-systems/<int:os_id>/delete/', views.operating_system_delete, name='operating_system_delete'),
 ] + static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)

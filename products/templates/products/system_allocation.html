@@ -548,12 +548,19 @@
 <div class="user-bg" style="padding-top: 6.5rem; padding-left: 3.5rem; padding-right: 3.5rem;">
     <div class="user-container" style="display: flex; gap: 2.5rem; align-items: flex-start; min-height: 400px;">
         <!-- Calendar Section -->
-        <div style="flex: 0 0 320px; background: #f8fafc; border-radius: 12px; box-shadow: 0 2px 12px #e0e3e7; padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; height: fit-content;">
-            <h3 style="margin-bottom: 1.2rem; color: #005fa3; font-size: 1.25rem; font-weight: 700;">Calendar</h3>
-            <div id="calendar-container"></div>
-            <div style="margin-top:0.8rem;text-align:center;">
-                <button id="calendarTodayBtn" style="background:#005fa3;color:#fff;border:none;border-radius:6px;padding:0.4rem 1.2rem;font-size:1rem;font-weight:700;cursor:pointer;">Today</button>
+        <div style="flex: 0 0 320px; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: #f8fafc; border-radius: 12px; box-shadow: 0 2px 12px #e0e3e7; padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; height: fit-content;">
+                <h3 style="margin-bottom: 1.2rem; color: #005fa3; font-size: 1.25rem; font-weight: 700;">Calendar</h3>
+                <div id="calendar-container"></div>
+                <div style="margin-top:0.8rem;text-align:center;">
+                    <button id="calendarTodayBtn" style="background:#005fa3;color:#fff;border:none;border-radius:6px;padding:0.4rem 1.2rem;font-size:1rem;font-weight:700;cursor:pointer;">Today</button>
+                </div>
             </div>
+            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+            <button id="ncDetailsBtn" style="padding:0.9rem 1.5rem;background:#28a745;color:#fff;border-radius:10px;font-weight:700;font-size:1.1rem;border:none;cursor:pointer;box-shadow:0 4px 16px #b3c6e0;width:100%;">
+                System 12 NC Details
+            </button>
+            {% endif %}
         </div>
         
         <!-- Systems List Section -->
@@ -562,13 +569,11 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 style="margin: 0; color: #005fa3; font-size: 1.7rem; font-weight: 800;">System List</h2>
-                    {% if view_date_str %}
-                        <div style="margin-top: 0.3rem; font-size: 0.95rem; color: #666;">
-                            <span style="background: #fff3cd; padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid #ffc107;">
-                                📅 Viewing status as of: <strong>{{ view_date|date:"d-m-Y" }}</strong>
-                            </span>
-                        </div>
-                    {% endif %}
+                    <div id="viewDateBanner" style="margin-top: 0.3rem; font-size: 0.95rem; color: #666; {% if not view_date_str %}display:none;{% endif %}">
+                        <span style="background: #fff3cd; padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid #ffc107;">
+                            📅 Viewing status as of: <strong id="viewDateText">{% if view_date_str %}{{ view_date|date:"d-m-Y" }}{% endif %}</strong>
+                        </span>
+                    </div>
                 </div>
                   <!-- Control Buttons -->
                 <div class="control-buttons" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
@@ -710,9 +715,10 @@
             {% endif %}
         </div>
         {% endif %}
-          <!-- Quick Action Buttons -->
-        <div class="system-quick-actions" style="position:absolute;bottom:8px;left:8px;display:none;gap:0.3rem;">
-            <button onclick="quickBookSystem({{ system.id }})" style="background:#007bff;color:#fff;border:none;border-radius:4px;padding:0.2rem 0.4rem;font-size:0.7rem;cursor:pointer;" title="Quick Book">📅</button>
+          <!-- Quick Book Button - Always Visible -->
+        <button onclick="event.stopPropagation();quickBookSystem({{ system.id }})" class="quick-book-btn" style="position:absolute;bottom:8px;left:8px;background:#007bff;color:#fff;border:none;border-radius:4px;padding:0.3rem 0.6rem;font-size:0.75rem;cursor:pointer;z-index:5;" title="Quick Book">📅 Book</button>
+        <!-- Quick Action Buttons (shown on hover) -->
+        <div class="system-quick-actions" style="position:absolute;bottom:8px;left:80px;display:none;gap:0.3rem;">
             {% if can_manage_downtime %}
             <button onclick="event.stopPropagation();openAdvancedSystemModal('report_downtime', {{ system.id }})" style="background:#dc3545;color:#fff;border:none;border-radius:4px;padding:0.2rem 0.4rem;font-size:0.7rem;cursor:pointer;" title="Report Downtime">🚨</button>
             <button onclick="event.stopPropagation();viewDowntimeHistory({{ system.id }})" style="background:#17a2b8;color:#fff;border:none;border-radius:4px;padding:0.2rem 0.4rem;font-size:0.7rem;cursor:pointer;" title="Downtime History">📊</button>
@@ -733,23 +739,6 @@
             {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
 
             <div style="margin-top: 2rem; text-align: center;">
-                <button id="ncDetailsBtn"
-                    style="
-                        position: absolute;
-                        top: 38.5rem;
-                        left: 6.5rem;
-                        padding:0.9rem 2.2rem;
-                        background:#28a745;
-                        color:#fff;
-                        border-radius:10px;
-                        font-weight:700;
-                        font-size:1.25rem;
-                        border:none;
-                        cursor:pointer;
-                        box-shadow:0 4px 16px #b3c6e0;
-                    ">
-                    System 12 NC Details
-                </button>
                 
                 <!-- Utilization Reset Buttons -->
                 <!-- <button id="resetUtilizationBtn"
@@ -1696,7 +1685,7 @@ function selectSystemCard(checkbox, systemId) {
     50% { opacity: 0.5; }
 }
 
-/* Responsive Design */
+/* Responsive Design - Enhanced Mobile Support */
 @media (max-width: 1200px) {
     .metrics-grid {
         grid-template-columns: 1fr;
@@ -1704,7 +1693,54 @@ function selectSystemCard(checkbox, systemId) {
     }
     
     .kpi-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .user-bg {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+    
+    .user-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .user-container > div:first-child {
+        flex: none;
+        max-width: none;
+        width: 100%;
+    }
+    
+    #systemGrid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .metrics-modal .modal-content {
+        width: 96%;
+        height: 94vh;
+        margin: 3vh auto;
+    }
+    
+    .metrics-modal .modal-header {
+        padding: 24px 30px;
+    }
+    
+    .metrics-modal .modal-header h2 {
+        font-size: 26px;
+    }
+    
+    #systemGrid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+        gap: 1.2rem;
+    }
+    
+    .system-box {
+        min-height: 70px;
+        padding: 1rem 0.6rem;
+        font-size: 1.05rem;
     }
 }
 
@@ -1712,6 +1748,7 @@ function selectSystemCard(checkbox, systemId) {
     .metrics-modal .modal-content {
         width: 95%;
         margin: 2% auto;
+        border-radius: 16px;
     }
     
     .metrics-modal .modal-header {
@@ -1719,17 +1756,103 @@ function selectSystemCard(checkbox, systemId) {
     }
     
     .metrics-modal .modal-header h2 {
-        font-size: 24px;
+        font-size: 22px;
     }
     
     .metrics-modal .modal-body {
-        padding: 24px;
+        padding: 20px;
     }
     
     .metrics-header {
         flex-direction: column;
         gap: 16px;
         text-align: center;
+        padding: 16px;
+    }
+    
+    .user-bg {
+        padding: 1rem !important;
+        padding-top: 5rem !important;
+    }
+    
+    .user-container > div:first-child h3 {
+        font-size: 1.1rem;
+    }
+    
+    .system-box {
+        min-height: 60px;
+        padding: 1rem 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .system-box .block-info {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #systemGrid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        gap: 1rem;
+    }
+    
+    .enhanced-search-filter {
+        padding: 1rem !important;
+    }
+    
+    .enhanced-search-filter div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .enhanced-search-filter > div > div {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Stack header buttons vertically on mobile */
+    .user-container h2 {
+        font-size: 1.4rem !important;
+    }
+    
+    .user-container .control-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .user-container button {
+        font-size: 0.85rem !important;
+        padding: 0.4rem 0.8rem !important;
+    }
+    
+    /* Modal improvements for mobile */
+    #dateModal .modal-content,
+    #ncDetailsModal > div {
+        min-width: auto;
+        max-width: 95vw;
+        padding: 1.5rem;
+    }
+    
+    #ncDetailsModal > div {
+        min-width: auto;
+        padding: 3rem 1.5rem 2rem 1.5rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.8rem !important;
+    }
+    
+    .modal-actions button {
+        width: 100%;
+        padding: 0.7rem 1rem !important;
+    }
+    
+    .chart-card {
+        padding: 16px;
+    }
+    
+    .kpi-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1920,6 +2043,7 @@ function selectSystemCard(checkbox, systemId) {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
 .filter-tab {
@@ -1930,6 +2054,10 @@ function selectSystemCard(checkbox, systemId) {
     color: #666;
     cursor: pointer;
     transition: all 0.2s;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .filter-tab.active {
@@ -1969,90 +2097,6 @@ function selectSystemCard(checkbox, systemId) {
 
 .export-dropdown:hover .export-dropdown-content {
     display: block;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .user-bg {
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-    }
-    
-    .user-container {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    
-    .user-container > div:first-child {
-        flex: none;
-        max-width: none;
-        width: 100%;
-    }
-    
-    #systemGrid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .user-bg {
-        padding: 1rem !important;
-        padding-top: 5rem !important;
-    }
-    
-    .user-container > div:first-child h3 {
-        font-size: 1.1rem;
-    }
-    
-    .system-box {
-        min-height: 60px;
-        padding: 1rem 0.5rem;
-        font-size: 1rem;
-    }
-    
-    #systemGrid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
-        gap: 1rem;
-    }
-    
-    .enhanced-search-filter div {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .enhanced-search-filter > div > div {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Stack header buttons vertically on mobile */
-    .user-container h2 {
-        font-size: 1.4rem !important;
-    }
-    
-    .user-container .control-buttons {
-        justify-content: center;
-    }
-    
-    .user-container button {
-        font-size: 0.8rem !important;
-        padding: 0.3rem 0.6rem !important;
-    }
-}
-
-/* Additional mobile improvements */
-@media (max-width: 480px) {
-    .user-container {
-        gap: 1rem;
-    }
-    
-    .enhanced-search-filter {
-        padding: 1rem !important;
-    }
-    
-    #systemGrid {
-        grid-template-columns: 1fr 1fr !important;
-    }
 }
 
 /* Modal styles */
@@ -2663,13 +2707,11 @@ function renderCalendar(containerId) {
                 // Always update selected and y/m to match the new selection
                 drawCalendar(calendarSelectedDate.getFullYear(), calendarSelectedDate.getMonth());
                 
-                // Format date as YYYY-MM-DD for URL parameter
+                // Format date as YYYY-MM-DD for API call
                 const dateStr = `${yy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
                 
-                // Reload page with view_date parameter to show historical status
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('view_date', dateStr);
-                window.location.href = currentUrl.toString();
+                // Use AJAX to load historical system status without page refresh
+                loadHistoricalSystemStatus(dateStr);
             };
         });
     }
@@ -2707,15 +2749,143 @@ document.addEventListener('DOMContentLoaded', function() {
     const todayBtn = document.getElementById('calendarTodayBtn');
     if (todayBtn) {
         todayBtn.onclick = function() {
-            // Set view_date to today's date explicitly
-            const currentUrl = new URL(window.location.href);
-            const now = new Date();
-            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            currentUrl.searchParams.set('view_date', todayStr);
-            window.location.href = currentUrl.toString();
+            goToToday();
         };
     }
 });
+
+// Global function to go to today's date
+function goToToday() {
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    loadHistoricalSystemStatus(todayStr);
+}
+
+// AJAX function to load historical system status without page refresh
+function loadHistoricalSystemStatus(dateStr) {
+    // Update calendarSelectedDate for the calendar display
+    const [year, month, day] = dateStr.split('-').map(Number);
+    calendarSelectedDate = new Date(year, month - 1, day);
+    
+    // Re-render calendar to update selection
+    renderCalendar('calendar-container');
+    
+    // Show loading indicator
+    const systemGrid = document.getElementById('systemGrid');
+    if (systemGrid) {
+        systemGrid.style.opacity = '0.6';
+    }
+    
+    // Update the viewing date banner
+    updateViewDateBanner(dateStr);
+    
+    // Fetch historical system statuses via AJAX
+    fetch(`/stream/{{ stream }}/system-allocation/historical-status/?view_date=${dateStr}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update each system card with historical data
+                data.systems.forEach(systemData => {
+                    const box = document.querySelector(`.system-box[data-system-id="${systemData.id}"]`);
+                    if (box) {
+                        // Update status display
+                        const statusDiv = box.querySelector('.system-status');
+                        if (statusDiv) {
+                            statusDiv.textContent = systemData.status_display;
+                            
+                            // Update status-based CSS classes
+                            box.classList.remove('status-active', 'status-not-active', 'status-issue', 'status-used', 'status-removed');
+                            const status = systemData.status_display.toLowerCase();
+                            if (status === 'active') {
+                                box.classList.add('status-active');
+                            } else if (status === 'not active') {
+                                box.classList.add('status-not-active');
+                            } else if (status.includes('issue')) {
+                                box.classList.add('status-issue');
+                            } else if (status.includes('used')) {
+                                box.classList.add('status-used');
+                            } else if (status.includes('removed') || status.includes('dismantled')) {
+                                box.classList.add('status-removed');
+                            }
+                        }
+                        
+                        // Update description if available
+                        let descDiv = box.querySelector('.system-desc');
+                        if (systemData.description && systemData.status_display !== 'Active') {
+                            if (!descDiv) {
+                                descDiv = document.createElement('div');
+                                descDiv.className = 'system-desc';
+                                descDiv.style.cssText = 'margin-top:0.2rem;font-size:0.95rem;color:#444;';
+                                const statusDiv = box.querySelector('.system-status');
+                                if (statusDiv) {
+                                    statusDiv.after(descDiv);
+                                }
+                            }
+                            descDiv.textContent = systemData.description;
+                            descDiv.style.display = 'block';
+                        } else if (descDiv) {
+                            descDiv.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Also load blocked systems for the selected date
+                loadBlockedSystems(calendarSelectedDate);
+                
+                // Update URL without page refresh (for bookmarking/sharing)
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('view_date', dateStr);
+                window.history.pushState({}, '', currentUrl.toString());
+            } else {
+                console.error('Failed to load historical status:', data.error);
+                showNotification('Failed to load historical status: ' + (data.error || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching historical status:', error);
+            showNotification('Error loading historical status. Check console for details.', 'error');
+        })
+        .finally(() => {
+            // Remove loading indicator
+            if (systemGrid) {
+                systemGrid.style.opacity = '1';
+            }
+        });
+}
+
+// Update the view date banner dynamically
+function updateViewDateBanner(dateStr) {
+    const banner = document.getElementById('viewDateBanner');
+    const dateText = document.getElementById('viewDateText');
+    const today = new Date();
+    const viewDate = new Date(dateStr);
+    const isToday = today.toDateString() === viewDate.toDateString();
+    
+    // Format date for display (dd-mm-yyyy)
+    const parts = dateStr.split('-');
+    const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    
+    if (isToday) {
+        // Hide banner for today's date
+        if (banner) {
+            banner.style.display = 'none';
+        }
+    } else {
+        // Show banner for historical date
+        if (banner) {
+            banner.style.display = 'block';
+        }
+        if (dateText) {
+            dateText.textContent = formattedDate;
+        }
+    }
+}
+
 // --- System Allocation Modal and AJAX ---
 let selectedSystem = null;
 let selectedStartDate = null;
@@ -2907,66 +3077,70 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-// Prevent clicking blocked systems
+// Quick Book System function - opens the Block System modal
+function quickBookSystem(systemId) {
+    const box = document.querySelector(`.system-box[data-system-id="${systemId}"]`);
+    if (!box) {
+        console.error('System box not found for ID:', systemId);
+        return;
+    }
+    
+    // Check if system is active
+    const statusDiv = box.querySelector('.system-status');
+    const isActive = statusDiv && statusDiv.textContent.trim() === 'Active';
+    
+    if (box.classList.contains('blocked') || !isActive) {
+        if (!isActive) {
+            alert('Only active systems can be booked or blocked.');
+        } else {
+            alert('This system is currently blocked.');
+        }
+        return;
+    }
+    
+    // Get the system name
+    let systemType = box.dataset.systemName;
+    
+    if (!systemType) {
+        const walker = document.createTreeWalker(
+            box,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        let textNode;
+        while (textNode = walker.nextNode()) {
+            const text = textNode.textContent.trim();
+            if (text && !text.match(/^(Active|Not Active|Issue|Used|Removed|Utilization:)/)) {
+                systemType = text;
+                break;
+            }
+        }
+        
+        if (!systemType && systemId) {
+            systemType = `System_${systemId}`;
+        }
+        
+        if (systemType) {
+            box.dataset.systemName = systemType;
+        }
+    }
+    
+    if (!systemType || systemType.trim() === '') {
+        console.error('System name not found for box:', box);
+        alert('Error: Could not identify system name. Please try again.');
+        return;
+    }
+    
+    showAllocationModal(systemType, systemId);
+}
+
+// Setup system box interactions (card click no longer opens modal)
 function setupSystemBoxClicks() {
     document.querySelectorAll('.system-box').forEach(box => {
-        // Only allow booking/blocking if system is active
-        const statusDiv = box.querySelector('.system-status');
-        const isActive = statusDiv && statusDiv.textContent.trim() === 'Active';
-        
-        box.onclick = function() {
-            if (box.classList.contains('blocked') || !isActive) {
-                if (!isActive) {
-                    alert('Only active systems can be booked or blocked.');
-                }
-                return;
-            }
-            
-            // Get the system name from the data attribute or extract it properly
-            let systemType = this.dataset.systemName;
-            const systemId = this.dataset.systemId;
-            
-            // If systemName is not in dataset, extract it from the box content
-            if (!systemType) {
-                // Get all text nodes and find the first meaningful one (the system name)
-                const walker = document.createTreeWalker(
-                    this,
-                    NodeFilter.SHOW_TEXT,
-                    null,
-                    false
-                );
-                
-                let textNode;
-                while (textNode = walker.nextNode()) {
-                    const text = textNode.textContent.trim();
-                    if (text && !text.match(/^(Active|Not Active|Issue|Used|Removed|Utilization:)/)) {
-                        systemType = text;
-                        break;
-                    }
-                }
-                
-                // Fallback: if still no system name, use the system ID
-                if (!systemType && systemId) {
-                    systemType = `System_${systemId}`;
-                }
-                
-                // Store it for future use
-                if (systemType) {
-                    this.dataset.systemName = systemType;
-                }
-            }
-            
-            console.log('Clicking system:', systemType, 'ID:', systemId);
-            
-            if (!systemType || systemType.trim() === '') {
-                console.error('System name not found for box:', this);
-                alert('Error: Could not identify system name. Please try again.');
-                return;
-            }
-            
-            // Pass both system name and ID for more precise matching
-            showAllocationModal(systemType, systemId);
-        };
+        // Remove any existing onclick handler - modal is opened via Quick Book button only
+        box.onclick = null;
     });
 }
 
