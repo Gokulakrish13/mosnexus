@@ -1,281 +1,735 @@
 {% extends 'products/base.html' %}
 {% block content %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html {
-            color: #222;
-            font-size: 1rem;
-            background: #f4f6f8;
-            margin: 0;
-            min-height: 100vh;
-            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004d99;
+            --primary-light: #e6f2ff;
+            --accent: #00b4d8;
+            --accent-gradient: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
+            --dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
+            --shadow-xl: 0 25px 60px rgba(0,0,0,0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .form-bg {
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-primary);
+            font-size: 1rem;
+            background: var(--bg-main);
+            overflow-x: hidden;
+        }
+
+        .form-page {
             min-height: 100vh;
+            padding-top: 70px;
+        }
+
+        /* Hero Section */
+        .form-hero {
+            background: var(--dark-gradient);
+            padding: 2.5rem 2rem 7rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .hero-glow-1 {
+            background: var(--primary);
+            top: -150px;
+            right: -50px;
+        }
+
+        .hero-glow-2 {
+            background: var(--accent);
+            bottom: -200px;
+            left: -50px;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .hero-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f4f6f8;
-            padding-top: 0; /* Removed the padding-top */
+            color: white;
+            font-size: 1.75rem;
         }
-        .form-container {
-            background: #fff;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.13);
-            border-radius: 18px;
-            padding: 2.7rem 3.5rem 2.2rem 3.5rem;
-            max-width: 900px;
-            width: 98vw;
-            transition: box-shadow 0.3s;
-            border: 1.5px solid #e0e3e7;
-            margin: 0 auto;
-        }
-        .form-container:hover {
-            box-shadow: 0 16px 48px rgba(0, 95, 163, 0.13);
-        }
-        .form-container h2 {
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 2rem;
-            font-size: 1.8rem;
-            color: #005fa3;
+
+        .hero-text h1 {
+            font-size: 2rem;
             font-weight: 700;
-            letter-spacing: 0.02em;
-            margin-left: 0.2rem; 
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
         }
-        .form-container label {
-            display: block;
-            margin-top: 1.2rem;
+
+        .hero-text .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .hero-text .breadcrumb a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .hero-text .breadcrumb a:hover {
+            color: white;
+        }
+
+        .hero-text .breadcrumb i {
+            font-size: 0.65rem;
+        }
+
+        /* Main Content */
+        .form-content {
+            max-width: 1200px;
+            margin: -4.5rem auto 3rem;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-card-title i {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-card-title span {
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #444;
-            letter-spacing: 0.01em;
+            color: var(--text-primary);
         }
-        .form-container input[type="text"],
-        .form-container textarea,
-        .form-container select {
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            background: white;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-main);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-card-body {
+            padding: 2rem;
+        }
+
+        /* Messages */
+        .alert-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-message {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-md);
+            color: var(--danger);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .alert-message i {
+            font-size: 1rem;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-title i {
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        /* Form Groups */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .form-group label .required {
+            color: var(--danger);
+            font-size: 0.9rem;
+        }
+
+        .form-group label .optional {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            font-weight: 400;
+        }
+
+        .form-control {
             width: 100%;
-            padding: 0.85rem 1rem;
-            margin-top: 0.5rem;
-            border: 1.5px solid #cfd8dc;
-            border-radius: 8px;
-            font-size: 1.05rem;
-            background: #f8fafc;
-            color: #222;
-            transition: border-color 0.25s, box-shadow 0.25s;
-            box-sizing: border-box;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            transition: var(--transition);
         }
-        .form-container input:focus, .form-container textarea:focus, .form-container select:focus {
-            border: 1.5px solid #005fa3;
+
+        .form-control:focus {
+            border-color: var(--primary);
             outline: none;
-            background: #fff;
-            box-shadow: 0 0 8px rgba(0, 95, 163, 0.10);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
         }
-        .form-container textarea {
-            min-height: 90px;
+
+        .form-control::placeholder {
+            color: var(--text-light);
+        }
+
+        .form-control:disabled {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
             resize: vertical;
         }
-        .form-container input[type="file"] {
-            margin-top: 0.7rem;
-            border: none;
-            background: none;
-            font-size: 1rem;
-            color: #005fa3;
-        }
-        .form-container input[type="file"]::-webkit-file-upload-button {
-            background: #e3f0fa;
-            color: #005fa3;
-            border: 1px solid #b3d8f6;
-            border-radius: 6px;
-            padding: 0.5rem 1.2rem;
-            font-weight: 600;
+
+        select.form-control {
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
         }
-        .form-container input[type="file"]:hover::-webkit-file-upload-button {
-            background: #cbe6fd;
-            color: #003e6b;
+
+        /* File Input */
+        .file-upload-wrapper {
+            position: relative;
         }
-        .form-container button[type="submit"] {
-            margin-top: 2.2rem;
-            width: 100%;
-            padding: 1rem 0;
-            background-color: #005fa3;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.18rem;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(0, 95, 163, 0.13);
-            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
-            user-select: none;
-        }
-        .form-container button[type="submit"]:hover,
-        .form-container button[type="submit"]:focus {
-            background-color: #004072;
-            box-shadow: 0 10px 28px rgba(0, 64, 114, 0.18);
-            transform: translateY(-2px);
-            outline: none;
-        }
-        .form-fields-row {
+
+        .file-upload-label {
             display: flex;
-            flex-wrap: wrap;
-            gap: 2.5rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-main);
+            cursor: pointer;
+            transition: var(--transition);
         }
-        .form-col {
-            flex: 1 1 0;
-            min-width: 0;
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
         }
-        @media (max-width: 900px) {
-            .form-fields-row {
-                flex-direction: column;
-                gap: 0;
-            }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            color: var(--text-light);
         }
-        .form-container form label {
-            margin-top: 1.2rem;
+
+        .file-upload-label span {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
-        .form-container form input[type="text"],
-        .form-container form textarea,
-        .form-container form select {
+
+        .file-upload-label .browse-text {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Conditional Fields */
+        .conditional-field {
+            padding: 1rem;
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            border-radius: var(--radius-md);
             margin-top: 0.5rem;
         }
-        .form-container form input[type="file"] {
-            margin-top: 0.7rem;
+
+        .conditional-field.issue {
+            background: #fef2f2;
+            border-color: #fecaca;
         }
-        /* Remove double margin for first label in each column */
-        .form-col label:first-child {
-            margin-top: 0;
+
+        /* Submit Button */
+        .form-actions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
         }
-        @media (max-width: 1100px) {
-            .form-container {
-                max-width: 99vw;
-                padding: 2rem 1rem 1.5rem 1rem;
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.35);
+        }
+
+        .btn-primary i {
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover i {
+            transform: translateX(3px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-hero {
+                padding: 2rem 1rem 5rem;
             }
-        }
-        @media (max-width: 600px) {
-            .form-container {
-                padding: 1.5rem 0.7rem 1.2rem 0.7rem;
-                max-width: 99vw;
+
+            .hero-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
             }
-            .form-container h2 {
+
+            .hero-text h1 {
                 font-size: 1.5rem;
             }
-            .form-container button[type="submit"] {
-                font-size: 1rem;
-                padding: 0.8rem 0;
+
+            .form-content {
+                padding: 0 1rem;
+                margin-top: -3rem;
             }
+
+            .form-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .form-card-body {
+                padding: 1.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Info text */
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        /* Category badge */
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #cce5ff 100%);
+            border: 1px solid #99caff;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .category-badge i {
+            font-size: 0.85rem;
         }
     </style>
 
-    <div class="form-bg">
-        <div class="form-container">
-            <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" style="display:inline-block;margin-bottom:0.1rem;color:#005fa3;font-weight:600;text-decoration:underline;">&larr; Back to List</a>
-            <h2>{% if edit %}Edit Product{% else %}Add Product{% endif %}</h2>
-            {% if messages %}
-                <ul class="messages" style="margin-bottom:1rem;list-style:none;padding:0;">
-                    {% for message in messages %}
-                        <li style="color:#b30000;font-weight:600;">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="hidden" name="stream" value="{{ stream }}">
-                <div class="form-fields-row">
-                    <div class="form-col">
-                        <label for="category">Category:</label>
-                        {% if selected_category %}
-                            <input type="hidden" name="category" value="{{ selected_category.id }}">
-                            <input type="text" id="category" value="{{ selected_category.name }} ({{ selected_category.serial_number }})" disabled style="background:#f0f3f8; color:#555; font-weight:600;">
-                        {% elif product and product.category %}
-                            <input type="hidden" name="category" value="{{ product.category.id }}">
-                            <input type="text" id="category" value="{{ product.category.name }} ({{ product.category.serial_number }})" disabled style="background:#f0f3f8; color:#555; font-weight:600;">
-                        {% else %}
-                            <div style="color:#888; font-style:italic; margin-bottom:1rem;">No category selected. Please go back and select a category.</div>
-                        {% endif %}
-                        <label for="name">Product Name:</label>
-                        <input type="text" id="name" name="name" required value="{{ product.name|default:'' }}">
-                        <label for="serial_number">Product Number / ID:</label>
-                        <input type="text" id="serial_number" name="serial_number" required value="{{ product.serial_number|default:next_serial }}">
-                        <label for="status">Status:</label>
-                        <select id="status" name="status" required onchange="toggleHandedOverFields(); toggleIssueField();">
-                            <option value="Active" {% if product.status == 'Active' %}selected{% endif %}>Active</option>
-                            <option value="Not Active" {% if product.status == 'Not Active' %}selected{% endif %}>Not Active</option>
-                            <option value="Scraped" {% if product.status == 'Scraped' %}selected{% endif %}>Scraped</option>
-                            <option value="Hand-Overed" {% if product.status == 'Hand-Overed' %}selected{% endif %}>Hand-Overed</option>
-                            <option value="Issue" {% if product.status == 'Issue' %}selected{% endif %}>Issue in the System</option>
-                        </select>
-                        
-                        <div id="handedOverFields" style="margin-top:1rem; display:none;">
-                            <label for="handover_team_type">Assigning team</label>
-                            <select id="handover_team_type" name="handover_team_type" onchange="toggleExternalTeamField()">
-                                <option value="Internal" {% if product and product.handover_team_type == 'Internal' %}selected{% endif %}>Internal (MoS)</option>
-                                <option value="External" {% if product and product.handover_team_type == 'External' %}selected{% endif %}>External</option>
-                            </select>
-                            <div id="externalTeamField" style="margin-top:0.7rem; display:none;">
-                                <label for="handover_external_team">If external, which team?</label>
-                                <input type="text" id="handover_external_team" name="handover_external_team" value="{{ product.handover_external_team|default:'' }}">
+    <div class="form-page">
+        <!-- Hero Section -->
+        <section class="form-hero">
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            <div class="hero-content">
+                <div class="hero-header">
+                    <div class="hero-icon">
+                        <i class="fas {% if edit %}fa-edit{% else %}fa-plus-circle{% endif %}"></i>
+                    </div>
+                    <div class="hero-text">
+                        <div class="breadcrumb">
+                            <a href="/"><i class="fas fa-home"></i> Home</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <a href="{% url 'product_list_stream' stream %}">{{ stream }}</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>{% if edit %}Edit Product{% else %}Add Product{% endif %}</span>
+                        </div>
+                        <h1>{% if edit %}Edit Product{% else %}Add New Product{% endif %}</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Form Content -->
+        <div class="form-content">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-title">
+                        <i class="fas fa-box"></i>
+                        <span>Product Information</span>
+                    </div>
+                    <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+
+                <div class="form-card-body">
+                    {% if messages %}
+                        <div class="alert-messages">
+                            {% for message in messages %}
+                                <div class="alert-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="stream" value="{{ stream }}">
+
+                        <div class="form-grid">
+                            <!-- Left Column -->
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    Basic Information
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    {% if selected_category %}
+                                        <input type="hidden" name="category" value="{{ selected_category.id }}">
+                                        <div class="category-badge">
+                                            <i class="fas fa-folder"></i>
+                                            {{ selected_category.name }} ({{ selected_category.serial_number }})
+                                        </div>
+                                    {% elif product and product.category %}
+                                        <input type="hidden" name="category" value="{{ product.category.id }}">
+                                        <div class="category-badge">
+                                            <i class="fas fa-folder"></i>
+                                            {{ product.category.name }} ({{ product.category.serial_number }})
+                                        </div>
+                                    {% else %}
+                                        <div class="form-help" style="color: var(--warning);">
+                                            <i class="fas fa-exclamation-triangle"></i> No category selected. Please go back and select a category.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="name">Product Name <span class="required">*</span></label>
+                                    <input type="text" id="name" name="name" class="form-control" required value="{{ product.name|default:'' }}" placeholder="Enter product name">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="serial_number">Product Number / ID <span class="required">*</span></label>
+                                    <input type="text" id="serial_number" name="serial_number" class="form-control" required value="{{ product.serial_number|default:next_serial }}" placeholder="Enter product number">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="status">Status <span class="required">*</span></label>
+                                    <select id="status" name="status" class="form-control" required onchange="toggleHandedOverFields(); toggleIssueField();">
+                                        <option value="Active" {% if product.status == 'Active' %}selected{% endif %}>Active</option>
+                                        <option value="Not Active" {% if product.status == 'Not Active' %}selected{% endif %}>Not Active</option>
+                                        <option value="Scraped" {% if product.status == 'Scraped' %}selected{% endif %}>Scraped</option>
+                                        <option value="Hand-Overed" {% if product.status == 'Hand-Overed' %}selected{% endif %}>Hand-Overed</option>
+                                        <option value="Issue" {% if product.status == 'Issue' %}selected{% endif %}>Issue in the System</option>
+                                    </select>
+                                </div>
+
+                                <div id="handedOverFields" style="display:none;">
+                                    <div class="conditional-field">
+                                        <div class="form-group">
+                                            <label for="handover_team_type">Assigning Team</label>
+                                            <select id="handover_team_type" name="handover_team_type" class="form-control" onchange="toggleExternalTeamField()">
+                                                <option value="Internal" {% if product and product.handover_team_type == 'Internal' %}selected{% endif %}>Internal (MoS)</option>
+                                                <option value="External" {% if product and product.handover_team_type == 'External' %}selected{% endif %}>External</option>
+                                            </select>
+                                        </div>
+                                        <div id="externalTeamField" style="display:none; margin-top:1rem;">
+                                            <div class="form-group">
+                                                <label for="handover_external_team">External Team Name</label>
+                                                <input type="text" id="handover_external_team" name="handover_external_team" class="form-control" value="{{ product.handover_external_team|default:'' }}" placeholder="Enter team name">
+                                            </div>
+                                        </div>
+                                        <div id="handoverOwnerField" style="display:none; margin-top:1rem;">
+                                            <div class="form-group">
+                                                <label id="handoverOwnerLabel" for="handover_owner">Name of the assignee / Owner</label>
+                                                <input type="text" id="handover_owner" name="handover_owner" class="form-control" value="{{ product.handover_owner|default:'' }}" placeholder="Enter assignee name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="issueField" {% if product.status == 'Issue' %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                                    <div class="conditional-field issue">
+                                        <div class="form-group">
+                                            <label for="issue_description">Issue Description <span class="required">*</span></label>
+                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="4" {% if product.status == 'Issue' %}required{% endif %} placeholder="Describe the issue in detail">{{ product.issue_description|default:'' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="form-section">
+                                <div class="form-section-title">
+                                    <i class="fas fa-cog"></i>
+                                    Additional Details
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="location">Location <span class="required">*</span></label>
+                                    <select id="location" name="location" class="form-control" required>
+                                        <option value="">-- Select Location --</option>
+                                        {% for loc in locations %}
+                                            <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="twelve_nc">12NC Information <span class="optional">(Optional)</span></label>
+                                    <input type="text" id="twelve_nc" name="twelve_nc" class="form-control" value="{{ product.twelve_nc|default:'' }}" placeholder="Enter 12NC or related info">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="description">Description <span class="required">*</span></label>
+                                    <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Enter product description">{{ product.description|default:'' }}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Product Images <span class="optional">(Optional, multiple allowed)</span></label>
+                                    <div class="file-upload-wrapper">
+                                        <label class="file-upload-label">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span><span class="browse-text">Browse</span> or drag files here</span>
+                                            <span style="font-size: 0.75rem; color: var(--text-light);">Supports: JPG, PNG, GIF</span>
+                                        </label>
+                                        <input type="file" id="images" name="images" accept="image/*" multiple>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div id="issueField"
-                          {% if product.status == 'Issue' %}
-                            style="margin-top:1rem; display:block;"
-                          {% else %}
-                            style="margin-top:1rem; display:none;"
-                          {% endif %}
-                        >
-                            <label for="issue_description">Issue Description:</label>
-                            <textarea id="issue_description" name="issue_description" rows="4" {% if product.status == 'Issue' %}required{% endif %}>{{ product.issue_description|default:'' }}</textarea>
-                        </div>
-                    </div>
-                    <div class="form-col">
-                        <div id="handoverOwnerField" style="display:none;">
-                            <label id="handoverOwnerLabel" for="handover_owner" style="margin-top:0.7rem;">Name of the assignee / Owner (default to Store)</label>
-                            <input type="text" id="handover_owner" name="handover_owner" value="{{ product.handover_owner|default:'' }}">
-                        </div>
-                        <label for="location" style="margin-top:0;">Location:</label>
-                        <select id="location" name="location" required>
-                            <option value="">-- Select Location --</option>
-                            {% for loc in locations %}
-                                <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
-                            {% endfor %}
-                        </select>
-                    
-                    <div class="form-col">
-                        </br>
-                        <label for="twelve_nc">12NC Information:</label>
-                        <input type="text" id="twelve_nc" name="twelve_nc" value="{{ product.twelve_nc|default:'' }}" placeholder="Enter 12NC or related info (optional)">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description" rows="4" required>{{ product.description|default:'' }}</textarea>
-                        <label for="images">Product Images (optional, you can select multiple):</label>
-                        <input type="file" id="images" name="images" accept="image/*" multiple>
-                    </div>
-                    
-                </div>
-                    </div>
 
-                <button type="submit">{% if edit %}Update Product{% else %}Add Product{% endif %}</button>
-            </form>
+                        <div class="form-actions">
+                            <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if edit %}<i class="fas fa-save"></i> Update Product{% else %}<i class="fas fa-plus"></i> Add Product{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
 <script>
-    function openHistoryModal(productId) {
-      // ...existing code...
-    }
-    function closeHistoryModal() {
-      // ...existing code...
-    }
-    document.addEventListener('keydown', e => {
-      // ...existing code...
-    });
-    document.getElementById('historyModal').onclick = e => {
-      // ...existing code...
-    };
     // Hand-Overed status logic
     function toggleHandedOverFields() {
       var status = document.getElementById('status').value;
       var handoverFields = document.getElementById('handedOverFields');
-      // Normalize status for robust comparison
       var normalized = status.replace(/[-\s]/g, '').toLowerCase();
       var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
       if (isHandedOver) {
@@ -284,10 +738,9 @@
         handoverFields.style.display = 'none';
       }
       toggleExternalTeamField();
-      // Debug log for troubleshooting
-      console.log('Status value:', status, '| Normalized:', normalized, '| Show handover fields:', isHandedOver);
     }
     window.toggleHandedOverFields = toggleHandedOverFields;
+
     function toggleExternalTeamField() {
       var teamType = document.getElementById('handover_team_type');
       var externalField = document.getElementById('externalTeamField');
@@ -297,7 +750,7 @@
       var status = document.getElementById('status') ? document.getElementById('status').value : '';
       var normalized = status.replace(/[-\s]/g, '').toLowerCase();
       var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
-      // Only show owner field if status is Hand-Overed/HandedOver
+      
       if (!isHandedOver) {
         if (ownerField) ownerField.style.display = 'none';
         if (ownerInput) ownerInput.required = false;
@@ -321,6 +774,7 @@
       }
     }
     window.toggleExternalTeamField = toggleExternalTeamField;
+
     function toggleIssueField() {
       var status = document.getElementById('status').value;
       var issueField = document.getElementById('issueField');
@@ -333,6 +787,7 @@
       }
     }
     window.toggleIssueField = toggleIssueField;
+
     // Initial call on page load
     document.addEventListener('DOMContentLoaded', function() {
       if (document.getElementById('status')) {
@@ -345,8 +800,9 @@
         document.getElementById('handover_team_type').addEventListener('change', toggleExternalTeamField);
       }
     });
+
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
-      });
-  </script>
+    });
+</script>
 {% endblock %}

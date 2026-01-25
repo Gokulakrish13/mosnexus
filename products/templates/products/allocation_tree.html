@@ -1864,10 +1864,16 @@
             <!-- Recent Allocations -->
             {% if system_data.recent_allocations %}
             <div class="tree-section">
-                <div class="tree-section-title">
-                    <i class="fas fa-history"></i> Recent Allocations (Last 15 Days)
+                <div class="tree-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>
+                        <i class="fas fa-history"></i> Recent Allocations (Last 15 Days)
+                    </span>
+                    <button onclick="toggleRecentAllocations({{ system_data.system.id }})" class="btn-tree btn-secondary-tree" style="font-size: 0.8em; padding: 0.3rem 0.8rem;">
+                        <i class="fas fa-chevron-down" id="allocIcon-{{ system_data.system.id }}"></i> 
+                        <span id="allocText-{{ system_data.system.id }}">Show</span>
+                    </button>
                 </div>
-                <div class="allocation-info">
+                <div id="allocPanel-{{ system_data.system.id }}" class="allocation-info" style="display: none; margin-top: 10px;">
                     {% for allocation in system_data.recent_allocations %}
                     <div class="allocation-item">
                         <strong>{{ allocation.user.username }}</strong>
@@ -1943,6 +1949,22 @@ function toggleSystemHistory(systemId) {
         if (!loadedHistory[systemId]) {
             loadSystemHistory(systemId);
         }
+    } else {
+        panel.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Show';
+    }
+}
+
+function toggleRecentAllocations(systemId) {
+    const panel = document.getElementById('allocPanel-' + systemId);
+    const icon = document.getElementById('allocIcon-' + systemId);
+    const text = document.getElementById('allocText-' + systemId);
+    
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Hide';
     } else {
         panel.style.display = 'none';
         icon.className = 'fas fa-chevron-down';

@@ -9,33 +9,43 @@
   <meta charset="UTF-8" />
   <title>Product List</title>
   <link rel="stylesheet" href="/static/products/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     :root {
-      --primary: #005fa3;
-      --primary-light: #e3f0fa;
-      --primary-dark: #003e6b;
+      --primary: #0066cc;
+      --primary-light: #e6f2ff;
+      --primary-dark: #004d99;
       --accent: #00b4d8;
       --accent-light: #90e0ef;
+      --accent-gradient: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
+      --dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
       --info: #3b82f6;
-      --text-primary: #1e293b;
+      --text-primary: #0f172a;
       --text-secondary: #64748b;
       --text-muted: #94a3b8;
       --bg-primary: #ffffff;
       --bg-secondary: #f8fafc;
       --bg-tertiary: #f1f5f9;
       --border-color: #e2e8f0;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-      --radius-sm: 6px;
-      --radius-md: 10px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
+      --shadow-xl: 0 25px 60px rgba(0,0,0,0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
       --radius-lg: 16px;
       --radius-xl: 24px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body, html {
@@ -45,39 +55,14 @@
       font-size: 1rem;
       background: var(--bg-secondary);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
     }
     a { text-decoration: none; }
     img { vertical-align: middle; }
 
-    /* Animated Background */
+    /* Remove old animated background */
     .page-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
-    }
-    
-    .page-background::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 20% 80%, rgba(0, 180, 216, 0.08) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(0, 95, 163, 0.08) 0%, transparent 50%),
-                  radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
-      animation: bgFloat 20s ease-in-out infinite;
-    }
-    
-    @keyframes bgFloat {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      33% { transform: translate(2%, 2%) rotate(1deg); }
-      66% { transform: translate(-1%, 1%) rotate(-1deg); }
+      display: none;
     }
 
     .top-bar {
@@ -120,76 +105,819 @@
       box-shadow: var(--shadow-md);
     }
 
-    .product-bg {
-      padding-top: 90px;
-      position: relative;
-    }
-    .container {
-      max-width: 1700px;
-      margin: 1rem auto 0;
-      padding: 2.5rem 1.5rem 1rem;
-    }
-
-    /* Stats Dashboard */
-    .stats-dashboard {
-      background: var(--bg-primary);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem 2rem;
-      margin: 0 auto 2rem auto;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-color);
-      max-width: 1665px;
+    /* Premium Hero Section */
+    .product-hero {
+      background: var(--dark-gradient);
+      padding: 2.5rem 2rem 8rem;
       position: relative;
       overflow: hidden;
+      margin-top: 60px;
     }
-    
-    .stats-dashboard::before {
+
+    .product-hero::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.5;
     }
-    
-    .stats-header {
+
+    .hero-glow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .hero-glow-1 {
+      background: var(--primary);
+      top: -150px;
+      right: -50px;
+    }
+
+    .hero-glow-2 {
+      background: var(--accent);
+      bottom: -200px;
+      left: -50px;
+    }
+
+    .hero-content {
+      max-width: 1700px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-header {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.2rem;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
-    
-    .stats-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.2) 100%);
-      border-radius: var(--radius-md);
+
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      color: var(--primary);
+      color: white;
+      font-size: 2rem;
     }
-    
-    .stats-title {
-      font-weight: 700;
-      font-size: 1.4rem;
-      color: var(--primary);
+
+    .hero-text h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
     }
-    
-    .stats-subtitle {
+
+    .hero-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       font-size: 0.9rem;
-      color: var(--text-secondary);
+      color: rgba(255,255,255,0.6);
     }
-    
-    .stats-grid {
+
+    .hero-breadcrumb a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .hero-breadcrumb a:hover {
+      color: white;
+    }
+
+    .hero-breadcrumb i {
+      font-size: 0.65rem;
+    }
+
+    /* Stats Cards in Hero */
+    .hero-stats {
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
-      justify-content: flex-start;
+      margin-top: 1.5rem;
     }
-    
+
+    .hero-stat-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .hero-stat-card:hover {
+      background: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+    }
+
+    .stat-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .stat-indicator.active { background: var(--success); color: var(--success); }
+    .stat-indicator.not-active { background: var(--warning); color: var(--warning); }
+    .stat-indicator.scraped { background: var(--danger); color: var(--danger); }
+    .stat-indicator.hand-overed { background: #8b5cf6; color: #8b5cf6; }
+    .stat-indicator.issue { background: #ff9800; color: #ff9800; }
+
+    .stat-label {
+      font-weight: 600;
+      color: #ffffff !important;
+      font-size: 0.9rem;
+    }
+
+    .hero-stat-card .stat-label {
+      color: #ffffff !important;
+    }
+
+    .stat-label-text {
+      color: rgba(255,255,255,0.85);
+    }
+
+    .stat-label-count {
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Main Content Area */
+    .product-bg {
+      padding-top: 0;
+      position: relative;
+    }
+
+    .main-content {
+      max-width: 1700px;
+      margin: -5rem auto 3rem;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Premium Toolbar Card */
+    .toolbar-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .toolbar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Category Selector */
+    .category-selector {
+      position: relative;
+    }
+
+    .category-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .category-row:hover, .category-row:focus-within {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    }
+
+    .category-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .category-select {
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: transparent;
+      cursor: pointer;
+      min-width: 160px;
+      outline: none;
+    }
+
+    /* Add Button */
+    .add-btn-text {
+      padding: 0.75rem 1.5rem;
+      background: var(--accent-gradient);
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(0, 102, 204, 0.25);
+    }
+
+    .add-btn-text:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 102, 204, 0.35);
+    }
+
+    .add-btn-text i {
+      transition: var(--transition);
+    }
+
+    .add-btn-text:hover i {
+      transform: rotate(90deg);
+    }
+
+    .container {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* Legacy Stats Dashboard - Hidden, replaced by hero stats */
+    .stats-dashboard {
+      display: none;
+    }
+
+    .top-actions {
+      display: none;
+    }
+
+    /* Modern Filter Card */
+    .filter-card {
+      position: relative;
+    }
+
+    .filter-form {
+      position: relative;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .filter-row:hover, .filter-row:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+    }
+
+    .filter-icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: var(--accent-gradient);
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .filter-select {
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: transparent;
+      cursor: pointer;
+      min-width: 160px;
+      outline: none;
+    }
+
+    /* Filter Popup */
+    .filter-popup {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      display: none;
+      min-width: 320px;
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+      z-index: 1100;
+      overflow: hidden;
+      animation: popupSlideDown 0.25s ease;
+    }
+
+    @keyframes popupSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .filter-section {
+      display: none;
+      padding: 1.25rem;
+    }
+
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-section-header i {
+      font-size: 0.8rem;
+    }
+
+    /* Search Input */
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .search-input-wrapper:focus-within {
+      border-color: var(--primary);
+      background: white;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      background: transparent;
+      outline: none;
+      color: var(--text-primary);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-submit-btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: var(--accent-gradient);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .search-submit-btn:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+
+    /* Date Inputs */
+    .date-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .date-field {
+      flex: 1;
+    }
+
+    .date-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .date-field input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: var(--transition);
+      box-sizing: border-box;
+    }
+
+    .date-field input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+    }
+
+    .date-separator {
+      color: var(--text-muted);
+      padding-top: 1.5rem;
+    }
+
+    /* Location Select */
+    .location-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .location-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+    }
+
+    /* Active Filter Banner */
+    .active-filter-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.08) 100%);
+      border: 1px solid rgba(0, 102, 204, 0.15);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      max-width: fit-content;
+    }
+
+    .filter-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .filter-badge i {
+      font-size: 0.7rem;
+    }
+
+    .filter-details {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .filter-tag i {
+      color: var(--primary);
+      font-size: 0.75rem;
+    }
+
+    .clear-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.85rem;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: var(--transition);
+      margin-left: auto;
+    }
+
+    .clear-filter-btn:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .search-bar input {
+      padding: 0.6rem 1.2rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      width: 260px;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+    }
+
+    .search-bar button {
+      padding: 0.6rem 1.4rem;
+      margin-left: 0.5rem;
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .search-bar button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Premium Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Premium Product Card */
+    .product-card {
+      background: white;
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-xl);
+      padding: 0;
+      transition: var(--transition);
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .product-card-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .product-card-body {
+      padding: 1.5rem;
+    }
+
+    .product-card h3 {
+      margin: 0 0 0.5rem;
+      color: var(--primary);
+      font-size: 1.15rem;
+      font-weight: 700;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .product-card h3 i {
+      opacity: 0.7;
+      font-size: 1rem;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #7dd3fc;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0369a1;
+    }
+
+    .category-badge i {
+      font-size: 0.65rem;
+    }
+
+    .serial, .desc, .created {
+      margin: 0.4rem 0;
+      font-size: 0.9rem;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    .serial {
+      color: var(--accent);
+      font-weight: 600;
+      word-break: break-all;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .desc {
+      color: var(--text-secondary);
+      max-width: 100%;
+      font-size: 0.875rem;
+    }
+
+    .created {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .twelve-nc, .location {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+      max-width: 100%;
+    }
+
+    .twelve-nc {
+      word-break: break-all;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    .location {
+      color: var(--primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    /* Action Buttons */
+    .action-links {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .edit-btn, .delete-btn, .history-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .edit-btn {
+      background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+      color: var(--text-primary);
+    }
+
+    .edit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+    }
+
+    .delete-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #fff;
+    }
+
+    .delete-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .history-btn {
+      background: linear-gradient(135deg, var(--info) 0%, #2563eb 100%);
+      color: #fff;
+    }
+
+    .history-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .status-btn {
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      font-weight: 600;
+      border: none;
+      pointer-events: none;
+      cursor: default;
+      margin-left: 0.25rem;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
     .stat-card {
       display: flex;
       align-items: center;
@@ -799,59 +1527,69 @@
       transition: all 0.2s ease;
     }
     
-    .status-active { 
-      background: linear-gradient(135deg, var(--success) 0%, #059669 100%); 
-      color: #fff; 
+    .status-active {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: #fff;
       box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
-    .status-notactive { 
-      background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%); 
-      color: #fff; 
+
+    .status-notactive {
+      background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+      color: #fff;
       box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
     }
-    .status-Scraped { 
-      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%); 
-      color: #fff; 
+
+    .status-Scraped {
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+      color: #fff;
       box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
     }
-    .status-handovered { 
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
-      color: #fff; 
-      box-shadow: 0 2px 8px rgba(0, 95, 163, 0.3);
+
+    .status-handovered {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
+
+    .status-issue {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
     }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
       align-items: center;
       justify-content: center;
       z-index: 2000;
     }
+
     .modal-content {
-      background: var(--bg-primary);
-      border-radius: var(--radius-lg);
+      background: white;
+      border-radius: var(--radius-xl);
       padding: 2rem;
-      max-width: 480px;
+      max-width: 500px;
       width: 90%;
       box-shadow: var(--shadow-xl);
       position: relative;
       animation: modalSlideIn 0.3s ease;
     }
-    
+
     @keyframes modalSlideIn {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-20px) scale(0.95);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
-    
+
     .modal-close {
       position: absolute;
       right: 1rem;
@@ -859,19 +1597,20 @@
       font-size: 1.5rem;
       color: var(--text-muted);
       cursor: pointer;
-      transition: color 0.2s ease;
-      width: 32px;
-      height: 32px;
+      transition: var(--transition);
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
     }
+
     .modal-close:hover {
       color: var(--danger);
       background: rgba(239, 68, 68, 0.1);
     }
-    
+
     /* View Details Link */
     .view-details-link {
       color: var(--primary);
@@ -881,10 +1620,11 @@
       gap: 0.4rem;
       margin-top: 0.75rem;
       padding: 0.4rem 0;
-      transition: all 0.2s ease;
+      transition: var(--transition);
       position: relative;
+      font-size: 0.875rem;
     }
-    
+
     .view-details-link::after {
       content: '';
       position: absolute;
@@ -895,86 +1635,86 @@
       background: var(--primary);
       transition: width 0.2s ease;
     }
-    
+
     .view-details-link:hover {
       color: var(--primary-dark);
     }
-    
+
     .view-details-link:hover::after {
       width: 100%;
     }
-    
+
     /* System and Project Tags */
     .system-tag-container {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 0.75rem;
+      right: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
-      max-width: 40%;
-      min-width: 180px;
+      gap: 0.5rem;
+      max-width: 45%;
+      min-width: 160px;
     }
-    
+
     .system-card, .project-card {
       border-radius: var(--radius-md);
-      padding: 0.6rem 0.8rem;
-      font-size: 0.8rem;
-      transition: all 0.3s ease;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      transition: var(--transition);
     }
-    
+
     .system-card {
       background: linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.15) 100%);
       border: 1px solid var(--primary);
-      box-shadow: 0 3px 12px rgba(0, 95, 163, 0.2);
+      box-shadow: 0 3px 12px rgba(0, 102, 204, 0.2);
     }
-    
+
     .system-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 95, 163, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 102, 204, 0.3);
     }
-    
+
     .project-card {
       background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
       border: 1px solid #f59e0b;
       box-shadow: 0 3px 12px rgba(245, 158, 11, 0.2);
     }
-    
+
     .project-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
     }
-    
+
     .tag-header {
       font-weight: 700;
       margin-bottom: 0.3rem;
       display: flex;
       align-items: center;
       gap: 0.3rem;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 0.25rem;
     }
-    
+
     /* Handover and Issue Info Boxes */
     .info-box {
       border-radius: var(--radius-md);
       padding: 0.75rem 1rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
+      margin: 0.5rem 0;
+      font-size: 0.85rem;
     }
-    
+
     .info-box.handover {
       background: linear-gradient(135deg, var(--bg-tertiary) 0%, #e2e8f0 100%);
       border: 1px solid var(--border-color);
     }
-    
+
     .info-box.issue {
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
       border: 1px solid #f59e0b;
       color: #92400e;
     }
-    
+
     /* Empty State */
     .empty-state {
       text-align: center;
@@ -985,13 +1725,16 @@
       align-items: center;
       justify-content: center;
       gap: 1rem;
+      background: white;
+      border-radius: var(--radius-xl);
+      border: 2px dashed var(--border-color);
     }
-    
+
     .empty-state i {
       font-size: 4rem;
       color: var(--border-color);
     }
-    
+
     /* Toast Styles */
     .toast {
       padding: 1rem 1.5rem;
@@ -1005,7 +1748,7 @@
       align-items: center;
       animation: toastSlideIn 0.3s ease;
     }
-    
+
     @keyframes toastSlideIn {
       from {
         opacity: 0;
@@ -1016,7 +1759,7 @@
         transform: translateX(0);
       }
     }
-    
+
     .toast-close {
       margin-left: auto;
       background: none;
@@ -1027,295 +1770,387 @@
       opacity: 0.7;
       transition: opacity 0.2s;
     }
-    
+
     .toast-close:hover {
       opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .product-hero {
+        padding: 2rem 1.5rem 6rem;
+      }
+
+      .hero-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-text h1 {
+        font-size: 1.75rem;
+      }
+
+      .main-content {
+        padding: 0 1rem;
+        margin-top: -4rem;
+      }
+
+      .toolbar-card {
+        padding: 1rem 1.25rem;
+      }
+
+      .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar-left, .toolbar-right {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .product-hero {
+        padding: 1.5rem 1rem 5rem;
+      }
+
+      .hero-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.5rem;
+      }
+
+      .hero-text h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero-stats {
+        flex-direction: column;
+      }
+
+      .hero-stat-card {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .main-content {
+        margin-top: -3rem;
+      }
+
+      .product-card-body {
+        padding: 1rem;
+      }
+
+      .action-links {
+        flex-wrap: wrap;
+      }
+
+      .status-btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
     }
 
   </style>
 </head>
 <body>
-  <div class="page-background"></div>
-  <div class="product-bg">
-    <!-- Stats Dashboard -->
-    <div class="stats-dashboard">
-      <div class="stats-header">
-        <div class="stats-icon">
+  <!-- Premium Hero Section -->
+  <section class="product-hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-content">
+      <div class="hero-header">
+        <div class="hero-icon">
           <i class="fas fa-boxes-stacked"></i>
         </div>
-        <div>
-          <div class="stats-title">Total Products: {{ total_count }}</div>
-        </div>
-        
-        <!-- Category Selector in Dashboard -->
-        <div class="category-selector" style="margin-left: auto;">
-          <div class="category-row">
-            <div class="category-icon-box">
-              <i class="fas fa-folder-open"></i>
-            </div>
-            <select id="categorySelect" class="category-select" onchange="changeCategory(this.value)">
-              <option value="">All Categories</option>
-              {% for cat in categories %}
-                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
-              {% endfor %}
-            </select>
+        <div class="hero-text">
+          <div class="hero-breadcrumb">
+            <a href="/"><i class="fas fa-home"></i> Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="#">{{ selected_stream }}</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Products</span>
           </div>
+          <h1>Product Inventory <span style="opacity: 0.7; font-weight: 400; font-size: 0.75em;">({{ total_count }} items)</span></h1>
         </div>
       </div>
-      <div class="stats-grid">
-        <div class="stat-card">
+
+      <!-- Stats in Hero -->
+      <div class="hero-stats">
+        <div class="hero-stat-card">
           <div class="stat-indicator active"></div>
           <span class="stat-label">Active: {{ status_counts.Active }}</span>
         </div>
-        <div class="stat-card">
+        <div class="hero-stat-card">
           <div class="stat-indicator not-active"></div>
           <span class="stat-label">Not Active: {{ status_counts|get_item:"Not Active" }}</span>
         </div>
-        <div class="stat-card">
+        <div class="hero-stat-card">
           <div class="stat-indicator scraped"></div>
           <span class="stat-label">Scraped: {{ status_counts.Scraped }}</span>
         </div>
-        <div class="stat-card">
+        <div class="hero-stat-card">
           <div class="stat-indicator hand-overed"></div>
           <span class="stat-label">Hand-Overed: {{ status_counts|get_item:"Hand-Overed" }}</span>
         </div>
-        <div class="stat-card">
+        <div class="hero-stat-card">
           <div class="stat-indicator issue"></div>
-          <span class="stat-label">Issue in System: {{ status_counts.Issue }}</span>
+          <span class="stat-label">Issue: {{ status_counts.Issue }}</span>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="container">      
-	  <div class="top-actions">
-        {% if request.GET.category %}
-          <a href="/stream/{{ selected_stream }}/products/add/?category={{ request.GET.category }}" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
-        {% else %}
-          <a href="/stream/{{ selected_stream }}/products/add/" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
-        {% endif %}
-        
-        <!-- Modern Filter Card -->
-        <div class="filter-card">
-          <form method="get" class="filter-form">
-            <div class="filter-row">
-              <div class="filter-icon-box">
-                <i class="fas fa-sliders-h"></i>
-              </div>
-              <select name="filter_type" id="filterType" class="filter-select">
-                <option value="" {% if not request.GET.filter_type %}selected{% endif %}>All Products</option>
-                <option value="product" {% if request.GET.filter_type == 'product' %}selected{% endif %}>Search by Name</option>
-                <option value="date" {% if request.GET.filter_type == 'date' %}selected{% endif %}>Filter by Date</option>
-                <option value="location" {% if request.GET.filter_type == 'location' %}selected{% endif %}>Filter by Location</option>
-              </select>
-            </div>
-
-            <!-- Filter controls popup -->
-            <div class="filter-popup">
-              <!-- Product search -->
-              <div class="filter-product filter-section">
-                <div class="filter-section-header">
-                  <i class="fas fa-search"></i>
-                  <span>Search Products</span>
+  <div class="product-bg">
+    <div class="main-content">
+      <!-- Premium Toolbar Card -->
+      <div class="toolbar-card">
+        <div class="toolbar-row">
+          <div class="toolbar-left">
+            <!-- Category Selector -->
+            <div class="category-selector">
+              <div class="category-row">
+                <div class="category-icon-box">
+                  <i class="fas fa-folder-open"></i>
                 </div>
-                <div class="search-input-wrapper">
-                  <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Type to search..." class="search-input" />
-                  <button type="submit" class="search-submit-btn"><i class="fas fa-arrow-right"></i></button>
-                </div>
-              </div>
-
-              <!-- Date Filter -->
-              <div class="filter-date filter-section">
-                <div class="filter-section-header">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span>Date Range</span>
-                </div>
-                <div class="date-inputs">
-                  <div class="date-field">
-                    <label>From</label>
-                    <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" />
-                  </div>
-                  <div class="date-separator"><i class="fas fa-arrow-right"></i></div>
-                  <div class="date-field">
-                    <label>To</label>
-                    <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Location Filter -->
-              <div class="filter-location filter-section">
-                <div class="filter-section-header">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span>Location</span>
-                </div>
-                <select name="location" class="location-select">
-                  <option value="">All Locations</option>
-                  {% for location in locations %}
-                    <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
-                      {{ location.name }}
-                    </option>
+                <select id="categorySelect" class="category-select" onchange="changeCategory(this.value)">
+                  <option value="">All Categories</option>
+                  {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
                   {% endfor %}
                 </select>
               </div>
             </div>
 
-          </form>
+            <!-- Filter Card -->
+            <div class="filter-card">
+              <form method="get" class="filter-form">
+                <div class="filter-row">
+                  <div class="filter-icon-box">
+                    <i class="fas fa-sliders-h"></i>
+                  </div>
+                  <select name="filter_type" id="filterType" class="filter-select">
+                    <option value="" {% if not request.GET.filter_type %}selected{% endif %}>All Products</option>
+                    <option value="product" {% if request.GET.filter_type == 'product' %}selected{% endif %}>Search by Name</option>
+                    <option value="date" {% if request.GET.filter_type == 'date' %}selected{% endif %}>Filter by Date</option>
+                    <option value="location" {% if request.GET.filter_type == 'location' %}selected{% endif %}>Filter by Location</option>
+                  </select>
+                </div>
+
+                <!-- Filter controls popup -->
+                <div class="filter-popup">
+                  <!-- Product search -->
+                  <div class="filter-product filter-section">
+                    <div class="filter-section-header">
+                      <i class="fas fa-search"></i>
+                      <span>Search Products</span>
+                    </div>
+                    <div class="search-input-wrapper">
+                      <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Type to search..." class="search-input" />
+                      <button type="submit" class="search-submit-btn"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Date Filter -->
+                  <div class="filter-date filter-section">
+                    <div class="filter-section-header">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>Date Range</span>
+                    </div>
+                    <div class="date-inputs">
+                      <div class="date-field">
+                        <label>From</label>
+                        <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" />
+                      </div>
+                      <div class="date-separator"><i class="fas fa-arrow-right"></i></div>
+                      <div class="date-field">
+                        <label>To</label>
+                        <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Location Filter -->
+                  <div class="filter-location filter-section">
+                    <div class="filter-section-header">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span>Location</span>
+                    </div>
+                    <select name="location" class="location-select">
+                      <option value="">All Locations</option>
+                      {% for location in locations %}
+                        <option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:"s" %}selected{% endif %}>
+                          {{ location.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            {% if request.GET.category %}
+              <a href="/stream/{{ selected_stream }}/products/add/?category={{ request.GET.category }}" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
+            {% else %}
+              <a href="/stream/{{ selected_stream }}/products/add/" class="add-btn-text"><i class="fas fa-plus"></i> Add Product</a>
+            {% endif %}
+          </div>
         </div>
       </div>
 
-    <!-- Active Filter Display -->
-    {% if request.GET.filter_type and request.GET.q or request.GET.start_date or request.GET.end_date or request.GET.location %}
-    <div class="active-filter-banner">
-      <div class="filter-badge">
-        <i class="fas fa-filter"></i>
-        <span>Filtered</span>
-      </div>
-      <div class="filter-details">
-        {% if request.GET.filter_type == 'product' and request.GET.q %}
-          <span class="filter-tag"><i class="fas fa-search"></i> "{{ request.GET.q }}"</span>
-        {% elif request.GET.filter_type == 'date' %}
-          {% if request.GET.start_date %}
-            <span class="filter-tag"><i class="fas fa-calendar"></i> From {{ request.GET.start_date }}</span>
-          {% endif %}
-          {% if request.GET.end_date %}
-            <span class="filter-tag"><i class="fas fa-calendar"></i> To {{ request.GET.end_date }}</span>
-          {% endif %}
-        {% elif request.GET.filter_type == 'location' and request.GET.location %}
-          <span class="filter-tag"><i class="fas fa-map-marker-alt"></i> 
-            {% for location in locations %}
-              {% if location.id|stringformat:"s" == request.GET.location %}{{ location.name }}{% endif %}
-            {% endfor %}
-          </span>
-        {% endif %}
-      </div>
-      <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" class="clear-filter-btn">
-        <i class="fas fa-times"></i> Clear
-      </a>
-    </div>
-    {% endif %}
-
-    {% if messages %}
-    <div class="toast-container" style="list-style:none;padding:0;max-width: 1665px;position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
-        {% for message in messages %}
-            {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}
-            <div class="toast messages-danger" style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;border-left:4px solid var(--danger);">
-                <i class="fas fa-exclamation-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
-                {{ message }}
-                <button type="button" class="toast-close" style="color:#991b1b;"><i class="fas fa-times"></i></button>
-            </div>
-            {% elif 'added' in message|lower or 'deleted' in message|lower or message.tags == 'success' %}
-            <div class="toast messages-success" style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);color:#065f46;border-left:4px solid var(--success);">
-                <i class="fas fa-check-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
-                {{ message }}
-                <button type="button" class="toast-close" style="color:#065f46;"><i class="fas fa-times"></i></button>
-            </div>
-            {% else %}
-            <div class="toast messages" style="background:linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.2) 100%);color:var(--primary-dark);border-left:4px solid var(--primary);">
-                <i class="fas fa-info-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
-                {{ message }}
-                <button type="button" class="toast-close" style="color:var(--primary-dark);"><i class="fas fa-times"></i></button>
-            </div>
+      <!-- Active Filter Display -->
+      {% if request.GET.filter_type and request.GET.q or request.GET.start_date or request.GET.end_date or request.GET.location %}
+      <div class="active-filter-banner">
+        <div class="filter-badge">
+          <i class="fas fa-filter"></i>
+          <span>Filtered</span>
+        </div>
+        <div class="filter-details">
+          {% if request.GET.filter_type == 'product' and request.GET.q %}
+            <span class="filter-tag"><i class="fas fa-search"></i> "{{ request.GET.q }}"</span>
+          {% elif request.GET.filter_type == 'date' %}
+            {% if request.GET.start_date %}
+              <span class="filter-tag"><i class="fas fa-calendar"></i> From {{ request.GET.start_date }}</span>
             {% endif %}
-        {% endfor %}
-    </div>
-    {% endif %}
+            {% if request.GET.end_date %}
+              <span class="filter-tag"><i class="fas fa-calendar"></i> To {{ request.GET.end_date }}</span>
+            {% endif %}
+          {% elif request.GET.filter_type == 'location' and request.GET.location %}
+            <span class="filter-tag"><i class="fas fa-map-marker-alt"></i> 
+              {% for location in locations %}
+                {% if location.id|stringformat:"s" == request.GET.location %}{{ location.name }}{% endif %}
+              {% endfor %}
+            </span>
+          {% endif %}
+        </div>
+        <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" class="clear-filter-btn">
+          <i class="fas fa-times"></i> Clear
+        </a>
+      </div>
+      {% endif %}
 
-    <div class="container">
+      {% if messages %}
+      <div class="toast-container" style="list-style:none;padding:0;max-width: 1665px;position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+          {% for message in messages %}
+              {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}
+              <div class="toast messages-danger" style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;border-left:4px solid var(--danger);">
+                  <i class="fas fa-exclamation-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                  {{ message }}
+                  <button type="button" class="toast-close" style="color:#991b1b;"><i class="fas fa-times"></i></button>
+              </div>
+              {% elif 'added' in message|lower or 'deleted' in message|lower or message.tags == 'success' %}
+              <div class="toast messages-success" style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);color:#065f46;border-left:4px solid var(--success);">
+                  <i class="fas fa-check-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                  {{ message }}
+                  <button type="button" class="toast-close" style="color:#065f46;"><i class="fas fa-times"></i></button>
+              </div>
+              {% else %}
+              <div class="toast messages" style="background:linear-gradient(135deg, var(--primary-light) 0%, rgba(0, 180, 216, 0.2) 100%);color:var(--primary-dark);border-left:4px solid var(--primary);">
+                  <i class="fas fa-info-circle" style="margin-right:0.8rem;font-size:1.2rem;"></i>
+                  {{ message }}
+                  <button type="button" class="toast-close" style="color:var(--primary-dark);"><i class="fas fa-times"></i></button>
+              </div>
+              {% endif %}
+          {% endfor %}
+      </div>
+      {% endif %}
 
+      <!-- Product Grid -->
       <div class="product-grid">
         {% for product in products %}
           <div class="product-card">
-            <!-- Top-right overlay section for system tags and projects -->
-            {% if product.system_tags.exists %}
-            <div class="system-tag-container">
-              
-              <!-- System Tags Container -->
-              <div class="system-card">
-                
-                <!-- System Header -->
-                <div class="tag-header" style="color: var(--primary-dark);">
-                  <i class="fas fa-server" style="font-size:0.7rem; color:var(--primary);"></i>
-                  <span style="letter-spacing:0.3px;">System Assigned</span>
-                </div>
-                
-                <!-- System List -->
-                <div style="display:flex; flex-direction:column; gap:0.2rem;">
-                  {% for system_tag in product.system_tags.all %}
-                    <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
-                      <div style="color:var(--primary); font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+            <div class="product-card-header">
+              <!-- Top-right overlay section for system tags and projects -->
+              {% if product.system_tags.exists %}
+              <div class="system-tag-container">
+                <!-- System Tags Container -->
+                <div class="system-card">
+                  <div class="tag-header" style="color: var(--primary-dark);">
+                    <i class="fas fa-server" style="font-size:0.65rem; color:var(--primary);"></i>
+                    <span style="letter-spacing:0.3px;">System Assigned</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:0.15rem;">
+                    {% for system_tag in product.system_tags.all %}
+                      <div style="color:var(--primary); font-size:0.75rem; font-weight:600; line-height:1.2; word-break:break-word;">
                         {{ system_tag.system.name }} - {{ system_tag.tag_name }}
                       </div>
-                    </div>
-                  {% endfor %}
+                    {% endfor %}
+                  </div>
                 </div>
-              </div>
-              
-              <!-- Project Assignment Cards -->
-              {% for system_tag in product.system_tags.all %}
-                {% if system_tag.projects.exists %}
-                  <div class="project-card">
-                    
-                    <!-- Project Header -->
-                    <div class="tag-header" style="color: #e65100;">
-                      <i class="fas fa-project-diagram" style="font-size:0.7rem; color:#ff9800;"></i>
-                      <span style="letter-spacing:0.3px;">Project Aligned</span>
-                    </div>
-                    
-                    <!-- Project List -->
-                    <div style="display:flex; flex-direction:column; gap:0.2rem;">
-                      {% for project in system_tag.projects.all %}
-                        <div style="display:flex; flex-direction:column; gap:0.1rem; padding:0.2rem 0;">
-                          <div style="color:var(--text-primary); font-size:0.8rem; font-weight:600; line-height:1.2; word-break:break-word;">
+                
+                <!-- Project Assignment Cards -->
+                {% for system_tag in product.system_tags.all %}
+                  {% if system_tag.projects.exists %}
+                    <div class="project-card">
+                      <div class="tag-header" style="color: #e65100;">
+                        <i class="fas fa-project-diagram" style="font-size:0.65rem; color:#ff9800;"></i>
+                        <span style="letter-spacing:0.3px;">Project Aligned</span>
+                      </div>
+                      <div style="display:flex; flex-direction:column; gap:0.15rem;">
+                        {% for project in system_tag.projects.all %}
+                          <div style="color:var(--text-primary); font-size:0.75rem; font-weight:600; line-height:1.2; word-break:break-word;">
                             {{ project.name }}
                           </div>
-                        </div>
-                      {% endfor %}
+                        {% endfor %}
+                      </div>
                     </div>
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
-            {% endif %}
-            <h3 style="font-size:1.15rem; font-weight:700; color:var(--primary); margin-bottom:0.4rem; padding-right:{% if product.system_tags.exists %}50%{% else %}0{% endif %};"><i class="fas fa-cube" style="margin-right:0.4rem; opacity:0.7;"></i>{{ product.name }}</h3>
-            <div style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.25rem 0.7rem; background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border:1px solid #7dd3fc; border-radius:20px; font-size:0.8rem; font-weight:600; color:#0369a1; margin-bottom:0.5rem;">
-              <i class="fas fa-folder" style="font-size:0.7rem;"></i>
-              {{ product.category.name }}
-            </div>
-            <div class="serial" style="font-size:0.95rem; margin-bottom:0.3rem;"><i class="fas fa-fingerprint" style="opacity:0.6;"></i> {{ product.serial_number }}</div>
-            {% if product.twelve_nc %}
-            <div class="twelve-nc" style="font-size:0.9rem; margin-bottom:0.4rem;"><i class="fas fa-barcode" style="margin-right:0.4rem; opacity:0.6;"></i>12NC: {{ product.twelve_nc }}</div>
-            {% endif %}
-            <div class="desc" style="font-size:0.95rem; margin-bottom:0.3rem; color:var(--text-secondary);">
-              <b style="color:var(--text-primary);">Description:</b><br>{{ product.description|linebreaksbr }}
-            </div>
-            <div class="created"><i class="far fa-clock"></i> Added: {{ product.created_at|date:'Y-m-d H:i' }}</div>
-            <div class="location" style="font-size:0.95rem; margin:0.4rem 0;">
-              <i class="fas fa-map-marker-alt"></i>
-              {% if product.location %}{{ product.location.name }}{% else %}No location assigned{% endif %}
-            </div>
-            {% if product.status == 'Hand-Overed' %}
-              <div class="info-box handover">
-                <div><strong>To which team?</strong> {{ product.handover_team_type }}</div>
-                {% if product.handover_team_type == 'External' and product.handover_external_team %}
-                  <div><strong>External Team:</strong> {{ product.handover_external_team }}</div>
-                {% endif %}
-                <div><strong>Assignee / Owner:</strong> {{ product.handover_owner }}</div>
+                  {% endif %}
+                {% endfor %}
               </div>
-            {% endif %}
-            {% if product.status == 'Issue' and product.issue_description %}
-              <div class="info-box issue">
-                <strong><i class="fas fa-exclamation-triangle"></i> Issue:</strong><br>{{ product.issue_description|linebreaksbr }}
-              </div>
-            {% endif %}
-            <a href="{% url 'product_detail_stream' selected_stream product.pk %}" class="view-details-link"><i class="fas fa-eye"></i> View Details</a>
-            <div class="action-links">
-              <a href="{% url 'product_edit_stream' selected_stream product.pk %}" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
-              {% if user|can_delete_products %}
-                <a href="{% url 'product_delete_stream' selected_stream product.pk %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="delete-btn"><i class="fas fa-trash-alt"></i> Delete</a>
               {% endif %}
-              <button type="button" class="history-btn" onclick="openHistoryModal('{{ product.pk }}')"><i class="fas fa-history"></i> History</button>
-              <div class="status-btn {% if product.status == 'Active' %}status-active{% elif product.status == 'Not Active' %}status-notactive{% elif product.status == 'Scraped' %}status-Scraped{% elif product.status == 'Hand-Overed' %}status-handovered{% endif %}" style="margin-left:0.5rem;">
-                {% if product.status == 'Issue' %}Issue in System{% else %}{{ product.status }}{% endif %}
+
+              <h3 style="padding-right:{% if product.system_tags.exists %}50%{% else %}0{% endif %};">
+                <i class="fas fa-cube"></i>{{ product.name }}
+              </h3>
+              <div class="category-badge">
+                <i class="fas fa-folder"></i>
+                {{ product.category.name }}
+              </div>
+            </div>
+
+            <div class="product-card-body">
+              <div class="serial" style="margin-bottom:0.5rem;"><i class="fas fa-fingerprint" style="opacity:0.6;"></i> {{ product.serial_number }}</div>
+              {% if product.twelve_nc %}
+              <div class="twelve-nc" style="margin-bottom:0.5rem;"><i class="fas fa-barcode" style="margin-right:0.4rem; opacity:0.6;"></i>12NC: {{ product.twelve_nc }}</div>
+              {% endif %}
+              <div class="desc" style="margin-bottom:0.5rem;">
+                <b style="color:var(--text-primary);">Description:</b><br>{{ product.description|linebreaksbr|truncatewords:20 }}
+              </div>
+              <div class="created"><i class="far fa-clock"></i> Added: {{ product.created_at|date:'Y-m-d H:i' }}</div>
+              <div class="location" style="margin:0.5rem 0;">
+                <i class="fas fa-map-marker-alt"></i>
+                {% if product.location %}{{ product.location.name }}{% else %}No location assigned{% endif %}
+              </div>
+              {% if product.status == 'Hand-Overed' %}
+                <div class="info-box handover">
+                  <div><strong>Team:</strong> {{ product.handover_team_type }}</div>
+                  {% if product.handover_team_type == 'External' and product.handover_external_team %}
+                    <div><strong>External:</strong> {{ product.handover_external_team }}</div>
+                  {% endif %}
+                  <div><strong>Owner:</strong> {{ product.handover_owner }}</div>
+                </div>
+              {% endif %}
+              {% if product.status == 'Issue' and product.issue_description %}
+                <div class="info-box issue">
+                  <strong><i class="fas fa-exclamation-triangle"></i> Issue:</strong><br>{{ product.issue_description|linebreaksbr|truncatewords:15 }}
+                </div>
+              {% endif %}
+              <a href="{% url 'product_detail_stream' selected_stream product.pk %}" class="view-details-link"><i class="fas fa-eye"></i> View Details</a>
+              <div class="action-links">
+                <a href="{% url 'product_edit_stream' selected_stream product.pk %}" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
+                {% if user|can_delete_products %}
+                  <a href="{% url 'product_delete_stream' selected_stream product.pk %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="delete-btn"><i class="fas fa-trash-alt"></i> Delete</a>
+                {% endif %}
+                <button type="button" class="history-btn" onclick="openHistoryModal('{{ product.pk }}')"><i class="fas fa-history"></i> History</button>
+                <div class="status-btn {% if product.status == 'Active' %}status-active{% elif product.status == 'Not Active' %}status-notactive{% elif product.status == 'Scraped' %}status-Scraped{% elif product.status == 'Hand-Overed' %}status-handovered{% elif product.status == 'Issue' %}status-issue{% endif %}">
+                  {% if product.status == 'Issue' %}Issue{% else %}{{ product.status }}{% endif %}
+                </div>
               </div>
             </div>
           </div>

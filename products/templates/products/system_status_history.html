@@ -1,34 +1,641 @@
 {% extends 'products/base.html' %}
 {% block content %}
-<div style="max-width:900px;margin:5rem auto 2rem auto;background:#fff;border-radius:16px;box-shadow:0 8px 32px #b3c6e0;padding:2.5rem 2.5rem 2rem 2.5rem;">
-    <h2 style="color:#005fa3;font-weight:900;margin-bottom:1.2rem;font-size:1.5rem;">System Status History for {{ system.name }}</h2>
-    <table style="width:100%;border-collapse:collapse;">
-        <thead>
-            <tr style="background:#e3f0fa;">
-                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Status Date</th>
-                <th style="padding:0.7rem 0.5rem;text-align:left;width:120px;font-weight:700;color:#005fa3;">Status</th>
-                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Assignee</th>
-                <th style="padding:0.7rem 0.5rem;text-align:left;width:340px;font-weight:700;color:#005fa3;">Description</th>
-                <th style="padding:0.7rem 0.5rem;text-align:left;width:140px;font-weight:700;color:#005fa3;">Changed By</th>
-            </tr>
-        </thead>
-        <tbody>
+<style>
+/* Enterprise Status History Styles */
+.ent-history-container {
+    max-width: 1200px;
+    margin: 80px auto 40px auto;
+    padding: 0 24px;
+}
+
+.ent-history-header {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 32px 40px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.ent-history-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.05) 100%);
+    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.ent-history-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ent-history-title-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.ent-history-subtitle {
+    font-size: 14px;
+    opacity: 0.85;
+    margin: 0;
+    font-weight: 400;
+}
+
+.ent-system-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.ent-system-badge-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #68d391;
+    box-shadow: 0 0 8px rgba(104, 211, 145, 0.6);
+}
+
+.ent-history-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.ent-stat-item {
+    background: rgba(255,255,255,0.1);
+    padding: 12px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.ent-stat-value {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.ent-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.ent-history-body {
+    background: #ffffff;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 40px rgba(26, 54, 93, 0.15);
+    overflow: hidden;
+}
+
+.ent-history-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 32px;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ent-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ent-search-box {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.ent-search-box:focus-within {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+.ent-search-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+    background: transparent;
+}
+
+.ent-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ent-filter-btn:hover {
+    border-color: #3182ce;
+    color: #3182ce;
+}
+
+.ent-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ent-export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ent-export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4);
+}
+
+.ent-timeline {
+    padding: 32px;
+}
+
+.ent-timeline-item {
+    display: flex;
+    gap: 24px;
+    position: relative;
+    padding-bottom: 32px;
+}
+
+.ent-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.ent-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 48px;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #e2e8f0 0%, transparent 100%);
+}
+
+.ent-timeline-item:last-child::before {
+    display: none;
+}
+
+.ent-timeline-marker {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.ent-timeline-marker.active { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+.ent-timeline-marker.inactive { background: linear-gradient(135deg, #a0aec0 0%, #718096 100%); }
+.ent-timeline-marker.issue { background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%); }
+.ent-timeline-marker.used { background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%); }
+.ent-timeline-marker.removed { background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%); }
+.ent-timeline-marker.blocked { background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%); }
+
+.ent-timeline-content {
+    flex: 1;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.ent-timeline-content:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transform: translateX(4px);
+}
+
+.ent-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.ent-timeline-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ent-timeline-status.active { background: #c6f6d5; color: #276749; }
+.ent-timeline-status.inactive { background: #e2e8f0; color: #4a5568; }
+.ent-timeline-status.issue { background: #feebc8; color: #c05621; }
+.ent-timeline-status.used { background: #bee3f8; color: #2b6cb0; }
+.ent-timeline-status.removed { background: #fed7d7; color: #c53030; }
+.ent-timeline-status.blocked { background: #e9d8fd; color: #6b46c1; }
+
+.ent-timeline-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ent-timeline-date-main {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.ent-timeline-date-time {
+    font-size: 12px;
+    color: #718096;
+}
+
+.ent-timeline-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.ent-timeline-field {
+    background: white;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+}
+
+.ent-timeline-field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.ent-timeline-field-value {
+    font-size: 14px;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.ent-timeline-description {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 8px;
+}
+
+.ent-timeline-description-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.ent-timeline-description-text {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.ent-empty-state {
+    text-align: center;
+    padding: 80px 40px;
+}
+
+.ent-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 24px auto;
+}
+
+.ent-empty-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.ent-empty-text {
+    font-size: 14px;
+    color: #718096;
+}
+
+.ent-back-section {
+    padding: 24px 32px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ent-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.ent-back-btn:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 4px 16px rgba(26, 54, 93, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.ent-page-info {
+    font-size: 13px;
+    color: #718096;
+}
+
+@media (max-width: 768px) {
+    .ent-history-container {
+        margin: 70px 12px 24px 12px;
+        padding: 0;
+    }
+    
+    .ent-history-header {
+        padding: 24px;
+    }
+    
+    .ent-history-title {
+        font-size: 20px;
+    }
+    
+    .ent-history-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .ent-stat-item {
+        flex: 1;
+        min-width: 100px;
+    }
+    
+    .ent-history-toolbar {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .ent-toolbar-left, .ent-toolbar-right {
+        width: 100%;
+    }
+    
+    .ent-timeline {
+        padding: 20px;
+    }
+    
+    .ent-timeline-item {
+        gap: 16px;
+    }
+    
+    .ent-timeline-marker {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .ent-timeline-body {
+        grid-template-columns: 1fr;
+    }
+    
+    .ent-timeline-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .ent-timeline-date {
+        align-items: flex-start;
+    }
+}
+</style>
+
+<div class="ent-history-container">
+    <!-- Header -->
+    <div class="ent-history-header">
+        <div class="ent-history-title">
+            <div class="ent-history-title-icon">📋</div>
+            <span>Status History</span>
+        </div>
+        <p class="ent-history-subtitle">Complete audit trail of system status changes and updates</p>
+        
+        <div class="ent-system-badge">
+            <span class="ent-system-badge-dot"></span>
+            <span>{{ system.name }}</span>
+        </div>
+        
+        <div class="ent-history-stats">
+            <div class="ent-stat-item">
+                <div class="ent-stat-value">{{ history|length }}</div>
+                <div class="ent-stat-label">Total Changes</div>
+            </div>
+            <div class="ent-stat-item">
+                <div class="ent-stat-value">{% if history %}{{ history.0.updated_at|date:'M Y' }}{% else %}N/A{% endif %}</div>
+                <div class="ent-stat-label">Latest Update</div>
+            </div>
+            <div class="ent-stat-item">
+                <div class="ent-stat-value">{{ system.get_status_display }}</div>
+                <div class="ent-stat-label">Current Status</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Body -->
+    <div class="ent-history-body">
+        <!-- Toolbar -->
+        <div class="ent-history-toolbar">
+            <div class="ent-toolbar-left">
+                <div class="ent-search-box">
+                    <span>🔍</span>
+                    <input type="text" class="ent-search-input" placeholder="Search history..." id="historySearch" onkeyup="filterHistory()">
+                </div>
+                <button class="ent-filter-btn" onclick="toggleFilter()">
+                    <span>⚡</span>
+                    <span>Filter</span>
+                </button>
+            </div>
+            <div class="ent-toolbar-right">
+                <button class="ent-export-btn" onclick="exportHistory()">
+                    <span>📥</span>
+                    <span>Export</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Timeline -->
+        <div class="ent-timeline" id="historyTimeline">
             {% for h in history %}
-            <tr style="border-bottom:1px solid #e0e3e7;">
-                <td style="padding:0.7rem 0.5rem;font-weight:600;color:#005fa3;">{{ h.updated_at|date:'d-m-Y' }}</td>
-                <td style="padding:0.7rem 0.5rem;font-weight:600;">{{ h.get_status_display }}</td>
-                <td style="padding:0.7rem 0.5rem;">{{ h.assignee|default:"N/A" }}</td>
-                <td style="padding:0.7rem 0.5rem;max-width:340px;word-break:break-word;">{{ h.description|default:"No description" }}</td>
-                <td style="padding:0.7rem 0.5rem;">{{ h.updated_by }}</td>
-            </tr>
+            <div class="ent-timeline-item" data-status="{{ h.status|lower }}" data-description="{{ h.description|lower }}" data-assignee="{{ h.assignee|lower }}">
+                <div class="ent-timeline-marker {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
+                    {% if h.status == 'Active' %}✓{% elif h.status == 'Not Active' %}○{% elif h.status == 'Issue' %}⚠{% elif h.status == 'Used' %}👥{% elif h.status == 'Removed' %}🗑{% elif h.status == 'Blocked' %}🚫{% else %}○{% endif %}
+                </div>
+                <div class="ent-timeline-content">
+                    <div class="ent-timeline-header">
+                        <span class="ent-timeline-status {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
+                            {{ h.get_status_display }}
+                        </span>
+                        <div class="ent-timeline-date">
+                            <span class="ent-timeline-date-main">{{ h.updated_at|date:'d M Y' }}</span>
+                            <span class="ent-timeline-date-time">{{ h.updated_at|time:'H:i' }}</span>
+                        </div>
+                    </div>
+                    <div class="ent-timeline-body">
+                        <div class="ent-timeline-field">
+                            <div class="ent-timeline-field-label">Assignee</div>
+                            <div class="ent-timeline-field-value">{{ h.assignee|default:"Not Assigned" }}</div>
+                        </div>
+                        <div class="ent-timeline-field">
+                            <div class="ent-timeline-field-label">Changed By</div>
+                            <div class="ent-timeline-field-value">{{ h.updated_by|default:"System" }}</div>
+                        </div>
+                        <div class="ent-timeline-field">
+                            <div class="ent-timeline-field-label">Record ID</div>
+                            <div class="ent-timeline-field-value">#{{ h.id }}</div>
+                        </div>
+                        {% if h.description %}
+                        <div class="ent-timeline-description">
+                            <div class="ent-timeline-description-label">Description</div>
+                            <div class="ent-timeline-description-text">{{ h.description }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
             {% empty %}
-            <tr><td colspan="5" style="text-align:center;padding:1.2rem;color:#888;">No status history found.</td></tr>
+            <div class="ent-empty-state">
+                <div class="ent-empty-icon">📭</div>
+                <div class="ent-empty-title">No History Found</div>
+                <div class="ent-empty-text">This system doesn't have any status change records yet.</div>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-    <div style="text-align:right;">
-        <br>
-        <a href="/stream/{{ stream|default:'' }}/system-allocation/" class="back-link" style="color:#005fa3;font-size:1.13rem;font-weight:700;text-decoration:none;">&larr; Back to System Allocation</a>
+        </div>
+        
+        <!-- Back Section -->
+        <div class="ent-back-section">
+            <a href="/stream/{{ stream|default:'' }}/system-allocation/" class="ent-back-btn">
+                <span>←</span>
+                <span>Back to System Allocation</span>
+            </a>
+            <span class="ent-page-info">Showing {{ history|length }} record{% if history|length != 1 %}s{% endif %}</span>
+        </div>
     </div>
 </div>
+
+<script>
+function filterHistory() {
+    const searchText = document.getElementById('historySearch').value.toLowerCase();
+    const items = document.querySelectorAll('.ent-timeline-item');
+    
+    items.forEach(item => {
+        const status = item.dataset.status || '';
+        const description = item.dataset.description || '';
+        const assignee = item.dataset.assignee || '';
+        const content = item.textContent.toLowerCase();
+        
+        if (content.includes(searchText) || status.includes(searchText) || 
+            description.includes(searchText) || assignee.includes(searchText)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function toggleFilter() {
+    // Could implement filter dropdown here
+    alert('Filter options: Active, Not Active, Issue, Used, Removed');
+}
+
+function exportHistory() {
+    // Simple CSV export
+    const items = document.querySelectorAll('.ent-timeline-item');
+    let csv = 'Date,Status,Assignee,Changed By,Description\n';
+    
+    items.forEach(item => {
+        const date = item.querySelector('.ent-timeline-date-main')?.textContent || '';
+        const status = item.querySelector('.ent-timeline-status')?.textContent?.trim() || '';
+        const fields = item.querySelectorAll('.ent-timeline-field-value');
+        const assignee = fields[0]?.textContent || '';
+        const changedBy = fields[1]?.textContent || '';
+        const desc = item.querySelector('.ent-timeline-description-text')?.textContent || '';
+        
+        csv += `"${date}","${status}","${assignee}","${changedBy}","${desc.replace(/"/g, '""')}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'system_history_{{ system.name }}.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
 {% endblock %}
