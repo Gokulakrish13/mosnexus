@@ -137,7 +137,39 @@ MEDIA_ROOT = BASE_DIR / 'product_images'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# =============================================================================
+# SECURITY SETTINGS
+# =============================================================================
 
+# Cookie Security - Prevents cookies from being accessed by JavaScript
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 
+# Session expires when browser closes
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 28800  # 8 hours in seconds
 
+# HTTP Strict Transport Security (HSTS) - Forces HTTPS
+# Only enable in production with HTTPS configured
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+# Content Security
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# CSRF Settings - Trusted origins for CSRF
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://127.0.0.1',
+#     'http://130.141.135.225',
+#     'http://14.194.95.251',
+#     'http://13.49.238.18',
+#     'https://igtmosnexus.com',
+#     'http://igtmosnexus.com',
+# ]
+
+# For production with HTTPS, uncomment these:
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
