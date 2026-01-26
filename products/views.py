@@ -2140,7 +2140,6 @@ def system_allocation(request, stream=None):
     })
 
 @login_required
-@csrf_exempt
 @require_POST
 def allocate_system(request, stream=None):
     if request.method == 'POST':
@@ -2272,7 +2271,6 @@ def get_blocked_systems(request, stream=None):
     return JsonResponse({'allocations': data})
 
 @login_required
-@csrf_exempt
 def release_system(request, stream=None):
     if request.method == 'POST':
         system_type = request.POST.get('system_type')
@@ -2339,7 +2337,6 @@ def remove_participant(request, participant_id):
     return redirect('user_list')
 
 @login_required
-@csrf_exempt
 @require_POST
 def extend_system(request, stream=None):
     system_type = request.POST.get('system_type')
@@ -2394,7 +2391,6 @@ def extend_system(request, stream=None):
     return JsonResponse({'success': True})
 
 @login_required
-@csrf_exempt
 @require_POST
 def opt_change_system(request, stream=None):
     if not request.user.is_superuser:
@@ -2592,7 +2588,6 @@ def location_delete(request, pk, stream=None):
     return render(request, 'products/location_confirm_delete.html', {'location': location, 'stream': stream, 'selected_stream': stream})
 
 @login_required
-@csrf_exempt
 @require_POST
 def add_system(request, stream=None):
     try:
@@ -2627,7 +2622,6 @@ def add_system(request, stream=None):
 
 @user_passes_test(is_admin)
 @login_required
-@csrf_exempt
 @require_POST
 def delete_system(request, stream=None):
     system_id = request.POST.get('id')
@@ -2650,7 +2644,6 @@ def delete_system(request, stream=None):
 
 @user_passes_test(is_admin)
 @login_required
-@csrf_exempt
 @require_POST
 def update_system(request, stream=None):
     system_id = request.POST.get('id')
@@ -2764,7 +2757,6 @@ def update_system(request, stream=None):
 
 @user_passes_test(is_admin)
 @login_required
-@csrf_exempt
 @require_POST
 def reset_system_utilization(request, stream=None):
     """Reset utilization percentage for one or all systems in a stream."""
@@ -2985,7 +2977,7 @@ def dashboard(request, stream=None):
 
     return render(request, 'products/dashboard.html', context)
 
-@csrf_exempt
+@login_required
 @require_POST
 def delete_stream(request):
     if not request.user.is_superuser:
@@ -3080,7 +3072,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import ZenitionProduct, ProductEntry
 import json
 
-@csrf_exempt
+@login_required
 def product_entries_api(request):
     if request.method == 'GET':
         product_id = request.GET.get('product_id')
@@ -3172,7 +3164,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .models import ZenitionProduct
 
-@csrf_exempt
+@login_required
 def add_zenition_product_api(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -3186,7 +3178,7 @@ def add_zenition_product_api(request):
         return JsonResponse({'success': True, 'id': product.id, 'name': product.name})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
-@csrf_exempt
+@login_required
 def delete_zenition_product_api(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
@@ -3207,7 +3199,7 @@ def delete_zenition_product_api(request):
     except ZenitionProduct.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Product not found.'}, status=404)
 
-@csrf_exempt
+@login_required
 def os_system_types_api(request):
     """API for managing OS System Types"""
     from .models import OSSystemType
@@ -3256,7 +3248,7 @@ def os_system_types_api(request):
     
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
-@csrf_exempt
+@login_required
 def binaries_system_types_api(request):
     """API for managing Binaries System Types"""
     from .models import BinariesSystemType
@@ -3305,7 +3297,7 @@ def binaries_system_types_api(request):
     
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
 
-@csrf_exempt
+@login_required
 @require_GET
 def system_types_category_mapping_api(request):
     """API for fetching system types with their mapped category counts"""
@@ -3428,7 +3420,6 @@ def download_inventory_with_os_binaries_excel(request):
     wb.save(response)
     return response
 
-@csrf_exempt
 @login_required
 def communication_api(request):
     user = request.user
@@ -3536,7 +3527,6 @@ def communication_api(request):
     else:
         return JsonResponse({'success': False, 'error': 'Invalid method.'}, status=405)
 
-@csrf_exempt
 @login_required
 def upload_communication_attachment(request):
     if request.method != 'POST':
@@ -3614,7 +3604,7 @@ from django.http import JsonResponse
 import subprocess
 import json
 
-@csrf_exempt
+@login_required
 def execute_robocopy(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
@@ -3947,7 +3937,6 @@ def delete_sub_level_tool(request, stream, subleveltool_id):
     return redirect('sub_level_tool_list_stream', stream=stream)
 
 @login_required
-@csrf_exempt
 @require_POST
 def bulk_delete_subleveltools(request, stream=None):
     try:
@@ -3967,7 +3956,6 @@ def bulk_delete_subleveltools(request, stream=None):
         return JsonResponse({'success': False, 'error': str(e)})
 
 @login_required
-@csrf_exempt
 @require_POST
 def bulk_update_subleveltools(request, stream=None):
     try:
@@ -4048,7 +4036,6 @@ def export_subleveltools(request, stream=None):
     return response
 
 @login_required
-@csrf_exempt
 def get_nc_details(request, stream=None):
     system_id = request.GET.get('system_id')
     try:
@@ -4058,7 +4045,6 @@ def get_nc_details(request, stream=None):
         return JsonResponse({'details': ''})
 
 @login_required
-@csrf_exempt
 def save_nc_details(request, stream=None):
     if request.method == 'POST':
         system_id = request.POST.get('system_id')
@@ -4099,7 +4085,6 @@ def get_all_nc_details(request, stream=None):
     return JsonResponse({'systems': data})
 
 @login_required
-@csrf_exempt
 def mark_notifications_read(request):
     if request.method == "POST":
         request.user.notifications.filter(is_read=False).update(is_read=True)
@@ -4459,7 +4444,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .models import TestEnvironment  # Make sure this model exists
 
-@csrf_exempt
 @login_required
 def save_test_environment(request):
     if request.method == 'POST':
@@ -5134,7 +5118,7 @@ def get_client_ip(request):
     return ip
 
 # API endpoints for dashboard real-time data
-@csrf_exempt
+@login_required
 @require_GET
 def dashboard_api_data(request):
     """API endpoint for real-time dashboard data."""
@@ -5194,7 +5178,7 @@ def dashboard_api_data(request):
     
     return JsonResponse(data)
 
-@csrf_exempt
+@login_required
 @require_POST
 def update_user_activity(request):
     """Update user activity for session tracking."""
@@ -5283,7 +5267,6 @@ def category_export_csv(request, stream=None):
     return resp
 
 @login_required
-@csrf_exempt
 def bulk_delete_sublevels(request, stream=None):
     if request.method == 'POST':
         import json
@@ -5305,7 +5288,6 @@ def bulk_delete_sublevels(request, stream=None):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @login_required
-@csrf_exempt
 def bulk_update_sublevels(request, stream=None):
     if request.method == 'POST':
         import json
@@ -5654,7 +5636,6 @@ def system_metrics(request, system_id):
     return JsonResponse(data)
 
 @login_required
-@csrf_exempt
 @require_POST
 def update_system_metrics(request, system_id):
     """Update metrics for a specific system"""
@@ -7169,7 +7150,7 @@ def holistic_system_detail(request, pk, stream=None):
     return render(request, 'products/holistic_system_detail.html', context)
 
 from django.views.decorators.csrf import csrf_exempt
-@csrf_exempt
+@login_required
 @require_POST
 def holistic_weekly_data_update(request, stream=None):
     """Update or create weekly data for a system"""
@@ -7601,7 +7582,6 @@ def holistic_bulk_update(request, stream=None):
 from django.views.decorators.csrf import csrf_exempt
 # AJAX endpoint to assign project to a specific week for a HolisticSystem
 @login_required
-@csrf_exempt
 def holistic_assign_project_to_week(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
@@ -7646,7 +7626,6 @@ def holistic_assign_project_to_week(request):
 
 # AJAX endpoint to get weekly data for a system
 @login_required
-@csrf_exempt
 def holistic_get_week_data(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
@@ -7703,7 +7682,6 @@ def holistic_get_week_data(request):
 
 # AJAX endpoint to get project assignments for a system across multiple weeks
 @login_required
-@csrf_exempt
 def holistic_get_project_assignments(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
@@ -7902,7 +7880,6 @@ def holistic_export_graph_data(request, system_id):
 # ================================
 
 @login_required
-@csrf_exempt
 @require_http_methods(["GET", "POST"])
 def system_downtime_events(request, stream=None, system_id=None):
     """
@@ -8033,7 +8010,6 @@ def system_downtime_events(request, stream=None, system_id=None):
             return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
-@csrf_exempt
 @require_http_methods(["PUT", "DELETE"])
 def system_downtime_event_detail(request, stream=None, downtime_id=None):
     """
@@ -8223,7 +8199,6 @@ def system_downtime_metrics(request, stream=None, system_id=None):
         })
 
 @login_required
-@csrf_exempt
 @require_POST
 def resolve_downtime(request, stream=None, downtime_id=None):
     """
