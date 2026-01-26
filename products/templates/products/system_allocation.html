@@ -4196,12 +4196,12 @@ function selectSystemCard(checkbox, systemId) {
           <textarea id="descInputPopup" class="ent-form-textarea" rows="2" placeholder="Enter description..."></textarea>
         </div>
         
-        <div class="ent-form-row">
-          <div>
+        <div class="ent-form-row" style="flex-wrap:wrap;">
+          <div style="flex:1;min-width:160px;">
             <label for="statusDateInput" class="ent-form-label">Status Date:</label>
             <input type="date" id="statusDateInput" class="ent-form-input" />
           </div>
-          <div>
+          <div style="flex:1;min-width:160px;margin-left:60px;">
             <label for="statusParticipantSelect" class="ent-form-label">Assign To:</label>
             <select id="statusParticipantSelect" class="ent-form-select">
               <option value="">-- Select Participant --</option>
@@ -4256,11 +4256,13 @@ function selectSystemCard(checkbox, systemId) {
         <div class="ent-form-row">
           <div>
             <label for="downtimeStartTime" class="ent-form-label">Start Time:</label>
-            <input type="datetime-local" id="downtimeStartTime" class="ent-form-input">
+            <input type="datetime-local" id="downtimeStartTime" class="ent-form-input" style="max-width: 350px;">
           </div>
           <div>
             <label for="downtimeTicketId" class="ent-form-label">External Ticket <span style="color:#10b981;">(Auto-Generated)</span>:</label>
-            <input type="text" id="downtimeTicketId" readonly class="ent-form-input" style="background:#f8fafc;cursor:not-allowed;" placeholder="Auto-generating...">
+            <select id="downtimeTicketId" class="ent-form-select" disabled>
+              <option value="">Auto-generating...</option>
+            </select>
             <small id="ticketValidation" style="color:#10b981;font-size:12px;margin-top:4px;display:block;">Ticket will be auto-generated on save</small>
             <div id="ticketPreview" style="margin-top:8px;padding:10px;background:#eff6ff;border-radius:8px;border-left:4px solid #3b82f6;font-family:monospace;font-size:13px;color:#1d4ed8;display:none;">
               <strong>Preview Format:</strong> <span id="previewText">Select downtime type to see format</span>
@@ -6504,11 +6506,9 @@ function closeStatusModal() {
     document.getElementById('descInputPopup').value = '';
     document.getElementById('downtimeTitle').value = '';
     document.getElementById('downtimeDescription').value = '';
-    document.getElementById('downtimeTicketId').value = '';
+    const ticketSelect = document.getElementById('downtimeTicketId');
+    ticketSelect.innerHTML = '<option value="">Auto-generating...</option>';
     document.getElementById('ticketValidation').textContent = 'Ticket will be auto-generated on save';
-    document.getElementById('downtimeTicketId').style.borderColor = '#28a745';
-    document.getElementById('downtimeTicketId').style.boxShadow = 'none';
-    document.getElementById('downtimeTicketId').placeholder = 'Auto-generating...';
     
     // Hide preview
     const previewDiv = document.getElementById('ticketPreview');
@@ -6919,7 +6919,8 @@ function saveDowntimeReport() {
     const externalTicketId = generateAutoTicketId(downtimeType, impactLevel);
     
     // Update the field with generated ticket ID
-    document.getElementById('downtimeTicketId').value = externalTicketId;
+    const ticketSelect1 = document.getElementById('downtimeTicketId');
+    ticketSelect1.innerHTML = `<option value="${externalTicketId}">${externalTicketId}</option>`;
     document.getElementById('ticketValidation').textContent = `Generated: ${externalTicketId}`;
     
     const downtimeData = {
@@ -7004,7 +7005,8 @@ function saveBothActions() {
     const externalTicketId = generateAutoTicketId(downtimeType, impactLevel);
     
     // Update the field with generated ticket ID
-    document.getElementById('downtimeTicketId').value = externalTicketId;
+    const ticketSelect2 = document.getElementById('downtimeTicketId');
+    ticketSelect2.innerHTML = `<option value="${externalTicketId}">${externalTicketId}</option>`;
     document.getElementById('ticketValidation').textContent = `Generated: ${externalTicketId}`;
     
     const statusDate = document.getElementById('statusDateInput').value;
@@ -7893,8 +7895,8 @@ function highlightFieldError(fieldId) {
 function clearFieldError(fieldId) {
     const field = document.getElementById(fieldId);
     if (field) {
-        field.style.borderColor = '#28a745';
-        field.style.boxShadow = '0 0 0 0.2rem rgba(40, 167, 69, 0.25)';
+        field.style.borderColor = '#e2e8f0';
+        field.style.boxShadow = 'none';
     }
 }
 
@@ -7917,11 +7919,11 @@ function setupTicketValidation() {
                 const sampleTicket = generateAutoTicketId(selectedType, selectedImpact || 'medium');
                 previewText.textContent = sampleTicket;
                 previewDiv.style.display = 'block';
-                ticketField.placeholder = sampleTicket;
+                ticketField.innerHTML = `<option value="">${sampleTicket}</option>`;
                 validationElement.textContent = `Format: [TYPE]-[PRIORITY]-[TIMESTAMP]-[RANDOM]`;
             } else {
                 previewDiv.style.display = 'none';
-                ticketField.placeholder = 'Auto-generating...';
+                ticketField.innerHTML = '<option value="">Auto-generating...</option>';
                 validationElement.textContent = 'Ticket will be auto-generated on save';
             }
         }

@@ -919,6 +919,51 @@
             transition: width 0.3s ease;
         }
 
+        /* Mobile Hamburger Button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 1001;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .mobile-menu-btn:hover {
+            background: var(--philips-blue);
+            color: white;
+            border-color: var(--philips-blue);
+        }
+        
+        /* Sidebar Overlay for Mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+        }
+
         /* Responsive */
         @media (max-width: 1280px) {
             .stats-grid {
@@ -927,8 +972,22 @@
         }
         
         @media (max-width: 1024px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .sidebar-overlay {
+                display: block;
+                pointer-events: none;
+            }
+            
+            .sidebar-overlay.active {
+                pointer-events: auto;
+            }
+            
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 1000;
             }
             
             .sidebar.open {
@@ -941,6 +1000,10 @@
             
             .sidebar.collapsed ~ .main-content {
                 margin-left: 0;
+            }
+            
+            .dashboard-content {
+                padding-top: 70px;
             }
         }
         
@@ -1973,6 +2036,14 @@
 
     <!-- Animated Background Particles -->
     <div class="particles" id="particles"></div>
+    
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" title="Open Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
@@ -3242,10 +3313,28 @@
     const sidebarToggle = document.getElementById('sidebarCollapseBtn');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
     
     // Check if mobile
     function isMobile() {
       return window.innerWidth <= 1024;
+    }
+    
+    // Function to open sidebar on mobile
+    function openMobileSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.classList.add('active');
+      mobileMenuBtn.querySelector('i').className = 'fas fa-times';
+      mobileMenuBtn.title = 'Close Menu';
+    }
+    
+    // Function to close sidebar on mobile
+    function closeMobileSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+      mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
+      mobileMenuBtn.title = 'Open Menu';
     }
     
     // Load saved sidebar state (only on desktop)
@@ -3256,18 +3345,24 @@
       }
     }
     
+    // Mobile menu button click
+    mobileMenuBtn.addEventListener('click', function() {
+      if (sidebar.classList.contains('open')) {
+        closeMobileSidebar();
+      } else {
+        openMobileSidebar();
+      }
+    });
+    
+    // Close sidebar when clicking overlay
+    sidebarOverlay.addEventListener('click', function() {
+      closeMobileSidebar();
+    });
+    
     sidebarToggle.addEventListener('click', function() {
       if (isMobile()) {
-        // On mobile: toggle sidebar overlay
-        sidebar.classList.toggle('open');
-        const icon = sidebarToggle.querySelector('i');
-        if (sidebar.classList.contains('open')) {
-          icon.className = 'fas fa-times';
-          sidebarToggle.title = 'Close Sidebar';
-        } else {
-          icon.className = 'fas fa-bars';
-          sidebarToggle.title = 'Open Sidebar';
-        }
+        // On mobile: close sidebar
+        closeMobileSidebar();
       } else {
         // On desktop: collapse/expand sidebar
         sidebar.classList.toggle('collapsed');
@@ -3291,6 +3386,7 @@
     window.addEventListener('resize', function() {
       if (!isMobile()) {
         sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
         const icon = sidebarToggle.querySelector('i');
         if (sidebar.classList.contains('collapsed')) {
           icon.className = 'fas fa-chevron-right';

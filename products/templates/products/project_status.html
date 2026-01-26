@@ -931,6 +931,11 @@
         .bulk-mode .card-checkbox {
             display: flex;
         }
+        
+        .project-card:hover .project-card-header,
+        .bulk-mode .project-card .project-card-header {
+            padding-left: 28px;
+        }
 
         .card-checkbox.checked {
             background: #0066cc;
@@ -1882,6 +1887,17 @@
     </style>
 </head>
 <body>
+    <!-- Consume Django messages and display via custom toast -->
+    {% if messages %}
+        {% for message in messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast("{{ message|escapejs }}", "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}".replace('error', 'warning'));
+            });
+        </script>
+        {% endfor %}
+    {% endif %}
+    
     <!-- Top Navigation -->
     <div class="top-nav">
         <div class="nav-left">
@@ -2393,15 +2409,15 @@
                     <div class="form-row three-col">
                         <div class="form-group">
                             <label>Start Date *</label>
-                            <input type="date" name="start_date" required>
+                            <input type="date" name="start_date" id="create_start_date" required>
                         </div>
                         <div class="form-group">
                             <label>Initial Release</label>
-                            <input type="date" name="initial_release_date">
+                            <input type="date" name="initial_release_date" id="create_initial_release_date">
                         </div>
                         <div class="form-group">
                             <label>Final Release *</label>
-                            <input type="date" name="final_release_date" required>
+                            <input type="date" name="final_release_date" id="create_final_release_date" required>
                         </div>
                     </div>
                     <div class="form-row three-col">
@@ -2596,7 +2612,86 @@
             updateStatistics();
             setupViewTabs();
             setupThemeToggle();
+            setupDateValidation();
         });
+        
+        // Date validation - Final release date cannot be less than initial release date
+        function setupDateValidation() {
+            // Create form validation
+            const createInitialDate = document.getElementById('create_initial_release_date');
+            const createFinalDate = document.getElementById('create_final_release_date');
+            
+            if (createInitialDate && createFinalDate) {
+                createInitialDate.addEventListener('change', function() {
+                    if (this.value) {
+                        createFinalDate.min = this.value;
+                        if (createFinalDate.value && createFinalDate.value < this.value) {
+                            createFinalDate.value = this.value;
+                            showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.','warning');
+
+                        }
+                    }
+                });
+                
+                createFinalDate.addEventListener('change', function() {
+                    if (createInitialDate.value && this.value < createInitialDate.value) {
+                        this.value = createInitialDate.value;
+                        showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.', 'warning');
+                    }
+                });
+            }
+            
+            // Edit form validation
+            const editInitialDate = document.getElementById('edit_initial_release_date');
+            const editFinalDate = document.getElementById('edit_final_release_date');
+            
+            if (editInitialDate && editFinalDate) {
+                editInitialDate.addEventListener('change', function() {
+                    if (this.value) {
+                        editFinalDate.min = this.value;
+                        if (editFinalDate.value && editFinalDate.value < this.value) {
+                            editFinalDate.value = this.value;
+                            showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.', 'warning');
+                        }
+                    }
+                });
+                
+                editFinalDate.addEventListener('change', function() {
+                    if (editInitialDate.value && this.value < editInitialDate.value) {
+                        this.value = editInitialDate.value;
+                        showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.', 'warning');
+                    }
+                });
+            }
+            
+            // Form submit validation
+            const createForm = document.getElementById('createProjectForm');
+            const editForm = document.getElementById('editProjectForm');
+            
+            if (createForm) {
+                createForm.addEventListener('submit', function(e) {
+                    const initial = document.getElementById('create_initial_release_date').value;
+                    const final = document.getElementById('create_final_release_date').value;
+                    if (initial && final && final < initial) {
+                        e.preventDefault();
+                        showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.', 'warning');
+                        return false;
+                    }
+                });
+            }
+            
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    const initial = document.getElementById('edit_initial_release_date').value;
+                    const final = document.getElementById('edit_final_release_date').value;
+                    if (initial && final && final < initial) {
+                        e.preventDefault();
+                        showToast('The final release date has been adjusted to align with the initial release date. The final release date cannot be earlier than the initial release date.', 'warning');
+                        return false;
+                    }
+                });
+            }
+        }
 
         // Update statistics
         function updateStatistics() {
@@ -2961,27 +3056,35 @@
         }
 
         // Toast notification
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', duration = null) {
             // Remove existing toast
             const existingToast = document.querySelector('.toast-notification');
             if (existingToast) existingToast.remove();
             
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type}`;
+            
+            // For warning type, show close button and stay until closed
+            const showCloseBtn = type === 'warning' || duration === 0;
+            
             toast.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle'}"></i>
                 <span>${message}</span>
+                ${showCloseBtn ? '<button class="toast-close" onclick="this.parentElement.classList.remove(\'show\'); setTimeout(() => this.parentElement.remove(), 300);" style="background:none;border:none;color:inherit;font-size:1.2rem;cursor:pointer;margin-left:1rem;opacity:0.7;">&times;</button>' : ''}
             `;
             document.body.appendChild(toast);
             
             // Trigger animation
             setTimeout(() => toast.classList.add('show'), 10);
             
-            // Remove after delay
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            // Auto-remove after delay (unless it's a warning or duration is 0)
+            if (!showCloseBtn) {
+                const timeout = duration || 3000;
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, timeout);
+            }
         }
 
         // Initialize drag and drop on page load
@@ -3227,7 +3330,7 @@
             document.getElementById('sortDropdown').classList.toggle('show');
         }
 
-        function sortProjects(sortType) {
+        function sortProjects(sortType, showNotification = true) {
             currentSort = sortType;
             
             // Update UI
@@ -3278,7 +3381,9 @@
                 cards.forEach(card => column.appendChild(card));
             });
 
-            showToast(`Sorted by: ${sortType.replace('-', ' ')}`, 'success');
+            if (showNotification) {
+                showToast(`Sorted by: ${sortType.replace('-', ' ')}`, 'success');
+            }
         }
 
         // ==========================================
@@ -3296,7 +3401,7 @@
                     if (pinBtn) pinBtn.classList.add('pinned');
                 }
             });
-            sortProjects('default'); // Re-sort to move pinned to top
+            sortProjects('default', false); // Re-sort to move pinned to top (without notification)
         }
 
         function togglePin(btn, projectId) {

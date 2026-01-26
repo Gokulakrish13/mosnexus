@@ -1108,7 +1108,6 @@
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-
         </div>
     </nav>
 
@@ -1117,7 +1116,7 @@
         <!-- Breadcrumb -->
         <div class="breadcrumb-container">
             <nav class="breadcrumb">
-                <a href="{% url 'notes_list' %}"><i class="fas fa-home"></i>Home</a>
+                <a href="/dashboard/"><i class="fas fa-home"></i>Home</a>
                 <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
                 <span class="breadcrumb-current">Notes</span>
             </nav>
@@ -1632,6 +1631,7 @@
         // ===== EXPORT FUNCTIONALITY =====
         const exportBtn = document.getElementById('exportBtn');
         const bulkExportBtn = document.getElementById('bulkExport');
+        const bulkDeleteBtn = document.getElementById('bulkDelete');
 
         // Export all visible notes
         exportBtn?.addEventListener('click', function() {
@@ -1641,6 +1641,95 @@
                 return;
             }
             exportNotesToCSV(visibleNotes, 'notes_export');
+        });
+
+        // ===== BULK DELETE FUNCTIONALITY =====
+        bulkDeleteBtn?.addEventListener('click', function() {
+            const selectedCheckboxes = document.querySelectorAll('.bulk-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one note to delete!');
+                return;
+            }
+            
+            const count = selectedCheckboxes.length;
+            if (!confirm(`Are you sure you want to delete ${count} selected note(s)? This action cannot be undone.`)) {
+                return;
+            }
+            
+            // Collect note IDs to delete
+            const noteIds = [];
+            selectedCheckboxes.forEach(cb => {
+                const noteCard = cb.closest('.note-card');
+                if (noteCard) {
+                    const noteId = noteCard.getAttribute('data-note-id');
+                    if (noteId) {
+                        noteIds.push(noteId);
+                    }
+                }
+            });
+            
+            if (noteIds.length === 0) {
+                alert('No valid notes selected!');
+                return;
+            }
+            
+            // Delete notes one by one using fetch
+            let deletedCount = 0;
+            let failedCount = 0;
+            
+            const deletePromises = noteIds.map(noteId => {
+                return fetch(`/notes/${noteId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                })
+                .then(response => {
+                    if (response.ok || response.redirected) {
+                        deletedCount++;
+                        // Remove the note card from DOM
+                        const noteCard = document.querySelector(`.note-card[data-note-id="${noteId}"]`);
+                        if (noteCard) {
+                            noteCard.remove();
+                        }
+                    } else {
+                        failedCount++;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting note:', error);
+                    failedCount++;
+                });
+            });
+            
+            Promise.all(deletePromises).then(() => {
+                // Update statistics and counts
+                updateStatistics();
+                updateAllCount();
+                updateSelectedCount();
+                
+                // Show result message
+                if (deletedCount > 0) {
+                    showToast(`Successfully deleted ${deletedCount} note(s)!`, 'success');
+                }
+                if (failedCount > 0) {
+                    showToast(`Failed to delete ${failedCount} note(s). You may not have permission.`, 'error');
+                }
+                
+                // Hide bulk actions bar if no notes left selected
+                if (bulkActions) {
+                    bulkActions.classList.remove('visible');
+                }
+                
+                // Exit bulk mode
+                if (notesContainer) {
+                    notesContainer.classList.remove('bulk-mode');
+                }
+                if (bulkSelectBtn) {
+                    bulkSelectBtn.innerHTML = '<i class="fas fa-check-square"></i><span>Bulk Select</span>';
+                }
+            });
         });
 
         // Export selected notes (bulk)
