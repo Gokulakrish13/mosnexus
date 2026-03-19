@@ -80,11 +80,12 @@ WSGI_APPLICATION = 'inventory.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 30,  # seconds — increase wait for locks
-        },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django-db',
+        'USER': 'postgres',
+        'PASSWORD': 'Malar2003',
+        'HOST': 'http://django-db.cxiu8q6oqx9v.eu-north-1.rds.amazonaws.com/',
+        'PORT': '5432',
     }
 }
 
