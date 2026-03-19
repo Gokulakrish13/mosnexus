@@ -82,10 +82,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'django-db',
-        'PASSWORD': 'Malar2003',
+        'USER': 'postgres',  # <-- use the working user
+        'PASSWORD': 'Malar2003',  # <-- same password you used in psql
         'HOST': 'django-db.cxiu8q6oqx9v.eu-north-1.rds.amazonaws.com',
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'verify-full',
+            'sslrootcert': BASE_DIR / 'global-bundle.pem',  # adjust path
+        },
     }
 }
 
