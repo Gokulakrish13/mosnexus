@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'django-db',
         'USER': 'postgres',
         'PASSWORD': 'Malar2003',
-        'HOST': 'http://django-db.cxiu8q6oqx9v.eu-north-1.rds.amazonaws.com/',
+        'HOST': 'django-db.cxiu8q6oqx9v.eu-north-1.rds.amazonaws.com',
         'PORT': '5432',
     }
 }
