@@ -214,7 +214,7 @@ def user_logout(request):
             description=f'User "{request.user.username}" logged out',
         )
     logout(request)
-    return redirect("please_login")
+    return redirect("/please_login/")
 
 
 @login_required

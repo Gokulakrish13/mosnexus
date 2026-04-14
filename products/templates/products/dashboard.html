@@ -93,7 +93,7 @@
             width: var(--sidebar-width);
             background: var(--surface);
             border-right: 1px solid var(--border-color);
-            z-index: 1000;
+            z-index: 10001;
             display: flex;
             flex-direction: column;
             transition: var(--transition-base);
@@ -451,14 +451,14 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
         
         .stat-card {
             background: var(--surface);
-            border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            padding: 1.35rem 1.15rem;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: var(--transition-base);
@@ -481,7 +481,7 @@
         .stat-card:nth-child(4)::before { background: var(--gradient-purple); }
         
         .stat-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
         }
         
@@ -489,17 +489,17 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         
         .stat-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.05rem;
         }
         
         .stat-card:nth-child(1) .stat-card-icon { background: rgba(11, 95, 255, 0.1); color: var(--philips-blue); }
@@ -510,11 +510,12 @@
         .stat-card-trend {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
+            gap: 0.2rem;
+            padding: 0.2rem 0.4rem;
             border-radius: 50px;
-            font-size: 0.75rem;
+            font-size: 0.6875rem;
             font-weight: 600;
+            margin-top: 0.6rem;
         }
         
         .stat-card-trend.up {
@@ -528,15 +529,15 @@
         }
         
         .stat-card-value {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.125rem;
             letter-spacing: -0.02em;
         }
         
         .stat-card-label {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
@@ -787,15 +788,11 @@
         }
 
 
-        /* Mobile Hamburger Button */
-        .mobile-menu-btn {
+        /* Mobile Hamburger Button (inline in page-header) */
+        .mobile-menu-inline {
             display: none;
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 1001;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border-color);
             background: var(--surface);
@@ -804,14 +801,20 @@
             justify-content: center;
             cursor: pointer;
             transition: var(--transition-fast);
-            font-size: 1.25rem;
-            box-shadow: var(--shadow-md);
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
-        .mobile-menu-btn:hover {
+        .mobile-menu-inline:hover {
             background: var(--philips-blue);
             color: white;
             border-color: var(--philips-blue);
+        }
+        
+        .mobile-menu-inline:active {
+            transform: scale(0.95);
         }
         
         /* Sidebar Overlay for Mobile */
@@ -823,7 +826,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            z-index: 9998;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -840,7 +843,7 @@
         }
         
         @media (max-width: 1024px) {
-            .mobile-menu-btn {
+            .mobile-menu-inline {
                 display: flex;
             }
             
@@ -855,11 +858,13 @@
             
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 1000;
+                z-index: 9999;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             
             .sidebar.open {
-                transform: translateX(0);
+                transform: translateX(0) !important;
+                visibility: visible;
             }
             
             .main-content {
@@ -875,8 +880,8 @@
                 margin-left: 0 !important;
             }
             
-            .dashboard-content {
-                padding-top: 70px;
+            .page-header {
+                margin-top: 0;
             }
         }
         
@@ -887,6 +892,10 @@
             
             .dashboard-content {
                 padding: 1rem;
+            }
+            
+            .page-header {
+                margin-top: 0;
             }
             
             .topbar {
@@ -2038,12 +2047,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 11000;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
         .loading-screen.hidden {
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
         }
         .loader-container {
             position: relative;
@@ -2127,13 +2137,14 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 11000;
             animation: qsplash-in 0.25s ease-out;
             transition: opacity 0.35s ease, visibility 0.35s ease;
         }
         .quick-splash.out {
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
         }
         .quick-splash-logo {
             width: 56px; height: 56px;
@@ -2163,11 +2174,6 @@
 
     <!-- Animated Background Particles -->
     <div class="particles" id="particles"></div>
-    
-    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn" title="Open Menu">
-        <i class="fas fa-bars"></i>
-    </button>
     
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -2401,7 +2407,7 @@
                     <i class="fas fa-exchange-alt"></i>
                     <span>Switch BU</span>
                 </a>
-                <a href="{% url 'logout' %}" class="menu-item logout">
+                <a href="/logout/" class="menu-item logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
@@ -2429,6 +2435,9 @@
         <div class="dashboard-content">
             <!-- Page Header -->
             <div class="dashboard-section page-header">
+                <button class="mobile-menu-inline" id="mobileMenuBtn" title="Open Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="page-header-title">
                     <h1>{{ BU_TITLE|default:'NexusOps' }} Dashboard</h1>
                     <p>Welcome back, <strong>{{ user.username }}</strong> • {{ current_time|date:"F d, Y" }}</p>
@@ -3914,16 +3923,20 @@
     function openMobileSidebar() {
       sidebar.classList.add('open');
       sidebarOverlay.classList.add('active');
-      mobileMenuBtn.querySelector('i').className = 'fas fa-times';
-      mobileMenuBtn.title = 'Close Menu';
+      if (mobileMenuBtn) {
+        mobileMenuBtn.querySelector('i').className = 'fas fa-times';
+        mobileMenuBtn.title = 'Close Menu';
+      }
     }
     
     // Function to close sidebar on mobile
     function closeMobileSidebar() {
       sidebar.classList.remove('open');
       sidebarOverlay.classList.remove('active');
-      mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
-      mobileMenuBtn.title = 'Open Menu';
+      if (mobileMenuBtn) {
+        mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
+        mobileMenuBtn.title = 'Open Menu';
+      }
     }
     
     // Load saved sidebar state (only on desktop)

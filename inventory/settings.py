@@ -298,6 +298,8 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "NexusOps <mostestauto
 # =============================================================================
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO" if PHILIPSNEXUS_ENV == "prod" else "DEBUG")
 FILE_LOGGING = os.environ.get("FILE_LOGGING", "off").lower() in ("1", "true", "on", "yes")
+_log_dir = BASE_DIR / "logs"
+_log_dir.mkdir(exist_ok=True)  # Auto-create logs/ directory if missing
 _log_handlers = ["console", "file"] if FILE_LOGGING else ["console"]
 LOGGING = {
     "version": 1,
