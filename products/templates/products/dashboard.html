@@ -859,12 +859,14 @@
             .sidebar {
                 transform: translateX(-100%);
                 z-index: 9999;
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s;
+                visibility: hidden;
             }
             
             .sidebar.open {
                 transform: translateX(0) !important;
                 visibility: visible;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s;
             }
             
             .main-content {
@@ -878,6 +880,12 @@
             
             body.sidebar-collapsed .main-content {
                 margin-left: 0 !important;
+            }
+            
+            /* Hide the "Toggle Sidebar" button inside sidebar on mobile — 
+               the hamburger button in page-header is used instead */
+            #sidebarCollapseBtn {
+                display: none !important;
             }
             
             .page-header {
@@ -3700,24 +3708,8 @@
         }
     });
 
-  // Mobile sidebar toggle
+  // Mobile sidebar / campus modal
   document.addEventListener('DOMContentLoaded', function() {
-    // Mobile responsive handling
-    function handleResize() {
-      const sidebar = document.querySelector('.sidebar');
-      const mainContent = document.querySelector('.main-content');
-      
-      if (window.innerWidth < 768) {
-        if (sidebar) sidebar.style.transform = 'translateX(-100%)';
-        if (mainContent) mainContent.style.marginLeft = '0';
-      } else {
-        if (sidebar) sidebar.style.transform = 'translateX(0)';
-        if (mainContent) mainContent.style.marginLeft = '280px';
-      }
-    }
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
 
     var addCampusText = document.getElementById('addCampusText');
     if (addCampusText) {
@@ -3939,6 +3931,10 @@
       }
     }
     
+    // Clear any stale inline styles from old handleResize (prevents conflicts)
+    if (sidebar) sidebar.style.transform = '';
+    if (mainContent) mainContent.style.marginLeft = '';
+
     // Load saved sidebar state (only on desktop)
     if (!isMobile()) {
       const sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
@@ -3949,21 +3945,26 @@
       }
     }
     
-    // Mobile menu button click
-    mobileMenuBtn.addEventListener('click', function() {
-      if (sidebar.classList.contains('open')) {
-        closeMobileSidebar();
-      } else {
-        openMobileSidebar();
-      }
-    });
+    // Mobile menu button click (support both click and touch)
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (sidebar.classList.contains('open')) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
+      });
+    }
     
     // Close sidebar when clicking overlay
-    sidebarOverlay.addEventListener('click', function() {
-      closeMobileSidebar();
-    });
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', function() {
+        closeMobileSidebar();
+      });
+    }
     
-    sidebarToggle.addEventListener('click', function() {
+    if (sidebarToggle) sidebarToggle.addEventListener('click', function() {
       if (isMobile()) {
         // On mobile: close sidebar
         closeMobileSidebar();
@@ -3990,14 +3991,25 @@
     
     // Handle window resize
     window.addEventListener('resize', function() {
+      // Clear any stale inline styles on every resize
+      if (sidebar) sidebar.style.transform = '';
+      if (mainContent) mainContent.style.marginLeft = '';
+      
       if (!isMobile()) {
         sidebar.classList.remove('open');
         sidebarOverlay.classList.remove('active');
-        const icon = sidebarToggle.querySelector('i');
-        if (sidebar.classList.contains('collapsed')) {
-          icon.className = 'fas fa-chevron-right';
-        } else {
-          icon.className = 'fas fa-bars';
+        if (sidebarToggle) {
+          const icon = sidebarToggle.querySelector('i');
+          if (sidebar.classList.contains('collapsed')) {
+            icon.className = 'fas fa-chevron-right';
+          } else {
+            icon.className = 'fas fa-bars';
+          }
+        }
+        // Restore hamburger icon on mobile button
+        if (mobileMenuBtn) {
+          mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
+          mobileMenuBtn.title = 'Open Menu';
         }
       }
     });
