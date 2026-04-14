@@ -8,23 +8,20 @@ from inventory.version import __version__ as APP_VERSION  # pylint: disable=wron
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ─── ENVIRONMENT CONFIGURATION ───────────────────────────────────────────────
-# Reads from environment variables with sensible defaults for development.
-# In production, these MUST be set via .env file or system environment.
-PHILIPSNEXUS_ENV = os.environ.get(
-    "NEXUSOPS_ENV", os.environ.get("PHILIPSNEXUS_ENV", "dev")
-)  # dev | staging | prod | test
 
-_secret = os.environ.get("DJANGO_SECRET_KEY", "")
-if not _secret and PHILIPSNEXUS_ENV in ("prod", "staging"):
-    raise RuntimeError("DJANGO_SECRET_KEY environment variable is required in production and staging!")
-SECRET_KEY = _secret or "django-insecure-dev-only-key-do-not-use-in-production"
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-g#=(mb2401nl!s-vr3nzjdsjti&6v7#wiu2+m%xfpyjki@bx73'
 
-_default_hosts = "localhost,127.0.0.1,130.141.135.225,14.194.95.251,13.49.238.18,philipsnexus.com"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", _default_hosts).split(",")
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
+ALLOWED_HOSTS = ['127.0.0.1','130.141.135.225','14.194.95.251','13.49.238.18','0.0.0.0','igtmosnexus.com']
+
+
+# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -89,11 +86,11 @@ WSGI_APPLICATION = "inventory.wsgi.application"
 
 # Database
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {
-            "timeout": 30,  # seconds — increase wait for locks
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,  # seconds — increase wait for locks
         },
     }
 }
