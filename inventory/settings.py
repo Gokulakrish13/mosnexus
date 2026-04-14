@@ -8,6 +8,8 @@ from inventory.version import __version__ as APP_VERSION  # pylint: disable=wron
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Environment identifier: set PHILIPSNEXUS_ENV=prod on your production server
+PHILIPSNEXUS_ENV = os.environ.get("PHILIPSNEXUS_ENV", "dev")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
