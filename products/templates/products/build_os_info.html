@@ -3005,6 +3005,13 @@
 <script>
 // Modern JavaScript for Enhanced Build & OS Hub
 
+// XSS-safe HTML escape utility
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = (str == null) ? '' : String(str);
+  return div.innerHTML;
+}
+
 // State Management
 const AppState = {
   currentStep: parseInt(localStorage.getItem('appState_currentStep')) || 1,
@@ -3658,7 +3665,7 @@ class DataManager {
   
   static async saveEntry(entry, isEdit = false) {
     try {
-      const url = '/api/product-entries/';
+      const url = _buPrefix + '/api/product-entries/';
       const method = isEdit ? 'PUT' : 'POST';
       
       const body = {
@@ -3675,7 +3682,7 @@ class DataManager {
       
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
         body: JSON.stringify(body)
       });
       
@@ -3698,7 +3705,7 @@ class DataManager {
     try {
       const response = await fetch(_buPrefix + '/api/product-entries/', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
         body: JSON.stringify({ id: entryId })
       });
       
