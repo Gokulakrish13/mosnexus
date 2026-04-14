@@ -1,0 +1,371 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ po.po_number }} — Purchase Order{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF; --philips-blue-dark: #0047AB; --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --gradient-success: linear-gradient(135deg, #10B981, #06b6d4);
+        --bg-primary: #F8FAFC; --bg-secondary: #EEF2F7; --surface: #FFFFFF;
+        --text-primary: #0F172A; --text-secondary: #475569; --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0; --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08); --shadow-xl: 0 20px 40px -5px rgba(0,0,0,0.12);
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+    }
+    body { background:var(--bg-primary);min-height:100vh;font-family:'Plus Jakarta Sans','Inter',sans-serif;color:var(--text-primary); }
+
+    .po-page { padding:2rem;max-width:1200px;margin:0 auto; }
+
+    /* Header */
+    .po-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
+    .po-header-left { display:flex;align-items:center;gap:1rem; }
+    .po-header-left .icon-wrap { width:52px;height:52px;background:var(--gradient-primary);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,95,255,0.25); }
+    .po-header-left .icon-wrap i { color:#fff;font-size:1.25rem; }
+    .po-title { font-size:1.5rem;font-weight:800;letter-spacing:-0.025em; }
+    .po-meta { display:flex;align-items:center;gap:0.75rem;margin-top:0.2rem;flex-wrap:wrap; }
+    .po-code { font-family:'JetBrains Mono',monospace;font-size:0.78rem;background:var(--bg-secondary);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-secondary);font-weight:500; }
+    .status-badge { padding:0.3rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:700;letter-spacing:0.02em;text-transform:capitalize; }
+    .status-draft { background:var(--bg-secondary);color:var(--text-tertiary); }
+    .status-submitted,.status-acknowledged,.status-in_progress { background:#FEF3C7;color:#92400E; }
+    .status-partially_delivered { background:#DBEAFE;color:#1E40AF; }
+    .status-delivered,.status-closed { background:#DCFCE7;color:#166534; }
+    .status-cancelled { background:#FEE2E2;color:#991B1B; }
+    .priority-badge { font-size:0.78rem;font-weight:600; }
+    .priority-urgent { color:#DC2626; }
+    .priority-high { color:#F59E0B; }
+    .priority-normal { color:var(--text-secondary); }
+    .priority-low { color:var(--text-tertiary); }
+
+    .header-actions { display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center; }
+    .btn-ph { padding:0.5rem 1rem;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:0.4rem;transition:all 0.25s;text-decoration:none;font-family:inherit; }
+    .btn-primary { background:var(--gradient-primary);color:#fff;box-shadow:0 2px 8px rgba(11,95,255,0.25); }
+    .btn-primary:hover { transform:translateY(-1px); }
+    .btn-outline { background:var(--surface);border:1.5px solid var(--border-color);color:var(--text-secondary); }
+    .btn-outline:hover { border-color:var(--philips-blue);color:var(--philips-blue); }
+    .btn-success { background:var(--gradient-success);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,0.25); }
+    .btn-danger { background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626; }
+    .btn-danger:hover { background:#DC2626;color:#fff; }
+
+    /* Summary Cards */
+    .summary-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem; }
+    .summary-card { background:var(--surface);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--shadow-md);border:1px solid var(--border-color);text-align:center; }
+    .summary-card .s-value { font-size:1.5rem;font-weight:800;color:var(--text-primary); }
+    .summary-card .s-label { font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-top:0.15rem; }
+    .summary-card .s-icon { width:36px;height:36px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.5rem; }
+    .summary-card .s-icon i { color:#fff;font-size:0.85rem; }
+
+    /* Info Cards */
+    .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem; }
+    .info-card { background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow-md);border:1px solid var(--border-color); }
+    .info-card-title { font-size:0.78rem;font-weight:700;color:var(--philips-blue);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.5rem; }
+    .info-row { display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid rgba(226,232,240,0.5);font-size:0.85rem; }
+    .info-row:last-child { border-bottom:none; }
+    .info-label { color:var(--text-secondary);font-weight:500; }
+    .info-value { font-weight:600;color:var(--text-primary);text-align:right;max-width:55%; }
+
+    /* Tables */
+    .section-header { display:flex;justify-content:space-between;align-items:center;margin:2rem 0 1.25rem; }
+    .section-title { font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:0.65rem;letter-spacing:-0.02em; }
+    .section-title .sec-icon { width:34px;height:34px;background:var(--gradient-primary);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center; }
+    .section-title .sec-icon i { color:#fff;font-size:0.85rem; }
+    .section-count { background:var(--bg-secondary);padding:0.15rem 0.55rem;border-radius:12px;font-size:0.75rem;font-weight:700;color:var(--text-secondary); }
+
+    .table-card { background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md);border:1px solid var(--border-color);margin-bottom:1.5rem; }
+    .data-table { width:100%;border-collapse:collapse; }
+    .data-table th { background:var(--bg-secondary);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);padding:0.8rem 1rem;text-align:left;border-bottom:2px solid var(--border-color); }
+    .data-table td { padding:0.75rem 1rem;border-bottom:1px solid var(--border-color);font-size:0.85rem;color:var(--text-primary);vertical-align:middle; }
+    .data-table tbody tr { transition:background 0.15s; }
+    .data-table tbody tr:hover { background:rgba(11,95,255,0.02); }
+    .data-table tbody tr:last-child td { border-bottom:none; }
+    .table-empty { text-align:center;padding:2rem;color:var(--text-tertiary);font-size:0.88rem; }
+
+    /* Progress bar */
+    .progress-bar { width:100%;height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden;margin-top:2px; }
+    .progress-bar .fill { height:100%;border-radius:3px;transition:width 0.4s; }
+    .fill-green { background:var(--success); }
+    .fill-blue { background:var(--philips-blue); }
+    .fill-yellow { background:var(--warning); }
+
+    /* Inline forms */
+    .add-form-card { background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow-md);border:1px solid var(--border-color);margin-bottom:1.25rem;border-left:4px solid var(--success); }
+    .add-form-title { font-size:0.88rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem; }
+    .add-form-title i { color:var(--success); }
+    .recv-table { width:100%;border-collapse:collapse; }
+    .recv-table th { background:var(--bg-secondary);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);padding:0.6rem 0.5rem;text-align:left;border-bottom:1.5px solid var(--border-color); }
+    .recv-table td { padding:0.5rem 0.5rem;border-bottom:1px solid var(--border-color);font-size:0.82rem;vertical-align:middle; }
+    .recv-table input,.recv-table select { padding:0.35rem 0.5rem;border:1.5px solid var(--border-color);border-radius:6px;font-size:0.82rem;background:var(--bg-primary);font-family:inherit;color:var(--text-primary); }
+    .recv-table input:focus { border-color:var(--philips-blue);outline:none; }
+    .add-form-row { display:flex;gap:0.7rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:0.75rem; }
+    .add-fg { display:flex;flex-direction:column;gap:0.3rem; }
+    .add-fg label { font-size:0.75rem;font-weight:600;color:var(--text-secondary); }
+    .add-fg input { padding:0.45rem 0.65rem;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);font-size:0.82rem;background:var(--bg-primary);color:var(--text-primary);font-family:inherit; }
+    .add-fg input:focus { border-color:var(--philips-blue);outline:none; }
+    .btn-recv { background:var(--success);color:#fff;padding:0.45rem 1rem;border-radius:var(--radius-sm);border:none;cursor:pointer;font-weight:600;font-size:0.82rem;display:inline-flex;align-items:center;gap:0.35rem;transition:all 0.2s;font-family:inherit; }
+    .btn-recv:hover { background:#059669; }
+
+    /* Status update */
+    .status-form { display:inline-flex;align-items:center;gap:0.5rem; }
+    .status-form select { padding:0.35rem 0.5rem;border:1.5px solid var(--border-color);border-radius:6px;font-size:0.8rem;font-family:inherit;background:var(--bg-primary);color:var(--text-primary); }
+    .status-form button { padding:0.35rem 0.7rem;border:none;background:var(--philips-blue);color:#fff;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit; }
+
+    .check-icon { font-size:0.95rem; }
+    .check-icon.ok { color:var(--success); }
+    .check-icon.fail { color:var(--danger); }
+    .overdue-badge { display:inline-flex;align-items:center;gap:0.25rem;background:#FEE2E2;color:#DC2626;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.72rem;font-weight:700; }
+
+    @media(max-width:992px) { .summary-grid{grid-template-columns:repeat(2,1fr);} .info-grid{grid-template-columns:1fr;} }
+    @media(max-width:768px) { .po-page{padding:1.25rem;} .po-header{flex-direction:column;} }
+</style>
+
+<div class="po-page">
+    <!-- Header -->
+    <div class="po-header">
+        <div class="po-header-left">
+            <div class="icon-wrap"><i class="fas fa-file-invoice"></i></div>
+            <div>
+                <div class="po-title">{{ po.title }}</div>
+                <div class="po-meta">
+                    <span class="po-code">{{ po.po_number }}</span>
+                    <span class="status-badge status-{{ po.status }}">{{ po.get_status_display }}</span>
+                    <span class="priority-badge priority-{{ po.priority }}">
+                        {% if po.priority == 'urgent' %}<i class="fas fa-exclamation-triangle"></i>{% elif po.priority == 'high' %}<i class="fas fa-arrow-up"></i>{% endif %}
+                        {{ po.get_priority_display }}
+                    </span>
+                    {% if po.is_overdue %}<span class="overdue-badge"><i class="fas fa-exclamation-circle"></i> Overdue</span>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            {% if is_admin %}
+            <form method="post" action="{% url 'vendor_po_update_status' stream=stream vendor_id=vendor.pk po_id=po.pk %}" class="status-form">
+                {% csrf_token %}
+                <select name="status">
+                    <option value="draft" {% if po.status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="submitted" {% if po.status == 'submitted' %}selected{% endif %}>Submitted</option>
+                    <option value="acknowledged" {% if po.status == 'acknowledged' %}selected{% endif %}>Acknowledged</option>
+                    <option value="in_progress" {% if po.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="partially_delivered" {% if po.status == 'partially_delivered' %}selected{% endif %}>Partially Delivered</option>
+                    <option value="delivered" {% if po.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                    <option value="closed" {% if po.status == 'closed' %}selected{% endif %}>Closed</option>
+                    <option value="cancelled" {% if po.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+                <button type="submit"><i class="fas fa-sync-alt"></i> Update</button>
+            </form>
+            <form method="post" action="{% url 'vendor_po_delete' stream=stream vendor_id=vendor.pk po_id=po.pk %}" style="display:inline;" onsubmit="return confirm('Delete this purchase order?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-ph btn-danger"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'vendor_detail' stream=stream pk=vendor.pk %}" class="btn-ph btn-outline"><i class="fas fa-arrow-left"></i> Back to Vendor</a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="s-icon" style="background:var(--gradient-primary);"><i class="fas fa-list"></i></div>
+            <div class="s-value">{{ items|length }}</div>
+            <div class="s-label">Line Items</div>
+        </div>
+        <div class="summary-card">
+            <div class="s-icon" style="background:var(--gradient-primary);"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="s-value">{{ po.currency }} {{ po.total_amount|floatformat:2 }}</div>
+            <div class="s-label">Total Value</div>
+        </div>
+        <div class="summary-card">
+            <div class="s-icon" style="background:var(--gradient-success);"><i class="fas fa-check-double"></i></div>
+            <div class="s-value">{{ po.delivery_status_summary.received }} / {{ po.delivery_status_summary.ordered }}</div>
+            <div class="s-label">Received / Ordered</div>
+        </div>
+        <div class="summary-card">
+            <div class="s-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);"><i class="fas fa-clock"></i></div>
+            <div class="s-value">{{ po.delivery_status_summary.pending }}</div>
+            <div class="s-label">Pending Items</div>
+        </div>
+    </div>
+
+    <!-- Order & Vendor Info -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card-title"><i class="fas fa-file-invoice"></i> Order Information</div>
+            <div class="info-row"><span class="info-label">PO Number</span><span class="info-value">{{ po.po_number }}</span></div>
+            <div class="info-row"><span class="info-label">Order Date</span><span class="info-value">{{ po.order_date|date:"Y-m-d" }}</span></div>
+            <div class="info-row"><span class="info-label">Expected Delivery</span><span class="info-value">{{ po.expected_delivery_date|date:"Y-m-d"|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Actual Delivery</span><span class="info-value">{{ po.actual_delivery_date|date:"Y-m-d"|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Shipping Address</span><span class="info-value">{{ po.shipping_address|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Created By</span><span class="info-value">{{ po.created_by.username|default:"-" }}</span></div>
+            {% if po.approved_by %}
+            <div class="info-row"><span class="info-label">Approved By</span><span class="info-value">{{ po.approved_by.username }} ({{ po.approved_at|date:"Y-m-d H:i" }})</span></div>
+            {% endif %}
+        </div>
+        <div class="info-card">
+            <div class="info-card-title"><i class="fas fa-building"></i> Vendor</div>
+            <div class="info-row"><span class="info-label">Name</span><span class="info-value">{{ vendor.name }}</span></div>
+            <div class="info-row"><span class="info-label">Code</span><span class="info-value">{{ vendor.code }}</span></div>
+            <div class="info-row"><span class="info-label">Contact</span><span class="info-value">{{ vendor.contact_person|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ vendor.email|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ vendor.phone|default:"-" }}</span></div>
+            {% if po.notes %}
+            <div class="info-row"><span class="info-label">Notes</span><span class="info-value" style="white-space:pre-wrap;">{{ po.notes }}</span></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon"><i class="fas fa-list"></i></span>
+            Line Items <span class="section-count">{{ items|length }}</span>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr><th>#</th><th>Item</th><th>Part #</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Total</th><th>Received</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td style="color:var(--text-tertiary);">{{ forloop.counter }}</td>
+                    <td>
+                        <strong>{{ item.item_name }}</strong>
+                        {% if item.description %}<br><span style="font-size:0.78rem;color:var(--text-tertiary);">{{ item.description }}</span>{% endif %}
+                    </td>
+                    <td><span class="po-code">{{ item.part_number|default:"-" }}</span></td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td>{{ po.currency }} {{ item.unit_price|floatformat:2 }}</td>
+                    <td><strong>{{ po.currency }} {{ item.line_total|floatformat:2 }}</strong></td>
+                    <td>
+                        <span style="font-weight:700;{% if item.is_fully_received %}color:var(--success);{% elif item.quantity_received > 0 %}color:var(--philips-blue);{% else %}color:var(--text-tertiary);{% endif %}">
+                            {{ item.quantity_received }} / {{ item.quantity }}
+                        </span>
+                        <div class="progress-bar">
+                            {% with pct=item.quantity_received|divisibleby:1 %}
+                            <div class="fill {% if item.is_fully_received %}fill-green{% elif item.quantity_received > 0 %}fill-blue{% else %}fill-yellow{% endif %}"
+                                 style="width:{% widthratio item.quantity_received item.quantity 100 %}%;"></div>
+                            {% endwith %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if item.is_fully_received %}<i class="fas fa-check-circle check-icon ok"></i> Complete
+                        {% elif item.quantity_received > 0 %}<i class="fas fa-truck check-icon" style="color:var(--philips-blue);"></i> Partial
+                        {% else %}<i class="fas fa-hourglass-half check-icon" style="color:var(--text-tertiary);"></i> Pending{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="background:var(--bg-secondary);">
+                    <td colspan="6" style="text-align:right;font-weight:800;font-size:0.88rem;border-bottom:none;">Grand Total</td>
+                    <td style="font-weight:800;font-size:1rem;color:var(--philips-blue);border-bottom:none;">{{ po.currency }} {{ po.total_amount|floatformat:2 }}</td>
+                    <td colspan="2" style="border-bottom:none;"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Record Delivery -->
+    {% if po.status != 'cancelled' and po.status != 'closed' and po.delivery_status_summary.pending > 0 %}
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon" style="background:var(--gradient-success);"><i class="fas fa-truck"></i></span>
+            Record Delivery
+        </div>
+    </div>
+
+    <div class="add-form-card">
+        <div class="add-form-title"><i class="fas fa-box-open"></i> Receive Items</div>
+        <form method="post" action="{% url 'vendor_po_receive' stream=stream vendor_id=vendor.pk po_id=po.pk %}">
+            {% csrf_token %}
+            <div class="add-form-row" style="margin-bottom:1rem;">
+                <div class="add-fg"><label>Receipt # (optional)</label><input type="text" name="receipt_number" placeholder="DR-001"></div>
+                <div class="add-fg"><label>Received Date *</label><input type="date" name="received_date" required></div>
+                <div class="add-fg" style="flex:1;"><label>Notes</label><input type="text" name="delivery_notes" style="width:100%;" placeholder="Delivery notes"></div>
+            </div>
+            <table class="recv-table">
+                <thead>
+                    <tr><th>Item</th><th>Ordered</th><th>Already Received</th><th>Remaining</th><th>Qty to Receive</th><th>Condition</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    {% if not item.is_fully_received %}
+                    <tr>
+                        <td><strong>{{ item.item_name }}</strong></td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.quantity_received }}</td>
+                        <td style="font-weight:700;color:var(--warning);">{{ item.remaining }}</td>
+                        <td><input type="number" name="recv_qty_{{ item.id }}" value="0" min="0" max="{{ item.remaining }}" style="width:70px;"></td>
+                        <td>
+                            <select name="recv_cond_{{ item.id }}">
+                                <option value="ok">OK</option>
+                                <option value="damaged">Damaged</option>
+                            </select>
+                        </td>
+                        <td><input type="text" name="recv_note_{{ item.id }}" placeholder="Note" style="width:120px;"></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div style="margin-top:1rem;text-align:right;">
+                <button type="submit" class="btn-recv"><i class="fas fa-check"></i> Record Delivery</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Delivery History -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon" style="background:var(--gradient-success);"><i class="fas fa-history"></i></span>
+            Delivery History <span class="section-count">{{ deliveries|length }}</span>
+        </div>
+    </div>
+
+    {% if deliveries %}
+    {% for d in deliveries %}
+    <div class="table-card" style="margin-bottom:1rem;">
+        <div style="padding:0.85rem 1rem;background:var(--bg-secondary);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);">
+            <div>
+                <strong style="font-size:0.88rem;">{% if d.receipt_number %}{{ d.receipt_number }}{% else %}Receipt #{{ d.id }}{% endif %}</strong>
+                <span style="color:var(--text-tertiary);font-size:0.78rem;margin-left:0.65rem;">{{ d.received_date|date:"Y-m-d" }}</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">
+                <i class="fas fa-user" style="margin-right:0.25rem;"></i> {{ d.received_by.username|default:"-" }}
+            </div>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Item</th><th>Qty Received</th><th>Condition</th><th>Notes</th></tr></thead>
+            <tbody>
+                {% for ri in d.items.all %}
+                <tr>
+                    <td>{{ ri.po_item.item_name }}</td>
+                    <td><strong>{{ ri.quantity_received }}</strong></td>
+                    <td>{% if ri.condition_ok %}<i class="fas fa-check-circle check-icon ok"></i> OK{% else %}<i class="fas fa-times-circle check-icon fail"></i> Damaged{% endif %}</td>
+                    <td>{{ ri.notes|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if d.notes %}
+        <div style="padding:0.65rem 1rem;font-size:0.82rem;color:var(--text-secondary);border-top:1px solid var(--border-color);">
+            <i class="fas fa-sticky-note" style="margin-right:0.35rem;color:var(--text-tertiary);"></i> {{ d.notes }}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="table-card">
+        <div class="table-empty"><i class="fas fa-truck" style="margin-right:0.5rem;"></i> No deliveries recorded yet.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

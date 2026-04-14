@@ -2,36 +2,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Required - IGT Mobile Surgery Portal</title>
-    <meta name="description" content="Authentication Required for Mobile Surgery Management Platform">
+    <title>Authentication Required - NexusOps Portal</title>
+    <meta name="description" content="Authentication required - NexusOps AI-Powered Operations Management Platform">
     <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --primary-dark: #0a192f;
-            --primary-navy: #1a365d;
-            --primary-blue: #2c5282;
-            --accent-blue: #3182ce;
-            --accent-cyan: #00bcd4;
-            --accent-teal: #0d9488;
-            --accent-gold: #d69e2e;
+            --philips-blue: #0066cc;
+            --philips-dark: #003d7a;
+            --philips-light: #e6f2ff;
+            --accent-cyan: #00d4ff;
+            --accent-teal: #00c9a7;
+            --accent-purple: #0044CC;
+            --gradient-primary: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
+            --gradient-hero: linear-gradient(135deg, #0a0f1a 0%, #0d1929 25%, #0f1f3d 50%, #0a1628 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --white: #ffffff;
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
-            --gray-300: #cbd5e0;
-            --gray-400: #a0aec0;
-            --gray-500: #718096;
-            --gray-600: #4a5568;
-            --gray-700: #2d3748;
-            --gray-800: #1a202c;
-            --success: #38a169;
-            --warning: #d69e2e;
-            --danger: #e53e3e;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
         }
 
         * {
@@ -41,355 +47,425 @@
         }
 
         html, body {
-            min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--gray-100);
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--white);
             overflow-x: hidden;
         }
 
-        /* Split Layout */
-        .login-wrapper {
-            display: flex;
+        /* Full Page Background */
+        .page-wrapper {
             min-height: 100vh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Main Container */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            min-height: 700px;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(0, 102, 204, 0.1);
         }
 
         /* Left Panel - Branding */
         .brand-panel {
-            flex: 0 0 45%;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-navy) 50%, var(--primary-blue) 100%);
+            flex: 1.2;
+            background: linear-gradient(135deg, #0a0f1a 0%, #0d1929 25%, #0f1f3d 50%, #0a1628 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            padding: 60px;
+            justify-content: space-between;
+            padding: 3rem;
             overflow: hidden;
         }
 
-        .brand-panel::before {
-            content: '';
+        /* Decorative Lines */
+        .deco-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            opacity: 0.3;
+        }
+
+        .deco-line-1 {
+            height: 1px;
+            width: 200px;
+            top: 120px;
+            right: -50px;
+            transform: rotate(-45deg);
+        }
+
+        .deco-line-2 {
+            height: 1px;
+            width: 300px;
+            bottom: 200px;
+            left: -100px;
+            transform: rotate(30deg);
+        }
+
+        /* Floating Particles */
+        .particles {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(49, 130, 206, 0.3) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(13, 148, 136, 0.2) 0%, transparent 40%),
-                radial-gradient(circle at 50% 90%, rgba(214, 158, 46, 0.15) 0%, transparent 30%);
+            overflow: hidden;
             pointer-events: none;
         }
 
-        /* Animated Grid Background */
-        .grid-bg {
+        .particle {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* Floating Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.4;
-            animation: orbFloat 8s ease-in-out infinite;
-        }
-
-        .orb-1 {
-            width: 300px;
-            height: 300px;
+            width: 4px;
+            height: 4px;
             background: var(--accent-cyan);
-            top: 10%;
-            left: -10%;
-            animation-delay: 0s;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: particleFloat 15s linear infinite;
         }
 
-        .orb-2 {
-            width: 200px;
-            height: 200px;
-            background: var(--accent-teal);
-            bottom: 20%;
-            right: -5%;
-            animation-delay: -3s;
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: -2s; animation-duration: 14s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: -4s; animation-duration: 10s; }
+        .particle:nth-child(4) { left: 50%; animation-delay: -6s; animation-duration: 16s; }
+        .particle:nth-child(5) { left: 70%; animation-delay: -8s; animation-duration: 13s; }
+        .particle:nth-child(6) { left: 85%; animation-delay: -10s; animation-duration: 11s; }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
-        .orb-3 {
-            width: 150px;
-            height: 150px;
-            background: var(--accent-gold);
-            top: 60%;
-            left: 20%;
-            animation-delay: -5s;
-        }
-
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(20px, -20px) scale(1.05); }
-            50% { transform: translate(-10px, 10px) scale(0.95); }
-            75% { transform: translate(15px, 15px) scale(1.02); }
-        }
-
+        /* Brand Content */
         .brand-content {
             position: relative;
-            z-index: 2;
-            color: var(--white);
+            z-index: 10;
         }
 
         .brand-logo {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 48px;
+            gap: 14px;
+            margin-bottom: 3rem;
         }
 
-        .brand-logo img {
-            width: 56px;
-            height: 56px;
-            filter: brightness(0) invert(1);
+        .logo-container {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--philips-blue) 0%, var(--accent-cyan) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 102, 204, 0.3);
+        }
+
+        .logo-container img {
+            width: 32px;
+            height: 32px;
         }
 
         .brand-logo-text {
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
+            color: var(--white);
             letter-spacing: -0.5px;
         }
 
-        .brand-title {
-            font-size: 48px;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            letter-spacing: -1px;
-        }
-
-        .brand-title span {
+        .brand-logo-text span {
             background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-teal) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .brand-subtitle {
-            font-size: 18px;
-            color: var(--gray-300);
-            line-height: 1.7;
-            margin-bottom: 48px;
-            max-width: 480px;
-        }
-
-        /* Stats Row */
-        .brand-stats {
-            display: flex;
-            gap: 40px;
-            padding-top: 32px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .stat-item {
-            text-align: left;
-        }
-
-        .stat-value {
-            font-size: 36px;
+        .brand-headline {
+            font-size: 3rem;
             font-weight: 800;
             color: var(--white);
-            line-height: 1;
-            margin-bottom: 8px;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1.5px;
         }
 
-        .stat-value span {
-            color: var(--accent-cyan);
+        .brand-headline .highlight {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .stat-label {
-            font-size: 13px;
+        .brand-description {
+            font-size: 1rem;
             color: var(--gray-400);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            max-width: 420px;
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 1rem;
+        }
+
+        .feature-text {
+            font-size: 0.95rem;
+            color: var(--gray-300);
             font-weight: 500;
         }
 
-        /* Right Panel - Login Form */
-        .login-panel {
-            flex: 1;
+        /* Stats Section */
+        .stats-section {
+            position: relative;
+            z-index: 10;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, var(--white) 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Right Panel - Content */
+        .form-panel {
+            flex: 0 0 580px;
+            background: var(--white);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            padding: 60px;
-            background: var(--white);
+            padding: 2.5rem 3rem;
             position: relative;
         }
 
-        .login-panel::before {
+        .form-panel::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-teal), var(--primary-blue));
+            background: linear-gradient(90deg, var(--philips-blue), var(--accent-cyan), var(--accent-teal));
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 580px;
-        }
-
-        /* Security Header */
-        .security-header {
+        /* Back Link */
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 32px;
-            padding: 14px 20px;
-            background: linear-gradient(135deg, rgba(56, 161, 105, 0.08) 0%, rgba(13, 148, 136, 0.08) 100%);
-            border: 1px solid rgba(56, 161, 105, 0.2);
-            border-radius: 12px;
+            gap: 8px;
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
         }
 
-        .security-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--success) 0%, var(--accent-teal) 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-        }
-
-        .security-text {
-            font-size: 14px;
-            font-weight: 600;
+        .back-link:hover {
             color: var(--gray-700);
+            background: var(--gray-100);
         }
 
-        .security-text span {
-            display: block;
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--gray-500);
-            margin-top: 2px;
+        .form-header {
+            margin-bottom: 1.25rem;
         }
 
-        /* Login Card */
-        .login-card {
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 24px;
-            padding: 40px 48px;
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                0 10px 15px -3px rgba(0, 0, 0, 0.05),
-                0 20px 25px -5px rgba(0, 0, 0, 0.03);
+        .form-welcome {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--philips-blue);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
         }
 
-        .login-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .login-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-blue) 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px auto;
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 8px 24px rgba(26, 54, 93, 0.3);
-        }
-
-        .login-title {
-            font-size: 26px;
+        .form-title {
+            font-size: 2rem;
             font-weight: 800;
-            color: var(--gray-800);
-            margin-bottom: 6px;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
             letter-spacing: -0.5px;
         }
 
-        .login-subtitle {
-            font-size: 14px;
+        .form-subtitle {
             color: var(--gray-500);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Auth Icon */
+        .auth-icon-wrap {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--philips-blue) 0%, var(--accent-cyan) 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 102, 204, 0.25);
+            position: relative;
+        }
+
+        .auth-icon-wrap::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 22px;
+            border: 2px solid rgba(0, 102, 204, 0.12);
+        }
+
+        /* Alert / Notice Styles */
+        .alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
             line-height: 1.5;
         }
 
-        /* Error Messages */
-        .error-message {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, rgba(229, 62, 62, 0.08) 0%, rgba(229, 62, 62, 0.04) 100%);
-            border: 1px solid rgba(229, 62, 62, 0.2);
-            border-left: 4px solid var(--danger);
-            border-radius: 12px;
-            margin-bottom: 24px;
+        .alert-warning {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            color: #92400e;
+            border: 1px solid #fde68a;
+            border-left: 4px solid var(--warning);
         }
 
-        .error-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--danger);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            flex-shrink: 0;
+        .alert-warning i {
+            color: var(--warning);
+            margin-top: 2px;
         }
 
-        .error-text {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--danger);
+        .alert-error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: var(--error);
+            border: 1px solid #fecaca;
+            border-left: 4px solid var(--error);
         }
 
-        /* Buttons */
-        .btn-group {
+        .alert-error i {
+            color: var(--error);
+            margin-top: 2px;
+        }
+
+        .alert-body {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .alert-desc {
+            font-weight: 400;
+            font-size: 0.825rem;
+            color: var(--gray-600);
+            line-height: 1.55;
+        }
+
+        /* CTA Buttons */
+        .btn-stack {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            margin-top: 28px;
+            gap: 0.65rem;
+            margin-bottom: 1rem;
         }
 
-        .btn {
+        .btn-submit {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--philips-blue) 0%, var(--accent-cyan) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 16px 28px;
-            font-size: 15px;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            border: none;
+            gap: 10px;
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.3);
+            text-decoration: none;
         }
 
-        .btn::before {
+        .btn-submit::before {
             content: '';
             position: absolute;
             top: 0;
@@ -397,422 +473,452 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
+            transition: left 0.6s ease;
         }
 
-        .btn:hover::before {
+        .btn-submit:hover::before {
             left: 100%;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-blue) 100%);
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 102, 204, 0.4);
             color: var(--white);
-            box-shadow: 0 4px 14px rgba(26, 54, 93, 0.35);
+            text-decoration: none;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(26, 54, 93, 0.45);
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-submit i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-submit:hover i:last-child {
+            transform: translateX(4px);
+        }
+
+        .btn-secondary-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
         }
 
         .btn-secondary {
-            background: var(--gray-50);
-            color: var(--gray-700);
+            padding: 0.875rem 1.25rem;
+            background: var(--white);
             border: 2px solid var(--gray-200);
+            border-radius: 14px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
         }
 
         .btn-secondary:hover {
-            background: var(--gray-100);
-            border-color: var(--gray-300);
+            border-color: var(--philips-blue);
+            background: var(--philips-light);
+            color: var(--philips-blue);
             transform: translateY(-2px);
-        }
-
-        .btn i {
-            font-size: 18px;
+            text-decoration: none;
         }
 
         /* Divider */
         .divider {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin: 24px 0;
-            color: var(--gray-400);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            gap: 1rem;
+            margin: 0.75rem 0;
         }
 
-        .divider::before,
-        .divider::after {
-            content: '';
+        .divider-line {
             flex: 1;
             height: 1px;
-            background: var(--gray-200);
+            background: linear-gradient(90deg, transparent, var(--gray-300), transparent);
+        }
+
+        .divider-text {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Features Grid */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 24px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .feature-card {
+        .feat-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 14px;
-            background: var(--gray-50);
-            border: 1px solid var(--gray-100);
+            text-align: center;
+            gap: 4px;
+            padding: 0.5rem 0.4rem;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            background: var(--gray-50);
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
         }
 
-        .feature-card:hover {
-            background: var(--white);
+        .feat-item:hover {
             border-color: var(--gray-200);
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .feature-icon {
-            width: 40px;
-            height: 40px;
+        .feat-icon {
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
+            font-size: 0.85rem;
         }
 
-        .feature-icon.blue { background: rgba(49, 130, 206, 0.12); color: var(--accent-blue); }
-        .feature-icon.teal { background: rgba(13, 148, 136, 0.12); color: var(--accent-teal); }
-        .feature-icon.gold { background: rgba(214, 158, 46, 0.12); color: var(--accent-gold); }
-        .feature-icon.green { background: rgba(56, 161, 105, 0.12); color: var(--success); }
+        .feat-icon.fi-blue   { background: rgba(59,130,246,0.1);  color: #3b82f6; }
+        .feat-icon.fi-teal   { background: rgba(6,182,212,0.1);   color: #0891b2; }
+        .feat-icon.fi-green  { background: rgba(5,150,105,0.1);   color: #059669; }
+        .feat-icon.fi-amber  { background: rgba(245,158,11,0.1);  color: #d97706; }
+        .feat-icon.fi-purple { background: rgba(124,58,237,0.1);  color: #0044CC; }
+        .feat-icon.fi-rose   { background: rgba(225,29,72,0.1);   color: #c82333; }
 
-        .feature-text {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--gray-700);
-            line-height: 1.4;
+        .feat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            line-height: 1.3;
         }
 
-        .feature-text span {
-            display: block;
-            font-weight: 400;
+        /* Security Badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px 20px;
+            background: var(--gray-50);
+            border-radius: 100px;
+            border: 1px solid var(--gray-200);
+            flex-wrap: wrap;
+        }
+
+        .sec-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
             color: var(--gray-500);
-            font-size: 12px;
-            margin-top: 2px;
-        }
-
-        /* Footer */
-        .login-footer {
-            text-align: center;
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid var(--gray-100);
-        }
-
-        .footer-text {
-            font-size: 13px;
-            color: var(--gray-500);
-            line-height: 1.6;
-        }
-
-        .footer-text a {
-            color: var(--accent-blue);
-            text-decoration: none;
             font-weight: 500;
         }
 
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-
-        /* Trust Badges */
-        .trust-badges {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--gray-100);
-        }
-
-        .trust-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--gray-500);
-        }
-
-        .trust-badge i {
+        .sec-item i {
             color: var(--success);
+            font-size: 0.7rem;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .login-wrapper {
-                flex-direction: column;
-            }
+        .sec-sep {
+            width: 3px;
+            height: 3px;
+            background: var(--gray-300);
+            border-radius: 50%;
+        }
 
-            .brand-panel {
-                flex: none;
-                padding: 40px 32px;
+        /* Responsive Design */
+        @media (max-width: 1100px) {
+            .login-container {
+                flex-direction: column;
+                max-width: 580px;
                 min-height: auto;
             }
 
-            .brand-title {
-                font-size: 32px;
+            .brand-panel {
+                display: none;
             }
 
-            .brand-subtitle {
-                font-size: 15px;
-                margin-bottom: 32px;
-            }
-
-            .brand-stats {
-                gap: 24px;
-            }
-
-            .stat-value {
-                font-size: 28px;
-            }
-
-            .login-panel {
-                padding: 40px 24px;
-            }
-
-            .login-card {
-                padding: 32px 24px;
+            .form-panel {
+                flex: 1;
+                padding: 3rem 2rem;
+                border-radius: 0;
             }
         }
 
         @media (max-width: 640px) {
-            .brand-panel {
-                padding: 32px 24px;
+            .page-wrapper {
+                padding: 1rem;
             }
 
-            .brand-logo {
-                margin-bottom: 32px;
+            .form-panel {
+                padding: 2rem 1.5rem;
             }
 
-            .brand-title {
-                font-size: 28px;
+            .form-title {
+                font-size: 1.5rem;
             }
 
-            .brand-stats {
-                flex-wrap: wrap;
-                gap: 20px;
-            }
-
-            .stat-item {
-                flex: 1;
-                min-width: 100px;
-            }
-
-            .features-grid {
+            .btn-secondary-row {
                 grid-template-columns: 1fr;
             }
 
-            .trust-badges {
-                flex-direction: column;
-                gap: 12px;
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .security-badge {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 1.5rem;
+                justify-content: center;
             }
         }
 
-        /* Loading state */
-        .btn.loading {
-            pointer-events: none;
-            opacity: 0.8;
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
         }
 
-        .btn.loading::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
     </style>
 </head>
 
 <body>
-    <div class="login-wrapper">
-        <!-- Left Brand Panel -->
-        <div class="brand-panel">
-            <div class="grid-bg"></div>
-            <div class="orb orb-1"></div>
-            <div class="orb orb-2"></div>
-            <div class="orb orb-3"></div>
-            
-            <div class="brand-content">
-                <div class="brand-logo">
-                    <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips" />
-                    <span class="brand-logo-text">Philips Healthcare</span>
+    <div class="page-wrapper">
+        <!-- Main Container -->
+        <div class="login-container">
+            <!-- Left Brand Panel -->
+            <div class="brand-panel">
+                <!-- Decorative Elements -->
+                <div class="deco-line deco-line-1"></div>
+                <div class="deco-line deco-line-2"></div>
+                <div class="particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
                 </div>
-                
-                <h1 class="brand-title">
-                    Mobile Surgery<br>
-                    <span>Management Platform</span>
-                </h1>
-                
-                <p class="brand-subtitle">
-                    Enterprise-grade solution for managing surgical systems, team allocations, 
-                    and real-time operational analytics. Secure, reliable, and built for scale.
-                </p>
-                
-                <div class="brand-stats">
-                    <div class="stat-item">
-                        <div class="stat-value">99.9<span>%</span></div>
-                        <div class="stat-label">Uptime SLA</div>
+
+                <!-- Brand Content -->
+                <div class="brand-content">
+                    <div class="brand-logo fade-in">
+                        <div class="logo-container">
+                            <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips">
+                        </div>
+                        <div class="brand-logo-text">NexusOps<span> Portal</span></div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value">256<span>-bit</span></div>
-                        <div class="stat-label">Encryption</div>
+
+                    <h1 class="brand-headline fade-in delay-2">
+                        Intelligent<br>
+                        <span class="highlight">Medical Imaging</span><br>
+                        Infrastructure
+                    </h1>
+
+                    <p class="brand-description fade-in delay-3">
+                        Streamline your healthcare operations with our enterprise-grade management platform. 
+                        Real-time monitoring, advanced analytics, and complete system visibility.
+                    </p>
+
+                    <div class="feature-list fade-in delay-4">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <span class="feature-text">Real-time System Monitoring</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span class="feature-text">Advanced Analytics Dashboard</span>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value">24<span>/7</span></div>
-                        <div class="stat-label">Support</div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section fade-in delay-5">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">5K+</div>
+                            <div class="stat-label">Systems</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Right Login Panel -->
-        <div class="login-panel">
-            <div class="login-container">
-                <!-- Security Header -->
-                <div class="security-header">
-                    <div class="security-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="security-text">
-                        Secure Connection Established
-                        <span>Your data is protected with enterprise-grade encryption</span>
+            <!-- Right Panel -->
+            <div class="form-panel">
+                <a href="{% url 'home' %}" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Home
+                </a>
+
+                <!-- Auth Icon -->
+                <div class="auth-icon-wrap fade-in">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+
+                <div class="form-header fade-in delay-1">
+                    <div class="form-welcome">Authentication Required</div>
+                    <h2 class="form-title">Please sign in</h2>
+                    <p class="form-subtitle">Your session has expired or you are not currently authenticated. Sign in to continue using the NexusOps platform.</p>
+                </div>
+
+                <!-- Session expired notice -->
+                <div class="alert alert-warning fade-in delay-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="alert-body">
+                        <div class="alert-title">Session Terminated</div>
+                        <div class="alert-desc">For security compliance, sessions automatically expire after a period of inactivity. Authenticate again to resume your work.</div>
                     </div>
                 </div>
 
-                <!-- Login Card -->
-                <div class="login-card">
-                    <div class="login-header">
-                        <div class="login-icon">
-                            <i class="fas fa-user-lock"></i>
-                        </div>
-                        <h2 class="login-title">Authentication Required</h2>
-                        <p class="login-subtitle">
-                            Please sign in with your credentials to access the platform
-                        </p>
-                    </div>
-
-                    <!-- Error Messages -->
-                    {% if messages %}
-                        {% for message in messages %}
-                        <div class="error-message">
-                            <div class="error-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
+                <!-- Error Messages from Django -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-error fade-in delay-2">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <div class="alert-body">
+                                <div class="alert-title">Authentication Error</div>
+                                <div class="alert-desc">{{ message }}</div>
                             </div>
-                            <div class="error-text">{{ message }}</div>
                         </div>
-                        {% endfor %}
-                    {% endif %}
+                    {% endfor %}
+                {% endif %}
 
-                    <!-- Action Buttons -->
-                    <div class="btn-group">
-                        <a href="{% url 'login' %}" class="btn btn-primary" id="loginBtn">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Sign In to Platform
-                        </a>
-                        <a href="{% url 'register' %}" class="btn btn-secondary">
+                <!-- CTA Buttons -->
+                <div class="btn-stack fade-in delay-3">
+                    <a href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="btn-submit" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Sign In to NexusOps</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <div class="btn-secondary-row">
+                        <a href="{% url 'register' %}" class="btn-secondary">
                             <i class="fas fa-user-plus"></i>
-                            Create New Account
+                            <span>Request Access</span>
                         </a>
-                    </div>
-
-                    <div class="divider">Platform Features</div>
-
-                    <!-- Features Grid -->
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon blue">
-                                <i class="fas fa-tachometer-alt"></i>
-                            </div>
-                            <div class="feature-text">
-                                Live Dashboard
-                                <span>Real-time monitoring</span>
-                            </div>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon teal">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="feature-text">
-                                Analytics Suite
-                                <span>Advanced insights</span>
-                            </div>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon gold">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                            <div class="feature-text">
-                                Scheduling
-                                <span>Resource allocation</span>
-                            </div>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon green">
-                                <i class="fas fa-users-cog"></i>
-                            </div>
-                            <div class="feature-text">
-                                Team Portal
-                                <span>Collaboration tools</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="login-footer">
-                        <p class="footer-text">
-                            By signing in, you agree to our <a href="#">Terms of Service</a> 
-                            and <a href="#">Privacy Policy</a>
-                        </p>
-                        
+                        <a href="{% url 'home' %}" class="btn-secondary">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Copyright -->
-                <p style="text-align: center; margin-top: 32px; font-size: 13px; color: var(--gray-500);">
-                    © 2026 Philips Healthcare. All rights reserved.
-                </p>
+                <div class="divider fade-in delay-4">
+                    <div class="divider-line"></div>
+                    <span class="divider-text">Platform Access Includes</span>
+                    <div class="divider-line"></div>
+                </div>
+
+                <!-- Features Grid -->
+                <div class="features-grid fade-in delay-4">
+                    <div class="feat-item">
+                        <div class="feat-icon fi-blue"><i class="fas fa-server"></i></div>
+                        <div class="feat-label">System Allocation</div>
+                    </div>
+                    <div class="feat-item">
+                        <div class="feat-icon fi-teal"><i class="fas fa-chart-pie"></i></div>
+                        <div class="feat-label">Analytics</div>
+                    </div>
+                    <div class="feat-item">
+                        <div class="feat-icon fi-purple"><i class="fas fa-brain"></i></div>
+                        <div class="feat-label">AI Insights</div>
+                    </div>
+                    <div class="feat-item">
+                        <div class="feat-icon fi-amber"><i class="fas fa-clipboard-check"></i></div>
+                        <div class="feat-label">Calibration</div>
+                    </div>
+                    <div class="feat-item">
+                        <div class="feat-icon fi-green"><i class="fas fa-users-cog"></i></div>
+                        <div class="feat-label">Team Mgmt</div>
+                    </div>
+                    <div class="feat-item">
+                        <div class="feat-icon fi-rose"><i class="fas fa-file-alt"></i></div>
+                        <div class="feat-label">Document OCR</div>
+                    </div>
+                </div>
+
+                <!-- Security Badge -->
+                <div class="security-badge fade-in delay-5">
+                    <span class="sec-item"><i class="fas fa-shield-alt"></i> SOC 2</span>
+                    <span class="sec-sep"></span>
+                    <span class="sec-item"><i class="fas fa-check-circle"></i> GDPR</span>
+                    <span class="sec-sep"></span>
+                    <span class="sec-item"><i class="fas fa-lock"></i> AES-256</span>
+                    <span class="sec-sep"></span>
+                    <span class="sec-item"><i class="fas fa-key"></i> RBAC</span>
+                    <span class="sec-sep"></span>
+                    <span class="sec-item"><i class="fas fa-user-shield"></i> MFA</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced login button interaction
-        document.getElementById('loginBtn').addEventListener('click', function(e) {
-            this.classList.add('loading');
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
-        });
-
-        // Keyboard shortcut
+        // Keyboard shortcut - Enter to sign in
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('loginBtn').click();
+            var loginBtn = document.getElementById('loginBtn');
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && loginBtn) {
+                loginBtn.click();
             }
         });
+
+        // Staggered animation for feature items
+        document.querySelectorAll('.feat-item').forEach(function(item, i) {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(8px)';
+            item.style.transition = 'opacity .35s ease, transform .35s ease';
+            setTimeout(function() {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, 500 + (i * 60));
+        });
     </script>
+
+<!-- Version badge -->
+<div style="position:fixed;bottom:8px;right:12px;z-index:9999;font-size:0.7rem;color:#aab;font-family:'Segoe UI',system-ui,sans-serif;letter-spacing:0.02em;user-select:none;pointer-events:none;opacity:0.6;">v{{ APP_VERSION }}{% if APP_ENV_KEY != 'prod' %} <span style="background:#ffd700;color:#333;padding:1px 5px;border-radius:3px;font-weight:600;font-size:0.6rem;pointer-events:auto;">{{ APP_ENVIRONMENT }}</span>{% endif %}</div>
 </body>
 </html>

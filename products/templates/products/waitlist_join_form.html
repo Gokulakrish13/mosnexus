@@ -1,0 +1,602 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Join Waitlist - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #6d28d9 50%, #4c1d95 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .header-main {
+        flex: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header p {
+        margin: 0.75rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1.05rem;
+        max-width: 500px;
+        line-height: 1.5;
+    }
+
+    .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .header-badge i {
+        color: #fcd34d;
+    }
+
+    .header-illustration {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .header-icon-large {
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(255,255,255,0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    .header-icon-large i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .header-features {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .header-feature {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
+    }
+
+    .header-feature:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-2px);
+    }
+
+    .header-feature i {
+        font-size: 1.25rem;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+    }
+
+    .header-feature span {
+        font-size: 0.85rem;
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    @media (max-width: 768px) {
+        .header-top {
+            flex-direction: column;
+        }
+        
+        .header-illustration {
+            display: none;
+        }
+        
+        .header-features {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .form-section {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .form-section h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section h3 i {
+        color: #0B5FFF;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 640px) {
+        .form-group.full-width {
+            grid-column: span 1;
+        }
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .form-group label .required {
+        color: #dc2626;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0B5FFF;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+        background: white;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        font-size: 0.9rem;
+        color: #374151;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+    }
+
+    .info-box {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0369a1;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-box p {
+        font-size: 0.85rem;
+        color: #0c4a6e;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: #f8fafc;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0B5FFF 0%, #6d28d9 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .priority-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .priority-options {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .priority-option {
+        position: relative;
+    }
+
+    .priority-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .priority-option label {
+        display: block;
+        padding: 0.75rem;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+    }
+
+    .priority-option input:checked + label {
+        border-color: #0B5FFF;
+        background: #eef4ff;
+        color: #6d28d9;
+    }
+
+    .priority-option.critical input:checked + label {
+        border-color: #dc2626;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .priority-option.high input:checked + label {
+        border-color: #b8860b;
+        background: #fff7ed;
+        color: #b8860b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-top">
+                <div class="header-main">
+                    <h1><i class="fas fa-clock"></i> Join Waitlist</h1>
+                    <p>Request to be notified when your desired time slot becomes available. We'll alert you the moment a matching slot opens up.</p>
+                    <div class="header-badge">
+                        <i class="fas fa-bell"></i>
+                        <span>Get instant notifications</span>
+                    </div>
+                </div>
+                <div class="header-illustration">
+                    <div class="header-icon-large">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="header-features">
+                <div class="header-feature">
+                    <i class="fas fa-bolt"></i>
+                    <span>Instant alerts when slots open</span>
+                </div>
+                <div class="header-feature">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Flexible date options</span>
+                </div>
+                <div class="header-feature">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Priority queue system</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form method="POST">
+            {% csrf_token %}
+            {% if form_error %}
+            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+            </div>
+            {% endif %}
+
+            <div class="form-section">
+                <div class="info-box">
+                    <h4><i class="fas fa-info-circle"></i> How the Waitlist Works</h4>
+                    <p>If your desired system and time slot is already booked, you can join the waitlist. 
+                       When the slot becomes available (due to cancellation), you'll be automatically notified 
+                       and can quickly book the system.</p>
+                </div>
+
+                <h3><i class="fas fa-desktop"></i> System Selection</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>System <span class="required">*</span></label>
+                        <select name="system" class="form-control" required>
+                            <option value="">Select a system...</option>
+                            {% for system in systems %}
+                            <option value="{{ system.id }}">{{ system.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Project (Optional)</label>
+                        <select name="project" class="form-control">
+                            <option value="">Select a project...</option>
+                            {% for project in projects %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-calendar-alt"></i> Desired Time Slot</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Desired Date <span class="required">*</span></label>
+                        <input type="date" name="desired_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Flexibility Days</label>
+                        <select name="flexibility_days" class="form-control">
+                            <option value="0">Exact date only</option>
+                            <option value="1">± 1 day</option>
+                            <option value="3" selected>± 3 days</option>
+                            <option value="7">± 7 days (1 week)</option>
+                        </select>
+                        <span class="help-text">How flexible are you with the date?</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time <span class="required">*</span></label>
+                        <input type="time" name="desired_start_time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Time <span class="required">*</span></label>
+                        <input type="time" name="desired_end_time" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top: 1rem;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="is_flexible_date" name="is_flexible_date">
+                        <label for="is_flexible_date">I'm flexible with the date</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="is_flexible_time" name="is_flexible_time">
+                        <label for="is_flexible_time">I'm flexible with the time</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-flag"></i> Priority</h3>
+                <div class="priority-options">
+                    <div class="priority-option">
+                        <input type="radio" name="priority" id="priority_low" value="low">
+                        <label for="priority_low"><i class="fas fa-arrow-down"></i> Low</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" name="priority" id="priority_normal" value="normal" checked>
+                        <label for="priority_normal"><i class="fas fa-minus"></i> Normal</label>
+                    </div>
+                    <div class="priority-option high">
+                        <input type="radio" name="priority" id="priority_high" value="high">
+                        <label for="priority_high"><i class="fas fa-arrow-up"></i> High</label>
+                    </div>
+                    <div class="priority-option critical">
+                        <input type="radio" name="priority" id="priority_critical" value="critical">
+                        <label for="priority_critical"><i class="fas fa-exclamation-circle"></i> Critical</label>
+                    </div>
+                </div>
+                <span class="help-text" style="display: block; margin-top: 0.5rem;">
+                    Higher priority requests may be fulfilled first when slots become available.
+                </span>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-comment-alt"></i> Additional Information</h3>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Reason for Request</label>
+                        <textarea name="reason" class="form-control" placeholder="Explain why you need this system and time slot..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea name="notes" class="form-control" placeholder="Any additional notes or special requirements..."></textarea>
+                    </div>
+                </div>
+                <div class="checkbox-group" style="margin-top: 1rem;">
+                    <input type="checkbox" id="notify_via_email" name="notify_via_email" checked>
+                    <label for="notify_via_email">Notify me via email when the slot becomes available</label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'waitlist_dashboard' stream=stream %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-clock"></i> Join Waitlist
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

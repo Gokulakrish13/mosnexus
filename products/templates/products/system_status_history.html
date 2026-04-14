@@ -1,641 +1,1325 @@
 {% extends 'products/base.html' %}
 {% block content %}
 <style>
-/* Enterprise Status History Styles */
-.ent-history-container {
-    max-width: 1200px;
-    margin: 80px auto 40px auto;
-    padding: 0 24px;
+/* ============================================
+   STATUS HISTORY — HORIZON DESIGN v1.0
+   Corporate · Professional · Functional
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --sh-bg: #f0f4f8;
+    --sh-surface: #ffffff;
+    --sh-primary: #1e3a5f;
+    --sh-primary-light: #3b82f6;
+    --sh-accent: #0891b2;
+    --sh-success: #059669;
+    --sh-warning: #d97706;
+    --sh-danger: #dc2626;
+    --sh-info: #2563eb;
+    --sh-purple: #0044CC;
+    --sh-text: #0f172a;
+    --sh-text-secondary: #475569;
+    --sh-text-muted: #94a3b8;
+    --sh-border: #e2e8f0;
+    --sh-shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --sh-shadow-sm: 0 2px 6px rgba(0,0,0,.05);
+    --sh-shadow: 0 4px 14px rgba(0,0,0,.07);
+    --sh-shadow-md: 0 8px 24px rgba(0,0,0,.09);
+    --sh-shadow-lg: 0 16px 48px rgba(0,0,0,.12);
+    --sh-radius: 12px;
+    --sh-radius-lg: 16px;
+    --sh-radius-sm: 8px;
+    --sh-gradient: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
 }
 
-.ent-history-header {
-    background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #2b6cb0 100%);
-    border-radius: 20px 20px 0 0;
-    padding: 32px 40px;
-    color: white;
-    position: relative;
-    overflow: hidden;
+@keyframes shFadeIn  { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shSlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shPulse   { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.5)} 50%{opacity:.85;box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+@keyframes shExpand  { from{opacity:0;max-height:0} to{opacity:1;max-height:600px} }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ===== PAGE ===== */
+.sh-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: calc(60px + 1.25rem) 2rem 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+    color: var(--sh-text);
+    background: var(--sh-bg);
+    min-height: 100vh;
 }
 
-.ent-history-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 100%;
-    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.05) 100%);
-    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
-}
-
-.ent-history-title {
-    font-size: 28px;
-    font-weight: 800;
-    margin: 0 0 8px 0;
+/* ===== BREADCRUMB ===== */
+.sh-breadcrumb {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-.ent-history-title-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
-
-.ent-history-subtitle {
-    font-size: 14px;
-    opacity: 0.85;
-    margin: 0;
-    font-weight: 400;
-}
-
-.ent-system-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.2);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 16px;
-    backdrop-filter: blur(10px);
-}
-
-.ent-system-badge-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #68d391;
-    box-shadow: 0 0 8px rgba(104, 211, 145, 0.6);
-}
-
-.ent-history-stats {
-    display: flex;
-    gap: 24px;
-    margin-top: 20px;
-}
-
-.ent-stat-item {
-    background: rgba(255,255,255,0.1);
-    padding: 12px 20px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-}
-
-.ent-stat-value {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.ent-stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
-}
-
-.ent-history-body {
-    background: #ffffff;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 10px 40px rgba(26, 54, 93, 0.15);
-    overflow: hidden;
-}
-
-.ent-history-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 32px;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.ent-toolbar-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.ent-search-box {
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 10px 16px;
-    gap: 10px;
-    transition: all 0.2s ease;
-}
-
-.ent-search-box:focus-within {
-    border-color: #3182ce;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
-}
-
-.ent-search-input {
-    border: none;
-    outline: none;
-    font-size: 14px;
-    width: 200px;
-    background: transparent;
-}
-
-.ent-filter-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: white;
-    font-size: 14px;
+    gap: 6px;
+    margin-bottom: 18px;
+    font-size: 13px;
     font-weight: 500;
-    color: #4a5568;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    color: var(--sh-text-muted);
+    animation: shFadeIn .3s ease-out;
 }
-
-.ent-filter-btn:hover {
-    border-color: #3182ce;
-    color: #3182ce;
+.sh-breadcrumb a {
+    color: var(--sh-text-muted);
+    text-decoration: none;
+    transition: color .15s;
 }
+.sh-breadcrumb a:hover { color: var(--sh-primary-light); }
+.sh-breadcrumb .sh-sep { color: var(--sh-border); font-size: 10px; }
+.sh-breadcrumb .sh-current { color: var(--sh-text-secondary); font-weight: 600; }
 
-.ent-toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.ent-export-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.ent-export-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4);
-}
-
-.ent-timeline {
-    padding: 32px;
-}
-
-.ent-timeline-item {
-    display: flex;
-    gap: 24px;
+/* ===== HEADER (Gradient Card) ===== */
+.sh-header {
+    background: var(--sh-gradient);
+    border-radius: var(--sh-radius-lg);
+    padding: 28px 32px 24px;
+    color: #fff;
     position: relative;
-    padding-bottom: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,102,204,.18);
+    margin-bottom: 20px;
+    animation: shFadeIn .35s ease-out;
 }
-
-.ent-timeline-item:last-child {
-    padding-bottom: 0;
-}
-
-.ent-timeline-item::before {
+.sh-header::before {
     content: '';
     position: absolute;
-    left: 24px;
-    top: 48px;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, #e2e8f0 0%, transparent 100%);
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M20 20.5V18H0v-2h20V0h2v16h18v2H22v20h-2V20.5z'/%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
 }
-
-.ent-timeline-item:last-child::before {
-    display: none;
-}
-
-.ent-timeline-marker {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.ent-timeline-marker.active { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
-.ent-timeline-marker.inactive { background: linear-gradient(135deg, #a0aec0 0%, #718096 100%); }
-.ent-timeline-marker.issue { background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%); }
-.ent-timeline-marker.used { background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%); }
-.ent-timeline-marker.removed { background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%); }
-.ent-timeline-marker.blocked { background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%); }
-
-.ent-timeline-content {
-    flex: 1;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 24px;
-    transition: all 0.3s ease;
-}
-
-.ent-timeline-content:hover {
-    border-color: #cbd5e0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    transform: translateX(4px);
-}
-
-.ent-timeline-header {
+.sh-header-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
 }
-
-.ent-timeline-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.ent-timeline-status.active { background: #c6f6d5; color: #276749; }
-.ent-timeline-status.inactive { background: #e2e8f0; color: #4a5568; }
-.ent-timeline-status.issue { background: #feebc8; color: #c05621; }
-.ent-timeline-status.used { background: #bee3f8; color: #2b6cb0; }
-.ent-timeline-status.removed { background: #fed7d7; color: #c53030; }
-.ent-timeline-status.blocked { background: #e9d8fd; color: #6b46c1; }
-
-.ent-timeline-date {
+.sh-header-info { flex: 1; }
+.sh-header-info h1 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -.3px;
+    text-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
-
-.ent-timeline-date-main {
-    font-size: 16px;
-    font-weight: 700;
-    color: #2d3748;
-}
-
-.ent-timeline-date-time {
-    font-size: 12px;
-    color: #718096;
-}
-
-.ent-timeline-body {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.ent-timeline-field {
-    background: white;
-    padding: 14px 16px;
-    border-radius: 10px;
-    border: 1px solid #edf2f7;
-}
-
-.ent-timeline-field-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #a0aec0;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.ent-timeline-field-value {
+.sh-header-info p {
+    margin: 6px 0 0;
     font-size: 14px;
-    color: #2d3748;
+    opacity: .85;
     font-weight: 500;
 }
-
-.ent-timeline-description {
-    grid-column: 1 / -1;
-    background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
-    padding: 16px;
-    border-radius: 10px;
-    margin-top: 8px;
+.sh-header-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
 }
-
-.ent-timeline-description-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #718096;
+.sh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.2);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
-    margin-bottom: 6px;
+    color: #fff;
+}
+.sh-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.sh-badge-dot.green { background: #34d399; animation: shPulse 2s infinite; }
+.sh-badge-dot.blue  { background: #60a5fa; }
+.sh-badge-dot.amber { background: #fbbf24; }
+.sh-badge-dot.red   { background: #f87171; }
+.sh-badge-dot.gray  { background: #94a3b8; }
+.sh-badge-dot.purple { background: #a78bfa; }
+.sh-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+}
+.sh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--sh-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+    text-decoration: none;
+}
+.sh-btn:hover { transform: translateY(-1px); }
+.sh-btn-glass {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(4px);
+}
+.sh-btn-glass:hover { background: rgba(255,255,255,.25); color: #fff; text-decoration: none; }
+.sh-btn-solid {
+    background: var(--sh-surface);
+    color: var(--sh-text);
+    box-shadow: var(--sh-shadow-xs);
+}
+.sh-btn-solid:hover { box-shadow: var(--sh-shadow-sm); }
+
+/* ===== KPI STRIP ===== */
+.sh-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+    animation: shFadeIn .4s ease-out .08s both;
+}
+.sh-kpi-card {
+    background: var(--sh-surface);
+    border-radius: var(--sh-radius);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: var(--sh-shadow-xs);
+    border: 1px solid var(--sh-border);
+    transition: all .15s ease;
+    position: relative;
+    overflow: hidden;
+}
+.sh-kpi-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+}
+.sh-kpi-card:hover {
+    box-shadow: var(--sh-shadow-sm);
+    transform: translateY(-1px);
+}
+.sh-kpi-total::before   { background: linear-gradient(180deg, #3b82f6, #2563eb); }
+.sh-kpi-active::before  { background: linear-gradient(180deg, #10b981, #059669); }
+.sh-kpi-changes::before { background: linear-gradient(180deg, #0B5FFF, #0044CC); }
+.sh-kpi-latest::before  { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.sh-kpi-health::before  { background: linear-gradient(180deg, #06b6d4, #0891b2); }
+.sh-kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.sh-kpi-total .sh-kpi-icon   { background: rgba(59,130,246,.1); color: #3b82f6; }
+.sh-kpi-active .sh-kpi-icon  { background: rgba(16,185,129,.1); color: #059669; }
+.sh-kpi-changes .sh-kpi-icon { background: rgba(139,92,246,.1); color: #0044CC; }
+.sh-kpi-latest .sh-kpi-icon  { background: rgba(245,158,11,.1); color: #d97706; }
+.sh-kpi-health .sh-kpi-icon  { background: rgba(6,182,212,.1); color: #0891b2; }
+.sh-kpi-data { flex: 1; min-width: 0; }
+.sh-kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--sh-text);
+    line-height: 1.1;
+}
+.sh-kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--sh-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-top: 2px;
 }
 
-.ent-timeline-description-text {
-    font-size: 14px;
-    color: #4a5568;
-    line-height: 1.6;
+/* ===== LAYOUT (sidebar + main) ===== */
+.sh-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+    animation: shFadeIn .4s ease-out .12s both;
 }
 
-.ent-empty-state {
+/* ===== SIDEBAR ===== */
+.sh-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 80px;
+}
+.sh-card {
+    background: var(--sh-surface);
+    border-radius: var(--sh-radius);
+    box-shadow: var(--sh-shadow-xs);
+    border: 1px solid var(--sh-border);
+    overflow: hidden;
+    transition: box-shadow .15s;
+}
+.sh-card:hover { box-shadow: var(--sh-shadow-sm); }
+.sh-card-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--sh-border);
+    background: linear-gradient(180deg, #fafbfc, #f8fafc);
+}
+.sh-card-header h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sh-text);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+.sh-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+}
+.sh-card-body { padding: 16px 18px; }
+
+/* System Info Card */
+.sh-sys-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.sh-sys-info-row:last-child { border-bottom: none; }
+.sh-sys-info-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sh-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+.sh-sys-info-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+.sh-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.sh-status-pill.active    { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.sh-status-pill.inactive  { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+.sh-status-pill.issue     { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.sh-status-pill.used      { background: #e8f0fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.sh-status-pill.removed   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.sh-status-pill.blocked   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.sh-status-pill-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+}
+.sh-status-pill.active .sh-status-pill-dot    { background: #10b981; }
+.sh-status-pill.inactive .sh-status-pill-dot  { background: #9ca3af; }
+.sh-status-pill.issue .sh-status-pill-dot     { background: #f59e0b; }
+.sh-status-pill.used .sh-status-pill-dot      { background: #0B5FFF; }
+.sh-status-pill.removed .sh-status-pill-dot   { background: #ef4444; }
+.sh-status-pill.blocked .sh-status-pill-dot   { background: #ef4444; }
+
+/* Health bar */
+.sh-health-bar-wrap {
+    margin-top: 10px;
+    padding: 12px 0 0;
+    border-top: 1px solid #f1f5f9;
+}
+.sh-health-label-row {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.sh-health-label { font-size: 11px; font-weight: 600; color: var(--sh-text-muted); text-transform: uppercase; letter-spacing: .3px; }
+.sh-health-value { font-size: 12px; font-weight: 700; }
+.sh-health-bar {
+    height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden;
+}
+.sh-health-fill {
+    height: 100%; border-radius: 3px; transition: width .6s ease;
+}
+.sh-health-fill.excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+.sh-health-fill.good      { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.sh-health-fill.warning   { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.sh-health-fill.critical  { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+/* Filter card */
+.sh-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.sh-filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--sh-radius-sm);
+    cursor: pointer;
+    transition: all .12s;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sh-text-secondary);
+    border: 1px solid transparent;
+}
+.sh-filter-item:hover { background: var(--sh-bg); }
+.sh-filter-item.active {
+    background: rgba(59,130,246,.06);
+    border-color: rgba(59,130,246,.15);
+    color: var(--sh-primary-light);
+    font-weight: 600;
+}
+.sh-filter-item .sh-filter-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.sh-filter-item .sh-filter-label { flex: 1; }
+.sh-filter-count {
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 22px;
     text-align: center;
-    padding: 80px 40px;
+    padding: 1px 6px;
+    background: var(--sh-bg);
+    border-radius: 10px;
+    color: var(--sh-text-muted);
+}
+.sh-filter-item.active .sh-filter-count {
+    background: rgba(59,130,246,.1);
+    color: var(--sh-primary-light);
 }
 
-.ent-empty-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+/* Status breakdown chart (mini) */
+.sh-mini-chart {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+.sh-mini-chart-bar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    gap: 2px;
+}
+.sh-mini-chart-seg {
+    height: 100%;
+    border-radius: 4px;
+    min-width: 4px;
+    transition: width .6s ease;
+}
+.sh-mini-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--sh-text-muted);
+    font-weight: 500;
+}
+.sh-mini-chart-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.sh-mini-chart-legend .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+}
+
+/* ===== MAIN CONTENT ===== */
+.sh-main { min-width: 0; }
+
+/* Toolbar */
+.sh-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--sh-surface);
+    border-radius: var(--sh-radius);
+    box-shadow: var(--sh-shadow-xs);
+    border: 1px solid var(--sh-border);
+    margin-bottom: 16px;
+}
+.sh-search {
+    position: relative;
+    min-width: 220px;
+    flex: 1;
+}
+.sh-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sh-text-muted);
+    font-size: 13px;
+    pointer-events: none;
+}
+.sh-search input {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border: 1.5px solid var(--sh-border);
+    border-radius: var(--sh-radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--sh-text);
+    background: var(--sh-bg);
+    transition: all .15s;
+}
+.sh-search input:focus {
+    outline: none;
+    border-color: var(--sh-primary-light);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+    background: #fff;
+}
+.sh-search input::placeholder { color: var(--sh-text-muted); }
+.sh-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.sh-toolbar-btn {
+    padding: 8px 14px;
+    border-radius: var(--sh-radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--sh-border);
+    background: var(--sh-surface);
+    color: var(--sh-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .15s;
+    font-family: inherit;
+}
+.sh-toolbar-btn:hover { border-color: #cbd5e1; background: var(--sh-bg); }
+.sh-toolbar-btn.active { border-color: var(--sh-primary-light); color: var(--sh-primary-light); background: rgba(59,130,246,.04); }
+.sh-sort-select {
+    padding: 8px 12px;
+    border: 1.5px solid var(--sh-border);
+    border-radius: var(--sh-radius-sm);
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--sh-text-secondary);
+    background: var(--sh-surface);
+    cursor: pointer;
+    font-weight: 600;
+}
+.sh-sort-select:focus { outline: none; border-color: var(--sh-primary-light); }
+.sh-results-count {
+    font-size: 12px;
+    color: var(--sh-text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ===== TIMELINE ===== */
+.sh-timeline { display: flex; flex-direction: column; gap: 0; }
+
+.sh-timeline-entry {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    padding-bottom: 0;
+    animation: shSlideUp .35s ease-out both;
+}
+.sh-timeline-entry:nth-child(1) { animation-delay: .05s; }
+.sh-timeline-entry:nth-child(2) { animation-delay: .1s; }
+.sh-timeline-entry:nth-child(3) { animation-delay: .15s; }
+.sh-timeline-entry:nth-child(4) { animation-delay: .2s; }
+.sh-timeline-entry:nth-child(5) { animation-delay: .25s; }
+
+/* Timeline spine */
+.sh-timeline-spine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 48px;
+}
+.sh-timeline-dot {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 24px auto;
-}
-
-.ent-empty-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 8px;
-}
-
-.ent-empty-text {
     font-size: 14px;
-    color: #718096;
+    flex-shrink: 0;
+    z-index: 2;
+    color: #fff;
+    box-shadow: var(--sh-shadow-sm);
 }
+.sh-timeline-dot.active   { background: linear-gradient(135deg, #10b981, #059669); }
+.sh-timeline-dot.inactive { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.sh-timeline-dot.issue    { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.sh-timeline-dot.used     { background: linear-gradient(135deg, #0B5FFF, #0044CC); }
+.sh-timeline-dot.removed  { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.sh-timeline-dot.blocked  { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.sh-timeline-line {
+    width: 2px;
+    flex: 1;
+    min-height: 20px;
+    background: linear-gradient(180deg, var(--sh-border), transparent);
+}
+.sh-timeline-entry:last-child .sh-timeline-line { display: none; }
 
-.ent-back-section {
-    padding: 24px 32px;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border-top: 1px solid #e2e8f0;
+/* Timeline card */
+.sh-timeline-card {
+    flex: 1;
+    background: var(--sh-surface);
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius);
+    overflow: hidden;
+    transition: all .18s ease;
+    margin-bottom: 14px;
+    min-width: 0;
+}
+.sh-timeline-card:hover {
+    box-shadow: var(--sh-shadow);
+    border-color: #cbd5e1;
+}
+.sh-timeline-card-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 16px 20px 12px;
+    gap: 12px;
 }
-
-.ent-back-btn {
-    display: inline-flex;
+.sh-timeline-card-top-left {
+    display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-    color: white;
-    text-decoration: none;
-    border-radius: 12px;
-    font-size: 14px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+.sh-timeline-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    white-space: nowrap;
+}
+.sh-timeline-status.active   { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.sh-timeline-status.inactive { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+.sh-timeline-status.issue    { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.sh-timeline-status.used     { background: #e8f0fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.sh-timeline-status.removed  { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.sh-timeline-status.blocked  { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.sh-timeline-id {
+    font-size: 11px;
+    color: var(--sh-text-muted);
     font-weight: 600;
-    transition: all 0.3s ease;
+    font-family: 'Courier New', monospace;
+}
+.sh-timeline-date-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+.sh-timeline-date-main {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--sh-text);
+}
+.sh-timeline-date-time {
+    font-size: 11px;
+    color: var(--sh-text-muted);
+    font-weight: 500;
+}
+.sh-timeline-date-ago {
+    font-size: 10px;
+    color: var(--sh-primary-light);
+    font-weight: 600;
+    margin-top: 1px;
 }
 
-.ent-back-btn:hover {
-    transform: translateX(-4px);
-    box-shadow: 0 4px 16px rgba(26, 54, 93, 0.3);
-    color: white;
-    text-decoration: none;
+/* Card body grid */
+.sh-timeline-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: #f1f5f9;
+    border-top: 1px solid var(--sh-border);
 }
-
-.ent-page-info {
+.sh-detail-cell {
+    background: var(--sh-surface);
+    padding: 12px 20px;
+}
+.sh-detail-cell-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--sh-text-muted);
+    margin-bottom: 3px;
+}
+.sh-detail-cell-value {
     font-size: 13px;
-    color: #718096;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+.sh-detail-cell-value.empty { color: var(--sh-text-muted); font-style: italic; font-weight: 400; }
+
+/* Description row */
+.sh-timeline-desc-row {
+    padding: 12px 20px;
+    background: #fafbfc;
+    border-top: 1px solid var(--sh-border);
+}
+.sh-timeline-desc-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--sh-text-muted);
+    margin-bottom: 4px;
+}
+.sh-timeline-desc-text {
+    font-size: 13px;
+    color: var(--sh-text-secondary);
+    line-height: 1.6;
+    white-space: pre-line;
 }
 
+/* Transition indicator */
+.sh-transition-arrow {
+    padding: 0 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--sh-text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.sh-transition-arrow i { font-size: 9px; }
+
+/* ===== EMPTY STATE ===== */
+.sh-empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    background: var(--sh-surface);
+    border-radius: var(--sh-radius);
+    border: 1px solid var(--sh-border);
+}
+.sh-empty-state i { font-size: 40px; color: var(--sh-border); display: block; margin-bottom: 12px; }
+.sh-empty-state h3 { font-size: 18px; font-weight: 700; color: var(--sh-text); margin: 0 0 6px; }
+.sh-empty-state p { font-size: 13px; color: var(--sh-text-muted); margin: 0; }
+
+/* ===== PAGINATION / FOOTER ===== */
+.sh-footer-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--sh-surface);
+    border-radius: var(--sh-radius);
+    border: 1px solid var(--sh-border);
+    margin-top: 16px;
+    box-shadow: var(--sh-shadow-xs);
+}
+.sh-footer-info {
+    font-size: 12px;
+    color: var(--sh-text-muted);
+    font-weight: 500;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px) {
+    .sh-layout { grid-template-columns: 1fr; }
+    .sh-sidebar { position: static; flex-direction: row; flex-wrap: wrap; }
+    .sh-sidebar > .sh-card { flex: 1; min-width: 250px; }
+    .sh-kpi-strip { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 768px) {
-    .ent-history-container {
-        margin: 70px 12px 24px 12px;
-        padding: 0;
-    }
-    
-    .ent-history-header {
-        padding: 24px;
-    }
-    
-    .ent-history-title {
-        font-size: 20px;
-    }
-    
-    .ent-history-stats {
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-    
-    .ent-stat-item {
-        flex: 1;
-        min-width: 100px;
-    }
-    
-    .ent-history-toolbar {
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px;
-    }
-    
-    .ent-toolbar-left, .ent-toolbar-right {
-        width: 100%;
-    }
-    
-    .ent-timeline {
-        padding: 20px;
-    }
-    
-    .ent-timeline-item {
-        gap: 16px;
-    }
-    
-    .ent-timeline-marker {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .ent-timeline-body {
-        grid-template-columns: 1fr;
-    }
-    
-    .ent-timeline-header {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .ent-timeline-date {
-        align-items: flex-start;
-    }
+    .sh-page { padding: 72px 10px 16px; }
+    .sh-header { padding: 20px 18px 16px; border-radius: 10px; }
+    .sh-header-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .sh-header-info h1 { font-size: 20px; }
+    .sh-kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .sh-kpi-card { padding: 14px 16px; gap: 10px; }
+    .sh-kpi-value { font-size: 18px; }
+    .sh-toolbar { flex-direction: column; align-items: stretch; padding: 10px 12px; gap: 8px; }
+    .sh-search { min-width: 100%; }
+    .sh-toolbar-right { margin-left: 0; }
+    .sh-timeline-entry { gap: 12px; }
+    .sh-timeline-spine { width: 36px; }
+    .sh-timeline-dot { width: 32px; height: 32px; font-size: 12px; }
+    .sh-timeline-details { grid-template-columns: 1fr 1fr; }
+    .sh-timeline-card-top { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; }
+    .sh-timeline-date-block { align-items: flex-start; }
+    .sh-sidebar { flex-direction: column; }
+    .sh-sidebar > .sh-card { min-width: 100%; }
+    .sh-breadcrumb { display: none; }
+    .sh-header-actions { gap: 6px; }
+    .sh-btn { padding: 6px 10px; font-size: 12px; }
+}
+@media (max-width: 480px) {
+    .sh-page { padding: 64px 6px 12px; }
+    .sh-kpi-strip { grid-template-columns: 1fr; gap: 6px; }
+    .sh-timeline-details { grid-template-columns: 1fr; }
+    .sh-header { padding: 16px 14px 14px; }
+    .sh-header-info h1 { font-size: 17px; }
 }
 </style>
 
-<div class="ent-history-container">
+<div class="sh-page">
+    <!-- Breadcrumb -->
+    <nav class="sh-breadcrumb">
+        <a href="{% url 'manage_streams' %}"><i class="fas fa-home"></i></a>
+        <span class="sh-sep"><i class="fas fa-chevron-right"></i></span>
+        <a href="{% url 'dashboard_stream' stream=stream %}">{{ stream }}</a>
+        <span class="sh-sep"><i class="fas fa-chevron-right"></i></span>
+        <a href="{{ BU_URL_PREFIX }}/stream/{{ stream }}/system-allocation/">System Allocation</a>
+        <span class="sh-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="sh-current">{{ system.name }} — Status History</span>
+    </nav>
+
     <!-- Header -->
-    <div class="ent-history-header">
-        <div class="ent-history-title">
-            <div class="ent-history-title-icon">📋</div>
-            <span>Status History</span>
-        </div>
-        <p class="ent-history-subtitle">Complete audit trail of system status changes and updates</p>
-        
-        <div class="ent-system-badge">
-            <span class="ent-system-badge-dot"></span>
-            <span>{{ system.name }}</span>
-        </div>
-        
-        <div class="ent-history-stats">
-            <div class="ent-stat-item">
-                <div class="ent-stat-value">{{ history|length }}</div>
-                <div class="ent-stat-label">Total Changes</div>
+    <div class="sh-header">
+        <div class="sh-header-top">
+            <div class="sh-header-info">
+                <h1>
+                    <i class="fas fa-history" style="font-size:22px;opacity:.7"></i>
+                    System Status History
+                </h1>
+                <p>Complete audit trail &amp; change log for <strong>{{ system.name }}</strong></p>
             </div>
-            <div class="ent-stat-item">
-                <div class="ent-stat-value">{% if history %}{{ history.0.updated_at|date:'M Y' }}{% else %}N/A{% endif %}</div>
-                <div class="ent-stat-label">Latest Update</div>
+        </div>
+        <div class="sh-header-badges">
+            <div class="sh-badge">
+                <span class="sh-badge-dot {% if system.status == 'Active' %}green{% elif system.status == 'Issue' %}amber{% elif system.status == 'Used' %}purple{% elif system.status == 'Not Active' %}gray{% else %}red{% endif %}"></span>
+                {{ system.get_status_display }}
             </div>
-            <div class="ent-stat-item">
-                <div class="ent-stat-value">{{ system.get_status_display }}</div>
-                <div class="ent-stat-label">Current Status</div>
+            <div class="sh-badge">
+                <i class="fas fa-server" style="font-size:11px;opacity:.7"></i>
+                {{ system.name }}
+            </div>
+            <div class="sh-badge">
+                <i class="fas fa-stream" style="font-size:11px;opacity:.7"></i>
+                {{ stream }} Stream
+            </div>
+            {% if system.health %}
+            <div class="sh-badge">
+                <i class="fas fa-heartbeat" style="font-size:11px;opacity:.7"></i>
+                {{ system.get_health_display }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="sh-header-actions">
+            <a href="{{ BU_URL_PREFIX }}/stream/{{ stream }}/system-allocation/" class="sh-btn sh-btn-glass">
+                <i class="fas fa-arrow-left"></i> Back to Allocation
+            </a>
+            <button class="sh-btn sh-btn-glass" onclick="exportHistoryCSV()">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button class="sh-btn sh-btn-glass" onclick="printHistory()">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button class="sh-btn sh-btn-glass" onclick="copyHistorySummary()">
+                <i class="fas fa-copy"></i> Copy Summary
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="sh-kpi-strip">
+        <div class="sh-kpi-card sh-kpi-total">
+            <div class="sh-kpi-icon"><i class="fas fa-list-ol"></i></div>
+            <div class="sh-kpi-data">
+                <div class="sh-kpi-value">{{ history|length }}</div>
+                <div class="sh-kpi-label">Total Changes</div>
+            </div>
+        </div>
+        <div class="sh-kpi-card sh-kpi-active">
+            <div class="sh-kpi-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="sh-kpi-data">
+                <div class="sh-kpi-value">{{ system.get_status_display }}</div>
+                <div class="sh-kpi-label">Current Status</div>
+            </div>
+        </div>
+        <div class="sh-kpi-card sh-kpi-changes">
+            <div class="sh-kpi-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="sh-kpi-data">
+                <div class="sh-kpi-value" id="uniqueStatusCount">—</div>
+                <div class="sh-kpi-label">Unique Statuses</div>
+            </div>
+        </div>
+        <div class="sh-kpi-card sh-kpi-latest">
+            <div class="sh-kpi-icon"><i class="fas fa-clock"></i></div>
+            <div class="sh-kpi-data">
+                <div class="sh-kpi-value" style="font-size:16px;">{% if history %}{{ history.0.updated_at|date:'d M Y' }}{% else %}N/A{% endif %}</div>
+                <div class="sh-kpi-label">Latest Change</div>
+            </div>
+        </div>
+        <div class="sh-kpi-card sh-kpi-health">
+            <div class="sh-kpi-icon"><i class="fas fa-heartbeat"></i></div>
+            <div class="sh-kpi-data">
+                <div class="sh-kpi-value" style="font-size:16px;">{{ system.get_health_display|default:"N/A" }}</div>
+                <div class="sh-kpi-label">System Health</div>
             </div>
         </div>
     </div>
-    
-    <!-- Body -->
-    <div class="ent-history-body">
-        <!-- Toolbar -->
-        <div class="ent-history-toolbar">
-            <div class="ent-toolbar-left">
-                <div class="ent-search-box">
-                    <span>🔍</span>
-                    <input type="text" class="ent-search-input" placeholder="Search history..." id="historySearch" onkeyup="filterHistory()">
+
+    <!-- Layout: Sidebar + Main -->
+    <div class="sh-layout">
+        <!-- Sidebar -->
+        <div class="sh-sidebar">
+            <!-- System Details Card -->
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div class="sh-card-icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-server"></i></div>
+                    <h3>System Details</h3>
                 </div>
-                <button class="ent-filter-btn" onclick="toggleFilter()">
-                    <span>⚡</span>
-                    <span>Filter</span>
-                </button>
-            </div>
-            <div class="ent-toolbar-right">
-                <button class="ent-export-btn" onclick="exportHistory()">
-                    <span>📥</span>
-                    <span>Export</span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Timeline -->
-        <div class="ent-timeline" id="historyTimeline">
-            {% for h in history %}
-            <div class="ent-timeline-item" data-status="{{ h.status|lower }}" data-description="{{ h.description|lower }}" data-assignee="{{ h.assignee|lower }}">
-                <div class="ent-timeline-marker {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
-                    {% if h.status == 'Active' %}✓{% elif h.status == 'Not Active' %}○{% elif h.status == 'Issue' %}⚠{% elif h.status == 'Used' %}👥{% elif h.status == 'Removed' %}🗑{% elif h.status == 'Blocked' %}🚫{% else %}○{% endif %}
-                </div>
-                <div class="ent-timeline-content">
-                    <div class="ent-timeline-header">
-                        <span class="ent-timeline-status {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
-                            {{ h.get_status_display }}
+                <div class="sh-card-body">
+                    <div class="sh-sys-info-row">
+                        <span class="sh-sys-info-label">System</span>
+                        <span class="sh-sys-info-value">{{ system.name }}</span>
+                    </div>
+                    <div class="sh-sys-info-row">
+                        <span class="sh-sys-info-label">Stream</span>
+                        <span class="sh-sys-info-value">{{ stream }}</span>
+                    </div>
+                    <div class="sh-sys-info-row">
+                        <span class="sh-sys-info-label">Status</span>
+                        <span class="sh-status-pill {% if system.status == 'Active' %}active{% elif system.status == 'Not Active' %}inactive{% elif system.status == 'Issue' %}issue{% elif system.status == 'Used' %}used{% elif system.status == 'Removed' %}removed{% elif system.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
+                            <span class="sh-status-pill-dot"></span>
+                            {{ system.get_status_display }}
                         </span>
-                        <div class="ent-timeline-date">
-                            <span class="ent-timeline-date-main">{{ h.updated_at|date:'d M Y' }}</span>
-                            <span class="ent-timeline-date-time">{{ h.updated_at|time:'H:i' }}</span>
+                    </div>
+                    <div class="sh-sys-info-row">
+                        <span class="sh-sys-info-label">System ID</span>
+                        <span class="sh-sys-info-value" style="font-family:'Courier New',monospace;font-size:12px;">#{{ system.id }}</span>
+                    </div>
+                    <div class="sh-sys-info-row">
+                        <span class="sh-sys-info-label">Created</span>
+                        <span class="sh-sys-info-value" style="font-size:12px;">{{ system.created_at|date:'d M Y' }}</span>
+                    </div>
+                    {% if system.utilization_percentage is not None %}
+                    <div class="sh-health-bar-wrap">
+                        <div class="sh-health-label-row">
+                            <span class="sh-health-label">Utilization</span>
+                            <span class="sh-health-value" style="color:{% if system.utilization_percentage < 50 %}#059669{% elif system.utilization_percentage < 80 %}#d97706{% else %}#dc2626{% endif %}">{{ system.utilization_percentage|floatformat:0 }}%</span>
+                        </div>
+                        <div class="sh-health-bar">
+                            <div class="sh-health-fill {% if system.utilization_percentage < 50 %}excellent{% elif system.utilization_percentage < 80 %}warning{% else %}critical{% endif %}" style="width:{{ system.utilization_percentage|floatformat:0 }}%"></div>
                         </div>
                     </div>
-                    <div class="ent-timeline-body">
-                        <div class="ent-timeline-field">
-                            <div class="ent-timeline-field-label">Assignee</div>
-                            <div class="ent-timeline-field-value">{{ h.assignee|default:"Not Assigned" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Filter by Status -->
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div class="sh-card-icon" style="background:rgba(139,92,246,.1);color:#0044CC"><i class="fas fa-filter"></i></div>
+                    <h3>Filter by Status</h3>
+                </div>
+                <div class="sh-card-body">
+                    <div class="sh-filter-list" id="filterList">
+                        <div class="sh-filter-item active" data-filter="all" onclick="filterByStatus('all', this)">
+                            <span class="sh-filter-dot" style="background:#64748b"></span>
+                            <span class="sh-filter-label">All Changes</span>
+                            <span class="sh-filter-count" id="countAll">{{ history|length }}</span>
                         </div>
-                        <div class="ent-timeline-field">
-                            <div class="ent-timeline-field-label">Changed By</div>
-                            <div class="ent-timeline-field-value">{{ h.updated_by|default:"System" }}</div>
+                        <div class="sh-filter-item" data-filter="Active" onclick="filterByStatus('Active', this)">
+                            <span class="sh-filter-dot" style="background:#10b981"></span>
+                            <span class="sh-filter-label">Active</span>
+                            <span class="sh-filter-count" id="countActive">0</span>
                         </div>
-                        <div class="ent-timeline-field">
-                            <div class="ent-timeline-field-label">Record ID</div>
-                            <div class="ent-timeline-field-value">#{{ h.id }}</div>
+                        <div class="sh-filter-item" data-filter="Not Active" onclick="filterByStatus('Not Active', this)">
+                            <span class="sh-filter-dot" style="background:#94a3b8"></span>
+                            <span class="sh-filter-label">Not Active</span>
+                            <span class="sh-filter-count" id="countInactive">0</span>
+                        </div>
+                        <div class="sh-filter-item" data-filter="Issue" onclick="filterByStatus('Issue', this)">
+                            <span class="sh-filter-dot" style="background:#f59e0b"></span>
+                            <span class="sh-filter-label">Issue</span>
+                            <span class="sh-filter-count" id="countIssue">0</span>
+                        </div>
+                        <div class="sh-filter-item" data-filter="Used" onclick="filterByStatus('Used', this)">
+                            <span class="sh-filter-dot" style="background:#0B5FFF"></span>
+                            <span class="sh-filter-label">Used</span>
+                            <span class="sh-filter-count" id="countUsed">0</span>
+                        </div>
+                        <div class="sh-filter-item" data-filter="Removed" onclick="filterByStatus('Removed', this)">
+                            <span class="sh-filter-dot" style="background:#ef4444"></span>
+                            <span class="sh-filter-label">Removed</span>
+                            <span class="sh-filter-count" id="countRemoved">0</span>
+                        </div>
+                    </div>
+                    <div class="sh-mini-chart" id="statusChart"></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sh-card">
+                <div class="sh-card-header">
+                    <div class="sh-card-icon" style="background:rgba(6,182,212,.1);color:#0891b2"><i class="fas fa-bolt"></i></div>
+                    <h3>Quick Actions</h3>
+                </div>
+                <div class="sh-card-body" style="display:flex;flex-direction:column;gap:8px;">
+                    <a href="{{ BU_URL_PREFIX }}/stream/{{ stream }}/system-allocation/" class="sh-toolbar-btn" style="justify-content:center;text-decoration:none;width:100%">
+                        <i class="fas fa-arrow-left"></i> System Allocation
+                    </a>
+                    <button class="sh-toolbar-btn" style="justify-content:center;width:100%" onclick="scrollToLatest()">
+                        <i class="fas fa-arrow-up"></i> Jump to Latest
+                    </button>
+                    <button class="sh-toolbar-btn" style="justify-content:center;width:100%" onclick="expandAllEntries()">
+                        <i class="fas fa-expand-alt"></i> Expand All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="sh-main">
+            <!-- Toolbar -->
+            <div class="sh-toolbar">
+                <div class="sh-search">
+                    <i class="fas fa-search sh-search-icon"></i>
+                    <input type="text" id="historySearch" placeholder="Search by status, assignee, description..." onkeyup="searchHistory()">
+                </div>
+                <div class="sh-toolbar-right">
+                    <select class="sh-sort-select" id="sortSelect" onchange="sortHistory()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                    <button class="sh-toolbar-btn" id="compactToggle" onclick="toggleCompactView()">
+                        <i class="fas fa-compress-alt"></i> Compact
+                    </button>
+                    <span class="sh-results-count"><span id="visibleCount">{{ history|length }}</span> of {{ history|length }} records</span>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="sh-timeline" id="historyTimeline">
+                {% for h in history %}
+                <div class="sh-timeline-entry"
+                     data-status="{{ h.status }}"
+                     data-description="{{ h.description|lower }}"
+                     data-assignee="{{ h.assignee|lower|default:'' }}"
+                     data-updated-by="{{ h.updated_by|lower|default:'' }}"
+                     data-date="{{ h.updated_at|date:'Y-m-d H:i' }}"
+                     data-timestamp="{{ h.updated_at|date:'U' }}">
+                    <!-- Spine -->
+                    <div class="sh-timeline-spine">
+                        <div class="sh-timeline-dot {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
+                            {% if h.status == 'Active' %}<i class="fas fa-check"></i>{% elif h.status == 'Not Active' %}<i class="fas fa-minus"></i>{% elif h.status == 'Issue' %}<i class="fas fa-exclamation"></i>{% elif h.status == 'Used' %}<i class="fas fa-users"></i>{% elif h.status == 'Removed' %}<i class="fas fa-trash"></i>{% elif h.status == 'Blocked' %}<i class="fas fa-ban"></i>{% else %}<i class="fas fa-circle"></i>{% endif %}
+                        </div>
+                        <div class="sh-timeline-line"></div>
+                    </div>
+                    <!-- Card -->
+                    <div class="sh-timeline-card">
+                        <div class="sh-timeline-card-top">
+                            <div class="sh-timeline-card-top-left">
+                                <span class="sh-timeline-status {% if h.status == 'Active' %}active{% elif h.status == 'Not Active' %}inactive{% elif h.status == 'Issue' %}issue{% elif h.status == 'Used' %}used{% elif h.status == 'Removed' %}removed{% elif h.status == 'Blocked' %}blocked{% else %}inactive{% endif %}">
+                                    {{ h.get_status_display }}
+                                </span>
+                                <span class="sh-timeline-id">#{{ h.id }}</span>
+                            </div>
+                            <div class="sh-timeline-date-block">
+                                <span class="sh-timeline-date-main">{{ h.updated_at|date:'d M Y' }}</span>
+                                <span class="sh-timeline-date-time">{{ h.updated_at|time:'H:i:s' }}</span>
+                                <span class="sh-timeline-date-ago" data-ts="{{ h.updated_at|date:'U' }}"></span>
+                            </div>
+                        </div>
+                        <div class="sh-timeline-details">
+                            <div class="sh-detail-cell">
+                                <div class="sh-detail-cell-label">Assignee</div>
+                                <div class="sh-detail-cell-value {% if not h.assignee %}empty{% endif %}">
+                                    {% if h.assignee %}<i class="fas fa-user-circle" style="color:var(--sh-primary-light);margin-right:4px;font-size:12px"></i>{{ h.assignee }}{% else %}Not Assigned{% endif %}
+                                </div>
+                            </div>
+                            <div class="sh-detail-cell">
+                                <div class="sh-detail-cell-label">Changed By</div>
+                                <div class="sh-detail-cell-value {% if not h.updated_by %}empty{% endif %}">
+                                    {% if h.updated_by %}<i class="fas fa-user-edit" style="color:var(--sh-accent);margin-right:4px;font-size:12px"></i>{{ h.updated_by }}{% else %}System{% endif %}
+                                </div>
+                            </div>
+                            <div class="sh-detail-cell">
+                                <div class="sh-detail-cell-label">Record ID</div>
+                                <div class="sh-detail-cell-value" style="font-family:'Courier New',monospace;">#{{ h.id }}</div>
+                            </div>
+                            <div class="sh-detail-cell">
+                                <div class="sh-detail-cell-label">Timestamp</div>
+                                <div class="sh-detail-cell-value" style="font-size:12px">{{ h.updated_at|date:'d/m/Y H:i:s' }}</div>
+                            </div>
                         </div>
                         {% if h.description %}
-                        <div class="ent-timeline-description">
-                            <div class="ent-timeline-description-label">Description</div>
-                            <div class="ent-timeline-description-text">{{ h.description }}</div>
+                        <div class="sh-timeline-desc-row">
+                            <div class="sh-timeline-desc-label"><i class="fas fa-align-left" style="margin-right:4px;font-size:10px"></i> Description</div>
+                            <div class="sh-timeline-desc-text">{{ h.description }}</div>
                         </div>
                         {% endif %}
                     </div>
                 </div>
+                {% empty %}
+                <div class="sh-empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No History Records</h3>
+                    <p>This system doesn't have any status change records yet.</p>
+                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="ent-empty-state">
-                <div class="ent-empty-icon">📭</div>
-                <div class="ent-empty-title">No History Found</div>
-                <div class="ent-empty-text">This system doesn't have any status change records yet.</div>
+
+            <!-- Footer Bar -->
+            <div class="sh-footer-bar">
+                <a href="{{ BU_URL_PREFIX }}/stream/{{ stream }}/system-allocation/" class="sh-btn sh-btn-solid" style="gap:8px;">
+                    <i class="fas fa-arrow-left"></i> Back to System Allocation
+                </a>
+                <span class="sh-footer-info">
+                    Displaying {{ history|length }} record{{ history|length|pluralize }} for <strong>{{ system.name }}</strong>
+                </span>
             </div>
-            {% endfor %}
-        </div>
-        
-        <!-- Back Section -->
-        <div class="ent-back-section">
-            <a href="/stream/{{ stream|default:'' }}/system-allocation/" class="ent-back-btn">
-                <span>←</span>
-                <span>Back to System Allocation</span>
-            </a>
-            <span class="ent-page-info">Showing {{ history|length }} record{% if history|length != 1 %}s{% endif %}</span>
         </div>
     </div>
 </div>
 
 <script>
-function filterHistory() {
-    const searchText = document.getElementById('historySearch').value.toLowerCase();
-    const items = document.querySelectorAll('.ent-timeline-item');
-    
-    items.forEach(item => {
-        const status = item.dataset.status || '';
-        const description = item.dataset.description || '';
-        const assignee = item.dataset.assignee || '';
-        const content = item.textContent.toLowerCase();
-        
-        if (content.includes(searchText) || status.includes(searchText) || 
-            description.includes(searchText) || assignee.includes(searchText)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
+(function() {
+    'use strict';
+
+    // ── Status counts ──
+    const entries = document.querySelectorAll('.sh-timeline-entry');
+    const counts = {};
+    entries.forEach(e => {
+        const s = e.dataset.status;
+        counts[s] = (counts[s] || 0) + 1;
+    });
+    const statusMap = {
+        'Active':     'countActive',
+        'Not Active': 'countInactive',
+        'Issue':      'countIssue',
+        'Used':       'countUsed',
+        'Removed':    'countRemoved'
+    };
+    Object.keys(statusMap).forEach(k => {
+        const el = document.getElementById(statusMap[k]);
+        if (el) el.textContent = counts[k] || 0;
+    });
+    const uniq = document.getElementById('uniqueStatusCount');
+    if (uniq) uniq.textContent = Object.keys(counts).length;
+
+    // ── Build mini chart ──
+    const chartEl = document.getElementById('statusChart');
+    if (chartEl && entries.length > 0) {
+        const total = entries.length;
+        const colors = { 'Active':'#10b981','Not Active':'#94a3b8','Issue':'#f59e0b','Used':'#0B5FFF','Removed':'#ef4444','Blocked':'#ef4444' };
+        let barHtml = '<div class="sh-mini-chart-bar">';
+        let legendHtml = '<div class="sh-mini-chart-legend">';
+        Object.keys(counts).forEach(k => {
+            const pct = ((counts[k] / total) * 100).toFixed(1);
+            const col = colors[k] || '#64748b';
+            barHtml += `<div class="sh-mini-chart-seg" style="width:${pct}%;background:${col}"></div>`;
+            legendHtml += `<span><span class="dot" style="background:${col}"></span>${k} (${counts[k]})</span>`;
+        });
+        barHtml += '</div>';
+        legendHtml += '</div>';
+        chartEl.innerHTML = barHtml + legendHtml;
+    }
+
+    // ── Relative time ──
+    document.querySelectorAll('[data-ts]').forEach(el => {
+        const ts = parseInt(el.dataset.ts);
+        if (!ts || isNaN(ts)) return;
+        const diff = Math.floor((Date.now() / 1000) - ts);
+        let text;
+        if (diff < 60) text = 'just now';
+        else if (diff < 3600) text = Math.floor(diff/60) + 'm ago';
+        else if (diff < 86400) text = Math.floor(diff/3600) + 'h ago';
+        else if (diff < 604800) text = Math.floor(diff/86400) + 'd ago';
+        else if (diff < 2592000) text = Math.floor(diff/604800) + 'w ago';
+        else if (diff < 31536000) text = Math.floor(diff/2592000) + 'mo ago';
+        else text = Math.floor(diff/31536000) + 'y ago';
+        el.textContent = text;
+    });
+})();
+
+// ── Search ──
+function searchHistory() {
+    const q = document.getElementById('historySearch').value.toLowerCase().trim();
+    let visible = 0;
+    document.querySelectorAll('.sh-timeline-entry').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const show = !q || text.includes(q);
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('visibleCount').textContent = visible;
+}
+
+// ── Filter ──
+let currentFilter = 'all';
+function filterByStatus(status, elem) {
+    currentFilter = status;
+    document.querySelectorAll('.sh-filter-item').forEach(f => f.classList.remove('active'));
+    if (elem) elem.classList.add('active');
+    let visible = 0;
+    document.querySelectorAll('.sh-timeline-entry').forEach(item => {
+        const show = status === 'all' || item.dataset.status === status;
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('visibleCount').textContent = visible;
+    // Clear search
+    document.getElementById('historySearch').value = '';
+}
+
+// ── Sort ──
+function sortHistory() {
+    const direction = document.getElementById('sortSelect').value;
+    const timeline = document.getElementById('historyTimeline');
+    const items = Array.from(timeline.querySelectorAll('.sh-timeline-entry'));
+    items.sort((a, b) => {
+        const tsA = parseInt(a.dataset.timestamp) || 0;
+        const tsB = parseInt(b.dataset.timestamp) || 0;
+        return direction === 'newest' ? tsB - tsA : tsA - tsB;
+    });
+    items.forEach(item => timeline.appendChild(item));
+}
+
+// ── Compact view ──
+let compactMode = false;
+function toggleCompactView() {
+    compactMode = !compactMode;
+    const btn = document.getElementById('compactToggle');
+    btn.classList.toggle('active', compactMode);
+    document.querySelectorAll('.sh-timeline-details').forEach(d => {
+        d.style.display = compactMode ? 'none' : '';
+    });
+    document.querySelectorAll('.sh-timeline-desc-row').forEach(d => {
+        d.style.display = compactMode ? 'none' : '';
     });
 }
 
-function toggleFilter() {
-    // Could implement filter dropdown here
-    alert('Filter options: Active, Not Active, Issue, Used, Removed');
+// ── Expand all ──
+function expandAllEntries() {
+    // Exit compact mode if active
+    if (compactMode) toggleCompactView();
+    // Show all entries (reset filter + search)
+    document.querySelectorAll('.sh-timeline-entry').forEach(item => {
+        item.style.display = '';
+    });
+    document.querySelectorAll('.sh-timeline-details').forEach(d => {
+        d.style.display = '';
+    });
+    document.querySelectorAll('.sh-timeline-desc-row').forEach(d => {
+        d.style.display = '';
+    });
+    // Reset filter sidebar
+    currentFilter = 'all';
+    document.querySelectorAll('.sh-filter-item').forEach(f => f.classList.remove('active'));
+    const allBtn = document.querySelector('.sh-filter-item[data-filter="all"]');
+    if (allBtn) allBtn.classList.add('active');
+    // Reset search
+    document.getElementById('historySearch').value = '';
+    // Update count
+    const total = document.querySelectorAll('.sh-timeline-entry').length;
+    document.getElementById('visibleCount').textContent = total;
 }
 
-function exportHistory() {
-    // Simple CSV export
-    const items = document.querySelectorAll('.ent-timeline-item');
-    let csv = 'Date,Status,Assignee,Changed By,Description\n';
-    
+// ── Scroll to latest ──
+function scrollToLatest() {
+    const first = document.querySelector('.sh-timeline-entry');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Export CSV ──
+function exportHistoryCSV() {
+    const items = document.querySelectorAll('.sh-timeline-entry');
+    if (!items.length) { alert('No records to export.'); return; }
+    const rows = [['Date', 'Time', 'Status', 'Assignee', 'Changed By', 'Record ID', 'Description']];
     items.forEach(item => {
-        const date = item.querySelector('.ent-timeline-date-main')?.textContent || '';
-        const status = item.querySelector('.ent-timeline-status')?.textContent?.trim() || '';
-        const fields = item.querySelectorAll('.ent-timeline-field-value');
-        const assignee = fields[0]?.textContent || '';
-        const changedBy = fields[1]?.textContent || '';
-        const desc = item.querySelector('.ent-timeline-description-text')?.textContent || '';
-        
-        csv += `"${date}","${status}","${assignee}","${changedBy}","${desc.replace(/"/g, '""')}"\n`;
+        const dateMain = item.querySelector('.sh-timeline-date-main')?.textContent?.trim() || '';
+        const dateTime = item.querySelector('.sh-timeline-date-time')?.textContent?.trim() || '';
+        const status   = item.querySelector('.sh-timeline-status')?.textContent?.trim() || '';
+        const cells    = item.querySelectorAll('.sh-detail-cell-value');
+        const assignee = cells[0]?.textContent?.trim() || '';
+        const changedBy = cells[1]?.textContent?.trim() || '';
+        const recordId = cells[2]?.textContent?.trim() || '';
+        const desc     = item.querySelector('.sh-timeline-desc-text')?.textContent?.trim() || '';
+        rows.push([dateMain, dateTime, status, assignee, changedBy, recordId, desc.replace(/"/g, '""')]);
     });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    let csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'system_history_{{ system.name }}.csv';
+    a.download = `status_history_{{ system.name }}_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
+}
+
+// ── Print ──
+function printHistory() {
+    window.print();
+}
+
+// ── Copy summary ──
+function copyHistorySummary() {
+    const items = document.querySelectorAll('.sh-timeline-entry');
+    let text = `Status History — {{ system.name }} ({{ stream }} Stream)\n`;
+    text += `Total Changes: ${items.length}\n`;
+    text += `Current Status: {{ system.get_status_display }}\n`;
+    text += '─'.repeat(50) + '\n';
+    items.forEach(item => {
+        const d = item.querySelector('.sh-timeline-date-main')?.textContent?.trim() || '';
+        const t = item.querySelector('.sh-timeline-date-time')?.textContent?.trim() || '';
+        const s = item.querySelector('.sh-timeline-status')?.textContent?.trim() || '';
+        text += `${d} ${t} → ${s}\n`;
+    });
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target.closest('.sh-btn');
+        if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => btn.innerHTML = orig, 1500);
+        }
+    });
 }
 </script>
 {% endblock %}

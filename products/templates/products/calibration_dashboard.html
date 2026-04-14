@@ -1,0 +1,699 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Calibration Dashboard - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-light: #e6f2ff;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --indigo: #0B5FFF;
+        --indigo-dark: #0044CC;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --bg-light: #f8fafc;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Enhanced Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-dark) 50%, #003399 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-text h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-text h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .header-text .subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 0.75rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-white {
+        background: white;
+        color: var(--indigo);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-white:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--border);
+        transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.indigo { background: #e8f0fe; color: var(--indigo); }
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+    .stat-icon.red { background: var(--danger-light); color: var(--danger); }
+
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-content p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header a {
+        font-size: 0.875rem;
+        color: var(--indigo);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .card-header a:hover {
+        text-decoration: underline;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Upcoming Calibrations */
+    .upcoming-calibrations {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .calibration-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .calibration-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .calibration-item:hover {
+        border-color: var(--border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .calibration-date {
+        min-width: 70px;
+        text-align: center;
+        background: white;
+        padding: 0.75rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+    }
+
+    .calibration-date .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--indigo);
+        line-height: 1;
+    }
+
+    .calibration-date .month {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        margin-top: 0.25rem;
+    }
+
+    .calibration-info {
+        flex: 1;
+    }
+
+    .calibration-info h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .calibration-info p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .calibration-status {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-due { background: var(--warning-light); color: #d97706; }
+    .status-overdue { background: var(--danger-light); color: #dc2626; }
+    .status-upcoming { background: #e8f0fe; color: var(--indigo); }
+    .status-completed { background: var(--success-light); color: #059669; }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .quick-action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1.25rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .quick-action:hover {
+        background: var(--indigo);
+        color: white;
+        border-color: var(--indigo);
+    }
+
+    .quick-action i {
+        font-size: 1.5rem;
+    }
+
+    .quick-action span {
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    /* Chart */
+    .chart-container {
+        height: 250px;
+    }
+
+    /* Alerts Section */
+    .alerts-section {
+        margin-top: 2rem;
+    }
+
+    .alerts-section h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: white;
+        border-radius: 14px;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .alert-item.critical {
+        border-left-color: var(--danger);
+        background: #fef2f2;
+    }
+
+    .alert-item.warning {
+        border-left-color: var(--warning);
+        background: #fffbeb;
+    }
+
+    .alert-item.info {
+        border-left-color: var(--primary);
+        background: #eff6ff;
+    }
+
+    .alert-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .alert-item.critical .alert-icon { background: var(--danger-light); color: var(--danger); }
+    .alert-item.warning .alert-icon { background: var(--warning-light); color: var(--warning); }
+    .alert-item.info .alert-icon { background: var(--primary-light); color: var(--primary); }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .alert-description {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .alert-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .btn-view {
+        padding: 0.5rem 0.75rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-view:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        opacity: 0.5;
+        margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-content {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .page-header {
+            padding: 1.5rem;
+        }
+
+        .header-text h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Enhanced Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1><i class="fas fa-ruler-combined"></i> Calibration Dashboard</h1>
+                <p class="subtitle">Track and manage equipment calibration schedules for {{ stream }} stream</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'calibration_records_list' stream=stream %}" class="btn btn-glass">
+                    <i class="fas fa-clipboard-list"></i> Records
+                </a>
+                <a href="{% url 'calibration_schedule_list' stream=stream %}" class="btn btn-glass">
+                    <i class="fas fa-list"></i> Schedules
+                </a>
+                <a href="{% url 'calibration_schedule_create' stream=stream %}" class="btn btn-white">
+                    <i class="fas fa-plus"></i> New Schedule
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon indigo">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ stats.total_schedules }}</h3>
+                <p>Total Schedules</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ stats.completed_this_month }}</h3>
+                <p>Completed This Month</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ stats.due_this_week }}</h3>
+                <p>Due This Week</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ stats.overdue }}</h3>
+                <p>Overdue</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-calendar-alt"></i> Upcoming Calibrations</h3>
+                <a href="{% url 'calibration_schedule_list' stream=stream %}">View All →</a>
+            </div>
+            <div class="card-body upcoming-calibrations">
+                {% if upcoming_calibrations %}
+                    {% for cal in upcoming_calibrations %}
+                        <div class="calibration-item">
+                            <div class="calibration-date">
+                                <div class="day">{{ cal.next_calibration_date|date:"d" }}</div>
+                                <div class="month">{{ cal.next_calibration_date|date:"M" }}</div>
+                            </div>
+                            <div class="calibration-info">
+                                <h4>{{ cal.title }}</h4>
+                                <p>{{ cal.get_calibration_type_display }} - {{ cal.calibration_interval }} {{ cal.interval_unit }}</p>
+                            </div>
+                            <span class="calibration-status {% if cal.is_overdue %}status-overdue{% elif cal.is_due_soon %}status-due{% else %}status-upcoming{% endif %}">
+                                {% if cal.is_overdue %}Overdue{% elif cal.is_due_soon %}Due Soon{% else %}Scheduled{% endif %}
+                            </span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>No upcoming calibrations scheduled</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="{% url 'calibration_schedule_list' stream=stream %}" class="quick-action">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Record Calibration</span>
+                        </a>
+                        <a href="{% url 'calibration_schedule_list' stream=stream %}" class="quick-action">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Certificate</span>
+                        </a>
+                        <a href="{% url 'calibration_schedule_list' stream=stream %}" class="quick-action">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Generate Report</span>
+                        </a>
+                        <a href="{% url 'calibration_schedule_list' stream=stream %}?status=overdue" class="quick-action">
+                            <i class="fas fa-bell"></i>
+                            <span>View Overdue</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Calibration Status</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="calibrationStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    <div class="alerts-section">
+        <h2><i class="fas fa-bell"></i> Recent Alerts</h2>
+        
+        {% if alerts %}
+            {% for alert in alerts %}
+                <div class="alert-item {{ alert.severity }}">
+                    <div class="alert-icon">
+                        <i class="fas {% if alert.severity == 'critical' %}fa-exclamation-circle{% elif alert.severity == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">{{ alert.title }}</div>
+                        <div class="alert-description">{{ alert.message }}</div>
+                    </div>
+                    <div class="alert-time">{{ alert.created_at|date:"M d, Y" }}</div>
+                    <a href="{% url 'calibration_schedule_detail' stream=stream pk=alert.id %}" class="btn-view">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="card">
+                <div class="card-body empty-state">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    <p style="margin: 0;">No active alerts. All calibrations are on track!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<script>
+// Calibration Status Chart
+const statusCtx = document.getElementById('calibrationStatusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['On Schedule', 'Due Soon', 'Overdue'],
+        datasets: [{
+            data: [{{ chart_data.on_schedule|default:0 }}, {{ chart_data.due_soon|default:0 }}, {{ chart_data.overdue|default:0 }}],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: {
+                        family: "'Inter', sans-serif"
+                    }
+                }
+            }
+        },
+        cutout: '65%'
+    }
+});
+</script>
+{% endblock %}

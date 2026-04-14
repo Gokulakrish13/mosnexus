@@ -1,0 +1,1255 @@
+{% extends 'products/base.html' %}
+{% load product_filters %}
+{% block content %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   PRODUCT EDIT — Corporate Enterprise Redesign
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --pe-primary: #0066cc;
+  --pe-primary-dark: #004d99;
+  --pe-primary-light: #e6f2ff;
+  --pe-accent: #00b4d8;
+  --pe-accent2: #0B5FFF;
+  --pe-gradient: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+  --pe-accent-gradient: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
+  --pe-success: #10b981;
+  --pe-success-bg: rgba(16,185,129,0.08);
+  --pe-danger: #ef4444;
+  --pe-danger-bg: rgba(239,68,68,0.06);
+  --pe-warning: #f59e0b;
+  --pe-warning-bg: rgba(245,158,11,0.08);
+  --pe-info: #3b82f6;
+  --pe-bg: #f1f5f9;
+  --pe-card: #ffffff;
+  --pe-text: #0f172a;
+  --pe-text2: #475569;
+  --pe-text3: #94a3b8;
+  --pe-border: #e2e8f0;
+  --pe-border-light: #f1f5f9;
+  --pe-shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --pe-shadow-md: 0 4px 16px rgba(0,0,0,0.07);
+  --pe-shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+  --pe-shadow-xl: 0 20px 60px rgba(0,0,0,0.12);
+  --pe-radius-sm: 8px;
+  --pe-radius-md: 12px;
+  --pe-radius-lg: 16px;
+  --pe-radius-xl: 20px;
+  --pe-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pe-page *, .pe-page *::before, .pe-page *::after { margin: 0; padding: 0; box-sizing: border-box; }
+.pe-page { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+/* ─── Page Wrapper ─── */
+.pe-page { min-height: 100vh; background: var(--pe-bg); padding-top: 1.25rem; }
+
+/* ─── Hero Header ─── */
+.pe-hero {
+  background: var(--pe-gradient);
+  padding: 2rem 2.5rem;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  margin: 0 1.5rem 1.5rem;
+  box-shadow: var(--pe-shadow-lg);
+  min-height: 100px;
+}
+.pe-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.pe-hero-glow {
+  position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.12; pointer-events: none;
+}
+.pe-hero-glow-1 { width: 450px; height: 450px; background: var(--pe-primary); top: -120px; right: -30px; }
+.pe-hero-glow-2 { width: 350px; height: 350px; background: var(--pe-accent); bottom: -160px; left: 10%; }
+.pe-hero-inner {
+  max-width: 100%; margin: 0; position: relative; z-index: 2;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; flex-wrap: wrap;
+}
+.pe-hero-left { display: flex; align-items: center; gap: 1.25rem; }
+.pe-hero-icon {
+  width: 54px; height: 54px; background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: var(--pe-radius-md);
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.35rem;
+}
+.pe-hero-title { font-size: 1.5rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+.pe-hero-sub {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.4rem;
+  font-size: 0.8rem; color: rgba(255,255,255,0.55);
+}
+.pe-hero-sub a { color: rgba(255,255,255,0.55); text-decoration: none; transition: var(--pe-transition); }
+.pe-hero-sub a:hover { color: #fff; }
+.pe-hero-sub i.fa-chevron-right { font-size: 0.55rem; }
+.pe-hero-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.pe-hero-meta {
+  display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.4rem 0.85rem;
+  background: rgba(255,255,255,0.06); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 100px;
+  font-size: 0.75rem; color: rgba(255,255,255,0.65); white-space: nowrap;
+}
+.pe-hero-meta i { font-size: 0.7rem; opacity: 0.7; }
+.pe-hero-meta strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+/* ─── Main Container ─── */
+.pe-container {
+  max-width: 100%; margin: 0 0 3rem 0; padding: 0 2.5rem; position: relative; z-index: 10;
+}
+
+/* ─── Layout: Sidebar + Main ─── */
+.pe-layout {
+  display: grid; grid-template-columns: 360px 1fr; gap: 1.5rem; align-items: start;
+}
+@media (max-width: 1100px) {
+  .pe-layout { grid-template-columns: 1fr; }
+}
+
+/* ─── Sidebar ─── */
+.pe-sidebar-card {
+  background: var(--pe-card); border-radius: var(--pe-radius-xl); box-shadow: var(--pe-shadow-lg);
+  overflow: hidden; position: sticky; top: 80px;
+}
+.pe-sidebar-top {
+  background: linear-gradient(135deg, #0f172a, #1e293b); padding: 1.5rem; text-align: center;
+}
+.pe-sidebar-avatar {
+  width: 72px; height: 72px; border-radius: var(--pe-radius-lg);
+  background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;
+  font-size: 1.75rem; color: rgba(255,255,255,0.7);
+}
+.pe-sidebar-avatar img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: inherit;
+}
+.pe-sidebar-name { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+.pe-sidebar-serial { font-size: 0.78rem; color: rgba(255,255,255,0.5); font-family: 'Courier New', monospace; }
+.pe-sidebar-status-wrap { margin-top: 0.75rem; }
+.pe-sidebar-badge {
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem;
+  border-radius: 100px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px;
+}
+.pe-sidebar-badge.sb-active { background: rgba(16,185,129,0.15); color: #34d399; }
+.pe-sidebar-badge.sb-not-active { background: rgba(248,113,113,0.15); color: #f87171; }
+.pe-sidebar-badge.sb-scraped { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.pe-sidebar-badge.sb-hand-overed { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.pe-sidebar-badge.sb-issue { background: rgba(251,113,133,0.15); color: #ef5350; }
+.pe-sidebar-badge .sb-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+}
+
+.pe-sidebar-body { padding: 1.25rem; }
+.pe-sidebar-section { margin-bottom: 1.25rem; }
+.pe-sidebar-section:last-child { margin-bottom: 0; }
+.pe-sidebar-label {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--pe-text3); margin-bottom: 0.6rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.pe-sidebar-label i { font-size: 0.6rem; color: var(--pe-primary); }
+.pe-sidebar-item {
+  display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0;
+  border-bottom: 1px solid var(--pe-border-light);
+  font-size: 0.82rem;
+}
+.pe-sidebar-item:last-child { border-bottom: none; }
+.pe-sidebar-item i {
+  width: 16px; text-align: center; color: var(--pe-text3); font-size: 0.72rem; margin-top: 2px; flex-shrink: 0;
+}
+.pe-sidebar-item .si-label { color: var(--pe-text3); min-width: 60px; }
+.pe-sidebar-item .si-value { color: var(--pe-text); font-weight: 500; word-break: break-word; }
+
+/* Quick Actions */
+.pe-sidebar-actions { display: flex; flex-direction: column; gap: 0.4rem; }
+.pe-sidebar-action {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.75rem;
+  border-radius: var(--pe-radius-sm); font-size: 0.8rem; font-weight: 500;
+  color: var(--pe-text2); text-decoration: none; transition: var(--pe-transition); cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.pe-sidebar-action:hover { background: var(--pe-border-light); color: var(--pe-primary); }
+.pe-sidebar-action i { width: 18px; text-align: center; font-size: 0.78rem; }
+.pe-sidebar-action.action-danger:hover { background: var(--pe-danger-bg); color: var(--pe-danger); }
+
+/* ─── Main Form Area ─── */
+.pe-main { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* Section Cards */
+.pe-section {
+  background: var(--pe-card); border-radius: var(--pe-radius-xl); box-shadow: var(--pe-shadow-md);
+  overflow: hidden; transition: var(--pe-transition); width: 100%;
+}
+.pe-section:hover { box-shadow: var(--pe-shadow-lg); }
+.pe-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.75rem; border-bottom: 1px solid var(--pe-border);
+  background: linear-gradient(135deg, #fcfcfd 0%, #f8fafc 100%);
+  cursor: pointer; user-select: none;
+}
+.pe-section-head-left { display: flex; align-items: center; gap: 0.75rem; }
+.pe-section-icon {
+  width: 34px; height: 34px; border-radius: var(--pe-radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: #fff;
+}
+.pe-section-icon.si-basic { background: var(--pe-accent-gradient); }
+.pe-section-icon.si-class { background: linear-gradient(135deg, #0B5FFF, #a78bfa); }
+.pe-section-icon.si-status { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.pe-section-icon.si-media { background: linear-gradient(135deg, #0B5FFF, #4A90FF); }
+.pe-section-icon.si-history { background: linear-gradient(135deg, #0B5FFF, #818cf8); }
+.pe-section-title { font-size: 0.95rem; font-weight: 600; color: var(--pe-text); }
+.pe-section-subtitle { font-size: 0.72rem; color: var(--pe-text3); margin-top: 0.1rem; }
+.pe-section-toggle {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--pe-border-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; color: var(--pe-text3); transition: var(--pe-transition);
+}
+.pe-section-head[aria-expanded="false"] .pe-section-toggle { transform: rotate(-90deg); }
+.pe-section-body {
+  padding: 1.75rem; transition: var(--pe-transition);
+}
+.pe-section-body.collapsed { display: none; }
+
+/* ─── Form Grid ─── */
+.pe-form-row {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem;
+}
+.pe-form-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.pe-form-row.cols-1 { grid-template-columns: 1fr; }
+@media (max-width: 768px) {
+  .pe-form-row, .pe-form-row.cols-3 { grid-template-columns: 1fr; }
+}
+
+/* Wider basic info section */
+.pe-section-basic .pe-section-body { max-width: 100%; }
+.pe-section-basic .pe-form-row { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.pe-section-basic .pe-input { padding: 0.75rem 0.95rem; font-size: 0.92rem; }
+.pe-section-basic .pe-input-wrap .pe-input { padding-left: 2.5rem; }
+
+/* Form Group */
+.pe-fg { display: flex; flex-direction: column; gap: 0.4rem; }
+.pe-fg-label {
+  font-size: 0.8rem; font-weight: 600; color: var(--pe-text);
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.pe-fg-label .req { color: var(--pe-danger); font-size: 0.75rem; }
+.pe-fg-label .opt { color: var(--pe-text3); font-size: 0.68rem; font-weight: 400; }
+.pe-fg-help { font-size: 0.72rem; color: var(--pe-text3); }
+
+/* Inputs */
+.pe-input {
+  width: 100%; padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--pe-border); border-radius: var(--pe-radius-sm);
+  font-size: 0.88rem; font-family: inherit; background: #fafbfc;
+  color: var(--pe-text); transition: var(--pe-transition);
+}
+.pe-input:focus {
+  border-color: var(--pe-primary); outline: none; background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,102,204,0.08);
+}
+.pe-input::placeholder { color: var(--pe-text3); }
+.pe-input:disabled { background: #f1f5f9; color: var(--pe-text2); cursor: not-allowed; }
+textarea.pe-input { min-height: 90px; resize: vertical; }
+select.pe-input {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.9rem center;
+  padding-right: 2.25rem;
+}
+
+/* Input with Icon */
+.pe-input-wrap { position: relative; }
+.pe-input-wrap .pe-input { padding-left: 2.4rem; }
+.pe-input-wrap .pe-input-icon {
+  position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+  color: var(--pe-text3); font-size: 0.8rem; pointer-events: none;
+}
+
+/* Read-only badge display */
+.pe-readonly-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;
+  background: linear-gradient(135deg, var(--pe-primary-light), #dbeafe);
+  border: 1px solid #93c5fd; border-radius: var(--pe-radius-sm);
+  font-weight: 600; color: var(--pe-primary-dark); font-size: 0.88rem;
+}
+.pe-readonly-badge i { font-size: 0.8rem; }
+
+/* Validation States */
+.pe-fg.valid .pe-input { border-color: var(--pe-success); }
+.pe-fg.invalid .pe-input { border-color: var(--pe-danger); }
+.pe-fg .pe-validation-msg {
+  font-size: 0.72rem; display: none; align-items: center; gap: 0.3rem; margin-top: 0.15rem;
+}
+.pe-fg.invalid .pe-validation-msg { display: flex; color: var(--pe-danger); }
+.pe-fg.valid .pe-validation-msg.success-msg { display: flex; color: var(--pe-success); }
+
+/* ─── Status Section ─── */
+.pe-status-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem;
+}
+@media (max-width: 900px) { .pe-status-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .pe-status-grid { grid-template-columns: repeat(2, 1fr); } }
+.pe-status-opt {
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  padding: 0.85rem 0.5rem; border: 2px solid var(--pe-border); border-radius: var(--pe-radius-md);
+  cursor: pointer; transition: var(--pe-transition); text-align: center; background: #fafbfc;
+}
+.pe-status-opt:hover { border-color: var(--pe-text3); background: #fff; }
+.pe-status-opt.selected { border-width: 2px; transform: scale(1.02); }
+.pe-status-opt .so-icon {
+  width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 0.8rem; transition: var(--pe-transition);
+}
+.pe-status-opt .so-name { font-size: 0.75rem; font-weight: 600; color: var(--pe-text); }
+.pe-status-opt .so-desc { font-size: 0.62rem; color: var(--pe-text3); line-height: 1.3; }
+
+/* Status colors */
+.pe-status-opt[data-status="Active"].selected { border-color: #10b981; background: rgba(16,185,129,0.04); }
+.pe-status-opt[data-status="Active"] .so-icon { background: rgba(16,185,129,0.1); color: #10b981; }
+.pe-status-opt[data-status="Not Active"].selected { border-color: #ef4444; background: rgba(239,68,68,0.04); }
+.pe-status-opt[data-status="Not Active"] .so-icon { background: rgba(239,68,68,0.1); color: #ef4444; }
+.pe-status-opt[data-status="Scraped"].selected { border-color: #f59e0b; background: rgba(245,158,11,0.04); }
+.pe-status-opt[data-status="Scraped"] .so-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
+.pe-status-opt[data-status="Hand-Overed"].selected { border-color: #0B5FFF; background: rgba(139,92,246,0.04); }
+.pe-status-opt[data-status="Hand-Overed"] .so-icon { background: rgba(139,92,246,0.1); color: #0B5FFF; }
+.pe-status-opt[data-status="Issue"].selected { border-color: #0B5FFF; background: rgba(236,72,153,0.04); }
+.pe-status-opt[data-status="Issue"] .so-icon { background: rgba(236,72,153,0.1); color: #0B5FFF; }
+
+/* Conditional panels */
+.pe-cond-panel {
+  margin-top: 1rem; padding: 1.25rem; border-radius: var(--pe-radius-md);
+  border: 1px solid; display: none;
+  animation: peFadeIn 0.3s ease;
+}
+.pe-cond-panel.visible { display: block; }
+.pe-cond-panel.panel-handover { background: rgba(139,92,246,0.03); border-color: rgba(139,92,246,0.15); }
+.pe-cond-panel.panel-issue { background: var(--pe-danger-bg); border-color: rgba(239,68,68,0.15); }
+.pe-cond-panel .pe-cond-title {
+  font-size: 0.78rem; font-weight: 600; color: var(--pe-text2); margin-bottom: 0.85rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.pe-cond-panel .pe-cond-title i { font-size: 0.72rem; }
+
+/* ─── Image Gallery ─── */
+.pe-gallery { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+.pe-gallery-item {
+  position: relative; width: 100px; height: 100px; border-radius: var(--pe-radius-sm);
+  overflow: hidden; border: 2px solid var(--pe-border); transition: var(--pe-transition);
+}
+.pe-gallery-item:hover { border-color: var(--pe-primary); box-shadow: var(--pe-shadow-md); }
+.pe-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.pe-gallery-item .gi-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  opacity: 0; transition: var(--pe-transition);
+}
+.pe-gallery-item:hover .gi-overlay { opacity: 1; }
+.pe-gallery-item .gi-overlay a, .pe-gallery-item .gi-overlay span {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.2); color: #fff; font-size: 0.7rem; cursor: pointer; transition: var(--pe-transition);
+  text-decoration: none;
+}
+.pe-gallery-item .gi-overlay a:hover { background: rgba(255,255,255,0.4); }
+.pe-gallery-item .gi-overlay span:hover { background: rgba(239,68,68,0.6); }
+.pe-gallery-item.marked-delete { border-color: var(--pe-danger); opacity: 0.4; filter: grayscale(0.7); }
+.pe-gallery-item.marked-delete .gi-overlay { opacity: 1; background: rgba(239,68,68,0.3); }
+.pe-gallery-item .gi-badge {
+  position: absolute; top: 4px; left: 4px; padding: 1px 6px; border-radius: 4px;
+  font-size: 0.55rem; font-weight: 700; background: rgba(0,0,0,0.6); color: #fff;
+  pointer-events: none;
+}
+
+/* Upload Drop Zone */
+.pe-upload-zone {
+  border: 2px dashed var(--pe-border); border-radius: var(--pe-radius-md);
+  padding: 2rem; text-align: center; cursor: pointer; transition: var(--pe-transition);
+  background: #fafbfc;
+}
+.pe-upload-zone:hover, .pe-upload-zone.dragover {
+  border-color: var(--pe-primary); background: var(--pe-primary-light);
+}
+.pe-upload-zone .uz-icon { font-size: 2rem; color: var(--pe-text3); margin-bottom: 0.5rem; }
+.pe-upload-zone .uz-text { font-size: 0.85rem; color: var(--pe-text2); }
+.pe-upload-zone .uz-text .uz-browse { color: var(--pe-primary); font-weight: 600; }
+.pe-upload-zone .uz-hint { font-size: 0.72rem; color: var(--pe-text3); margin-top: 0.3rem; }
+.pe-upload-zone input[type="file"] {
+  position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+}
+
+/* New file previews */
+.pe-new-files { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.75rem; }
+.pe-new-file {
+  display: flex; flex-direction: column; align-items: center; width: 90px; position: relative;
+}
+.pe-new-file .nf-thumb {
+  width: 80px; height: 80px; border-radius: var(--pe-radius-sm); overflow: hidden;
+  border: 2px solid var(--pe-border); position: relative;
+}
+.pe-new-file .nf-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pe-new-file .nf-name {
+  font-size: 0.62rem; color: var(--pe-text3); text-align: center; margin-top: 0.2rem;
+  word-break: break-all; line-height: 1.2; max-height: 2.4em; overflow: hidden;
+}
+.pe-new-file .nf-remove {
+  position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--pe-danger); color: #fff; border: 2px solid #fff; font-size: 0.55rem;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: var(--pe-transition); z-index: 2;
+}
+.pe-new-file .nf-remove:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
+.pe-new-file .nf-progress {
+  width: 100%; height: 3px; background: var(--pe-border); border-radius: 2px; margin-top: 0.2rem; overflow: hidden;
+}
+.pe-new-file .nf-progress-bar {
+  height: 100%; width: 0%; background: var(--pe-accent-gradient); border-radius: 2px; transition: width 0.3s ease;
+}
+.pe-new-file .nf-progress-bar.done { background: var(--pe-success); }
+
+/* ─── History Timeline ─── */
+.pe-timeline { position: relative; padding-left: 1.5rem; }
+.pe-timeline::before {
+  content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+  width: 2px; background: var(--pe-border);
+}
+.pe-timeline-item {
+  position: relative; padding: 0.6rem 0 0.6rem 1rem;
+}
+.pe-timeline-item::before {
+  content: ''; position: absolute; left: -1.5rem; top: 0.85rem;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--pe-card); border: 2px solid var(--pe-primary);
+}
+.pe-timeline-item.ti-created::before { border-color: var(--pe-success); }
+.pe-timeline-item.ti-edited::before { border-color: var(--pe-info); }
+.pe-timeline-meta {
+  font-size: 0.7rem; color: var(--pe-text3); display: flex; align-items: center; gap: 0.5rem;
+}
+.pe-timeline-meta .tm-user { font-weight: 600; color: var(--pe-text2); }
+.pe-timeline-meta .tm-action {
+  padding: 1px 6px; border-radius: 4px; font-size: 0.62rem; font-weight: 600;
+}
+.pe-timeline-meta .tm-action.action-created { background: var(--pe-success-bg); color: var(--pe-success); }
+.pe-timeline-meta .tm-action.action-edited { background: rgba(59,130,246,0.08); color: var(--pe-info); }
+.pe-timeline-details {
+  font-size: 0.75rem; color: var(--pe-text2); margin-top: 0.2rem; line-height: 1.5;
+}
+.pe-timeline-empty { font-size: 0.82rem; color: var(--pe-text3); padding: 1rem 0; }
+
+/* ─── Action Bar ─── */
+.pe-action-bar {
+  background: var(--pe-card); border-radius: var(--pe-radius-xl); box-shadow: var(--pe-shadow-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.pe-action-left { display: flex; align-items: center; gap: 0.75rem; }
+.pe-action-info {
+  font-size: 0.78rem; color: var(--pe-text3); display: flex; align-items: center; gap: 0.4rem;
+}
+.pe-action-info i { color: var(--pe-warning); }
+.pe-action-right { display: flex; align-items: center; gap: 0.75rem; }
+
+/* Buttons */
+.pe-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.5rem;
+  border-radius: var(--pe-radius-sm); font-size: 0.85rem; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: var(--pe-transition); border: none;
+  text-decoration: none;
+}
+.pe-btn-primary {
+  background: var(--pe-accent-gradient); color: #fff;
+  box-shadow: 0 4px 12px rgba(0,102,204,0.2);
+}
+.pe-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,102,204,0.3); }
+.pe-btn-secondary {
+  background: #fff; color: var(--pe-text2); border: 1.5px solid var(--pe-border);
+}
+.pe-btn-secondary:hover { background: var(--pe-bg); color: var(--pe-text); border-color: #cbd5e1; }
+.pe-btn-danger {
+  background: #fff; color: var(--pe-danger); border: 1.5px solid rgba(239,68,68,0.2);
+}
+.pe-btn-danger:hover { background: var(--pe-danger-bg); border-color: rgba(239,68,68,0.4); }
+.pe-btn-draft {
+  background: #fef3c7; color: #d97706; border: 1.5px solid #f59e0b;
+}
+.pe-btn-draft:hover { background: #f59e0b; color: #fff; border-color: #d97706; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,.3); }
+.pe-btn-draft:active { transform: translateY(0); }
+
+/* ─── Alerts ─── */
+.pe-alert {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem;
+  border-radius: var(--pe-radius-md); font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;
+}
+.pe-alert-error { background: var(--pe-danger-bg); border: 1px solid rgba(239,68,68,0.15); color: var(--pe-danger); }
+.pe-alert-success { background: var(--pe-success-bg); border: 1px solid rgba(16,185,129,0.15); color: var(--pe-success); }
+.pe-alert i { font-size: 0.9rem; }
+
+/* ─── Animations ─── */
+@keyframes peFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.pe-section { animation: peFadeIn 0.4s ease both; }
+.pe-section:nth-child(2) { animation-delay: 0.05s; }
+.pe-section:nth-child(3) { animation-delay: 0.1s; }
+.pe-section:nth-child(4) { animation-delay: 0.15s; }
+.pe-section:nth-child(5) { animation-delay: 0.2s; }
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .pe-hero { padding: 1.25rem 1rem 4rem; }
+  .pe-hero-inner { flex-direction: column; }
+  .pe-container { padding: 0 1rem; }
+  .pe-section-body { padding: 1rem; }
+  .pe-action-bar { flex-direction: column; text-align: center; }
+  .pe-action-right { width: 100%; justify-content: center; }
+  .pe-status-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Unsaved changes indicator ─── */
+.pe-unsaved-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--pe-warning);
+  display: none; animation: pePulse 2s infinite;
+}
+.pe-unsaved-dot.visible { display: inline-block; }
+@keyframes pePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+
+<div class="pe-page">
+  <!-- ═══ Hero Header ═══ -->
+  <section class="pe-hero">
+    <div class="pe-hero-glow pe-hero-glow-1"></div>
+    <div class="pe-hero-glow pe-hero-glow-2"></div>
+    <div class="pe-hero-inner">
+      <div class="pe-hero-left">
+        <div class="pe-hero-icon"><i class="fas fa-pen-to-square"></i></div>
+        <div>
+          <div class="pe-hero-title">Edit Product</div>
+          <div class="pe-hero-sub">
+            <a href="{% url 'product_list_stream' selected_stream %}">Products</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ product.name }}</span>
+            <i class="fas fa-chevron-right"></i>
+            <span style="color:rgba(255,255,255,0.8);">Edit</span>
+          </div>
+        </div>
+      </div>
+      <div class="pe-hero-right">
+        <div class="pe-hero-meta"><i class="fas fa-stream"></i> Stream: <strong>{{ selected_stream }}</strong></div>
+        <div class="pe-hero-meta"><i class="fas fa-hashtag"></i> ID: <strong>#{{ product.pk }}</strong></div>
+        <div class="pe-hero-meta"><i class="fas fa-clock"></i> Created: <strong>{{ product.created_at|date:"M d, Y" }}</strong></div>
+        {% if product.updated_at %}
+        <div class="pe-hero-meta"><i class="fas fa-sync-alt"></i> Updated: <strong>{{ product.updated_at|date:"M d, Y H:i" }}</strong></div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Main Container ═══ -->
+  <div class="pe-container">
+
+    {% if form_error %}
+    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+        <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="peEditForm">
+      {% csrf_token %}
+      <input type="hidden" name="stream" value="{{ stream }}">
+      <input type="hidden" name="save_as_draft" id="peSaveAsDraft" value="{% if product.is_draft %}1{% else %}0{% endif %}">
+
+      <div class="pe-layout">
+        <!-- ═══ Left Sidebar ═══ -->
+        <aside class="pe-sidebar-card">
+          <div class="pe-sidebar-top">
+            <div class="pe-sidebar-avatar">
+              {% if product.images.all %}
+                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+              {% else %}
+                <i class="fas fa-cube"></i>
+              {% endif %}
+            </div>
+            <div class="pe-sidebar-name">{{ product.name }}</div>
+            <div class="pe-sidebar-serial">{{ product.serial_number }}</div>
+            <div class="pe-sidebar-status-wrap">
+              <span class="pe-sidebar-badge sb-{{ product.status|lower|cut:' ' }}" id="peSidebarBadge">
+                <span class="sb-dot"></span>
+                {{ product.status }}
+              </span>
+            </div>
+          </div>
+          <div class="pe-sidebar-body">
+            <!-- Product Details -->
+            <div class="pe-sidebar-section">
+              <div class="pe-sidebar-label"><i class="fas fa-info-circle"></i> Product Details</div>
+              <div class="pe-sidebar-item">
+                <i class="fas fa-folder"></i>
+                <span class="si-label">Category</span>
+                <span class="si-value">{{ product.category.name|default:"—" }}</span>
+              </div>
+              <div class="pe-sidebar-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="si-label">Location</span>
+                <span class="si-value">{{ product.location.name|default:"—" }}</span>
+              </div>
+              {% if product.twelve_nc %}
+              <div class="pe-sidebar-item">
+                <i class="fas fa-barcode"></i>
+                <span class="si-label">12NC</span>
+                <span class="si-value">{{ product.twelve_nc }}</span>
+              </div>
+              {% endif %}
+              {% if product.device_serial_number %}
+              <div class="pe-sidebar-item">
+                <i class="fas fa-barcode"></i>
+                <span class="si-label">Serial Number</span>
+                <span class="si-value">{{ product.device_serial_number }}</span>
+              </div>
+              {% endif %}
+              <div class="pe-sidebar-item">
+                <i class="fas fa-images"></i>
+                <span class="si-label">Images</span>
+                <span class="si-value">{{ product.images.count }} file{{ product.images.count|pluralize }}</span>
+              </div>
+            </div>
+
+            <!-- Audit Info -->
+            <div class="pe-sidebar-section">
+              <div class="pe-sidebar-label"><i class="fas fa-user-clock"></i> Audit Trail</div>
+              <div class="pe-sidebar-item">
+                <i class="fas fa-user-plus"></i>
+                <span class="si-label">Created by</span>
+                <span class="si-value">{{ product.created_by.get_full_name|default:product.created_by.username|default:"System" }}</span>
+              </div>
+              <div class="pe-sidebar-item">
+                <i class="fas fa-calendar-plus"></i>
+                <span class="si-label">Created</span>
+                <span class="si-value">{{ product.created_at|date:"M d, Y H:i" }}</span>
+              </div>
+              {% if product.updated_by %}
+              <div class="pe-sidebar-item">
+                <i class="fas fa-user-edit"></i>
+                <span class="si-label">Updated by</span>
+                <span class="si-value">{{ product.updated_by.get_full_name|default:product.updated_by.username }}</span>
+              </div>
+              {% endif %}
+              <div class="pe-sidebar-item">
+                <i class="fas fa-calendar-check"></i>
+                <span class="si-label">Updated</span>
+                <span class="si-value">{{ product.updated_at|date:"M d, Y H:i" }}</span>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="pe-sidebar-section">
+              <div class="pe-sidebar-label"><i class="fas fa-bolt"></i> Quick Actions</div>
+              <div class="pe-sidebar-actions">
+                <a href="{% url 'product_list_stream' selected_stream %}{% if product.category %}?category={{ product.category.pk }}{% endif %}" class="pe-sidebar-action">
+                  <i class="fas fa-arrow-left"></i> Back to Product List
+                </a>
+                {% if product.lifecycle %}
+                <a href="{% url 'asset_lifecycle_detail' stream=selected_stream pk=product.lifecycle.pk %}" class="pe-sidebar-action">
+                  <i class="fas fa-heartbeat"></i> View Lifecycle
+                </a>
+                {% endif %}
+                <button type="button" class="pe-sidebar-action" onclick="document.getElementById('peEditForm').reset(); initStatusButtons();">
+                  <i class="fas fa-undo"></i> Reset Form
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ═══ Main Edit Area ═══ -->
+        <div class="pe-main">
+          <!-- Section 1: Basic Information -->
+          <div class="pe-section pe-section-basic">
+            <div class="pe-section-head" aria-expanded="true" onclick="toggleSection(this)">
+              <div class="pe-section-head-left">
+                <div class="pe-section-icon si-basic"><i class="fas fa-info-circle"></i></div>
+                <div>
+                  <div class="pe-section-title">Basic Information</div>
+                  <div class="pe-section-subtitle">Product name, serial number, and identifiers</div>
+                </div>
+              </div>
+              <div class="pe-section-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+            <div class="pe-section-body">
+              <div class="pe-form-row">
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Product Name <span class="req">*</span></label>
+                  <div class="pe-input-wrap">
+                    <i class="fas fa-cube pe-input-icon"></i>
+                    <input type="text" name="name" class="pe-input" required value="{{ product.name|default:'' }}" placeholder="Enter product name" data-validate="required">
+                  </div>
+                  <span class="pe-validation-msg"><i class="fas fa-exclamation-circle"></i> Product name is required</span>
+                </div>
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Product Number / Serial <span class="req">*</span></label>
+                  <div class="pe-input-wrap">
+                    <i class="fas fa-fingerprint pe-input-icon"></i>
+                    <input type="text" name="serial_number" class="pe-input" required value="{{ product.serial_number|default:'' }}" placeholder="Enter product number">
+                  </div>
+                  <span class="pe-fg-help">Unique identifier for this product</span>
+                </div>
+              </div>
+              <div class="pe-form-row" style="margin-top: 1.25rem;">
+                <div class="pe-fg">
+                  <label class="pe-fg-label">12NC Information <span class="opt">(Optional)</span></label>
+                  <div class="pe-input-wrap">
+                    <i class="fas fa-barcode pe-input-icon"></i>
+                    <input type="text" name="twelve_nc" class="pe-input" value="{{ product.twelve_nc|default:'' }}" placeholder="Enter 12NC or related info">
+                  </div>
+                </div>
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Serial Number <span class="opt">(Optional)</span></label>
+                  <div class="pe-input-wrap">
+                    <i class="fas fa-barcode pe-input-icon"></i>
+                    <input type="text" name="device_serial_number" class="pe-input" value="{{ product.device_serial_number|default:'' }}" placeholder="Enter device serial number">
+                  </div>
+                </div>
+              </div>
+              <div class="pe-form-row" style="margin-top: 1.25rem;">
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Category</label>
+                  {% if product.category %}
+                    <input type="hidden" name="category" value="{{ product.category.id }}">
+                    <div class="pe-readonly-badge">
+                      <i class="fas fa-folder"></i>
+                      {{ product.category.name }}{% if product.category.serial_number %} ({{ product.category.serial_number }}){% endif %}
+                    </div>
+                  {% else %}
+                    <select name="category" class="pe-input">
+                      <option value="">-- Select Category --</option>
+                      {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Classification & Location -->
+          <div class="pe-section">
+            <div class="pe-section-head" aria-expanded="true" onclick="toggleSection(this)">
+              <div class="pe-section-head-left">
+                <div class="pe-section-icon si-class"><i class="fas fa-map-marker-alt"></i></div>
+                <div>
+                  <div class="pe-section-title">Location & Description</div>
+                  <div class="pe-section-subtitle">Physical location and detailed product description</div>
+                </div>
+              </div>
+              <div class="pe-section-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+            <div class="pe-section-body">
+              <div class="pe-form-row">
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Location <span class="req">*</span></label>
+                  <div class="pe-input-wrap">
+                    <i class="fas fa-map-pin pe-input-icon"></i>
+                    <select name="location" class="pe-input" required style="padding-left: 2.4rem;">
+                      <option value="">-- Select Location --</option>
+                      {% for loc in locations %}
+                        <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="pe-form-row cols-1" style="margin-top: 1.25rem;">
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Description <span class="req">*</span></label>
+                  <textarea name="description" class="pe-input" rows="4" required placeholder="Enter a detailed product description">{{ product.description|default:'' }}</textarea>
+                  <span class="pe-fg-help"><span id="peDescCount">{{ product.description|length|default:"0" }}</span> characters</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Status & Assignments -->
+          <div class="pe-section">
+            <div class="pe-section-head" aria-expanded="true" onclick="toggleSection(this)">
+              <div class="pe-section-head-left">
+                <div class="pe-section-icon si-status"><i class="fas fa-toggle-on"></i></div>
+                <div>
+                  <div class="pe-section-title">Status & Assignments</div>
+                  <div class="pe-section-subtitle">Current status, hand-over details, and issue tracking</div>
+                </div>
+              </div>
+              <div class="pe-section-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+            <div class="pe-section-body">
+              <div class="pe-fg-label" style="margin-bottom: 0.75rem;">Current Status <span class="req">*</span></div>
+              <input type="hidden" name="status" id="peStatusInput" value="{{ product.status|default:'Active' }}">
+              <div class="pe-status-grid" id="peStatusGrid">
+                <div class="pe-status-opt{% if product.status == 'Active' %} selected{% endif %}" data-status="Active">
+                  <div class="so-icon"><i class="fas fa-check-circle"></i></div>
+                  <div class="so-name">Active</div>
+                  <div class="so-desc">In use</div>
+                </div>
+                <div class="pe-status-opt{% if product.status == 'Not Active' %} selected{% endif %}" data-status="Not Active">
+                  <div class="so-icon"><i class="fas fa-pause-circle"></i></div>
+                  <div class="so-name">Not Active</div>
+                  <div class="so-desc">Inactive</div>
+                </div>
+                <div class="pe-status-opt{% if product.status == 'Scraped' %} selected{% endif %}" data-status="Scraped">
+                  <div class="so-icon"><i class="fas fa-recycle"></i></div>
+                  <div class="so-name">Scraped</div>
+                  <div class="so-desc">Decommissioned</div>
+                </div>
+                <div class="pe-status-opt{% if product.status == 'Hand-Overed' %} selected{% endif %}" data-status="Hand-Overed">
+                  <div class="so-icon"><i class="fas fa-hand-holding"></i></div>
+                  <div class="so-name">Hand-Overed</div>
+                  <div class="so-desc">Transferred</div>
+                </div>
+                <div class="pe-status-opt{% if product.status == 'Issue' %} selected{% endif %}" data-status="Issue">
+                  <div class="so-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                  <div class="so-name">Issue</div>
+                  <div class="so-desc">Has problems</div>
+                </div>
+              </div>
+
+              <!-- Hand-Over Panel -->
+              <div class="pe-cond-panel panel-handover{% if product.status == 'Hand-Overed' %} visible{% endif %}" id="peHandoverPanel">
+                <div class="pe-cond-title"><i class="fas fa-hand-holding"></i> Hand-Over Details</div>
+                <div class="pe-form-row">
+                  <div class="pe-fg">
+                    <label class="pe-fg-label">Assigning Team</label>
+                    <select id="peHandoverTeamType" name="handover_team_type" class="pe-input" onchange="toggleExternalTeamField()">
+                      <option value="Internal" {% if product.handover_team_type == 'Internal' %}selected{% endif %}>Internal</option>
+                      <option value="External" {% if product.handover_team_type == 'External' %}selected{% endif %}>External</option>
+                    </select>
+                  </div>
+                  <div class="pe-fg" id="peHandoverStreamField" style="{% if product.handover_team_type == 'External' %}display:none;{% endif %}">
+                    <label class="pe-fg-label">Handover to Stream <span class="req">*</span></label>
+                    <select id="peHandoverStream" name="handover_stream" class="pe-input" onchange="toggleExternalTeamField()">
+                      <option value="">-- Confirm Target Stream --</option>
+                      {% for s in all_streams %}
+                      <option value="{{ s.id }}" {% if product.handover_stream_id == s.id %}selected{% elif s.id == product.stream_id and not product.handover_stream_id %}selected{% endif %}>
+                        {{ s.name }}{% if s.id == product.stream_id %} (Current){% endif %}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <span class="pe-fg-help">Select the stream this product will be handed over to</span>
+                  </div>
+                  <div class="pe-fg" id="peExternalTeamField" style="{% if product.handover_team_type != 'External' %}display:none;{% endif %}">
+                    <label class="pe-fg-label">External Team Name</label>
+                    <input type="text" name="handover_external_team" class="pe-input" value="{{ product.handover_external_team|default:'' }}" placeholder="Enter external team name">
+                  </div>
+                </div>
+                <div class="pe-form-row">
+                  <div class="pe-fg">
+                    <label class="pe-fg-label" id="peHandoverOwnerLabel">Name of the Assignee / Owner</label>
+                    <div class="pe-input-wrap">
+                      <i class="fas fa-user pe-input-icon"></i>
+                      <input type="text" name="handover_owner" class="pe-input" value="{{ product.handover_owner|default:'' }}" placeholder="Enter assignee name">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Issue Panel -->
+              <div class="pe-cond-panel panel-issue{% if product.status == 'Issue' %} visible{% endif %}" id="peIssuePanel">
+                <div class="pe-cond-title"><i class="fas fa-bug"></i> Issue Details</div>
+                <div class="pe-fg">
+                  <label class="pe-fg-label">Issue Description <span class="req">*</span></label>
+                  <textarea name="issue_description" id="peIssueDesc" class="pe-input" rows="4" placeholder="Describe the issue in detail" {% if product.status == 'Issue' %}required{% endif %}>{{ product.issue_description|default:'' }}</textarea>
+                  <span class="pe-fg-help">Please provide a detailed description to help with troubleshooting</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Media & Images -->
+          <div class="pe-section">
+            <div class="pe-section-head" aria-expanded="true" onclick="toggleSection(this)">
+              <div class="pe-section-head-left">
+                <div class="pe-section-icon si-media"><i class="fas fa-images"></i></div>
+                <div>
+                  <div class="pe-section-title">Media & Attachments</div>
+                  <div class="pe-section-subtitle">Product images and visual documentation ({{ product.images.count }} current)</div>
+                </div>
+              </div>
+              <div class="pe-section-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+            <div class="pe-section-body">
+              {% if product.images.all %}
+              <div class="pe-fg-label" style="margin-bottom: 0.6rem;">
+                Current Images ({{ product.images.count }})
+                <span style="font-weight:400; font-size:0.68rem; color:var(--pe-text3); margin-left:0.5rem;">Hover to view or mark for removal</span>
+              </div>
+              <div class="pe-gallery" id="peGallery">
+                {% for img in product.images.all %}
+                <div class="pe-gallery-item" id="peImg{{ img.id }}">
+                  <div class="gi-badge">#{{ forloop.counter }}</div>
+                  <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
+                  <div class="gi-overlay">
+                    <a href="{{ img.image.url }}" target="_blank" title="View full size"><i class="fas fa-expand"></i></a>
+                    <span onclick="toggleDeleteImg({{ img.id }})" title="Mark for removal"><i class="fas fa-trash-alt"></i></span>
+                  </div>
+                  <input type="checkbox" name="delete_images" value="{{ img.id }}" id="peDelImg{{ img.id }}" style="display:none;">
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="pe-fg-label" style="margin-bottom: 0.5rem; margin-top: 0.5rem;">
+                Upload New Images <span class="opt">(Optional, multiple allowed)</span>
+              </div>
+              <div class="pe-upload-zone" id="peUploadZone" style="position:relative;">
+                <div class="uz-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="uz-text"><span class="uz-browse">Browse files</span> or drag & drop here</div>
+                <div class="uz-hint">Supports JPG, PNG, GIF — Max 10MB each</div>
+                <input type="file" id="peFileInput" name="images" accept="image/*" multiple>
+              </div>
+              <div class="pe-new-files" id="peNewFiles"></div>
+            </div>
+          </div>
+
+          <!-- Section 5: Change History -->
+          <div class="pe-section">
+            <div class="pe-section-head" aria-expanded="{% if product.history.all %}true{% else %}false{% endif %}" onclick="toggleSection(this)">
+              <div class="pe-section-head-left">
+                <div class="pe-section-icon si-history"><i class="fas fa-history"></i></div>
+                <div>
+                  <div class="pe-section-title">Change History</div>
+                  <div class="pe-section-subtitle">{{ product.history.count }} recorded change{{ product.history.count|pluralize }}</div>
+                </div>
+              </div>
+              <div class="pe-section-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+            <div class="pe-section-body{% if not product.history.all %} collapsed{% endif %}">
+              {% if product.history.all %}
+              <div class="pe-timeline">
+                {% for entry in product.history.all reversed %}
+                <div class="pe-timeline-item ti-{{ entry.action }}">
+                  <div class="pe-timeline-meta">
+                    <span class="tm-action action-{{ entry.action }}">{{ entry.action|upper }}</span>
+                    <span class="tm-user">{{ entry.user.get_full_name|default:entry.user.username|default:"System" }}</span>
+                    <span>{{ entry.timestamp|date:"M d, Y H:i" }}</span>
+                  </div>
+                  {% if entry.details %}
+                  <div class="pe-timeline-details">{{ entry.details }}</div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="pe-timeline-empty">
+                <i class="fas fa-info-circle"></i> No changes recorded yet. Changes will appear here after updates.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- ═══ Action Bar ═══ -->
+          <div class="pe-action-bar">
+            <div class="pe-action-left">
+              <div class="pe-unsaved-dot" id="peUnsavedDot"></div>
+              <div class="pe-action-info">
+                <i class="fas fa-info-circle"></i>
+                <span id="peActionHint">All changes are tracked and logged in audit history</span>
+              </div>
+            </div>
+            <div class="pe-action-right">
+              <a href="{% url 'product_list_stream' selected_stream %}{% if product.category %}?category={{ product.category.pk }}{% endif %}" class="pe-btn pe-btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+              </a>
+              <button type="button" class="pe-btn pe-btn-draft" id="peDraftBtn" onclick="peSaveDraft()">
+                <i class="fas fa-file-alt"></i> Save Draft
+              </button>
+              <button type="submit" class="pe-btn pe-btn-primary" id="peSubmitBtn">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </div><!-- / pe-main -->
+      </div><!-- / pe-layout -->
+    </form>
+  </div><!-- / pe-container -->
+</div><!-- / pe-page -->
+
+<script>
+(function() {
+  'use strict';
+
+  // ─── Section Collapse/Expand ───
+  window.toggleSection = function(head) {
+    var expanded = head.getAttribute('aria-expanded') === 'true';
+    head.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    var body = head.nextElementSibling;
+    if (body) body.classList.toggle('collapsed', expanded);
+  };
+
+  // ─── Status Selector ───
+  var statusGrid = document.getElementById('peStatusGrid');
+  var statusInput = document.getElementById('peStatusInput');
+  var handoverPanel = document.getElementById('peHandoverPanel');
+  var issuePanel = document.getElementById('peIssuePanel');
+  var issueDesc = document.getElementById('peIssueDesc');
+
+  function initStatusButtons() {
+    var current = statusInput.value;
+    var opts = statusGrid.querySelectorAll('.pe-status-opt');
+    opts.forEach(function(o) {
+      o.classList.toggle('selected', o.dataset.status === current);
+    });
+    updateCondPanels(current);
+  }
+
+  function updateCondPanels(status) {
+    handoverPanel.classList.toggle('visible', status === 'Hand-Overed');
+    issuePanel.classList.toggle('visible', status === 'Issue');
+    if (status === 'Issue') {
+      issueDesc.required = true;
+    } else {
+      issueDesc.required = false;
+    }
+    // Update sidebar badge
+    var badge = document.getElementById('peSidebarBadge');
+    if (badge) {
+      badge.className = 'pe-sidebar-badge sb-' + status.toLowerCase().replace(/\s+/g, '-');
+      badge.innerHTML = '<span class="sb-dot"></span> ' + escapeHtml(status);
+    }
+  }
+
+  if (statusGrid) {
+    statusGrid.addEventListener('click', function(e) {
+      var opt = e.target.closest('.pe-status-opt');
+      if (!opt) return;
+      statusGrid.querySelectorAll('.pe-status-opt').forEach(function(o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+      statusInput.value = opt.dataset.status;
+      updateCondPanels(opt.dataset.status);
+      markUnsaved();
+    });
+  }
+
+  // ─── External Team Field Toggle ───
+  window.toggleExternalTeamField = function() {
+    var tt = document.getElementById('peHandoverTeamType');
+    var ext = document.getElementById('peExternalTeamField');
+    var streamField = document.getElementById('peHandoverStreamField');
+    var label = document.getElementById('peHandoverOwnerLabel');
+    if (tt && ext && streamField) {
+      if (tt.value === 'External') {
+        ext.style.display = '';
+        streamField.style.display = 'none';
+      } else {
+        ext.style.display = 'none';
+        streamField.style.display = '';
+      }
+    }
+    if (label) {
+      label.textContent = (tt && tt.value === 'Internal')
+        ? 'Name of the Assignee / Owner (default to Store)'
+        : 'Name of the Assignee / Owner';
+    }
+  };
+
+  // ─── Description Character Counter ───
+  var descField = document.querySelector('textarea[name="description"]');
+  var descCount = document.getElementById('peDescCount');
+  if (descField && descCount) {
+    descField.addEventListener('input', function() {
+      descCount.textContent = this.value.length;
+    });
+  }
+
+  // ─── Unsaved Changes Indicator ───
+  var unsavedDot = document.getElementById('peUnsavedDot');
+  var hint = document.getElementById('peActionHint');
+  var formDirty = false;
+
+  function markUnsaved() {
+    if (formDirty) return;
+    formDirty = true;
+    if (unsavedDot) unsavedDot.classList.add('visible');
+    if (hint) hint.textContent = 'You have unsaved changes';
+  }
+
+  var form = document.getElementById('peEditForm');
+  if (form) {
+    form.addEventListener('input', markUnsaved);
+    form.addEventListener('change', markUnsaved);
+  }
+
+  // Warn before leaving with unsaved changes
+  window.addEventListener('beforeunload', function(e) {
+    if (formDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // Clear dirty on submit
+  if (form) {
+    form.addEventListener('submit', function() { formDirty = false; });
+  }
+
+  // ─── Image Delete Toggle ───
+  window.toggleDeleteImg = function(id) {
+    var el = document.getElementById('peImg' + id);
+    var cb = document.getElementById('peDelImg' + id);
+    if (!el || !cb) return;
+    el.classList.toggle('marked-delete');
+    cb.checked = !cb.checked;
+    markUnsaved();
+  };
+
+  // ─── File Upload with Preview ───
+  var fileInput = document.getElementById('peFileInput');
+  var uploadZone = document.getElementById('peUploadZone');
+  var newFilesContainer = document.getElementById('peNewFiles');
+  var dt = new DataTransfer();
+
+  if (uploadZone) {
+    ['dragenter', 'dragover'].forEach(function(ev) {
+      uploadZone.addEventListener(ev, function(e) { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(function(ev) {
+      uploadZone.addEventListener(ev, function(e) { e.preventDefault(); uploadZone.classList.remove('dragover'); });
+    });
+    uploadZone.addEventListener('drop', function(e) {
+      var files = e.dataTransfer.files;
+      for (var i = 0; i < files.length; i++) dt.items.add(files[i]);
+      fileInput.files = dt.files;
+      renderNewFiles();
+      markUnsaved();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      for (var i = 0; i < fileInput.files.length; i++) dt.items.add(fileInput.files[i]);
+      fileInput.files = dt.files;
+      renderNewFiles();
+      markUnsaved();
+    });
+  }
+
+  function renderNewFiles() {
+    newFilesContainer.innerHTML = '';
+    var files = dt.files;
+    if (files.length === 0) return;
+    for (var i = 0; i < files.length; i++) {
+      (function(idx) {
+        var file = files[idx];
+        var el = document.createElement('div');
+        el.className = 'pe-new-file';
+
+        var remove = document.createElement('span');
+        remove.className = 'nf-remove';
+        remove.innerHTML = '<i class="fas fa-times"></i>';
+        remove.title = 'Remove';
+        remove.addEventListener('click', function(e) {
+          e.preventDefault();
+          var newDt = new DataTransfer();
+          for (var j = 0; j < dt.files.length; j++) {
+            if (j !== idx) newDt.items.add(dt.files[j]);
+          }
+          dt = newDt;
+          fileInput.files = dt.files;
+          renderNewFiles();
+        });
+        el.appendChild(remove);
+
+        var thumb = document.createElement('div');
+        thumb.className = 'nf-thumb';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = function() { URL.revokeObjectURL(this.src); };
+        thumb.appendChild(img);
+        el.appendChild(thumb);
+
+        var name = document.createElement('div');
+        name.className = 'nf-name';
+        name.title = file.name;
+        name.textContent = file.name.length > 14 ? file.name.substring(0, 11) + '...' : file.name;
+        el.appendChild(name);
+
+        var progress = document.createElement('div');
+        progress.className = 'nf-progress';
+        var bar = document.createElement('div');
+        bar.className = 'nf-progress-bar';
+        progress.appendChild(bar);
+        el.appendChild(progress);
+
+        newFilesContainer.appendChild(el);
+
+        // Animate progress
+        var p = 0;
+        var speed = Math.max(15, Math.min(80, 50 - file.size / 500000));
+        var iv = setInterval(function() {
+          p += Math.random() * speed;
+          if (p >= 100) { p = 100; bar.style.width = '100%'; bar.classList.add('done'); clearInterval(iv); }
+          else { bar.style.width = p + '%'; }
+        }, 60);
+      })(i);
+    }
+  }
+
+  // ─── Save as Draft ───
+  window.peSaveDraft = function() {
+    var draftField = document.getElementById('peSaveAsDraft');
+    if (draftField) { draftField.value = '1'; draftField._draftClicked = true; }
+    var draftBtn = document.getElementById('peDraftBtn');
+    if (draftBtn) {
+      draftBtn.disabled = true;
+      draftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Draft...';
+    }
+    if (form) form.submit();
+  };
+
+  // ─── Form Submit UX ───
+  var submitBtn = document.getElementById('peSubmitBtn');
+  if (form && submitBtn) {
+    form.addEventListener('submit', function() {
+      // Ensure draft flag is reset for normal saves (publish the product)
+      var draftField = document.getElementById('peSaveAsDraft');
+      if (draftField && draftField._draftClicked !== true) draftField.value = '0';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      // Animate all file progress bars to 100%
+      var bars = document.querySelectorAll('.nf-progress-bar');
+      bars.forEach(function(b) { b.style.transition = 'width 1s ease'; b.style.width = '100%'; });
+    });
+  }
+
+  // ─── Inline Validation ───
+  var requiredInputs = form ? form.querySelectorAll('[required]') : [];
+  requiredInputs.forEach(function(inp) {
+    inp.addEventListener('blur', function() {
+      var fg = this.closest('.pe-fg');
+      if (!fg) return;
+      if (this.value.trim()) {
+        fg.classList.remove('invalid');
+        fg.classList.add('valid');
+      } else {
+        fg.classList.remove('valid');
+        fg.classList.add('invalid');
+      }
+    });
+    inp.addEventListener('input', function() {
+      var fg = this.closest('.pe-fg');
+      if (!fg) return;
+      if (this.value.trim()) {
+        fg.classList.remove('invalid');
+        fg.classList.add('valid');
+      }
+    });
+  });
+
+  // Init on load
+  document.addEventListener('DOMContentLoaded', function() {
+    initStatusButtons();
+    toggleExternalTeamField();
+  });
+
+})();
+</script>
+{% endblock %}

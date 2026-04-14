@@ -1,0 +1,612 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ alert.title }} - Compliance Alert{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --danger-red: #ef4444;
+        --warning-orange: #f59e0b;
+        --info-blue: #3b82f6;
+        --success-green: #10b981;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-content { flex: 1; }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .breadcrumb a { color: white; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.65rem;
+        border-radius: 12px;
+    }
+
+    .header-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .btn-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.25rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 42px;
+        box-sizing: border-box;
+    }
+
+    .btn-header-back {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-header-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+
+    .btn-header-warn {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .btn-header-warn:hover { background: #d97706; }
+
+    .btn-header-success {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .btn-header-success:hover { background: #059669; }
+
+    .btn-header-edit {
+        background: white;
+        color: var(--emerald-dark);
+    }
+
+    .btn-header-edit:hover { background: #f0fdf4; }
+
+    .btn-header-danger {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+
+    .btn-header-danger:hover { background: var(--danger-red); }
+
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* Cards */
+    .card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .card + .card { margin-top: 1.5rem; }
+
+    .card-header {
+        padding: 1.25rem 1.75rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-body { padding: 1.75rem; }
+
+    /* Detail Items */
+    .detail-item { margin-bottom: 1.5rem; }
+    .detail-item:last-child { margin-bottom: 0; }
+
+    .detail-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.35rem;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        line-height: 1.7;
+    }
+
+    /* Severity & Status Badges */
+    .severity-badge, .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .severity-badge.critical { background: #fee2e2; color: #b91c1c; }
+    .severity-badge.urgent { background: #fef3c7; color: #b45309; }
+    .severity-badge.warning { background: #fff7ed; color: #c2410c; }
+    .severity-badge.info { background: #dbeafe; color: #1e40af; }
+
+    .status-badge.active { background: #fee2e2; color: #b91c1c; }
+    .status-badge.acknowledged { background: #fef3c7; color: #b45309; }
+    .status-badge.resolved { background: #d1fae5; color: #047857; }
+    .status-badge.dismissed { background: #e2e8f0; color: #475569; }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .info-card {
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .info-card .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--text-secondary);
+        margin-bottom: 0.35rem;
+    }
+
+    .info-card .info-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.6rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.75rem;
+    }
+
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.65rem;
+        top: 0.2rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px var(--border-color);
+    }
+
+    .timeline-item.created::before { background: var(--info-blue); box-shadow: 0 0 0 2px var(--info-blue); }
+    .timeline-item.acknowledged::before { background: var(--warning-orange); box-shadow: 0 0 0 2px var(--warning-orange); }
+    .timeline-item.resolved::before { background: var(--success-green); box-shadow: 0 0 0 2px var(--success-green); }
+
+    .timeline-date {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+    }
+
+    .timeline-content {
+        font-size: 0.88rem;
+        color: var(--text-primary);
+    }
+
+    .timeline-user { font-weight: 600; color: var(--emerald-dark); }
+
+    /* Related Items */
+    .related-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .related-item:hover { background: #f0fdf4; }
+    .related-item:last-child { margin-bottom: 0; }
+
+    .related-item i { color: var(--emerald); font-size: 0.9rem; }
+    .related-item .related-label { font-size: 0.78rem; color: var(--text-secondary); }
+    .related-item .related-value { font-size: 0.88rem; font-weight: 600; }
+
+    @media (max-width: 1024px) {
+        .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .page-header { padding: 1.5rem; }
+        .header-top { flex-direction: column; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-top">
+            <div class="header-content">
+                <div class="breadcrumb">
+                    <a href="{% url 'compliance_dashboard' stream %}">Compliance</a>
+                    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+                    <a href="{% url 'compliance_alerts_list' stream %}">Alerts</a>
+                    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+                    <span>{{ alert.title|truncatechars:40 }}</span>
+                </div>
+                <h1>
+                    <i class="fas fa-bell"></i>
+                    {{ alert.title }}
+                </h1>
+                <div class="header-badges">
+                    <span class="header-badge">
+                        <i class="fas fa-{% if alert.severity == 'critical' %}exclamation-circle{% elif alert.severity == 'urgent' %}exclamation-triangle{% elif alert.severity == 'warning' %}exclamation{% else %}info-circle{% endif %}"></i>
+                        {{ alert.get_severity_display }}
+                    </span>
+                    <span class="header-badge">
+                        <i class="fas fa-tag"></i>
+                        {{ alert.get_alert_type_display }}
+                    </span>
+                    <span class="header-badge">
+                        <i class="fas fa-{% if alert.status == 'resolved' %}check-circle{% elif alert.status == 'acknowledged' %}eye{% else %}bell{% endif %}"></i>
+                        {{ alert.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'compliance_alerts_list' stream %}" class="btn-header btn-header-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                {% if alert.status == 'active' %}
+                <form method="POST" action="{% url 'compliance_alert_acknowledge' stream alert.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-header btn-header-warn">
+                        <i class="fas fa-check"></i> Acknowledge
+                    </button>
+                </form>
+                {% endif %}
+                {% if alert.status != 'resolved' %}
+                <form method="POST" action="{% url 'compliance_alert_resolve' stream alert.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-header btn-header-success">
+                        <i class="fas fa-check-double"></i> Resolve
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'compliance_alert_edit' stream alert.pk %}" class="btn-header btn-header-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'compliance_alert_delete' stream alert.pk %}" class="btn-header btn-header-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div>
+            <!-- Alert Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle" style="color: var(--emerald);"></i> Alert Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="detail-item">
+                        <div class="detail-label">Message</div>
+                        <div class="detail-value">{{ alert.message|default:"No message provided."|linebreaks }}</div>
+                    </div>
+
+                    {% if alert.resolution_notes %}
+                    <div class="detail-item">
+                        <div class="detail-label">Resolution Notes</div>
+                        <div class="detail-value">{{ alert.resolution_notes|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Items -->
+            {% if alert.related_requirement or alert.related_document or alert.related_calibration or alert.related_certificate %}
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-link" style="color: #0044CC;"></i> Related Items</h2>
+                </div>
+                <div class="card-body">
+                    {% if alert.related_requirement %}
+                    <div class="related-item">
+                        <i class="fas fa-balance-scale"></i>
+                        <div>
+                            <div class="related-label">Regulatory Requirement</div>
+                            <div class="related-value">{{ alert.related_requirement.requirement_id }} — {{ alert.related_requirement.title }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if alert.related_document %}
+                    <div class="related-item">
+                        <i class="fas fa-file-alt"></i>
+                        <div>
+                            <div class="related-label">Compliance Document</div>
+                            <div class="related-value">{{ alert.related_document.document_id }} — {{ alert.related_document.title }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if alert.related_calibration %}
+                    <div class="related-item">
+                        <i class="fas fa-tools"></i>
+                        <div>
+                            <div class="related-label">Calibration Schedule</div>
+                            <div class="related-value">{{ alert.related_calibration }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if alert.related_certificate %}
+                    <div class="related-item">
+                        <i class="fas fa-certificate"></i>
+                        <div>
+                            <div class="related-label">Calibration Certificate</div>
+                            <div class="related-value">{{ alert.related_certificate }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Quick Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-signal" style="color: var(--info-blue);"></i> Quick Info</h2>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Severity</div>
+                            <div class="info-value">
+                                <span class="severity-badge {{ alert.severity }}">
+                                    {{ alert.get_severity_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge {{ alert.status }}">
+                                    {{ alert.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <div class="detail-item">
+                            <div class="detail-label">Alert Type</div>
+                            <div class="detail-value">{{ alert.get_alert_type_display }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Stream</div>
+                            <div class="detail-value">{{ alert.stream }}</div>
+                        </div>
+                        {% if alert.target_user %}
+                        <div class="detail-item">
+                            <div class="detail-label">Assigned To</div>
+                            <div class="detail-value">{{ alert.target_user.get_full_name|default:alert.target_user.username }}</div>
+                        </div>
+                        {% endif %}
+                        {% if alert.auto_dismiss_date %}
+                        <div class="detail-item">
+                            <div class="detail-label">Auto-Dismiss Date</div>
+                            <div class="detail-value">{{ alert.auto_dismiss_date|date:"F d, Y" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clock" style="color: var(--warning-orange);"></i> Activity Timeline</h2>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item created">
+                            <div class="timeline-date">{{ alert.created_at|date:"M d, Y H:i" }}</div>
+                            <div class="timeline-content">
+                                Alert created
+                            </div>
+                        </div>
+
+                        {% if alert.acknowledged_at %}
+                        <div class="timeline-item acknowledged">
+                            <div class="timeline-date">{{ alert.acknowledged_at|date:"M d, Y H:i" }}</div>
+                            <div class="timeline-content">
+                                Acknowledged
+                                {% if alert.acknowledged_by %}
+                                by <span class="timeline-user">{{ alert.acknowledged_by.get_full_name|default:alert.acknowledged_by.username }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if alert.resolved_at %}
+                        <div class="timeline-item resolved">
+                            <div class="timeline-date">{{ alert.resolved_at|date:"M d, Y H:i" }}</div>
+                            <div class="timeline-content">
+                                Resolved
+                                {% if alert.resolved_by %}
+                                by <span class="timeline-user">{{ alert.resolved_by.get_full_name|default:alert.resolved_by.username }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

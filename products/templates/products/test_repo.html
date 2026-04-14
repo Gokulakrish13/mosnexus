@@ -1,953 +1,1549 @@
 {% block content %}
-<title>Sanity Test Suite</title>
-    {% load static %}
-    <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+<title>Sanity Test Suite — {{ BU_TITLE|default:'NexusOps' }}</title>
+{% load static %}
+<link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+
 <style>
-.dashboard-header-advanced {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 3.5rem 0 3.5rem;
-  background: linear-gradient(90deg, #e9ecef 60%, #f8f9fa 100%);
-  border-radius: 0 0 24px 24px;
-  box-shadow: 0 4px 24px #e0e3e7;
-  position: relative;
-  margin-bottom: 2.2rem;
+/* ===== Design Tokens ===== */
+:root {
+    --primary: #0066cc;
+    --primary-dark: #004d99;
+    --primary-light: #e6f0ff;
+    --accent: #0891b2;
+    --accent-light: #ecfeff;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
 }
-.dashboard-title {
-  font-size: 2.5rem;
-  color: #007bff;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  margin: 0;
-  text-align: center;
-  width: 100%;
+* { box-sizing: border-box; }
+html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    overflow-x: hidden;
 }
-.dashboard-home-advanced {
-  position: absolute;
-  top: 1.2rem;
-  right: 3.5rem;
-  color: #fff;
-  background: linear-gradient(135deg, #007bff 60%, #28a745 100%);
-  font-size: 2.3rem;
-  border-radius: 50%;
-  width: 3.2rem;
-  height: 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 12px #b3c6e0;
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s, transform 0.18s;
-  border: 2px solid #fff;
+
+/* ===== Page Layout ===== */
+.page-wrapper { max-width: 1900px; margin: 0 auto; padding: 1rem 2rem 3rem; }
+
+/* ===== Header ===== */
+.page-header {
+    background: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem 2.5rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
 }
-.dashboard-home-advanced:hover {
-  background: linear-gradient(135deg, #28a745 60%, #007bff 100%);
-  color: #fff;
-  transform: scale(1.08);
-  box-shadow: 0 4px 18px #b3e0fc;
-  text-decoration: none;
+.header-left { display: flex; align-items: center; gap: 1rem; }
+.header-left h1 { font-size: 1.5rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; }
+.header-left .subtitle { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+.header-right { display: flex; align-items: center; gap: 0.75rem; }
+.header-btn {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
 }
-#zenitionExcelPreviewModal .modal-dialog {
-  left: 0;
-  position: fixed;
+.header-btn:hover { background: rgba(255,255,255,0.25); color: #fff; text-decoration: none; }
+
+/* ===== Wizard Stepper ===== */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+    flex-wrap: wrap;
 }
-/* #testEnvModal .modal-dialog {
-  right: 0;
-  position: fixed;
-} */
+.step {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-primary);
+    border: 1.5px solid var(--border-color);
+    transition: all 0.3s;
+    cursor: default;
+    white-space: nowrap;
+}
+.step .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+.step.active { color: var(--primary); border-color: var(--primary); background: var(--primary-light); }
+.step.active .step-num { background: var(--primary); color: #fff; }
+.step.completed { color: var(--success); border-color: var(--success); background: var(--success-light); }
+.step.completed .step-num { background: var(--success); color: #fff; }
+.step-connector { width: 36px; height: 2px; background: var(--border-color); flex-shrink: 0; transition: background 0.3s; }
+.step-connector.active { background: var(--primary); }
+.step-connector.completed { background: var(--success); }
+
+/* ===== Panel Card ===== */
+.panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.25s;
+}
+.panel:hover { box-shadow: var(--shadow-md); }
+.panel-header {
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.panel-header h3 {
+    font-size: 0.95rem; font-weight: 600; margin: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.panel-header h3 i { color: var(--primary); font-size: 1.05rem; }
+.panel-body { padding: 1.5rem; }
+
+/* ===== Status Badges ===== */
+.badge-status {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.25rem 0.7rem; border-radius: 50px;
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3px;
+}
+.badge-ready { background: var(--success-light); color: var(--success); }
+.badge-pending { background: var(--warning-light); color: var(--warning); }
+.badge-empty { background: var(--bg-tertiary); color: var(--text-muted); }
+
+/* ===== Form Controls ===== */
+.form-label-custom {
+    font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);
+    margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; display: block;
+}
+.form-control-custom {
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.6rem 1rem;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+    background: var(--bg-primary);
+    width: 100%;
+}
+.form-control-custom:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.12); outline: none; }
+
+/* ===== Buttons ===== */
+.btn-primary-custom {
+    background: var(--primary); color: #fff; border: none;
+    padding: 0.6rem 1.5rem; border-radius: var(--radius-md);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-primary-custom:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-success-custom {
+    background: var(--success); color: #fff; border: none;
+    padding: 0.6rem 1.5rem; border-radius: var(--radius-md);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-success-custom:hover { background: #047857; }
+.btn-outline-custom {
+    background: transparent; color: var(--primary);
+    border: 1.5px solid var(--primary);
+    padding: 0.55rem 1.25rem; border-radius: var(--radius-md);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-outline-custom:hover { background: var(--primary-light); }
+.btn-warning-custom {
+    background: var(--warning); color: #fff; border: none;
+    padding: 0.6rem 1.5rem; border-radius: var(--radius-md);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-warning-custom:hover { background: #b45309; }
+.btn-danger-custom {
+    background: var(--danger); color: #fff; border: none;
+    padding: 0.45rem 0.85rem; border-radius: var(--radius-md);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    transition: all 0.2s;
+}
+.btn-danger-custom:hover { background: #b91c1c; }
+.btn-ghost {
+    background: transparent; color: var(--text-secondary);
+    border: 1.5px solid var(--border-color);
+    padding: 0.55rem 1.25rem; border-radius: var(--radius-md);
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-ghost:hover { background: var(--bg-tertiary); border-color: var(--border-hover); }
+
+/* ===== Layout Grid ===== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.content-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+.content-grid .full-width { grid-column: 1 / -1; }
+
+/* ===== Stats Row ===== */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.15rem 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; flex-shrink: 0;
+}
+.stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+.stat-icon.green { background: var(--success-light); color: var(--success); }
+.stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+.stat-icon.cyan { background: var(--accent-light); color: var(--accent); }
+.stat-info h4 { font-size: 1.3rem; font-weight: 700; margin: 0; line-height: 1; }
+.stat-info p { font-size: 0.73rem; color: var(--text-muted); margin: 0.2rem 0 0; }
+
+/* ===== Upload Zone ===== */
+.upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-secondary);
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--primary-light); }
+.upload-zone i.upload-icon { font-size: 2rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem; }
+.upload-zone p { font-size: 0.82rem; color: var(--text-muted); margin: 0.2rem 0 0; }
+.upload-zone .upload-title { font-weight: 600; color: var(--text-secondary); font-size: 0.92rem; }
+
+/* ===== Action Tile ===== */
+.action-tile {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-primary);
+}
+.action-tile:hover { border-color: var(--primary); background: var(--primary-light); }
+.action-tile .tile-icon {
+    width: 40px; height: 40px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; flex-shrink: 0;
+}
+.action-tile .tile-text h4 { font-size: 0.88rem; font-weight: 600; margin: 0; }
+.action-tile .tile-text p { font-size: 0.73rem; color: var(--text-muted); margin: 0.15rem 0 0; }
+.action-tile.disabled { opacity: 0.5; pointer-events: none; }
+
+/* ===== File Item ===== */
+.file-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+}
+.file-item:hover { background: var(--bg-secondary); }
+.file-item .file-info { display: flex; align-items: center; gap: 0.75rem; }
+.file-item .file-info i { color: var(--success); font-size: 1.05rem; }
+.file-item .file-name { font-size: 0.85rem; font-weight: 500; }
+.file-item .file-meta { font-size: 0.7rem; color: var(--text-muted); }
+
+/* ===== Toast Notifications ===== */
+.toast-container-custom { position: fixed; bottom: 2rem; right: 2rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast-custom {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--success);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.15rem;
+    display: flex; align-items: center; gap: 0.65rem;
+    box-shadow: var(--shadow-lg);
+    animation: toastSlide 0.3s ease;
+    min-width: 320px;
+    font-size: 0.85rem;
+}
+.toast-custom.error { border-left-color: var(--danger); }
+.toast-custom i { font-size: 1.05rem; }
+.toast-custom.success i { color: var(--success); }
+.toast-custom.error i { color: var(--danger); }
+@keyframes toastSlide { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+
+/* ===== Modal Overrides ===== */
+.modal-professional .modal-content { border: none; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); }
+.modal-professional .modal-header { padding: 1.15rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+.modal-professional .modal-header .modal-title { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+.modal-professional .modal-body { padding: 1.5rem; }
+.modal-professional .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); }
+
+/* ===== Fullscreen Preview Modals ===== */
+.modal-fullscreen-preview .modal-dialog { max-width: 98vw; width: 98vw; height: 96vh; margin: 2vh auto; }
+.modal-fullscreen-preview .modal-content { height: 96vh; border-radius: var(--radius-xl); border: none; box-shadow: var(--shadow-lg); }
+.modal-fullscreen-preview .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+.modal-fullscreen-preview .modal-body { height: calc(96vh - 60px); overflow: auto; padding: 1.5rem; }
+.modal-fullscreen-preview table { width: 100% !important; table-layout: auto; font-size: 0.85rem; border-collapse: collapse; }
+.modal-fullscreen-preview th {
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 0.75rem 1rem; border: 1px solid var(--border-color);
+    position: sticky; top: 0; z-index: 1;
+}
+.modal-fullscreen-preview td { padding: 0.6rem 1rem; border: 1px solid var(--border-color); vertical-align: middle; }
+.modal-fullscreen-preview tbody tr:hover { background: var(--primary-light); }
+.modal-fullscreen-preview td[contenteditable="true"] { background: #fffbeb; cursor: text; }
+
+/* ===== Zenition Product Tags ===== */
+.zen-product-tag {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: var(--accent-light); color: var(--accent);
+    border: 1px solid rgba(8,145,178,0.2);
+    border-radius: 50px; padding: 0.25rem 0.7rem;
+    font-size: 0.76rem; font-weight: 500;
+}
+.zen-product-tag .remove-tag { cursor: pointer; font-size: 0.88rem; line-height: 1; opacity: 0.6; }
+.zen-product-tag .remove-tag:hover { opacity: 1; color: var(--danger); }
+
+/* ===== Divider ===== */
+.divider-or {
+    display: flex; align-items: center; gap: 1rem;
+    margin: 1rem 0; color: var(--text-muted);
+    font-size: 0.78rem; font-weight: 500;
+}
+.divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+
+/* ===== Empty State ===== */
+.empty-state { text-align: center; padding: 2.5rem 1rem; }
+.empty-state i { font-size: 2.5rem; color: var(--border-color); }
+.empty-state h4 { font-size: 0.92rem; font-weight: 600; color: var(--text-secondary); margin: 0.75rem 0 0.25rem; }
+.empty-state p { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ===== Footer ===== */
+.page-footer {
+    text-align: center; padding: 1.25rem 0;
+    font-size: 0.78rem; color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    margin-top: 2rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+    .content-grid, .content-grid.three-col { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .stats-row { grid-template-columns: 1fr; }
+    .stepper { gap: 0.25rem; }
+    .step { font-size: 0.72rem; padding: 0.5rem 0.75rem; }
+    .step-connector { width: 16px; }
+    .page-header { flex-direction: column; text-align: center; gap: 1rem; }
+    .page-wrapper { padding: 0 1rem 2rem; }
+}
 </style>
-<div class="dashboard-header-advanced" style="justify-content: center;">
-  <!-- Philips Logo and Go to Dashboard button -->
-  <a href="/dashboard/" title="Go to Dashboard" style="position: absolute; right: 120px; top: 28px; z-index: 11;">
-    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home" style="height: 32px; width: 32px; background: white; border-radius: 8px; padding: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  </a>
-  <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo" style="height: 90px; position: absolute; right: 30px; top: 20px; z-index: 10;">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-    <h2 class="dashboard-title" style="margin: 0; display: inline-block; vertical-align: middle;">Test Repo Dashboard</h2>
-    <button id="infoBtn" title="About this page" style="background:none; border:none; outline:none; cursor:pointer; padding:0; margin-left:4px; vertical-align: middle; display:inline-block;">
-      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#3182ce" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
-        <circle cx="16" cy="16" r="14"/>
-        <line x1="16" y1="22" x2="16" y2="16"/>
-        <line x1="16" y1="10" x2="16" y2="10"/>
-      </svg>
-    </button>
-  </div>
-</div>
-<div style="display:flex;width:100vw;min-height:100vh;margin:0;padding:0;background:#fff;border-radius:0;box-shadow:none;">
- <div style="width:33vw;min-height:100vh;display:flex;align-items:flex-start;justify-content:flex-start;padding-left:2vw;padding-top:4vh;flex-direction:column;">
-    <form method="get" id="streamSelectForm" class="d-flex flex-column align-items-start justify-content-center mb-4" style="gap:2rem;width:100%;background:linear-gradient(90deg,#f8f9fa 70%,#e9ecef 100%);padding:2rem 2rem 2rem 1rem;border-radius:18px;box-shadow:0 2px 18px #e0e3e7;">
-        <label for="streamDropdown" style="font-weight:700;color:#005fa3;font-size:1.35rem;letter-spacing:1px;">Select Stream:</label>
-        <select name="stream" id="streamDropdown" class="form-select" style="min-width:200px;width:85%;font-size:1.15rem;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid #007bff;">
-            <option value="Software Element Backend" {% if request.GET.stream == 'Software Element Backend' or selected_stream == 'Software Element Backend' %}selected{% endif %}>Software Element Backend</option>
-            <option value="Software Element FrontEnd" {% if request.GET.stream == 'Software Element FrontEnd' or selected_stream == 'Software Element FrontEnd' %}selected{% endif %}>Software Element FrontEnd</option>
-        </select>
-        <button type="submit" class="btn btn-primary" style="width:85%;font-size:1.15rem;padding:0.7rem 0;border-radius:10px;font-weight:600;letter-spacing:1px;">Submit</button>
-    </form>
-    <div id="uploadSection" style="display:none;width:100%;margin-top:2rem;">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title">Upload Legacy Excel</h4>
-          <p>You can either upload a file or use the existing file in the Database</p>
-          <form method="post" enctype="multipart/form-data" id="legacyExcelForm" class="d-flex align-items-center" style="gap:1rem;">
-            {% csrf_token %}
-            <input type="hidden" name="selected_stream" value="{{ request.GET.stream|default:selected_stream }}">
-            <input type="file" name="legacy_excel" accept=".xlsx,.xls" class="form-control" style="max-width:290px;">
-            <button type="submit" class="btn btn-success">Upload</button>
-          </form>
-          <p>or</p>
-          <!-- Fetch Data Button -->
-          <div style="margin-top:1rem;">
-              <button type="button" id="fetchLegacyDataBtn" class="btn btn-outline-primary">Fetch Data</button>
-            </div>
-            <div id="previewBtnContainer" style="margin-top:1rem;display:none;">
-                <button type="button" id="previewBtn" class="btn btn-outline-info">Preview Uploaded File</button>
+
+<!-- ======== PAGE STRUCTURE ======== -->
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div>
+                <h1><i class="bi bi-clipboard2-data"></i> Sanity Test Suite</h1>
+                <div class="subtitle">Manage sanity test data, merge Excel sources &amp; configure test environments</div>
             </div>
         </div>
-      </div>
-      <!-- Fetch Data Modal -->
-    <div class="modal fade" id="fetchLegacyDataModal" tabindex="-1" aria-labelledby="fetchLegacyDataModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="header-right">
+            <button type="button" class="header-btn" id="infoBtn" title="About this page"><i class="bi bi-info-circle"></i> Guide</button>
+            <a href="{% url 'dashboard' %}" class="header-btn"><i class="bi bi-house-door"></i> Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Workflow Stepper -->
+    <div class="stepper">
+        <div class="step active" id="step1"><span class="step-num">1</span> Select Stream</div>
+        <div class="step-connector" id="conn1"></div>
+        <div class="step" id="step2"><span class="step-num">2</span> Legacy Excel</div>
+        <div class="step-connector" id="conn2"></div>
+        <div class="step" id="step3"><span class="step-num">3</span> Zenition Product</div>
+        <div class="step-connector" id="conn3"></div>
+        <div class="step" id="step4"><span class="step-num">4</span> Merge &amp; Configure</div>
+        <div class="step-connector" id="conn4"></div>
+        <div class="step" id="step5"><span class="step-num">5</span> Export</div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-folder2-open"></i></div>
+            <div class="stat-info">
+                <h4 id="statStreams">{{ streams|length }}</h4>
+                <p>Available Streams</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-box-seam"></i></div>
+            <div class="stat-info">
+                <h4 id="statZenition">{{ zenition_products|length }}</h4>
+                <p>Zenition Products</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-file-earmark-excel"></i></div>
+            <div class="stat-info">
+                <h4 id="statUploads">0</h4>
+                <p>Files Loaded</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-check2-circle"></i></div>
+            <div class="stat-info">
+                <h4 id="statStatus">Pending</h4>
+                <p>Workflow Status</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== STEP 1: Stream Selection ====== -->
+    <div id="section-stream" class="content-grid" style="grid-template-columns: 1fr 2fr;">
+        <div class="panel">
+            <div class="panel-header">
+                <h3><i class="bi bi-signpost-split"></i> Stream Selection</h3>
+                <span class="badge-status badge-pending" id="streamBadge"><i class="bi bi-clock"></i> Pending</span>
+            </div>
+            <div class="panel-body">
+                <form method="get" id="streamSelectForm">
+                    <div class="mb-3">
+                        <label class="form-label-custom">Target Stream</label>
+                        <select name="stream" id="streamDropdown" class="form-control-custom form-select">
+                            {% for s in streams %}
+                            <option value="{{ s }}" {% if s == selected_stream %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:1rem;">
+                        Select the target stream (Backend/Frontend) to begin the sanity test workflow.
+                    </p>
+                    <button type="submit" class="btn-primary-custom" style="width:100%;justify-content:center;">
+                        <i class="bi bi-arrow-right-circle"></i> Load Stream
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h3><i class="bi bi-map"></i> Workflow Overview</h3>
+            </div>
+            <div class="panel-body">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                    <div class="action-tile" style="cursor:default;">
+                        <div class="tile-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-1-circle-fill"></i></div>
+                        <div class="tile-text"><h4>Select Stream</h4><p>Choose Backend or Frontend stream</p></div>
+                    </div>
+                    <div class="action-tile" style="cursor:default;">
+                        <div class="tile-icon" style="background:var(--success-light);color:var(--success);"><i class="bi bi-2-circle-fill"></i></div>
+                        <div class="tile-text"><h4>Upload Legacy Data</h4><p>Load legacy Excel from file or DB</p></div>
+                    </div>
+                    <div class="action-tile" style="cursor:default;">
+                        <div class="tile-icon" style="background:var(--warning-light);color:var(--warning);"><i class="bi bi-3-circle-fill"></i></div>
+                        <div class="tile-text"><h4>Zenition Product</h4><p>Add products &amp; upload Zenition data</p></div>
+                    </div>
+                    <div class="action-tile" style="cursor:default;">
+                        <div class="tile-icon" style="background:var(--accent-light);color:var(--accent);"><i class="bi bi-4-circle-fill"></i></div>
+                        <div class="tile-text"><h4>Merge &amp; Export</h4><p>Consolidate data, configure env, export</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== STEP 2: Legacy Excel + Zenition Products (side by side) ====== -->
+    <div id="section-legacy" style="display:none;">
+        <div class="content-grid">
+            <!-- Legacy Excel Upload -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="bi bi-file-earmark-arrow-up" style="color:var(--success);"></i> Upload Legacy Excel</h3>
+                    <span class="badge-status badge-empty" id="legacyBadge"><i class="bi bi-dash"></i> No file</span>
+                </div>
+                <div class="panel-body">
+                    <form method="post" enctype="multipart/form-data" id="legacyExcelForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="selected_stream" id="selectedStreamInput" value="{{ selected_stream }}">
+                        <div class="upload-zone" id="legacyDropZone">
+                            <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                            <p class="upload-title">Drag &amp; drop your Excel file here</p>
+                            <p>or click to browse — .xlsx, .xls supported</p>
+                            <input type="file" name="legacy_excel" accept=".xlsx,.xls" id="legacyFileInput" style="display:none;">
+                        </div>
+                        <div id="legacyFileInfo" style="display:none; margin-top:1rem;"></div>
+                        <button type="submit" class="btn-success-custom" id="legacyUploadBtn" style="width:100%;justify-content:center;margin-top:1rem;display:none;">
+                            <i class="bi bi-upload"></i> Upload File
+                        </button>
+                    </form>
+                    <div class="divider-or">OR</div>
+                    <button type="button" id="fetchLegacyDataBtn" class="btn-outline-custom" style="width:100%;justify-content:center;">
+                        <i class="bi bi-database"></i> Fetch from Database
+                    </button>
+                    <div id="legacyPreviewBtnContainer" style="display:none; margin-top:1rem;">
+                        <button type="button" id="previewBtn" class="btn-ghost" style="width:100%;justify-content:center;">
+                            <i class="bi bi-eye"></i> Preview Legacy File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zenition Products Management -->
+            <div class="panel" id="addZenitionCard">
+                <div class="panel-header">
+                    <h3><i class="bi bi-boxes" style="color:var(--accent);"></i> Zenition Products</h3>
+                    <span class="badge-status badge-empty" id="zenBadge"><i class="bi bi-dash"></i> {{ zenition_products|length }} loaded</span>
+                </div>
+                <div class="panel-body">
+                    <form id="addZenitionForm" style="display:flex; align-items:flex-end; gap:0.75rem; margin-bottom:1.25rem;">
+                        {% csrf_token %}
+                        <div style="flex:1;">
+                            <label class="form-label-custom">New Product Name</label>
+                            <input type="text" name="zenition_name" id="zenitionNameInput" placeholder="e.g. Azurion B12/22" class="form-control-custom" required>
+                        </div>
+                        <button type="submit" class="btn-success-custom" style="white-space:nowrap;"><i class="bi bi-plus-lg"></i> Add</button>
+                    </form>
+                    <div id="zenitionTagList" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.25rem;">
+                        {% for zp in zenition_products %}
+                        <span class="zen-product-tag" data-id="{{ zp.id }}">{{ zp.name }} <span class="remove-tag" title="Remove">&times;</span></span>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="form-label-custom">Select Product for Excel Upload</label>
+                        <select id="zenitionDropdown" class="form-control-custom form-select">
+                            <option value="">— Choose a Zenition Product —</option>
+                            {% for zp in zenition_products %}
+                            <option value="{{ zp.id }}">{{ zp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== STEP 3: Zenition Excel Upload + Action Tiles ====== -->
+    <div id="section-zenition-excel" style="display:none;">
+        <div class="content-grid">
+            <!-- Zenition Excel Upload -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="bi bi-file-earmark-richtext" style="color:var(--accent);"></i> Upload Zenition Excel</h3>
+                    <span class="badge-status badge-empty" id="zenExcelBadge"><i class="bi bi-dash"></i> No file</span>
+                </div>
+                <div class="panel-body">
+                    <form method="post" enctype="multipart/form-data" id="zenitionExcelForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="zenition_product_id" id="zenitionProductIdInput">
+                        <input type="hidden" name="selected_stream" value="{{ selected_stream }}">
+                        <div class="upload-zone" id="zenitionDropZone">
+                            <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                            <p class="upload-title">Drop Zenition Excel here</p>
+                            <p>or click to browse — .xlsx, .xls</p>
+                            <input type="file" name="zenition_excel" accept=".xlsx,.xls" id="zenitionFileInput" style="display:none;">
+                        </div>
+                        <div id="zenitionFileInfo" style="display:none; margin-top:1rem;"></div>
+                        <button type="submit" class="btn-success-custom" id="zenitionUploadBtn" style="width:100%;justify-content:center;margin-top:1rem;display:none;">
+                            <i class="bi bi-upload"></i> Upload File
+                        </button>
+                    </form>
+                    <div class="divider-or">OR</div>
+                    <button type="button" id="fetchZenitionDataBtn" class="btn-outline-custom" style="width:100%;justify-content:center;">
+                        <i class="bi bi-database"></i> Fetch from Database
+                    </button>
+                    <div id="zenitionExcelPreviewBtnContainer" style="display:none; margin-top:1rem;">
+                        <button type="button" id="zenitionExcelPreviewBtn" class="btn-ghost" style="width:100%;justify-content:center;">
+                            <i class="bi bi-eye"></i> Preview Zenition File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Panel -->
+            <div class="panel" id="section-actions">
+                <div class="panel-header">
+                    <h3><i class="bi bi-lightning-charge" style="color:var(--warning);"></i> Actions</h3>
+                </div>
+                <div class="panel-body" style="display:flex; flex-direction:column; gap:1rem;">
+                    <div class="action-tile disabled" id="mergeTile">
+                        <div class="tile-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-intersect"></i></div>
+                        <div class="tile-text">
+                            <h4>Merge &amp; Consolidate</h4>
+                            <p>Combine legacy + Zenition data into one editable view</p>
+                        </div>
+                    </div>
+                    <div class="action-tile" id="testEnvTile">
+                        <div class="tile-icon" style="background:var(--warning-light);color:var(--warning);"><i class="bi bi-gear-wide-connected"></i></div>
+                        <div class="tile-text">
+                            <h4>Test Environment Setup</h4>
+                            <p>Configure MVS, Stand PC, Apps PC binaries &amp; OS</p>
+                        </div>
+                    </div>
+                    <div class="action-tile disabled" id="exportTile">
+                        <div class="tile-icon" style="background:var(--success-light);color:var(--success);"><i class="bi bi-download"></i></div>
+                        <div class="tile-text">
+                            <h4>Export Data</h4>
+                            <p>Download consolidated test information as Excel</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end .page-wrapper -->
+
+<!-- ======== TOAST CONTAINER ======== -->
+<div class="toast-container-custom" id="toastContainer"></div>
+
+<!-- ======== INFO MODAL ======== -->
+<div class="modal fade modal-professional" id="infoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="fetchLegacyDataModalLabel">Select Legacy Excel File</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div id="legacyExcelListContent"></div>
-        </div>
-        </div>
-    </div>
-    </div>
-    </div>
-</div>
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
-  <div class="card mb-4 shadow-sm" id="addZenitionCard" style="display:none;margin-left:-380px;max-width:600px;width:95%;margin-top:4.5rem;margin-bottom:2.5rem;">
-    <div class="card-body">
-      <h4 class="card-title">Add TestRepoZenitionProduct</h4>
-      <form method="post" id="addZenitionForm" class="d-flex align-items-center" style="gap:1rem;">
-        {% csrf_token %}
-        <input type="text" name="zenition_name" id="zenitionNameInput" placeholder="Enter Zenition Product Name" required class="form-control" style="max-width:280px;">
-        <button type="submit" class="btn btn-success">Add</button>
-      </form>
-      <div style="margin-top:1.2rem;">
-        <label for="zenitionDropdown" style="font-weight:600;color:#005fa3;">Choose TestRepoZenitionProduct:</label>
-        <select id="zenitionDropdown" name="zenition_product" class="form-select" style="min-width:180px;">
-          {% for zp in zenition_products %}
-            <option value="{{ zp.id }}">{{ zp.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-  </div>
-    <div id="zenitionSection" style="margin-top:2rem;display:none;max-width:500px;width:100%;">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title">Add TestRepoZenitionProduct</h4>
-          <form method="post" id="addZenitionForm" class="d-flex align-items-center" style="gap:1rem;">
-            {% csrf_token %}
-            <input type="text" name="zenition_name" id="zenitionNameInput" placeholder="Enter Zenition Product Name" required class="form-control" style="max-width:220px;">
-            <button type="submit" class="btn btn-success">Add</button>
-          </form>
-          <div style="margin-top:1.2rem;">
-            <label for="zenitionDropdown" style="font-weight:600;color:#005fa3;">Choose TestRepoZenitionProduct:</label>
-            <select id="zenitionDropdown" name="zenition_product" class="form-select" style="min-width:180px;">
-              {% for zp in zenition_products %}
-                <option value="{{ zp.id }}">{{ zp.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="zenitionExcelSection" style="margin-top:4.5rem;display:none;margin-left:-380px;max-width:600px;width:95%;">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title">Upload Excel for Selected TestRepoZenitionProduct</h4>
-          <p>You can either upload a file or use the existing file in the Database</p>
-          <form method="post" enctype="multipart/form-data" id="zenitionExcelForm" class="d-flex align-items-center" style="gap:1rem;">
-            {% csrf_token %}
-            <input type="hidden" name="zenition_product_id" id="zenitionProductIdInput">
-            <input type="file" name="zenition_excel" accept=".xlsx,.xls" class="form-control" style="max-width:320px;">
-            <button type="submit" class="btn btn-success">Upload</button>
-          </form>
-          <p>or</p>
-          <div style="margin-top:1rem;">
-            <button type="button" id="fetchZenitionDataBtn" class="btn btn-outline-primary">Fetch Data</button>
-          </div>
-          <div id="zenitionExcelPreviewBtnContainer" style="margin-top:1rem;display:none;">
-            <button type="button" id="zenitionExcelPreviewBtn" class="btn btn-outline-info">Preview Uploaded File</button>
-          </div>
-        </div>
-      </div>
-      <!-- Modal for zenition preview (styled like Legacy Excel Preview) -->
-      <div class="modal fade" id="zenitionExcelPreviewModal" tabindex="-1" aria-labelledby="zenitionExcelPreviewModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width:98vw;width:98vw;height:96vh;margin:1vh auto;">
-          <div class="modal-content" style="height:96vh;border-radius:10px;">
             <div class="modal-header">
-              <h5 class="modal-title" id="zenitionExcelPreviewModalLabel">Zenition Product Excel Preview</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="zenitionExcelPreviewContent" style="height:calc(96vh - 70px);overflow:auto;padding:0;">
-              <!-- Zenition Excel preview content will be injected here -->
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Modal for fetch zenition data -->
-      <div class="modal fade" id="fetchZenitionDataModal" tabindex="-1" aria-labelledby="fetchZenitionDataModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="fetchZenitionDataModalLabel">Select Zenition Excel File</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="bi bi-info-circle" style="color:var(--primary);"></i> Sanity Test Suite — User Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <div id="zenitionExcelListContent"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="mergeSection" style="margin-top:2rem;display:none;">
-      <div style="position:absolute;top:13.5rem;right:2.5rem;z-index:10;max-width:420px;width:100%;">
-        <div class="card mb-4 shadow-sm" id="mergeSection" style="display:block;">
-            <div class="card-body">
-            <h4 class="card-title">Merge Legacy Excel & Zenition Product Excel</h4>
-            <button type="button" id="mergeBtn" class="btn btn-primary">Merge & Show Consolidated View</button>
-            </div>
-        </div>
-        <div class="card mb-4 shadow-sm" id="testEnvSection" style="display:block;margin-top:5rem;">
-          <div class="card-body">
-            <h4 class="card-title">Test Environment Setup</h4>
-            <button type="button" id="testEnvBtn" class="btn btn-warning">Setup Test Environment</button>
-          </div>
-        </div>
-        <div class="card mb-4 shadow-sm" id="exportDataSection" style="display:none;margin-top:5rem;">
-          <div class="card-body">
-            <h4 class="card-title">Export Test Information</h4>
-        <button type="button" id="exportDataBtn" class="btn btn-primary">Export Data</button>
-      </div>
-      </div>
-      </div>
-      <!-- Modal for merged preview and field editing -->
-      <div class="modal fade" id="mergePreviewModal" tabindex="-1" aria-labelledby="mergePreviewModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width:98vw;width:98vw;height:96vh;margin:1vh auto;">
-          <div class="modal-content" style="height:96vh;border-radius:10px;">
-            <div class="modal-header">
-              <h5 class="modal-title" id="mergePreviewModalLabel">Merged Excel Preview</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" style="height:calc(96vh - 70px);overflow:auto;padding:0;">
-             <div class="d-flex align-items-center mt-4" style="gap:1rem; margin-left:2.5rem;">
-              <button type="button" id="addFieldBtn" class="btn btn-outline-success">Add Field</button>
-              <!-- <button type="button" id="deleteFieldBtn" class="btn btn-outline-danger">Delete Field</button> -->
-            </div>
-              <div id="fieldEditSection" class="mt-3" style="display:none;">
-                <div id="addFieldInputs" style="display:none; margin-left: 2.5rem;"> <!-- Moved right -->
-                  <input type="text" id="fieldTestCaseInput" class="form-control mb-2" placeholder="Description/Test Case" style="max-width:1220px;">
-                  <input type="text" id="fieldResultInput" class="form-control mb-2" placeholder="Results" style="max-width:1220px;">
-                  <input type="text" id="fieldCommentInput" class="form-control mb-2" placeholder="Comments" style="max-width:1220px;">
-                  <button type="button" id="confirmAddFieldBtn" class="btn btn-success mb-2">Confirm Add</button>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">This page provides a complete workflow for managing sanity test data for Software Element streams.</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+                    <div style="background:var(--bg-secondary); border-radius:var(--radius-md); padding:1rem;">
+                        <h6 style="font-weight:600; color:var(--primary); font-size:0.85rem;"><i class="bi bi-1-circle-fill"></i> Select Stream</h6>
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Choose the target stream (Backend / Frontend) to load associated data.</p>
+                    </div>
+                    <div style="background:var(--bg-secondary); border-radius:var(--radius-md); padding:1rem;">
+                        <h6 style="font-weight:600; color:var(--success); font-size:0.85rem;"><i class="bi bi-2-circle-fill"></i> Upload Legacy Data</h6>
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Upload a legacy Excel file or fetch existing data from the database. Preview uploaded files anytime.</p>
+                    </div>
+                    <div style="background:var(--bg-secondary); border-radius:var(--radius-md); padding:1rem;">
+                        <h6 style="font-weight:600; color:var(--warning); font-size:0.85rem;"><i class="bi bi-3-circle-fill"></i> Zenition Products</h6>
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Add Zenition products, select one, and upload the associated Zenition Excel data.</p>
+                    </div>
+                    <div style="background:var(--bg-secondary); border-radius:var(--radius-md); padding:1rem;">
+                        <h6 style="font-weight:600; color:var(--accent); font-size:0.85rem;"><i class="bi bi-4-circle-fill"></i> Merge &amp; Export</h6>
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Merge both sources into one editable table, configure test environment, and export consolidated data.</p>
+                    </div>
                 </div>
-                <select id="deleteFieldDropdown" class="form-select mb-2" style="display:none; margin-left: 2.5rem;"></select> <!-- Moved right -->
-                <button type="button" id="confirmDeleteFieldBtn" class="btn btn-danger mb-2" style="display:none; margin-left: 2.5rem;">Confirm Delete</button> <!-- Moved right -->
-              </div>
-              <div id="mergePreviewContent" style="width:100%;height:100%;">
-                <!-- Merged Excel preview content will be injected here -->
-              </div>
+                <div style="margin-top:1.25rem; padding:1rem; background:var(--warning-light); border-radius:var(--radius-md); border-left:4px solid var(--warning);">
+                    <p style="font-size:0.82rem; color:var(--text-primary); margin:0;"><strong><i class="bi bi-lightbulb"></i> Tip:</strong> You can edit merged table cells directly by clicking on them. Use the Add Row / Delete buttons to modify the consolidated view before exporting.</p>
+                </div>
             </div>
-          </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary-custom" data-bs-dismiss="modal">Got it</button>
+            </div>
         </div>
-      </div>
     </div>
-    <div class="card mb-4 shadow-sm" id="testEnvSection" style="display:none;margin-top:23.5rem;margin-right:-50rem;">
-      <div class="card-body">
-        <h4 class="card-title">Test Environment Setup</h4>
-        <button type="button" id="testEnvBtn" class="btn btn-warning">Setup Test Environment</button>
-      </div>
-    </div>
-    <!-- Modal for Test Environment Setup -->
-    <div class="modal fade" id="testEnvModal" tabindex="-1" aria-labelledby="testEnvModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="testEnvModalLabel">Test Environment Setup</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="testEnvForm">
-              <div class="mb-3">
-                <label for="mvsBinaries" class="form-label">MVS Binaries</label>
-                <input type="text" class="form-control" id="mvsBinaries" name="mvs_binaries">
-              </div>
-              <div class="mb-3">
-                <label for="mvsOs" class="form-label">MVS OS</label>
-                <input type="text" class="form-control" id="mvsOs" name="mvs_os">
-              </div>
-              <div class="mb-3">
-                <label for="standBinaries" class="form-label">Stand Binaries</label>
-                <input type="text" class="form-control" id="standBinaries" name="stand_binaries">
-              </div>
-              <div class="mb-3">
-                <label for="standOs" class="form-label">Stand OS</label>
-                <input type="text" class="form-control" id="standOs" name="stand_os">
-              </div>
-              <div class="mb-3">
-                <label for="appsPcBinaries" class="form-label">APPS PC Binaries</label>
-                <input type="text" class="form-control" id="appsPcBinaries" name="apps_pc_binaries">
-              </div>
-              <div class="mb-3">
-                <label for="appsPcOs" class="form-label">APPS PC OS</label>
-                <input type="text" class="form-control" id="appsPcOs" name="apps_pc_os">
-              </div>
-              <div class="mb-3">
-                <label for="testEnvironment" class="form-label">Test Environment</label>
-                <input type="text" class="form-control" id="testEnvironment" name="test_environment">
-              </div>
-              <button type="submit" class="btn btn-success">Save</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
-<!-- Modal for legacy excel preview -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="previewModalLabel">Legacy Excel Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="previewContent"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Info Modal: appears on first page load -->
-<div id="infoModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:99999; align-items:center; justify-content:center;">
-  <div style="background:#fff; padding:2rem 2.5rem; border-radius:12px; box-shadow:0 4px 24px #e0e3e7; min-width:340px; display:flex; flex-direction:column; gap:1.2rem; align-items:center;">
-    <h3 style="margin:0; color:#3182ce; font-weight:700;">Welcome to Test Repo Dashboard</h3>
-    <div style="font-size:1.08rem; color:#222; text-align:center; max-width:480px;">
-      <p>This page allows you to select a stream, upload and preview legacy and Zenition Excel files, merge data, and set up the test environment. Use the available tools to manage and export test information efficiently.</p>
-      <ul style="text-align:left; margin:0 auto; max-width:400px;">
-        <li>Select a stream to begin.</li>
-        <li>Upload or fetch legacy and Zenition Excel files.</li>
-        <li>Preview, merge, and edit test data.</li>
-        <li>Set up and save the test environment.</li>
-        <li>Export consolidated test information.</li>
-      </ul>
-    </div>
-    <button id="closeInfoModalBtn" style="background:#3182ce; color:white; font-weight:700; border:none; border-radius:8px; padding:0.6rem 1.5rem; cursor:pointer;">Close</button>
-  </div>
-</div>
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  var infoModal = document.getElementById('infoModal');
-  var closeBtn = document.getElementById('closeInfoModalBtn');
-  // Only show if not already shown in this session
-  if (infoModal && closeBtn && !sessionStorage.getItem('testRepoInfoModalShown')) {
-    infoModal.style.display = 'flex';
-    closeBtn.onclick = function() {
-      infoModal.style.display = 'none';
-      sessionStorage.setItem('testRepoInfoModalShown', 'true');
-    };
-  } else if (closeBtn) {
-    closeBtn.onclick = function() {
-      infoModal.style.display = 'none';
-    };
-  }
-});
-document.getElementById('infoBtn').onclick = function() {
-  var infoModal = document.getElementById('infoModal');
-  if (infoModal) infoModal.style.display = 'flex';
-};
-</script>
-<style>
-html, body {
-  overflow: hidden !important;
-  height: 100vh;
-}
-/* Match Zenition Excel Preview modal to Legacy Excel Preview style */
-#zenitionExcelPreviewModal .modal-dialog {
-  max-width: 98vw;
-  width: 98vw;
-  height: 96vh;
-  margin: 1vh auto;
-}
-#zenitionExcelPreviewModal .modal-content {
-  height: 96vh;
-  border-radius: 10px;
-}
-#zenitionExcelPreviewModal .modal-body {
-  height: calc(96vh - 70px);
-  overflow: auto;
-  padding: 0;
-}
-#zenitionExcelPreviewContent {
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  background: #fff;
-}
-#zenitionExcelPreviewContent table {
-  width: 100% !important;
-  table-layout: auto;
-  font-size: 1.1rem;
-}
-#zenitionExcelPreviewContent th, #zenitionExcelPreviewContent td {
-  padding: 0.7rem 1rem;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-/* Slightly reduced fullscreen modal for legacy preview */
-#previewModal .modal-dialog {
-  max-width: 98vw;
-  width: 98vw;
-  height: 96vh;
-  margin: 1vh auto;
-}
-#previewModal .modal-content {
-  height: 96vh;
-  border-radius: 10px;
-}
-#previewModal .modal-body {
-  height: calc(96vh - 70px);
-  overflow: auto;
-  padding: 0;
-}
-#previewContent {
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  background: #fff;
-}
-#previewContent table {
-  width: 100% !important;
-  table-layout: auto;
-  font-size: 1.1rem;
-}
-#previewContent th, #previewContent td {
-  padding: 0.7rem 1rem;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-/* Match Merged Excel Preview modal to Legacy Excel Preview style */
-#mergePreviewModal .modal-dialog {
-  max-width: 98vw;
-  width: 98vw;
-  height: 96vh;
-  margin: 1vh auto;
-}
-#mergePreviewModal .modal-content {
-  height: 96vh;
-  border-radius: 10px;
-}
-#mergePreviewModal .modal-body {
-  height: calc(96vh - 70px);
-  overflow: auto;
-  padding: 0;
-}
-#mergePreviewContent {
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  background: #fff;
-}
-#mergePreviewContent table {
-  width: 100% !important;
-  table-layout: auto;
-  font-size: 1.1rem;
-}
-#mergePreviewContent th, #mergePreviewContent td {
-  padding: 0.7rem 1rem;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-</style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Show upload section only if stream is selected
-window.onload = function() {
-  var params = new URLSearchParams(window.location.search);
-  var uploadSection = document.getElementById('uploadSection');
-  var zenitionSection = document.getElementById('zenitionSection');
-  if(params.get('stream')) {
-    uploadSection.style.display = 'block';
-  } else {
-    uploadSection.style.display = 'none';
-  }
-  zenitionSection.style.display = 'none'; // Hide Zenition section by default
-  // If page is loaded with ?stream=, redirect to base URL
-  if(params.get('stream')) {
-    history.replaceState(null, '', window.location.pathname);
-  }
-};
-document.getElementById('legacyExcelForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const response = await fetch('', {method: 'POST', body: formData});
-  const result = await response.json();
-  if(result.success) {
-    document.getElementById('previewBtnContainer').style.display = 'block';
-    window.latestUploadId = result.upload_id;
-    // Show Bootstrap modal popup for success
-    var successModal = document.createElement('div');
-    successModal.className = 'modal fade';
-    successModal.id = 'uploadSuccessModal';
-    successModal.tabIndex = -1;
-    successModal.innerHTML = `
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Upload Successful</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>File uploaded successfully!</p>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(successModal);
-    var modal = new bootstrap.Modal(successModal);
-    modal.show();
-    successModal.addEventListener('hidden.bs.modal', function() {
-      document.body.removeChild(successModal);
-      document.getElementById('addZenitionCard').style.display = 'block'; // Show Add TestRepoZenitionProduct only after modal closes
-    });
-    // Hide initially
-    document.getElementById('addZenitionCard').style.display = 'none';
-    showMergeSection();
-  } else {
-    // Show Bootstrap modal popup for error
-    var errorModal = document.createElement('div');
-    errorModal.className = 'modal fade';
-    errorModal.id = 'uploadErrorModal';
-    errorModal.tabIndex = -1;
-    errorModal.innerHTML = `
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Upload Failed</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>${result.error || 'Upload failed'}</p>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(errorModal);
-    var modal = new bootstrap.Modal(errorModal);
-    modal.show();
-    errorModal.addEventListener('hidden.bs.modal', function() {
-      document.body.removeChild(errorModal);
-    });
-  }
-};
-window.showPreviewModal = function() {
-  var modal = new bootstrap.Modal(document.getElementById('previewModal'));
-  modal.show();
-}
-document.getElementById('previewBtn').onclick = async function() {
-  const id = window.latestUploadId;
-  if (!id) return alert('No file uploaded or selected!');
-  const response = await fetch(`/preview-legacy-excel/${id}/`);
-  const result = await response.json();
-  if (result.success) {
-    document.getElementById('previewContent').innerHTML = result.html;
-    window.showPreviewModal();
-  } else {
-    alert(result.error || 'Preview failed');
-  }
-};
-document.getElementById('fetchLegacyDataBtn').onclick = async function() {
-  const response = await fetch('/fetch-legacy-excels/');
-  const result = await response.json();
-  if(result.success && Array.isArray(result.excels)) {
-    let html = '<table class="table table-bordered table-hover"><thead><tr><th></th><th>File Name</th></tr></thead><tbody>';
-    result.excels.forEach((excel, idx) => {
-      html += `<tr>
-        <td><input type="radio" name="legacyExcelSelect" value="${excel.id}" ${idx === 0 ? 'checked' : ''}></td>
-        <td>${excel.file_name}</td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-    html += `<button type="button" id="selectLegacyExcelBtn" class="btn btn-primary mt-2">Select & Use This File</button>`;
-    document.getElementById('legacyExcelListContent').innerHTML = html;
-    var modal = new bootstrap.Modal(document.getElementById('fetchLegacyDataModal'));
-    modal.show();
-  }
-};
-document.getElementById('addZenitionForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const name = document.getElementById('zenitionNameInput').value.trim();
-  if(!name) return alert('Please enter a name');
-  const formData = new FormData(this);
-  const response = await fetch('', {method: 'POST', body: formData});
-  const result = await response.json();
-  if(result.success && result.zenition_products) {
-    // Update dropdown
-    const dropdown = document.getElementById('zenitionDropdown');
-    dropdown.innerHTML = '';
-    result.zenition_products.forEach(zp => {
-      const opt = document.createElement('option');
-      opt.value = zp.id;
-      opt.textContent = zp.name;
-      dropdown.appendChild(opt);
-    });
-    alert('Zenition Product added!');
-    document.getElementById('zenitionNameInput').value = '';
-  } else {
-    alert(result.error || 'Add failed');
-  }
-};
-document.getElementById('zenitionDropdown').onchange = function() {
-  var zenitionSection = document.getElementById('zenitionSection');
-  var zenitionExcelSection = document.getElementById('zenitionExcelSection');
-  var selectedId = this.value;
-  if(selectedId) {
-    document.getElementById('zenitionProductIdInput').value = selectedId;
-    zenitionExcelSection.style.display = 'block';
-  } else {
-    zenitionExcelSection.style.display = 'none';
-  }
-};
-document.getElementById('zenitionExcelForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const response = await fetch('', {method: 'POST', body: formData});
-  const result = await response.json();
-  if(result.success) {
-    document.getElementById('zenitionExcelPreviewBtnContainer').style.display = 'block';
-    window.latestZenitionExcelUploadId = result.upload_id;
-    // Show HTML popup message for success
-    var successModal = document.createElement('div');
-    successModal.className = 'modal fade';
-    successModal.id = 'zenitionExcelUploadSuccessModal';
-    successModal.tabIndex = -1;
-    successModal.innerHTML = `
-      <div class='modal-dialog modal-dialog-centered'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h5 class='modal-title'>Upload Successful</h5>
-            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-          </div>
-          <div class='modal-body'>
-            <p>Zenition Product Excel uploaded successfully!</p>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(successModal);
-    var modal = new bootstrap.Modal(successModal);
-    modal.show();
-    successModal.addEventListener('hidden.bs.modal', function() {
-      document.body.removeChild(successModal);
-    });
-    showMergeSection();
-  } else {
-    alert(result.error || 'Upload failed');
-  }
-};
-window.showZenitionExcelPreviewModal = function() {
-  var modal = new bootstrap.Modal(document.getElementById('zenitionExcelPreviewModal'));
-  modal.show();
-}
-document.getElementById('zenitionExcelPreviewBtn').onclick = async function() {
-  const id = window.latestZenitionExcelUploadId;
-  if(!id) return alert('No file uploaded yet!');
-  const response = await fetch(`/preview-zenition-excel/${id}/`);
-  const result = await response.json();
-  if(result.success) {
-    document.getElementById('zenitionExcelPreviewContent').innerHTML = result.html;
-    // Show both modals at the same time
-    var zenitionModal = new bootstrap.Modal(document.getElementById('zenitionExcelPreviewModal'), {backdrop: false});
-    // var testEnvModal = new bootstrap.Modal(document.getElementById('testEnvModal'), {backdrop: false});
-    zenitionModal.show();
-    // testEnvModal.show();
-  } else {
-    alert(result.error || 'Preview failed');
-  }
-};
-document.getElementById('fetchZenitionDataBtn').onclick = async function() {
-  const response = await fetch('/fetch-zenition-excels/');
-  const result = await response.json();
-  if(result.success && Array.isArray(result.excels)) {
-    let html = '<table class="table table-bordered table-hover"><thead><tr><th></th><th>File Name</th></tr></thead><tbody>';
-    result.excels.forEach((excel, idx) => {
-      html += `<tr>
-        <td><input type="radio" name="zenitionExcelSelect" value="${excel.id}" ${idx === 0 ? 'checked' : ''}></td>
-        <td>${excel.file_name}</td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-    html += `<button type="button" id="selectZenitionExcelBtn" class="btn btn-primary mt-2">Select & Use This File</button>`;
-    document.getElementById('zenitionExcelListContent').innerHTML = html;
-    var modal = new bootstrap.Modal(document.getElementById('fetchZenitionDataModal'));
-    modal.show();
-  }
-};
-// Show merge section only after both uploads
-function showMergeSection() {
-  var mergeSection = document.getElementById('mergeSection');
-  if(window.latestUploadId && window.latestZenitionExcelUploadId) {
-    mergeSection.style.display = 'block';
-  } else {
-    mergeSection.style.display = 'none';
-  }
-}
-window.showMergePreviewModal = function() {
-  var modal = new bootstrap.Modal(document.getElementById('mergePreviewModal'));
-  modal.show();
-}
-document.getElementById('mergeBtn').onclick = async function() {
-  const legacyId = window.latestUploadId;
-  const zenitionId = window.latestZenitionExcelUploadId;
-  if(!legacyId || !zenitionId) return alert('Upload both files first!');
-  const response = await fetch(`/merge-excels/?legacy_id=${legacyId}&zenition_id=${zenitionId}`);
-  const result = await response.json();
-  if(result.success) {
-    updateMergePreview(result.html);
-    window.showMergePreviewModal();
-  } else {
-    alert(result.error || 'Merge failed');
-  }
-};
-document.getElementById('addFieldBtn').onclick = function() {
-  document.getElementById('fieldEditSection').style.display = 'block';
-  document.getElementById('addFieldInputs').style.display = 'block';
-  document.getElementById('deleteFieldDropdown').style.display = 'none';
-  document.getElementById('confirmDeleteFieldBtn').style.display = 'none';
-};
-document.getElementById('confirmAddFieldBtn').onclick = function() {
-  const testCase = document.getElementById('fieldTestCaseInput').value.trim();
-  const result = document.getElementById('fieldResultInput').value.trim();
-  const comment = document.getElementById('fieldCommentInput').value.trim();
-  if(!testCase && !result && !comment) return alert('Enter at least one value');
-  const legacyId = window.latestUploadId;
-  const zenitionId = window.latestZenitionExcelUploadId;
-  fetch(`/merge-excels/?legacy_id=${legacyId}&zenition_id=${zenitionId}&add_row_testcase=${encodeURIComponent(testCase)}&add_row_result=${encodeURIComponent(result)}&add_row_comment=${encodeURIComponent(comment)}`)
-    .then(r => r.json())
-    .then(result => {
-      if(result.success) {
-        updateMergePreview(result.html);
-        document.getElementById('fieldEditSection').style.display = 'none';
-        document.getElementById('addFieldInputs').style.display = 'none';
-        document.getElementById('fieldTestCaseInput').value = '';
-        document.getElementById('fieldResultInput').value = '';
-        document.getElementById('fieldCommentInput').value = '';
-      } else {
-        alert(result.error || 'Add row failed');
-      }
-    });
-};
-document.addEventListener('click', function(e) {
-  if (e.target && e.target.id === 'selectLegacyExcelBtn') {
-    const selectedRadio = document.querySelector('input[name="legacyExcelSelect"]:checked');
-    if (!selectedRadio) return alert('Select a file!');
-    window.latestUploadId = selectedRadio.value; // This should be the numeric ID
-    document.getElementById('previewBtnContainer').style.display = 'block';
-    showMergeSection();
-    // Optionally close modal
-    bootstrap.Modal.getInstance(document.getElementById('fetchLegacyDataModal')).hide();
 
-    // Show Bootstrap modal popup for success
-    var successModal = document.createElement('div');
-    successModal.className = 'modal fade';
-    successModal.id = 'uploadSuccessModal';
-    successModal.tabIndex = -1;
-    successModal.innerHTML = `
-      <div class="modal-dialog modal-dialog-centered">
+<!-- ======== FETCH LEGACY DATA MODAL ======== -->
+<div class="modal fade modal-professional" id="fetchLegacyDataModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Upload Successful</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>File uploaded successfully!</p>
-          </div>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-database" style="color:var(--primary);"></i> Select Legacy Excel File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="legacyExcelListContent">
+                    <div class="empty-state"><i class="bi bi-hourglass-split"></i><h4>Loading files...</h4></div>
+                </div>
+            </div>
         </div>
-      </div>
-    `;
-    document.body.appendChild(successModal);
-    var modal = new bootstrap.Modal(successModal);
-    modal.show();
-    successModal.addEventListener('hidden.bs.modal', function() {
-      document.body.removeChild(successModal);
-      document.getElementById('addZenitionCard').style.display = 'block'; // Show Add TestRepoZenitionProduct after modal closes
-    });
-    // Hide initially
-    document.getElementById('addZenitionCard').style.display = 'none';
-  }
-});
-document.getElementById('confirmDeleteFieldBtn').onclick = function() {
-  const fieldName = document.getElementById('deleteFieldDropdown').value;
-  if(!fieldName) return alert('Select field to delete');
-  // Send request to delete field
-  const legacyId = window.latestUploadId;
-  const zenitionId = window.latestZenitionExcelUploadId;
-  fetch(`/merge-excels/?legacy_id=${legacyId}&zenition_id=${zenitionId}&delete_field=${fieldName}`)
-    .then(r => r.json())
-    .then(result => {
-      if(result.success) {
-        document.getElementById('mergePreviewContent').innerHTML = result.html;
-        document.getElementById('fieldEditSection').style.display = 'none';
-      } else {
-        alert(result.error || 'Delete field failed');
-      }
-    });
-};
-// After rendering the merged preview table, make cells editable and add delete buttons
-function makeMergeTableEditable() {
-  const table = document.querySelector('#mergePreviewContent table');
-  if (!table) return;
-  // Make all cells editable
-  Array.from(table.querySelectorAll('td')).forEach(td => {
-    td.setAttribute('contenteditable', 'true');
-    td.style.background = '#f8f9fa';
-  });
-  // Add delete button to each row
-  Array.from(table.querySelectorAll('tbody tr')).forEach((tr, idx) => {
-    let delBtn = document.createElement('button');
-    delBtn.textContent = 'Delete';
-    delBtn.className = 'btn btn-sm btn-danger';
-    delBtn.style.marginLeft = '8px';
-    delBtn.onclick = function() {
-      const legacyId = window.latestUploadId;
-      const zenitionId = window.latestZenitionExcelUploadId;
-      fetch(`/merge-excels/?legacy_id=${legacyId}&zenition_id=${zenitionId}&delete_row_index=${idx}`)
-        .then(r => r.json())
-        .then(result => {
-          if(result.success) {
-            document.getElementById('mergePreviewContent').innerHTML = result.html;
-            makeMergeTableEditable();
-          } else {
-            alert(result.error || 'Delete row failed');
-          }
-        });
-    };
-    let td = tr.insertCell(-1);
-    td.appendChild(delBtn);
-  });
-}
-// Call after every preview update
-function updateMergePreview(html) {
-  document.getElementById('mergePreviewContent').innerHTML = html;
-  makeMergeTableEditable();
-}
-// Add Save Changes button below the table
-const saveBtn = document.createElement('button');
-saveBtn.textContent = 'Save Changes';
-saveBtn.className = 'btn btn-success mt-3';
-saveBtn.onclick = function() {
-  const table = document.querySelector('#mergePreviewContent table');
-  if (!table) return;
-  const rows = Array.from(table.querySelectorAll('tbody tr'));
-  const data = rows.map(tr => Array.from(tr.querySelectorAll('td')).slice(0,3).map(td => td.textContent));
-  const legacyId = window.latestUploadId;
-  const zenitionId = window.latestZenitionExcelUploadId;
-  fetch(`/merge-excels/?legacy_id=${legacyId}&zenition_id=${zenitionId}&save_table_data=${encodeURIComponent(JSON.stringify(data))}`)
-    .then(r => r.json())
-    .then(result => {
-      if(result.success) {
-        updateMergePreview(result.html);
-      } else {
-        alert(result.error || 'Save failed');
-      }
-    });
-};
-document.getElementById('mergePreviewContent').appendChild(saveBtn);
-document.getElementById('testEnvBtn').onclick = function() {
-  var modal = new bootstrap.Modal(document.getElementById('testEnvModal'));
-  modal.show();
-};
-document.getElementById('testEnvForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const response = await fetch('/save-test-environment/', {method: 'POST', body: formData});
-  const result = await response.json();
-  // HTML-based Bootstrap modal popup for feedback
-  var feedbackModal = document.createElement('div');
-  feedbackModal.className = 'modal fade';
-  feedbackModal.id = 'testEnvFeedbackModal';
-  feedbackModal.tabIndex = -1;
-  feedbackModal.innerHTML = `
+    </div>
+</div>
+
+<!-- ======== FETCH ZENITION DATA MODAL ======== -->
+<div class="modal fade modal-professional" id="fetchZenitionDataModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-database" style="color:var(--accent);"></i> Select Zenition Excel File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="zenitionExcelListContent">
+                    <div class="empty-state"><i class="bi bi-hourglass-split"></i><h4>Loading files...</h4></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======== LEGACY EXCEL PREVIEW MODAL ======== -->
+<div class="modal fade modal-fullscreen-preview" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">${result.success ? 'Success' : 'Error'}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+                    <i class="bi bi-table" style="color:var(--primary);"></i> Legacy Excel Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"><div id="previewContent"></div></div>
         </div>
-        <div class="modal-body">
-          <p>${result.success ? 'Test Environment saved!' : (result.error || 'Save failed')}</p>
-        </div>
-      </div>
     </div>
-  `;
-  document.body.appendChild(feedbackModal);
-  var modal = new bootstrap.Modal(feedbackModal);
-  modal.show();
-  feedbackModal.addEventListener('hidden.bs.modal', function() {
-    document.body.removeChild(feedbackModal);
-    if(result.success) {
-      bootstrap.Modal.getInstance(document.getElementById('testEnvModal')).hide();
+</div>
 
-      document.getElementById('exportDataSection').style.display = 'block';
-    }
-  });
-};
-document.getElementById('exportDataBtn').onclick = function() {
-  const legacyId = window.latestUploadId;
-  const zenitionId = window.latestZenitionExcelUploadId;
-  window.location.href = `/export-data/?legacy_id=${legacyId}&zenition_id=${zenitionId}`;
-};
-</script>
-<style>
-/* Slightly reduced fullscreen modal for legacy preview */
-#previewModal .modal-dialog {
-  max-width: 98vw;
-  width: 98vw;
-  height: 96vh;
-  margin: 1vh auto;
-}
-#previewModal .modal-content {
-  height: 96vh;
-  border-radius: 10px;
-}
-#previewModal .modal-body {
-  height: calc(96vh - 70px);
-  overflow: auto;
-  padding: 0;
-}
-#previewContent {
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  background: #fff;
-}
-#previewContent table {
-  width: 100% !important;
-  table-layout: auto;
-  font-size: 1.1rem;
-}
-#previewContent th, #previewContent td {
-  padding: 0.7rem 1rem;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-</style>
-<footer style="width:100%;background:#f8fafc;color:#888;text-align:center;padding:0.5rem 0;font-size:1rem;position:fixed;bottom:0;left:0;z-index:999;box-shadow:0 -2px 8px #e0e3e7;">
+<!-- ======== ZENITION EXCEL PREVIEW MODAL ======== -->
+<div class="modal fade modal-fullscreen-preview" id="zenitionExcelPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+                    <i class="bi bi-table" style="color:var(--accent);"></i> Zenition Excel Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"><div id="zenitionExcelPreviewContent"></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ======== MERGE PREVIEW MODAL ======== -->
+<div class="modal fade modal-fullscreen-preview" id="mergePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;">
+                <h5 class="modal-title" style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+                    <i class="bi bi-intersect" style="color:var(--primary);"></i> Merged Data — Consolidated View
+                </h5>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button type="button" id="addFieldBtn" class="btn-outline-custom" style="padding:0.4rem 0.75rem; font-size:0.78rem;"><i class="bi bi-plus-lg"></i> Add Row</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="fieldEditSection" style="display:none; margin-bottom:1rem; padding:1rem; background:var(--bg-secondary); border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                    <div id="addFieldInputs" style="display:none;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                            <input type="text" id="fieldTestCaseInput" class="form-control-custom" placeholder="Description / Test Case">
+                            <input type="text" id="fieldResultInput" class="form-control-custom" placeholder="Results">
+                            <input type="text" id="fieldCommentInput" class="form-control-custom" placeholder="Comments">
+                        </div>
+                        <button type="button" id="confirmAddFieldBtn" class="btn-success-custom" style="padding:0.4rem 1rem; font-size:0.78rem;"><i class="bi bi-check-lg"></i> Confirm Add</button>
+                    </div>
+                    <select id="deleteFieldDropdown" class="form-control-custom form-select mb-2" style="display:none;"></select>
+                    <button type="button" id="confirmDeleteFieldBtn" class="btn-danger-custom" style="display:none;"><i class="bi bi-trash3"></i> Confirm Delete</button>
+                </div>
+                <div id="mergePreviewContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======== TEST ENVIRONMENT MODAL ======== -->
+<div class="modal fade modal-professional" id="testEnvModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gear-wide-connected" style="color:var(--warning);"></i> Test Environment Configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testEnvForm">
+                    {% csrf_token %}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div>
+                            <label class="form-label-custom" for="mvsBinaries">MVS Binaries</label>
+                            <input type="text" class="form-control-custom" id="mvsBinaries" name="mvs_binaries">
+                        </div>
+                        <div>
+                            <label class="form-label-custom" for="mvsOs">MVS OS</label>
+                            <input type="text" class="form-control-custom" id="mvsOs" name="mvs_os">
+                        </div>
+                        <div>
+                            <label class="form-label-custom" for="standBinaries">Stand Binaries</label>
+                            <input type="text" class="form-control-custom" id="standBinaries" name="stand_binaries">
+                        </div>
+                        <div>
+                            <label class="form-label-custom" for="standOs">Stand OS</label>
+                            <input type="text" class="form-control-custom" id="standOs" name="stand_os">
+                        </div>
+                        <div>
+                            <label class="form-label-custom" for="appsPcBinaries">Apps PC Binaries</label>
+                            <input type="text" class="form-control-custom" id="appsPcBinaries" name="apps_pc_binaries">
+                        </div>
+                        <div>
+                            <label class="form-label-custom" for="appsPcOs">Apps PC OS</label>
+                            <input type="text" class="form-control-custom" id="appsPcOs" name="apps_pc_os">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label class="form-label-custom" for="testEnvironment">Test Environment</label>
+                            <input type="text" class="form-control-custom" id="testEnvironment" name="test_environment">
+                        </div>
+                    </div>
+                    <div style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:0.75rem;">
+                        <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-success-custom"><i class="bi bi-check-circle"></i> Save Configuration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="page-footer" style="max-width:1900px; margin:2rem auto 0; padding:1.25rem 2rem;">
     &copy; Koninklijke Philips N.V., 2026. All rights reserved.
-</footer>
+</div>
+
+<!-- ======== SCRIPTS ======== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script>
+(function() {
+    'use strict';
+
+    // ════════════════════════════════════════════
+    //  BU PREFIX (for AJAX URL construction)
+    // ════════════════════════════════════════════
+    var _buPrefix = (function() {
+        var p = window.location.pathname;
+        var i = p.indexOf('/test-repo');
+        if (i > 0) return p.substring(0, i);
+        var m = p.match(/^\/bu\/[^/]+/);
+        return m ? m[0] : '';
+    })();
+
+    var _canDeleteExcel = {{ can_delete_excel|yesno:"true,false" }};
+
+    // ════════════════════════════════════════════
+    //  LOCAL escapeHtml (base.html defines it AFTER this block)
+    // ════════════════════════════════════════════
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = (str == null) ? '' : String(str);
+        return div.innerHTML;
+    }
+
+    // ════════════════════════════════════════════
+    //  HELPERS
+    // ════════════════════════════════════════════
+
+    function showToast(message, isError) {
+        var container = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'toast-custom ' + (isError ? 'error' : 'success');
+        toast.innerHTML = '<i class="bi ' + (isError ? 'bi-exclamation-circle' : 'bi-check-circle-fill') + '"></i><span>' + escapeHtml(message) + '</span>';
+        container.appendChild(toast);
+        setTimeout(function() { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; setTimeout(function() { toast.remove(); }, 300); }, 4000);
+    }
+
+    function updateStepper(activeStep) {
+        for (var i = 1; i <= 5; i++) {
+            var step = document.getElementById('step' + i);
+            var conn = document.getElementById('conn' + (i - 1));
+            step.className = 'step' + (i < activeStep ? ' completed' : (i === activeStep ? ' active' : ''));
+            if (conn) conn.className = 'step-connector' + (i < activeStep ? ' completed' : (i === activeStep ? ' active' : ''));
+        }
+    }
+
+    function updateUploadCount() {
+        var count = 0;
+        if (window._latestUploadId) count++;
+        if (window._latestZenitionExcelUploadId) count++;
+        document.getElementById('statUploads').textContent = count;
+    }
+
+    function updateBadge(el, text, cls) {
+        el.className = 'badge-status ' + cls;
+        var icon = cls === 'badge-ready' ? 'bi-check-circle' : (cls === 'badge-pending' ? 'bi-clock' : 'bi-dash');
+        el.innerHTML = '<i class="bi ' + icon + '"></i> ' + text;
+    }
+
+    // ════════════════════════════════════════════
+    //  DRAG & DROP FILE ZONES
+    // ════════════════════════════════════════════
+
+    function setupDropZone(zoneId, inputId, infoId, uploadBtnId) {
+        var zone = document.getElementById(zoneId);
+        var input = document.getElementById(inputId);
+        var info = document.getElementById(infoId);
+        var uploadBtn = document.getElementById(uploadBtnId);
+
+        zone.addEventListener('click', function() { input.click(); });
+        zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                input.files = e.dataTransfer.files;
+                showFileInfo(input.files[0], info, uploadBtn);
+            }
+        });
+        input.addEventListener('change', function() {
+            if (input.files.length > 0) showFileInfo(input.files[0], info, uploadBtn);
+        });
+    }
+
+    function showFileInfo(file, infoEl, btnEl) {
+        var size = file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        infoEl.innerHTML = '<div class="file-item"><div class="file-info"><i class="bi bi-file-earmark-excel-fill"></i><div><div class="file-name">' + escapeHtml(file.name) + '</div><div class="file-meta">' + size + '</div></div></div></div>';
+        infoEl.style.display = 'block';
+        btnEl.style.display = 'flex';
+    }
+
+    // ════════════════════════════════════════════
+    //  STEP 1 — STREAM SELECTION
+    // ════════════════════════════════════════════
+
+    var streamForm = document.getElementById('streamSelectForm');
+    streamForm.onsubmit = function(e) {
+        e.preventDefault();
+        var stream = document.getElementById('streamDropdown').value;
+        document.getElementById('selectedStreamInput').value = stream;
+        document.getElementById('section-legacy').style.display = 'block';
+        updateStepper(2);
+        updateBadge(document.getElementById('streamBadge'), stream, 'badge-ready');
+        document.getElementById('statStatus').textContent = 'In Progress';
+        showToast('Stream "' + stream + '" loaded successfully');
+        document.getElementById('section-legacy').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // ════════════════════════════════════════════
+    //  STEP 2 — LEGACY EXCEL UPLOAD
+    // ════════════════════════════════════════════
+
+    setupDropZone('legacyDropZone', 'legacyFileInput', 'legacyFileInfo', 'legacyUploadBtn');
+
+    document.getElementById('legacyExcelForm').onsubmit = async function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        try {
+            var response = await fetch('', { method: 'POST', body: formData });
+            var result = await response.json();
+            if (result.success) {
+                window._latestUploadId = result.upload_id;
+                document.getElementById('legacyPreviewBtnContainer').style.display = 'block';
+                updateBadge(document.getElementById('legacyBadge'), 'Uploaded', 'badge-ready');
+                updateUploadCount();
+                updateStepper(3);
+                document.getElementById('section-zenition-excel').style.display = 'block';
+                checkMergeReady();
+                showToast('Legacy Excel uploaded successfully!');
+            } else {
+                showToast(result.error || 'Upload failed', true);
+            }
+        } catch (err) { showToast('Upload failed: ' + err.message, true); }
+    };
+
+    // Legacy Preview
+    document.getElementById('previewBtn').onclick = async function() {
+        var id = window._latestUploadId;
+        if (!id) return showToast('No file uploaded yet!', true);
+        try {
+            var response = await fetch(_buPrefix + '/preview-legacy-excel/' + id + '/');
+            var result = await response.json();
+            if (result.success) {
+                document.getElementById('previewContent').innerHTML = result.html;
+                new bootstrap.Modal(document.getElementById('previewModal')).show();
+            } else {
+                showToast(result.error || 'Preview failed', true);
+            }
+        } catch (err) { showToast('Preview failed: ' + err.message, true); }
+    };
+
+    // Fetch Legacy from DB
+    document.getElementById('fetchLegacyDataBtn').onclick = async function() {
+        try {
+            var response = await fetch(_buPrefix + '/fetch-legacy-excels/');
+            var result = await response.json();
+            if (result.success && Array.isArray(result.excels) && result.excels.length) {
+                var html = '<div style="display:flex;flex-direction:column;gap:0.5rem;">';
+                result.excels.forEach(function(excel, idx) {
+                    var displayName = excel.base_name || excel.file_name;
+                    var dateInfo = excel.uploaded_at ? ' <span style="color:var(--text-muted);font-size:0.78rem;">' + excel.uploaded_at + '</span>' : '';
+                    html += '<div class="file-item" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:8px;background:var(--card-bg);border:1px solid var(--border-color);">';
+                    html += '<label style="cursor:pointer;display:flex;align-items:center;gap:0.5rem;flex:1;margin:0;">';
+                    html += '<input type="radio" name="legacyExcelSelect" value="' + excel.id + '" ' + (idx === 0 ? 'checked' : '') + '>';
+                    html += '<i class="bi bi-file-earmark-excel-fill" style="color:var(--success);font-size:1.1rem;"></i>';
+                    html += '<span class="file-name">' + escapeHtml(displayName) + '</span>' + dateInfo;
+                    html += '</label>';
+                    if (_canDeleteExcel) {
+                        html += '<button type="button" class="btn-delete-legacy" data-id="' + excel.id + '" data-name="' + escapeHtml(displayName) + '" style="background:none;border:none;color:var(--danger, #dc3545);cursor:pointer;padding:0.25rem 0.5rem;font-size:1rem;opacity:0.7;transition:opacity 0.2s;" title="Delete this file"><i class="bi bi-trash"></i></button>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div><div style="margin-top:1.25rem; text-align:right;"><button type="button" id="selectLegacyExcelBtn" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Use Selected File</button></div>';
+                document.getElementById('legacyExcelListContent').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('fetchLegacyDataModal')).show();
+            } else {
+                showToast('No legacy files found', true);
+            }
+        } catch (err) { showToast('Fetch failed: ' + err.message, true); }
+    };
+
+    // ════════════════════════════════════════════
+    //  ZENITION PRODUCT MANAGEMENT
+    // ════════════════════════════════════════════
+
+    document.getElementById('addZenitionForm').onsubmit = async function(e) {
+        e.preventDefault();
+        var name = document.getElementById('zenitionNameInput').value.trim();
+        if (!name) return;
+        var formData = new FormData(this);
+        var response = await fetch('', { method: 'POST', body: formData });
+        var result = await response.json();
+        if (result.success && result.zenition_products) {
+            var dropdown = document.getElementById('zenitionDropdown');
+            dropdown.innerHTML = '<option value="">— Choose a Zenition Product —</option>';
+            var tagList = document.getElementById('zenitionTagList');
+            tagList.innerHTML = '';
+            result.zenition_products.forEach(function(zp) {
+                var opt = document.createElement('option');
+                opt.value = zp.id;
+                opt.textContent = zp.name;
+                dropdown.appendChild(opt);
+                tagList.innerHTML += '<span class="zen-product-tag" data-id="' + zp.id + '">' + escapeHtml(zp.name) + ' <span class="remove-tag" title="Remove">&times;</span></span>';
+            });
+            document.getElementById('zenitionNameInput').value = '';
+            document.getElementById('statZenition').textContent = result.zenition_products.length;
+            updateBadge(document.getElementById('zenBadge'), result.zenition_products.length + ' loaded', 'badge-ready');
+            showToast('Zenition Product "' + name + '" added!');
+        } else {
+            showToast(result.error || 'Add failed', true);
+        }
+    };
+
+    // Zenition Dropdown → show excel upload
+    document.getElementById('zenitionDropdown').onchange = function() {
+        var selectedId = this.value;
+        if (selectedId) {
+            document.getElementById('zenitionProductIdInput').value = selectedId;
+            document.getElementById('section-zenition-excel').style.display = 'block';
+            document.getElementById('section-zenition-excel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    // ════════════════════════════════════════════
+    //  STEP 3 — ZENITION EXCEL UPLOAD
+    // ════════════════════════════════════════════
+
+    setupDropZone('zenitionDropZone', 'zenitionFileInput', 'zenitionFileInfo', 'zenitionUploadBtn');
+
+    document.getElementById('zenitionExcelForm').onsubmit = async function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        try {
+            var response = await fetch('', { method: 'POST', body: formData });
+            var result = await response.json();
+            if (result.success) {
+                window._latestZenitionExcelUploadId = result.upload_id;
+                document.getElementById('zenitionExcelPreviewBtnContainer').style.display = 'block';
+                updateBadge(document.getElementById('zenExcelBadge'), 'Uploaded', 'badge-ready');
+                updateUploadCount();
+                updateStepper(4);
+                checkMergeReady();
+                showToast('Zenition Excel uploaded successfully!');
+            } else {
+                showToast(result.error || 'Upload failed', true);
+            }
+        } catch (err) { showToast('Upload failed: ' + err.message, true); }
+    };
+
+    // Zenition Preview
+    document.getElementById('zenitionExcelPreviewBtn').onclick = async function() {
+        var id = window._latestZenitionExcelUploadId;
+        if (!id) return showToast('No file uploaded yet!', true);
+        try {
+            var response = await fetch(_buPrefix + '/preview-zenition-excel/' + id + '/');
+            var result = await response.json();
+            if (result.success) {
+                document.getElementById('zenitionExcelPreviewContent').innerHTML = result.html;
+                new bootstrap.Modal(document.getElementById('zenitionExcelPreviewModal')).show();
+            } else {
+                showToast(result.error || 'Preview failed', true);
+            }
+        } catch (err) { showToast('Preview failed: ' + err.message, true); }
+    };
+
+    // Fetch Zenition from DB
+    document.getElementById('fetchZenitionDataBtn').onclick = async function() {
+        try {
+            var response = await fetch(_buPrefix + '/fetch-zenition-excels/');
+            var result = await response.json();
+            if (result.success && Array.isArray(result.folders) && result.folders.length) {
+                var html = '<div style="display:flex;flex-direction:column;gap:1rem;">';
+                var firstFile = true;
+                result.folders.forEach(function(folder) {
+                    html += '<div style="border:1px solid var(--border-color);border-radius:10px;overflow:hidden;background:var(--card-bg);">';
+                    html += '<div style="padding:0.6rem 1rem;background:var(--bg-secondary, #f8f9fa);border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.5rem;font-weight:600;">';
+                    html += '<i class="bi bi-folder-fill" style="color:var(--accent);font-size:1.1rem;"></i> ' + escapeHtml(folder.product_name);
+                    html += ' <span style="color:var(--text-muted);font-weight:400;font-size:0.8rem;">(' + folder.files.length + ' file' + (folder.files.length > 1 ? 's' : '') + ')</span>';
+                    html += '</div>';
+                    html += '<div style="padding:0.5rem;display:flex;flex-direction:column;gap:0.35rem;">';
+                    folder.files.forEach(function(excel) {
+                        var displayName = excel.base_name || excel.file_name;
+                        var dateInfo = excel.uploaded_at ? ' <span style="color:var(--text-muted);font-size:0.78rem;">' + excel.uploaded_at + '</span>' : '';
+                        html += '<div class="file-item zenition-file-row" style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.75rem;border-radius:6px;">';
+                        html += '<label style="cursor:pointer;display:flex;align-items:center;gap:0.5rem;flex:1;margin:0;">';
+                        html += '<input type="radio" name="zenitionExcelSelect" value="' + excel.id + '" ' + (firstFile ? 'checked' : '') + '>';
+                        html += '<i class="bi bi-file-earmark-excel-fill" style="color:var(--accent);font-size:1rem;"></i>';
+                        html += '<span class="file-name">' + escapeHtml(displayName) + '</span>' + dateInfo;
+                        html += '</label>';
+                        if (_canDeleteExcel) {
+                            html += '<button type="button" class="btn-delete-zenition-excel" data-id="' + excel.id + '" data-name="' + escapeHtml(displayName) + '" style="background:none;border:none;color:var(--danger, #dc3545);cursor:pointer;padding:0.25rem 0.5rem;font-size:1rem;opacity:0.7;transition:opacity 0.2s;" title="Delete this file"><i class="bi bi-trash"></i></button>';
+                        }
+                        html += '</div>';
+                        firstFile = false;
+                    });
+                    html += '</div></div>';
+                });
+                html += '</div><div style="margin-top:1.25rem; text-align:right;"><button type="button" id="selectZenitionExcelBtn" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Use Selected File</button></div>';
+                document.getElementById('zenitionExcelListContent').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('fetchZenitionDataModal')).show();
+            } else {
+                showToast('No Zenition files found', true);
+            }
+        } catch (err) { showToast('Fetch failed: ' + err.message, true); }
+    };
+
+    // ════════════════════════════════════════════
+    //  STEP 4 — MERGE LOGIC
+    // ════════════════════════════════════════════
+
+    function checkMergeReady() {
+        var mergeTile = document.getElementById('mergeTile');
+        var exportTile = document.getElementById('exportTile');
+        if (window._latestUploadId && window._latestZenitionExcelUploadId) {
+            mergeTile.classList.remove('disabled');
+        }
+    }
+
+    // Merge Tile Click
+    document.getElementById('mergeTile').onclick = async function() {
+        var legacyId = window._latestUploadId;
+        var zenitionId = window._latestZenitionExcelUploadId;
+        if (!legacyId || !zenitionId) return showToast('Upload both files first!', true);
+        var response = await fetch(_buPrefix + '/merge-excels/?legacy_id=' + legacyId + '&zenition_id=' + zenitionId);
+        var result = await response.json();
+        if (result.success) {
+            updateMergePreview(result.html);
+            new bootstrap.Modal(document.getElementById('mergePreviewModal')).show();
+        } else {
+            showToast(result.error || 'Merge failed', true);
+        }
+    };
+
+    // Add Field
+    document.getElementById('addFieldBtn').onclick = function() {
+        document.getElementById('fieldEditSection').style.display = 'block';
+        document.getElementById('addFieldInputs').style.display = 'block';
+        document.getElementById('deleteFieldDropdown').style.display = 'none';
+        document.getElementById('confirmDeleteFieldBtn').style.display = 'none';
+    };
+
+    document.getElementById('confirmAddFieldBtn').onclick = function() {
+        var testCase = document.getElementById('fieldTestCaseInput').value.trim();
+        var resultVal = document.getElementById('fieldResultInput').value.trim();
+        var comment = document.getElementById('fieldCommentInput').value.trim();
+        if (!testCase && !resultVal && !comment) return showToast('Enter at least one value', true);
+        var legacyId = window._latestUploadId;
+        var zenitionId = window._latestZenitionExcelUploadId;
+        var fd = new FormData();
+        fd.append('legacy_id', legacyId); fd.append('zenition_id', zenitionId);
+        fd.append('add_row_testcase', testCase); fd.append('add_row_result', resultVal); fd.append('add_row_comment', comment);
+        fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        fetch(_buPrefix + '/merge-excels/', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    updateMergePreview(result.html);
+                    document.getElementById('fieldEditSection').style.display = 'none';
+                    document.getElementById('addFieldInputs').style.display = 'none';
+                    document.getElementById('fieldTestCaseInput').value = '';
+                    document.getElementById('fieldResultInput').value = '';
+                    document.getElementById('fieldCommentInput').value = '';
+                    showToast('Row added successfully');
+                } else {
+                    showToast(result.error || 'Add row failed', true);
+                }
+            });
+    };
+
+    // Delete Field
+    document.getElementById('confirmDeleteFieldBtn').onclick = function() {
+        var fieldName = document.getElementById('deleteFieldDropdown').value;
+        if (!fieldName) return;
+        var legacyId = window._latestUploadId;
+        var zenitionId = window._latestZenitionExcelUploadId;
+        var fd = new FormData();
+        fd.append('legacy_id', legacyId); fd.append('zenition_id', zenitionId);
+        fd.append('delete_field', fieldName);
+        fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        fetch(_buPrefix + '/merge-excels/', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    updateMergePreview(result.html);
+                    document.getElementById('fieldEditSection').style.display = 'none';
+                } else {
+                    showToast(result.error || 'Delete failed', true);
+                }
+            });
+    };
+
+    // Make merge table editable + add delete row buttons
+    function makeMergeTableEditable() {
+        var table = document.querySelector('#mergePreviewContent table');
+        if (!table) return;
+        // Make all td cells editable
+        Array.from(table.querySelectorAll('td')).forEach(function(td) {
+            td.setAttribute('contenteditable', 'true');
+        });
+        // Add delete button at end of each row
+        Array.from(table.querySelectorAll('tbody tr')).forEach(function(tr, idx) {
+            var delBtn = document.createElement('button');
+            delBtn.innerHTML = '<i class="bi bi-trash3"></i>';
+            delBtn.className = 'btn-danger-custom';
+            delBtn.style.padding = '0.3rem 0.55rem';
+            delBtn.style.fontSize = '0.72rem';
+            delBtn.onclick = function() {
+                var fd = new FormData();
+                fd.append('legacy_id', window._latestUploadId); fd.append('zenition_id', window._latestZenitionExcelUploadId);
+                fd.append('delete_row_index', idx);
+                fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                fetch(_buPrefix + '/merge-excels/', { method: 'POST', body: fd })
+                    .then(function(r) { return r.json(); })
+                    .then(function(result) {
+                        if (result.success) { updateMergePreview(result.html); }
+                        else { showToast(result.error || 'Delete row failed', true); }
+                    });
+            };
+            var td = tr.insertCell(-1);
+            td.appendChild(delBtn);
+            td.style.textAlign = 'center';
+            td.removeAttribute('contenteditable');
+        });
+        // Add header for delete column
+        var thead = table.querySelector('thead tr');
+        if (thead && !thead.querySelector('.del-col-hdr')) {
+            var th = document.createElement('th');
+            th.className = 'del-col-hdr';
+            th.style.width = '50px';
+            th.textContent = '';
+            thead.appendChild(th);
+        }
+    }
+
+    // Update merge preview + add save button
+    function updateMergePreview(html) {
+        var container = document.getElementById('mergePreviewContent');
+        container.innerHTML = html;
+        makeMergeTableEditable();
+        // Save button
+        var existing = document.getElementById('mergePreviewSaveBtn');
+        if (existing) existing.remove();
+        var saveBtn = document.createElement('button');
+        saveBtn.id = 'mergePreviewSaveBtn';
+        saveBtn.className = 'btn-success-custom';
+        saveBtn.style.marginTop = '1.25rem';
+        saveBtn.innerHTML = '<i class="bi bi-floppy"></i> Save Changes';
+        saveBtn.onclick = function() {
+            var table = document.querySelector('#mergePreviewContent table');
+            if (!table) return;
+            var rows = Array.from(table.querySelectorAll('tbody tr'));
+            var data = rows.map(function(tr) { return Array.from(tr.querySelectorAll('td')).slice(0, 3).map(function(td) { return td.textContent; }); });
+            var fd = new FormData();
+            fd.append('legacy_id', window._latestUploadId); fd.append('zenition_id', window._latestZenitionExcelUploadId);
+            fd.append('save_table_data', JSON.stringify(data));
+            fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            fetch(_buPrefix + '/merge-excels/', { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(result) {
+                    if (result.success) { updateMergePreview(result.html); showToast('Changes saved!'); }
+                    else { showToast(result.error || 'Save failed', true); }
+                });
+        };
+        container.appendChild(saveBtn);
+    }
+
+    // ════════════════════════════════════════════
+    //  TEST ENVIRONMENT
+    // ════════════════════════════════════════════
+
+    document.getElementById('testEnvTile').onclick = function() {
+        new bootstrap.Modal(document.getElementById('testEnvModal')).show();
+    };
+
+    document.getElementById('testEnvForm').onsubmit = async function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        var csrfToken = formData.get('csrfmiddlewaretoken');
+        var response = await fetch(_buPrefix + '/save-test-environment/', { method: 'POST', body: formData, headers: { 'X-CSRFToken': csrfToken } });
+        var result = await response.json();
+        if (result.success) {
+            showToast('Test Environment saved!');
+            bootstrap.Modal.getInstance(document.getElementById('testEnvModal')).hide();
+            // Enable export
+            var exportTile = document.getElementById('exportTile');
+            exportTile.classList.remove('disabled');
+            updateStepper(5);
+            document.getElementById('statStatus').textContent = 'Ready';
+        } else {
+            showToast(result.error || 'Save failed', true);
+        }
+    };
+
+    // ════════════════════════════════════════════
+    //  EXPORT
+    // ════════════════════════════════════════════
+
+    document.getElementById('exportTile').onclick = function() {
+        var legacyId = window._latestUploadId;
+        var zenitionId = window._latestZenitionExcelUploadId;
+        if (!legacyId || !zenitionId) return showToast('Complete the workflow first', true);
+        window.location.href = _buPrefix + '/export-data/?legacy_id=' + legacyId + '&zenition_id=' + zenitionId;
+        showToast('Export started — downloading file...');
+    };
+
+    // ════════════════════════════════════════════
+    //  EVENT DELEGATION (dynamic buttons)
+    // ════════════════════════════════════════════
+
+    document.addEventListener('click', function(e) {
+        // Delete legacy excel from fetch modal
+        var deleteBtn = e.target.closest('.btn-delete-legacy');
+        if (deleteBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            var fileId = deleteBtn.getAttribute('data-id');
+            var fileName = deleteBtn.getAttribute('data-name');
+            if (!confirm('Delete "' + fileName + '"? This will permanently remove the file.')) return;
+            var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            var csrfToken = csrfEl ? csrfEl.value : '';
+            fetch(_buPrefix + '/delete-legacy-excel/' + fileId + '/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    // Remove the file row from the modal
+                    var row = deleteBtn.closest('.file-item');
+                    if (row) row.remove();
+                    // If no more files, close modal
+                    var remaining = document.querySelectorAll('#legacyExcelListContent .file-item');
+                    if (!remaining.length) {
+                        var modalEl = document.getElementById('fetchLegacyDataModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        showToast('All legacy files deleted');
+                    } else {
+                        // Auto-select first remaining radio
+                        var firstRadio = remaining[0].querySelector('input[type=radio]');
+                        if (firstRadio) firstRadio.checked = true;
+                        showToast('"' + fileName + '" deleted');
+                    }
+                } else {
+                    showToast(result.error || 'Delete failed', true);
+                }
+            })
+            .catch(function(err) { showToast('Delete failed: ' + err.message, true); });
+            return;
+        }
+        // Delete zenition excel from fetch modal
+        var deleteZenBtn = e.target.closest('.btn-delete-zenition-excel');
+        if (deleteZenBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            var fileId = deleteZenBtn.getAttribute('data-id');
+            var fileName = deleteZenBtn.getAttribute('data-name');
+            if (!confirm('Delete "' + fileName + '"? This will permanently remove the file and all its duplicates.')) return;
+            var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            var csrfToken = csrfEl ? csrfEl.value : '';
+            fetch(_buPrefix + '/delete-legacy-excel/' + fileId + '/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    // Remove the file row from the modal
+                    var row = deleteZenBtn.closest('.zenition-file-row');
+                    if (row) row.remove();
+                    // Check if the parent folder is now empty
+                    var folderDiv = deleteZenBtn.closest('[style*="border:1px solid"]');
+                    if (folderDiv) {
+                        var remainingFiles = folderDiv.querySelectorAll('.zenition-file-row');
+                        if (!remainingFiles.length) folderDiv.remove();
+                    }
+                    // If no more files at all, close modal
+                    var allRemaining = document.querySelectorAll('#zenitionExcelListContent .zenition-file-row');
+                    if (!allRemaining.length) {
+                        var modalEl = document.getElementById('fetchZenitionDataModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        showToast('All Zenition files deleted');
+                    } else {
+                        // Auto-select first remaining radio
+                        var firstRadio = allRemaining[0].querySelector('input[type=radio]');
+                        if (firstRadio) firstRadio.checked = true;
+                        showToast('"' + fileName + '" deleted');
+                    }
+                } else {
+                    showToast(result.error || 'Delete failed', true);
+                }
+            })
+            .catch(function(err) { showToast('Delete failed: ' + err.message, true); });
+            return;
+        }
+        // Select legacy excel from fetch modal
+        if (e.target && e.target.id === 'selectLegacyExcelBtn') {
+            var selectedRadio = document.querySelector('input[name="legacyExcelSelect"]:checked');
+            if (!selectedRadio) return showToast('Select a file!', true);
+            window._latestUploadId = selectedRadio.value;
+            document.getElementById('legacyPreviewBtnContainer').style.display = 'block';
+            updateBadge(document.getElementById('legacyBadge'), 'Loaded from DB', 'badge-ready');
+            updateUploadCount();
+            updateStepper(3);
+            document.getElementById('section-zenition-excel').style.display = 'block';
+            checkMergeReady();
+            bootstrap.Modal.getInstance(document.getElementById('fetchLegacyDataModal')).hide();
+            showToast('Legacy Excel loaded from database');
+        }
+        // Select zenition excel from fetch modal
+        if (e.target && e.target.id === 'selectZenitionExcelBtn') {
+            var selectedRadio = document.querySelector('input[name="zenitionExcelSelect"]:checked');
+            if (!selectedRadio) return showToast('Select a file!', true);
+            window._latestZenitionExcelUploadId = selectedRadio.value;
+            document.getElementById('zenitionExcelPreviewBtnContainer').style.display = 'block';
+            updateBadge(document.getElementById('zenExcelBadge'), 'Loaded from DB', 'badge-ready');
+            updateUploadCount();
+            updateStepper(4);
+            checkMergeReady();
+            bootstrap.Modal.getInstance(document.getElementById('fetchZenitionDataModal')).hide();
+            showToast('Zenition Excel loaded from database');
+        }
+        // Remove Zenition product tag
+        if (e.target && (e.target.classList.contains('remove-tag') || (e.target.parentElement && e.target.parentElement.classList.contains('remove-tag')))) {
+            var removeBtn = e.target.classList.contains('remove-tag') ? e.target : e.target.parentElement;
+            var tag = removeBtn.closest('.zen-product-tag');
+            if (!tag) return;
+            var productId = tag.getAttribute('data-id');
+            var productName = tag.textContent.replace('×', '').trim();
+            if (!confirm('Delete "' + productName + '"?')) return;
+            var formData = new FormData();
+            formData.append('zenition_delete_id', productId);
+            var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfEl) formData.append('csrfmiddlewaretoken', csrfEl.value);
+            fetch('', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success && result.zenition_products) {
+                    tag.remove();
+                    var dropdown = document.getElementById('zenitionDropdown');
+                    dropdown.innerHTML = '<option value="">— Choose a Zenition Product —</option>';
+                    var tagList = document.getElementById('zenitionTagList');
+                    tagList.innerHTML = '';
+                    result.zenition_products.forEach(function(zp) {
+                        var opt = document.createElement('option');
+                        opt.value = zp.id; opt.textContent = zp.name;
+                        dropdown.appendChild(opt);
+                        tagList.innerHTML += '<span class="zen-product-tag" data-id="' + zp.id + '">' + escapeHtml(zp.name) + ' <span class="remove-tag" title="Remove">&times;</span></span>';
+                    });
+                    document.getElementById('statZenition').textContent = result.zenition_products.length;
+                    showToast('Product "' + productName + '" deleted');
+                } else {
+                    showToast(result.error || 'Delete failed', true);
+                }
+            })
+            .catch(function(err) { showToast('Delete failed: ' + err.message, true); });
+        }
+    });
+
+    // ════════════════════════════════════════════
+    //  INFO MODAL
+    // ════════════════════════════════════════════
+
+    document.getElementById('infoBtn').onclick = function() {
+        new bootstrap.Modal(document.getElementById('infoModal')).show();
+    };
+    // Show info on first visit
+    if (!sessionStorage.getItem('testRepoInfoShown')) {
+        setTimeout(function() { new bootstrap.Modal(document.getElementById('infoModal')).show(); }, 500);
+        sessionStorage.setItem('testRepoInfoShown', 'true');
+    }
+
+    // ════════════════════════════════════════════
+    //  INIT — auto-load if stream param exists
+    // ════════════════════════════════════════════
+
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('stream')) {
+        document.getElementById('streamDropdown').value = params.get('stream');
+        streamForm.dispatchEvent(new Event('submit'));
+        history.replaceState(null, '', window.location.pathname);
+    }
+
+})();
+</script>
 {% endblock %}

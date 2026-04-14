@@ -1,0 +1,1330 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Recurring Reservation - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --primary-blue-dark: #0047ab;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --transition-fast: 0.15s ease;
+        --transition-normal: 0.25s ease;
+    }
+
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+        color: white;
+        padding: 2rem 2.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 102, 204, 0.25);
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.85;
+        margin-top: 0.5rem;
+    }
+
+    .breadcrumb {
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition-fast);
+    }
+
+    .breadcrumb a:hover {
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section {
+        padding: 1.75rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: var(--primary-blue);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .form-group label .required {
+        color: var(--danger-red);
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px var(--primary-blue-light);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-group .help-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .days-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .day-checkbox {
+        display: none;
+    }
+
+    .day-label {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .day-checkbox:checked + .day-label {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .day-label:hover {
+        border-color: var(--primary-blue);
+    }
+
+    .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: 0.3s;
+        border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+        background-color: var(--primary-blue);
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+
+    .toggle-label {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: var(--bg-light);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0052a3;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-light);
+    }
+
+    .recurrence-preview {
+        background: var(--primary-blue-light);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+
+    .recurrence-preview h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .recurrence-preview p {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    /* Conflict Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+    }
+    
+    .conflict-modal {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .modal-header.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+    }
+    
+    .modal-header.error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+    }
+    
+    .modal-header.success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    }
+    
+    .modal-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .modal-icon.warning {
+        background: var(--warning-orange);
+        color: white;
+    }
+    
+    .modal-icon.error {
+        background: var(--danger-red);
+        color: white;
+    }
+    
+    .modal-icon.success {
+        background: var(--success-green);
+        color: white;
+    }
+    
+    .modal-title h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .modal-title p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .conflict-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-card {
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .summary-card.conflicts {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+    
+    .summary-card.available {
+        background: #d1fae5;
+        border: 1px solid #a7f3d0;
+    }
+    
+    .summary-card h4 {
+        font-size: 1.5rem;
+        margin: 0;
+        font-weight: 700;
+    }
+    
+    .summary-card.conflicts h4 {
+        color: var(--danger-red);
+    }
+    
+    .summary-card.available h4 {
+        color: var(--success-green);
+    }
+    
+    .summary-card p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .conflict-list {
+        margin-top: 1rem;
+    }
+    
+    .conflict-list h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.75rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .conflict-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #fef2f2;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border-left: 3px solid var(--danger-red);
+    }
+    
+    .conflict-item .date {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .conflict-item .day {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    
+    .conflict-item .details {
+        font-size: 0.75rem;
+        color: var(--danger-red);
+        text-align: right;
+    }
+    
+    .waitlist-info {
+        background: linear-gradient(135deg, #e8f0fe, #c7d2fe);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .waitlist-info h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #003399;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .waitlist-info p {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: #003399;
+        line-height: 1.5;
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-light);
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+    
+    .modal-btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+    }
+    
+    .modal-btn-cancel {
+        background: white;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+    
+    .modal-btn-cancel:hover {
+        background: var(--bg-light);
+        color: var(--text-primary);
+    }
+    
+    .modal-btn-waitlist {
+        background: #0B5FFF;
+        color: white;
+    }
+    
+    .modal-btn-waitlist:hover {
+        background: #0044CC;
+    }
+    
+    .modal-btn-proceed {
+        background: var(--success-green);
+        color: white;
+    }
+    
+    .modal-btn-proceed:hover {
+        background: #059669;
+    }
+    
+    .loading-spinner-small {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-color);
+        border-top-color: var(--primary-blue);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-container {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .conflict-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal-footer {
+            flex-direction: column;
+        }
+        
+        .modal-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="breadcrumb">
+            <a href="{% url 'recurring_reservations_list' stream=stream %}"><i class="fas fa-arrow-left"></i> Back to List</a>
+        </div>
+        <h1>
+            <i class="fas fa-calendar-plus"></i>
+            {% if is_edit %}Edit Recurring Reservation{% else %}Create Recurring Reservation{% endif %}
+        </h1>
+        <p class="subtitle">{% if is_edit %}Update the recurring reservation settings{% else %}Set up an automated recurring system reservation{% endif %}</p>
+    </div>
+
+    <form method="POST" class="form-card">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Title <span class="required">*</span></label>
+                    <input type="text" name="title" required placeholder="e.g., Weekly Team Testing Slot" 
+                           value="{% if recurring %}{{ recurring.title }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>System <span class="required">*</span></label>
+                    <select name="system" required>
+                        <option value="">Select a system</option>
+                        {% for system in systems %}
+                            <option value="{{ system.id }}" {% if recurring and recurring.system_id == system.id %}selected{% endif %}>
+                                {{ system.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if recurring and recurring.priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reserve For</label>
+                    <select name="reserved_for">
+                        <option value="">Self ({{ request.user.username }})</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if recurring and recurring.reserved_for_id == user.id %}selected{% endif %}>
+                                {{ user.username }} ({{ user.email }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Project (Optional)</label>
+                    <select name="project">
+                        <option value="">No project</option>
+                        {% for project in projects %}
+                            <option value="{{ project.id }}" {% if recurring and recurring.project_id == project.id %}selected{% endif %}>
+                                {{ project.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea name="description" placeholder="Describe the purpose of this recurring reservation...">{% if recurring %}{{ recurring.description }}{% endif %}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recurrence Pattern -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-redo"></i> Recurrence Pattern</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Recurrence Type <span class="required">*</span></label>
+                    <select name="recurrence_type" id="recurrenceType" onchange="updateRecurrenceUI()">
+                        {% for value, label in recurrence_types %}
+                            <option value="{{ value }}" {% if recurring and recurring.recurrence_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" id="dayOfMonthGroup" style="display: none;">
+                    <label>Day of Month</label>
+                    <select name="day_of_month">
+                        <option value="">Select day</option>
+                        {% for day in "123456789"|make_list %}
+                            <option value="{{ day }}" {% if recurring and recurring.day_of_month == day|add:0 %}selected{% endif %}>{{ day }}</option>
+                        {% endfor %}
+                        {% for day in "10111213141516171819202122232425262728293031"|make_list %}
+                        {% endfor %}
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                </div>
+                <div class="form-group full-width" id="daysOfWeekGroup">
+                    <label>Days of Week</label>
+                    <div class="days-selector">
+                        <input type="checkbox" name="days_of_week" value="0" id="day0" class="day-checkbox" 
+                               {% if recurring and '0' in selected_days %}checked{% endif %}>
+                        <label for="day0" class="day-label">Mon</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="1" id="day1" class="day-checkbox"
+                               {% if recurring and '1' in selected_days %}checked{% endif %}>
+                        <label for="day1" class="day-label">Tue</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="2" id="day2" class="day-checkbox"
+                               {% if recurring and '2' in selected_days %}checked{% endif %}>
+                        <label for="day2" class="day-label">Wed</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="3" id="day3" class="day-checkbox"
+                               {% if recurring and '3' in selected_days %}checked{% endif %}>
+                        <label for="day3" class="day-label">Thu</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="4" id="day4" class="day-checkbox"
+                               {% if recurring and '4' in selected_days %}checked{% endif %}>
+                        <label for="day4" class="day-label">Fri</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="5" id="day5" class="day-checkbox"
+                               {% if recurring and '5' in selected_days %}checked{% endif %}>
+                        <label for="day5" class="day-label">Sat</label>
+                        
+                        <input type="checkbox" name="days_of_week" value="6" id="day6" class="day-checkbox"
+                               {% if recurring and '6' in selected_days %}checked{% endif %}>
+                        <label for="day6" class="day-label">Sun</label>
+                    </div>
+                    <p class="help-text">Select the days when the reservation should occur</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Settings -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-clock"></i> Time Settings</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Start Time <span class="required">*</span></label>
+                    <input type="time" name="start_time" required 
+                           value="{% if recurring %}{{ recurring.start_time|time:'H:i' }}{% else %}09:00{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>End Time <span class="required">*</span></label>
+                    <input type="time" name="end_time" required 
+                           value="{% if recurring %}{{ recurring.end_time|time:'H:i' }}{% else %}17:00{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Recurrence Start Date <span class="required">*</span></label>
+                    <input type="date" name="start_date" required 
+                           value="{% if recurring %}{{ recurring.start_date|date:'Y-m-d' }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Recurrence End Date</label>
+                    <input type="date" name="end_date" 
+                           value="{% if recurring and recurring.end_date %}{{ recurring.end_date|date:'Y-m-d' }}{% endif %}">
+                    <p class="help-text">Leave blank for indefinite recurrence</p>
+                </div>
+                <div class="form-group">
+                    <label>Maximum Occurrences</label>
+                    <input type="number" name="max_occurrences" min="1" placeholder="No limit"
+                           value="{% if recurring %}{{ recurring.max_occurrences|default:'' }}{% endif %}">
+                    <p class="help-text">Alternative to end date</p>
+                </div>
+                <div class="form-group">
+                    <label>Reminder (Hours Before)</label>
+                    <input type="number" name="reminder_hours_before" min="1" 
+                           value="{% if recurring %}{{ recurring.reminder_hours_before }}{% else %}24{% endif %}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Conflict Handling -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> Conflict Handling</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <div class="toggle-group" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="allow_conflicts" 
+                                       {% if recurring and recurring.allow_conflicts %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" style="font-weight:600;">Allow booking with conflicts</span>
+                        </div>
+                        <p style="font-size:0.75rem;color:#64748b;margin:0;padding-left:56px;line-height:1.5;">
+                            <i class="fas fa-info-circle" style="color:#0066cc;margin-right:0.25rem;"></i>
+                            When enabled, conflicting time slots are <strong>force-booked</strong> (allocation created anyway) instead of being added to the waitlist.
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="toggle-group" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="auto_resolve_conflicts"
+                                       {% if recurring and recurring.auto_resolve_conflicts %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" style="font-weight:600;">Auto-find next available slot</span>
+                        </div>
+                        <p style="font-size:0.75rem;color:#64748b;margin:0;padding-left:56px;line-height:1.5;">
+                            <i class="fas fa-info-circle" style="color:#0066cc;margin-right:0.25rem;"></i>
+                            When a conflict is detected, the system automatically <strong>shifts the time forward in 30-minute increments</strong> on the same day to find a free slot.
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="toggle-group" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="notify_on_creation" 
+                                       {% if not recurring or recurring.notify_on_creation %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" style="font-weight:600;">Notify on reservation creation</span>
+                        </div>
+                        <p style="font-size:0.75rem;color:#64748b;margin:0;padding-left:56px;line-height:1.5;">
+                            <i class="fas fa-info-circle" style="color:#0066cc;margin-right:0.25rem;"></i>
+                            Sends an in-app notification for <strong>each successfully created booking</strong> with date, time, and system details.
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="toggle-group" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="notify_on_conflict"
+                                       {% if not recurring or recurring.notify_on_conflict %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" style="font-weight:600;">Notify on conflict detection</span>
+                        </div>
+                        <p style="font-size:0.75rem;color:#64748b;margin:0;padding-left:56px;line-height:1.5;">
+                            <i class="fas fa-info-circle" style="color:#0066cc;margin-right:0.25rem;"></i>
+                            Sends an in-app notification when a <strong>conflict is detected</strong>, including details of the conflicting booking and waitlist/force-book status.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if is_edit %}
+        <!-- Status (Edit only) -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-toggle-on"></i> Status</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if recurring.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-sticky-note"></i> Additional Notes</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <textarea name="notes" placeholder="Any additional notes...">{% if recurring %}{{ recurring.notes }}{% endif %}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'recurring_reservations_list' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="button" class="btn btn-primary" id="checkConflictsBtn" onclick="checkConflicts()">
+                <i class="fas fa-search"></i> Check Availability
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">
+                <i class="fas fa-save"></i> {% if is_edit %}Update{% else %}Create{% endif %} Reservation
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Conflict Check Modal -->
+<div class="modal-overlay" id="conflictModal">
+    <div class="conflict-modal">
+        <div class="modal-header warning" id="modalHeader">
+            <div class="modal-icon warning" id="modalIcon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="modal-title">
+                <h3 id="modalTitle">Checking Availability...</h3>
+                <p id="modalSubtitle">Please wait while we check for conflicts</p>
+            </div>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div style="text-align: center; padding: 2rem;">
+                <div class="loading-spinner-small"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">Analyzing schedule...</p>
+            </div>
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function updateRecurrenceUI() {
+    const type = document.getElementById('recurrenceType').value;
+    const daysGroup = document.getElementById('daysOfWeekGroup');
+    const dayOfMonthGroup = document.getElementById('dayOfMonthGroup');
+    
+    if (type === 'weekly' || type === 'bi_weekly') {
+        daysGroup.style.display = 'block';
+        dayOfMonthGroup.style.display = 'none';
+    } else if (type === 'monthly') {
+        daysGroup.style.display = 'none';
+        dayOfMonthGroup.style.display = 'block';
+    } else if (type === 'daily') {
+        daysGroup.style.display = 'none';
+        dayOfMonthGroup.style.display = 'none';
+    } else {
+        daysGroup.style.display = 'block';
+        dayOfMonthGroup.style.display = 'block';
+    }
+}
+
+function closeModal() {
+    document.getElementById('conflictModal').classList.remove('active');
+}
+
+function showModal() {
+    document.getElementById('conflictModal').classList.add('active');
+}
+
+function getFormData() {
+    const form = document.querySelector('form');
+    const daysOfWeek = [];
+    document.querySelectorAll('input[name="days_of_week"]:checked').forEach(cb => {
+        daysOfWeek.push(cb.value);
+    });
+    
+    return {
+        system_id: form.querySelector('[name="system"]').value,
+        recurrence_type: form.querySelector('[name="recurrence_type"]').value,
+        days_of_week: daysOfWeek,
+        day_of_month: form.querySelector('[name="day_of_month"]')?.value || null,
+        start_time: form.querySelector('[name="start_time"]').value,
+        end_time: form.querySelector('[name="end_time"]').value,
+        start_date: form.querySelector('[name="start_date"]').value,
+        end_date: form.querySelector('[name="end_date"]').value || null,
+    };
+}
+
+function validateForm() {
+    const data = getFormData();
+    const errors = [];
+    
+    if (!data.system_id) errors.push('Please select a system');
+    if (!data.start_time) errors.push('Please enter a start time');
+    if (!data.end_time) errors.push('Please enter an end time');
+    if (!data.start_date) errors.push('Please enter a start date');
+    
+    const recurrenceType = data.recurrence_type;
+    if ((recurrenceType === 'weekly' || recurrenceType === 'bi_weekly') && data.days_of_week.length === 0) {
+        errors.push('Please select at least one day of the week');
+    }
+    if (recurrenceType === 'monthly' && !data.day_of_month) {
+        errors.push('Please select a day of the month');
+    }
+    
+    return errors;
+}
+
+function checkConflicts() {
+    const errors = validateForm();
+    if (errors.length > 0) {
+        alert('Please fix the following:\n\n' + errors.join('\n'));
+        return;
+    }
+    
+    showModal();
+    
+    // Reset modal to loading state
+    document.getElementById('modalHeader').className = 'modal-header warning';
+    document.getElementById('modalIcon').className = 'modal-icon warning';
+    document.getElementById('modalIcon').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    document.getElementById('modalTitle').textContent = 'Checking Availability...';
+    document.getElementById('modalSubtitle').textContent = 'Please wait while we check for conflicts';
+    document.getElementById('modalBody').innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+            <div class="loading-spinner-small"></div>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">Analyzing schedule...</p>
+        </div>
+    `;
+    document.getElementById('modalFooter').innerHTML = `
+        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+    `;
+    
+    const data = getFormData();
+    
+    fetch('{% url "check_recurring_conflicts" stream=stream %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            displayConflictResults(result);
+        } else {
+            showError(result.error || 'Failed to check conflicts');
+        }
+    })
+    .catch(error => {
+        showError('Network error: ' + error.message);
+    });
+}
+
+function showError(message) {
+    document.getElementById('modalHeader').className = 'modal-header error';
+    document.getElementById('modalIcon').className = 'modal-icon error';
+    document.getElementById('modalIcon').innerHTML = '<i class="fas fa-times-circle"></i>';
+    document.getElementById('modalTitle').textContent = 'Error';
+    document.getElementById('modalSubtitle').textContent = message;
+    document.getElementById('modalBody').innerHTML = '';
+    document.getElementById('modalFooter').innerHTML = `
+        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+            <i class="fas fa-times"></i> Close
+        </button>
+    `;
+}
+
+function displayConflictResults(result) {
+    const hasConflicts = result.has_conflicts;
+    const allConflict = result.all_conflict;
+    
+    // Read current toggle states to show accurate handling info
+    const allowConflicts = document.querySelector('input[name="allow_conflicts"]').checked;
+    const autoResolve = document.querySelector('input[name="auto_resolve_conflicts"]').checked;
+    const notifyCreation = document.querySelector('input[name="notify_on_creation"]').checked;
+    const notifyConflict = document.querySelector('input[name="notify_on_conflict"]').checked;
+
+    // Build the "how conflicts are handled" info box based on toggles
+    function buildHandlingInfo(conflictCount, availableCount) {
+        let steps = [];
+        let icons = [];
+        
+        // Available dates
+        steps.push(`<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.6rem 0.75rem;background:#d1fae5;border-radius:8px;border-left:3px solid #10b981;">
+            <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;flex-shrink:0;"></i>
+            <div>
+                <strong style="color:#065f46;">${availableCount} available date(s)</strong>
+                <span style="color:#047857;font-size:0.8rem;"> — will be booked immediately</span>
+            </div>
+        </div>`);
+        
+        if (conflictCount > 0) {
+            if (autoResolve) {
+                steps.push(`<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.6rem 0.75rem;background:#e8f0fe;border-radius:8px;border-left:3px solid #0B5FFF;">
+                    <i class="fas fa-magic" style="color:#0B5FFF;margin-top:2px;flex-shrink:0;"></i>
+                    <div>
+                        <strong style="color:#3730a3;">Auto-Resolve Active</strong>
+                        <span style="color:#003399;font-size:0.8rem;"> — system will try shifting time by 30-min increments to find free slots on conflict days</span>
+                    </div>
+                </div>`);
+            }
+            
+            if (allowConflicts) {
+                steps.push(`<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.6rem 0.75rem;background:#fef3c7;border-radius:8px;border-left:3px solid #f59e0b;">
+                    <i class="fas fa-bolt" style="color:#f59e0b;margin-top:2px;flex-shrink:0;"></i>
+                    <div>
+                        <strong style="color:#92400e;">${conflictCount} conflict(s) — Force-Book</strong>
+                        <span style="color:#a16207;font-size:0.8rem;"> — ${autoResolve ? 'remaining unresolved conflicts' : 'conflicting slots'} will be booked anyway (double-booked)</span>
+                    </div>
+                </div>`);
+            } else {
+                steps.push(`<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.6rem 0.75rem;background:#fee2e2;border-radius:8px;border-left:3px solid #ef4444;">
+                    <i class="fas fa-clock" style="color:#ef4444;margin-top:2px;flex-shrink:0;"></i>
+                    <div>
+                        <strong style="color:#991b1b;">${conflictCount} conflict(s) — Waitlist</strong>
+                        <span style="color:#b91c1c;font-size:0.8rem;"> — ${autoResolve ? 'remaining unresolved conflicts' : 'conflicting slots'} will be added to the waitlist</span>
+                    </div>
+                </div>`);
+            }
+        }
+        
+        // Notification info
+        let notifParts = [];
+        if (notifyCreation) notifParts.push('each booking created');
+        if (notifyConflict && conflictCount > 0) notifParts.push('each conflict detected');
+        
+        if (notifParts.length > 0) {
+            steps.push(`<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.6rem 0.75rem;background:#eff6ff;border-radius:8px;border-left:3px solid #0066cc;">
+                <i class="fas fa-bell" style="color:#0066cc;margin-top:2px;flex-shrink:0;"></i>
+                <div>
+                    <strong style="color:#1e40af;">Notifications</strong>
+                    <span style="color:#1d4ed8;font-size:0.8rem;"> — you'll be notified for ${notifParts.join(' and ')}</span>
+                </div>
+            </div>`);
+        }
+        
+        return `<div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem;">
+            <h4 style="font-size:0.85rem;font-weight:700;color:#1e293b;margin:0;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-cogs" style="color:#0066cc;"></i> How conflicts will be handled
+            </h4>
+            ${steps.join('')}
+        </div>`;
+    }
+    
+    if (!hasConflicts) {
+        // No conflicts - all good!
+        document.getElementById('modalHeader').className = 'modal-header success';
+        document.getElementById('modalIcon').className = 'modal-icon success';
+        document.getElementById('modalIcon').innerHTML = '<i class="fas fa-check-circle"></i>';
+        document.getElementById('modalTitle').textContent = 'No Conflicts Found!';
+        document.getElementById('modalSubtitle').textContent = `All ${result.total_dates} time slots are available for ${result.system_name}`;
+        
+        document.getElementById('modalBody').innerHTML = `
+            <div class="conflict-summary">
+                <div class="summary-card available">
+                    <h4>${result.available_count}</h4>
+                    <p>Available Slots</p>
+                </div>
+                <div class="summary-card conflicts">
+                    <h4>0</h4>
+                    <p>Conflicts</p>
+                </div>
+            </div>
+            ${buildHandlingInfo(0, result.available_count)}
+            <div style="text-align: center; padding: 1rem;">
+                <i class="fas fa-calendar-check" style="font-size: 3rem; color: var(--success-green); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary);">You can proceed to create this recurring reservation.</p>
+            </div>
+        `;
+        
+        document.getElementById('modalFooter').innerHTML = `
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="button" class="modal-btn modal-btn-proceed" onclick="submitForm()">
+                <i class="fas fa-check"></i> Create Reservation
+            </button>
+        `;
+    } else if (allConflict) {
+        // All dates have conflicts
+        document.getElementById('modalHeader').className = 'modal-header error';
+        document.getElementById('modalIcon').className = 'modal-icon error';
+        document.getElementById('modalIcon').innerHTML = '<i class="fas fa-times-circle"></i>';
+        document.getElementById('modalTitle').textContent = 'All Dates Have Conflicts';
+        document.getElementById('modalSubtitle').textContent = `${result.system_name} is fully booked during your requested time slots`;
+        
+        let conflictListHtml = result.conflicts.map(c => `
+            <div class="conflict-item">
+                <div>
+                    <div class="date">${c.display_date}</div>
+                    <div class="day">${c.day_name}</div>
+                </div>
+                <div class="details">${c.conflict_details || 'Booked'}</div>
+            </div>
+        `).join('');
+        
+        const allConflictAction = allowConflicts ? 'Force-Book All' : 'Add All to Waitlist';
+        const allConflictBtnClass = allowConflicts ? 'modal-btn-proceed' : 'modal-btn-waitlist';
+        const allConflictIcon = allowConflicts ? 'fa-bolt' : 'fa-clock';
+        
+        document.getElementById('modalBody').innerHTML = `
+            <div class="conflict-summary">
+                <div class="summary-card available">
+                    <h4>0</h4>
+                    <p>Available Slots</p>
+                </div>
+                <div class="summary-card conflicts">
+                    <h4>${result.conflicts_count}</h4>
+                    <p>Conflicts</p>
+                </div>
+            </div>
+            
+            ${buildHandlingInfo(result.conflicts_count, 0)}
+            
+            <div class="conflict-list">
+                <h4><i class="fas fa-calendar-times"></i> Conflicting Dates (${result.conflicts_count})</h4>
+                ${conflictListHtml}
+                ${result.conflicts_count > 20 ? `<p style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.5rem;">... and ${result.conflicts_count - 20} more conflicts</p>` : ''}
+            </div>
+        `;
+        
+        document.getElementById('modalFooter').innerHTML = `
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                <i class="fas fa-arrow-left"></i> Go Back & Modify
+            </button>
+            <button type="button" class="modal-btn ${allConflictBtnClass}" onclick="submitForm()">
+                <i class="fas ${allConflictIcon}"></i> ${allConflictAction}
+            </button>
+        `;
+    } else {
+        // Some conflicts
+        document.getElementById('modalHeader').className = 'modal-header warning';
+        document.getElementById('modalIcon').className = 'modal-icon warning';
+        document.getElementById('modalIcon').innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        document.getElementById('modalTitle').textContent = 'Some Conflicts Found';
+        document.getElementById('modalSubtitle').textContent = `${result.conflicts_count} of ${result.total_dates} dates have conflicts on ${result.system_name}`;
+        
+        let conflictListHtml = result.conflicts.map(c => `
+            <div class="conflict-item">
+                <div>
+                    <div class="date">${c.display_date}</div>
+                    <div class="day">${c.day_name}</div>
+                </div>
+                <div class="details">${c.conflict_details || 'Booked'}</div>
+            </div>
+        `).join('');
+        
+        const conflictAction = allowConflicts ? 'force-booked' : 'waitlisted';
+        const proceedBtnLabel = `Proceed (${result.available_count} booked + ${result.conflicts_count} ${conflictAction})`;
+        
+        document.getElementById('modalBody').innerHTML = `
+            <div class="conflict-summary">
+                <div class="summary-card available">
+                    <h4>${result.available_count}</h4>
+                    <p>Available Slots</p>
+                </div>
+                <div class="summary-card conflicts">
+                    <h4>${result.conflicts_count}</h4>
+                    <p>Conflicts</p>
+                </div>
+            </div>
+            
+            ${buildHandlingInfo(result.conflicts_count, result.available_count)}
+            
+            <div class="conflict-list">
+                <h4><i class="fas fa-calendar-times"></i> Conflicting Dates</h4>
+                ${conflictListHtml}
+                ${result.conflicts_count > 20 ? `<p style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.5rem;">... and ${result.conflicts_count - 20} more conflicts</p>` : ''}
+            </div>
+        `;
+        
+        document.getElementById('modalFooter').innerHTML = `
+            <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                <i class="fas fa-arrow-left"></i> Go Back & Modify
+            </button>
+            <button type="button" class="modal-btn modal-btn-proceed" onclick="submitForm()">
+                <i class="fas fa-check"></i> ${proceedBtnLabel}
+            </button>
+        `;
+    }
+}
+
+function submitForm() {
+    closeModal();
+    document.querySelector('form').submit();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', updateRecurrenceUI);
+</script>
+{% endblock %}

@@ -2,17 +2,14 @@
 function renderTasks(filteredTasks = null) {
     const tasksToRender = filteredTasks || tasks;
     
-    // Group tasks by status
     const todoTasks = tasksToRender.filter(task => task.status === 'todo');
     const progressTasks = tasksToRender.filter(task => task.status === 'progress');
     const doneTasks = tasksToRender.filter(task => task.status === 'done');
     
-    // Calculate total pages for each column
     const todoPages = Math.ceil(todoTasks.length / TASKS_PER_PAGE) || 1;
     const progressPages = Math.ceil(progressTasks.length / TASKS_PER_PAGE) || 1;
     const donePages = Math.ceil(doneTasks.length / TASKS_PER_PAGE) || 1;
     
-    // Update pagination displays
     document.querySelector('.total-pages[data-status="todo"]').textContent = todoPages;
     document.querySelector('.total-pages[data-status="progress"]').textContent = progressPages;
     document.querySelector('.total-pages[data-status="done"]').textContent = donePages;
@@ -26,7 +23,6 @@ function renderTasks(filteredTasks = null) {
     document.querySelector('.current-page[data-status="progress"]').textContent = currentPages.progress;
     document.querySelector('.current-page[data-status="done"]').textContent = currentPages.done;
     
-    // Update button states
     document.querySelector('.prev-btn[data-status="todo"]').disabled = currentPages.todo <= 1;
     document.querySelector('.next-btn[data-status="todo"]').disabled = currentPages.todo >= todoPages;
     document.querySelector('.prev-btn[data-status="progress"]').disabled = currentPages.progress <= 1;
@@ -34,7 +30,6 @@ function renderTasks(filteredTasks = null) {
     document.querySelector('.prev-btn[data-status="done"]').disabled = currentPages.done <= 1;
     document.querySelector('.next-btn[data-status="done"]').disabled = currentPages.done >= donePages;
     
-    // Clear all columns
     todoTasksEl.innerHTML = '';
     progressTasksEl.innerHTML = '';
     doneTasksEl.innerHTML = '';
@@ -77,7 +72,6 @@ function renderMonthView(filteredTasks = null) {
     const monthContainer = document.getElementById('month-container');
     monthContainer.innerHTML = '';
     
-    // Group tasks by month
     const tasksByMonth = {};
     tasksToRender.forEach(task => {
         if (task.dueDate) {
@@ -90,28 +84,23 @@ function renderMonthView(filteredTasks = null) {
         }
     });
     
-    // Sort months
     const sortedMonths = Object.keys(tasksByMonth).sort().reverse();
     
     // Pagination for months
     const monthsPerPage = 3;
     const totalMonthPages = Math.ceil(sortedMonths.length / monthsPerPage) || 1;
     
-    // Update month pagination display
     document.getElementById('total-month-pages').textContent = totalMonthPages;
     currentPages.month = Math.min(currentPages.month, totalMonthPages);
     document.getElementById('current-month-page').textContent = currentPages.month;
     
-    // Update month pagination buttons
     document.getElementById('prev-month-page').disabled = currentPages.month <= 1;
     document.getElementById('next-month-page').disabled = currentPages.month >= totalMonthPages;
     
-    // Get months for current page
     const monthStart = (currentPages.month - 1) * monthsPerPage;
     const monthEnd = monthStart + monthsPerPage;
     const monthsToDisplay = sortedMonths.slice(monthStart, monthEnd);
     
-    // Create month sections
     monthsToDisplay.forEach(monthYear => {
         const [year, month] = monthYear.split('-');
         const date = new Date(parseInt(year), parseInt(month) - 1, 1);
@@ -128,14 +117,12 @@ function renderMonthView(filteredTasks = null) {
             <span class="collapse-icon">▼</span>
         `;
         
-        // Create month tasks container
         const monthTasks = document.createElement('div');
         monthTasks.classList.add('month-tasks');
         
         // Sort tasks by due date
         const sortedTasks = tasksByMonth[monthYear].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         
-        // Add tasks to month
         sortedTasks.forEach(task => {
             monthTasks.appendChild(createTaskElement(task));
         });
@@ -146,7 +133,6 @@ function renderMonthView(filteredTasks = null) {
             monthTasks.classList.toggle('collapsed');
         });
         
-        // Append to month section
         monthSection.appendChild(monthHeader);
         monthSection.appendChild(monthTasks);
         monthContainer.appendChild(monthSection);

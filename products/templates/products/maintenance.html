@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance | NexusOps</title>
+    <meta http-equiv="refresh" content="60">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f4f6f8 0%, #e8ecf1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #222;
+        }
+
+        .maintenance-container {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .maintenance-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.85; }
+        }
+
+        .maintenance-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            padding: 3rem 2.5rem;
+            border: 1px solid #e0e3e7;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #856404;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #ffc107;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ---- Countdown Timer ---- */
+        .countdown-section {
+            margin: 1.5rem 0;
+        }
+
+        .countdown-label {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .countdown-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 64px;
+        }
+
+        .countdown-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 0.4rem 0.75rem;
+            min-width: 64px;
+            line-height: 1.3;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .countdown-unit-label {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.3rem;
+        }
+
+        .countdown-separator {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ccc;
+            align-self: flex-start;
+            padding-top: 0.4rem;
+        }
+
+        .countdown-expired {
+            font-size: 1.1rem;
+            color: #28a745;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 2rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: #e0e3e7;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, #4e73df, #1cc88a);
+            border-radius: 2px;
+            animation: loading 2s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        .logo-area {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .logo-area img {
+            height: 48px;
+            width: auto;
+        }
+
+        .logo-area .logo-subtitle {
+            font-size: 1.2rem;
+            color: #999;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <div class="maintenance-card">
+            <div class="logo-area">
+                <img src="/static/products/philips.png" alt="Philips">
+                <span class="logo-subtitle">NexusOps</span>
+            </div>
+            <div class="maintenance-icon">🔧</div>
+            <h1>We'll Be Right Back</h1>
+
+            <div class="status-bar">
+                <span class="status-dot"></span>
+                Scheduled Maintenance In Progress
+            </div>
+
+            <p class="message">
+                {{ maintenance_message }}
+            </p>
+
+            {% if has_timer %}
+            <div class="countdown-section">
+                <div class="countdown-label">Estimated Time Remaining</div>
+                <div class="countdown-timer" id="countdown">
+                    <div class="countdown-unit">
+                        <span class="countdown-value" id="cd-days">--</span>
+                        <span class="countdown-unit-label">Days</span>
+                    </div>
+                    <span class="countdown-separator">:</span>
+                    <div class="countdown-unit">
+                        <span class="countdown-value" id="cd-hours">--</span>
+                        <span class="countdown-unit-label">Hours</span>
+                    </div>
+                    <span class="countdown-separator">:</span>
+                    <div class="countdown-unit">
+                        <span class="countdown-value" id="cd-mins">--</span>
+                        <span class="countdown-unit-label">Minutes</span>
+                    </div>
+                    <span class="countdown-separator">:</span>
+                    <div class="countdown-unit">
+                        <span class="countdown-value" id="cd-secs">--</span>
+                        <span class="countdown-unit-label">Seconds</span>
+                    </div>
+                </div>
+                <div class="countdown-expired" id="cd-expired" style="display:none;">
+                    ✅ Maintenance completed — Refreshing..
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+
+            <p class="footer-text">
+                This page will automatically refresh every 60 seconds.<br>
+            </p>
+        </div>
+    </div>
+
+    {% if has_timer %}
+    <script>
+        (function() {
+            var endTime = new Date("{{ end_time_iso }}").getTime();
+            var timerEl = document.getElementById('countdown');
+            var expiredEl = document.getElementById('cd-expired');
+            var daysEl = document.getElementById('cd-days');
+            var hoursEl = document.getElementById('cd-hours');
+            var minsEl = document.getElementById('cd-mins');
+            var secsEl = document.getElementById('cd-secs');
+
+            function pad(n) { return n < 10 ? '0' + n : n; }
+
+            function updateCountdown() {
+                var now = Date.now();
+                var diff = endTime - now;
+
+                if (diff <= 0) {
+                    timerEl.style.display = 'none';
+                    expiredEl.style.display = 'block';
+                    setTimeout(function() { location.reload(); }, 3000);
+                    return;
+                }
+
+                var totalSecs = Math.floor(diff / 1000);
+                var days = Math.floor(totalSecs / 86400);
+                var hours = Math.floor((totalSecs % 86400) / 3600);
+                var mins = Math.floor((totalSecs % 3600) / 60);
+                var secs = totalSecs % 60;
+
+                daysEl.textContent = pad(days);
+                hoursEl.textContent = pad(hours);
+                minsEl.textContent = pad(mins);
+                secsEl.textContent = pad(secs);
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        })();
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,813 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Waitlist Dashboard - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --primary-blue-dark: #0047ab;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --purple-dark: #6d28d9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --transition-fast: 0.15s ease;
+        --transition-normal: 0.25s ease;
+    }
+
+    .waitlist-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+        color: white;
+        padding: 2rem 2.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .page-header h1 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem;
+        opacity: 0.9;
+    }
+
+    .page-header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.85;
+        margin-top: 0.5rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.9);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        transition: var(--transition-fast);
+    }
+
+    .btn-back:hover {
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .btn-join {
+        background: white;
+        color: var(--purple);
+        padding: 0.875rem 1.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition-normal);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-join:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        animation: slideIn 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .alert-success { background: var(--success-green-light); color: #065f46; border: 1px solid #a7f3d0; }
+    .alert-error, .alert-danger { background: var(--danger-red-light); color: #991b1b; border: 1px solid #fecaca; }
+    .alert-warning { background: var(--warning-orange-light); color: #92400e; border: 1px solid #fde68a; }
+    .alert-info { background: var(--primary-blue-light); color: #1e40af; border: 1px solid #bfdbfe; }
+
+    .alert-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .alert-close:hover { opacity: 1; }
+
+    .alert-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: currentColor;
+        opacity: 0.3;
+        border-radius: 0 0 12px 12px;
+        animation: progressShrink 5s linear forwards;
+    }
+
+    @keyframes progressShrink {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: var(--transition-normal);
+        border: 1px solid transparent;
+    }
+
+    .stat-card:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+    .stat-icon.green { background: var(--success-green-light); color: var(--success-green); }
+    .stat-icon.red { background: var(--danger-red-light); color: var(--danger-red); }
+    .stat-icon.blue { background: var(--primary-blue-light); color: var(--primary-blue); }
+    .stat-icon.orange { background: var(--warning-orange-light); color: var(--warning-orange); }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-content p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .filters-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .filters-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-group select {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .btn-filter {
+        background: var(--purple);
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .waitlist-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .table-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        background: var(--bg-light);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background: var(--bg-light);
+    }
+
+    .queue-position {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--purple);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--primary-blue-light);
+        color: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .user-email {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-waiting { background: #fef3c7; color: #d97706; }
+    .status-notified { background: var(--primary-blue-light); color: var(--primary-blue); }
+    .status-fulfilled { background: #d1fae5; color: #059669; }
+    .status-expired { background: #fee2e2; color: #dc2626; }
+    .status-declined { background: #f1f5f9; color: #64748b; }
+    .status-not_allocated { background: #fef2f2; color: #991b1b; }
+
+    .priority-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .priority-low { background: #f1f5f9; color: #64748b; }
+    .priority-normal { background: var(--primary-blue-light); color: var(--primary-blue); }
+    .priority-high { background: #fef3c7; color: #d97706; }
+    .priority-urgent { background: #fee2e2; color: #dc2626; }
+
+    .flexibility-badges {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .flex-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        background: #e8f0fe;
+        color: var(--purple);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        padding: 0.375rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-fulfill {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .btn-fulfill:hover {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-cancel:hover {
+        background: var(--danger-red);
+        color: white;
+    }
+
+    .btn-view {
+        background: var(--primary-blue-light);
+        color: var(--primary-blue);
+    }
+
+    .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .empty-state .empty-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bg-light), #eef2f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-state .empty-icon i {
+        font-size: 2.5rem;
+        color: #94a3b8;
+    }
+
+    .empty-state h3 {
+        font-size: 1.375rem;
+        color: var(--text-primary);
+        margin: 0 0 0.75rem 0;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin: 0 0 2rem 0;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    @media (max-width: 1024px) {
+        .waitlist-table {
+            overflow-x: auto;
+        }
+        
+        table {
+            min-width: 800px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .waitlist-container {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="waitlist-container">
+    <!-- Django Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="alert-progress"></div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <div>
+            <a href="{% url 'system_allocation_stream' stream=stream %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to System Allocation
+            </a>
+            <h1><i class="fas fa-list-ol"></i> Reservation Waitlist</h1>
+            <p class="subtitle">Manage waitlist entries for system reservations in <strong>{{ stream }}</strong> stream</p>
+        </div>
+        <a href="{% url 'waitlist_join' stream=stream %}" class="btn-join">
+            <i class="fas fa-plus"></i> Join Waitlist
+        </a>
+    </div>
+
+    <div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_waiting }}</h3>
+            <p>Currently Waiting</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_fulfilled }}</h3>
+            <p>Fulfilled</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_expired }}</h3>
+            <p>Expired</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef2f2; color: #991b1b;">
+            <i class="fas fa-ban"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_not_allocated }}</h3>
+            <p>Not Allocated</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-stopwatch"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.avg_wait_time }}</h3>
+            <p>Avg. Wait Time</p>
+        </div>
+    </div>
+</div>
+
+<div class="filters-section">
+    <form method="GET" class="filters-form">
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="">All Statuses</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>System</label>
+            <select name="system">
+                <option value="">All Systems</option>
+                {% for system in systems %}
+                    <option value="{{ system.id }}" {% if system_filter == system.id|stringformat:"s" %}selected{% endif %}>{{ system.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Priority</label>
+            <select name="priority">
+                <option value="">All Priorities</option>
+                {% for value, label in priority_choices %}
+                    <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-filter">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+    </form>
+</div>
+
+<div class="waitlist-table">
+    <div class="table-header">
+        <h3>Waitlist Entries</h3>
+    </div>
+    
+    {% if waitlist_entries %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>User</th>
+                    <th>System</th>
+                    <th>Desired Slot</th>
+                    <th>Priority</th>
+                    <th>Flexibility</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in waitlist_entries %}
+                    <tr>
+                        <td>
+                            <div class="queue-position">#{{ entry.queue_position }}</div>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">{{ entry.user.username|first|upper }}</div>
+                                <div class="user-details">
+                                    <span class="user-name">{{ entry.user.username }}</span>
+                                    <span class="user-email">{{ entry.user.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ entry.system.name }}</strong>
+                            {% if entry.project %}
+                                <br><small style="color: var(--text-secondary);">{{ entry.project.name }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ entry.desired_date|date:"M d, Y" }}</strong><br>
+                            <small style="color: var(--text-secondary);">
+                                {{ entry.desired_start_time|time:"H:i" }} - {{ entry.desired_end_time|time:"H:i" }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="priority-badge priority-{{ entry.priority }}">{{ entry.get_priority_display }}</span>
+                        </td>
+                        <td>
+                            <div class="flexibility-badges">
+                                {% if entry.is_flexible_date %}
+                                    <span class="flex-badge">±{{ entry.flexibility_days }} days</span>
+                                {% endif %}
+                                {% if entry.is_flexible_time %}
+                                    <span class="flex-badge">Flexible time</span>
+                                {% endif %}
+                                {% if not entry.is_flexible_date and not entry.is_flexible_time %}
+                                    <span style="color: var(--text-secondary); font-size: 0.75rem;">Fixed</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ entry.status }}">{{ entry.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'waitlist_entry_detail' stream=stream pk=entry.pk %}" class="btn-action btn-view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if entry.status == 'waiting' and user.is_superuser or user.custom_profile.is_admin %}
+                                    <button onclick="fulfillEntry({{ entry.pk }})" class="btn-action btn-fulfill" title="Fulfill">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                {% endif %}
+                                {% if entry.status == 'waiting' and entry.user == request.user %}
+                                    <form action="{% url 'waitlist_cancel' stream=stream pk=entry.pk %}" method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-action btn-cancel" title="Cancel" onclick="return confirm('Cancel this waitlist entry?')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h3>No Waitlist Entries</h3>
+            <p>There are no entries matching your filters. Join the waitlist to get notified when a slot becomes available.</p>
+            <a href="{% url 'waitlist_join' stream=stream %}" class="btn-join" style="background: var(--purple); color: white;">
+                <i class="fas fa-plus"></i> Join Waitlist
+            </a>
+        </div>
+    {% endif %}
+</div>
+</div>
+
+<script>
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function fulfillEntry(pk) {
+    if (!confirm('Fulfill this waitlist entry? This will create a reservation for the requested slot.')) {
+        return;
+    }
+    
+    const url = '{% url "waitlist_fulfill" stream=stream pk=0 %}'.replace('/0/', '/' + pk + '/');
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            console.error('Fulfill failed:', data.error);
+            alert('Error fulfilling entry.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error fulfilling entry');
+    });
+}
+
+// Auto-close alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

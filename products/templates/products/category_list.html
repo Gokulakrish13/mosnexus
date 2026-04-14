@@ -1,1678 +1,1513 @@
 {% extends 'products/base.html' %}
+{% load static %}
+{% load product_filters %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories</title>
-    <link rel="stylesheet" href="/static/products/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #0066cc;
-            --primary-dark: #004d99;
-            --primary-light: #e6f2ff;
-            --accent: #00b4d8;
-            --accent-2: #7c3aed;
-            --accent-3: #f59e0b;
-            --accent-gradient: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
-            --purple-gradient: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
-            --dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-dark: #0f172a;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-light: #94a3b8;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
-            --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
-            --shadow-xl: 0 25px 60px rgba(0,0,0,0.15);
-            --shadow-glow: 0 0 40px rgba(0, 102, 204, 0.15);
-            --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.05);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-primary);
-            font-size: 1rem;
-            background: var(--bg-main);
-            overflow-x: hidden;
-        }
-
-        .category-bg {
-            padding-top: 80px;
-            background: var(--bg-main);
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* Premium Hero Section */
-        .hero-section {
-            background: var(--dark-gradient);
-            padding: 3rem 2rem 8rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
-        }
-
-        .hero-glow {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            pointer-events: none;
-        }
-
-        .hero-glow-1 {
-            background: var(--primary);
-            top: -200px;
-            right: -100px;
-        }
-
-        .hero-glow-2 {
-            background: var(--accent);
-            bottom: -300px;
-            left: -100px;
-        }
-
-        .hero-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .hero-title-section {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .hero-icon {
-            width: 72px;
-            height: 72px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-        }
-
-        .hero-text h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .hero-text .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .hero-text .breadcrumb a {
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .hero-text .breadcrumb a:hover {
-            color: white;
-        }
-
-        .hero-text .breadcrumb i {
-            font-size: 0.7rem;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .hero-stat {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-md);
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .hero-stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-
-        .hero-stat-label {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-
-        /* Main Content Area - Floating Cards */
-        .category-list-container {
-            max-width: 1400px;
-            margin: -5rem auto 0;
-            padding: 0 2rem 3rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Toolbar Card */
-        .toolbar-card {
-            background: white;
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .toolbar-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .search-section {
-            flex: 1;
-            min-width: 300px;
-            max-width: 500px;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-
-        .search-input-wrapper {
-            position: relative;
-            flex: 1;
-        }
-
-        .search-input-wrapper i {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            transition: var(--transition);
-            font-size: 0.9rem;
-            z-index: 2;
-        }
-
-        .search-input-wrapper:focus-within i {
-            color: var(--primary);
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3rem !important;
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--border-color);
-            font-size: 0.95rem;
-            transition: var(--transition);
-            background: var(--bg-main);
-            font-family: inherit;
-        }
-
-        .search-input::placeholder {
-            color: var(--text-light);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
-        }
-
-        .search-btn {
-            padding: 1rem 1.75rem;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius-lg);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-            font-family: inherit;
-        }
-
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.35);
-        }
-
-        .quick-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .add-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 1rem 1.75rem;
-            background: var(--accent-gradient);
-            color: white;
-            border-radius: var(--radius-lg);
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border: none;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.25);
-        }
-
-        .add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.35);
-        }
-
-        .add-btn i {
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-
-        .add-btn:hover i {
-            transform: rotate(90deg);
-        }
-
-        .toolbar-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .toolbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        /* View Toggle */
-        .view-toggle {
-            display: flex;
-            background: var(--bg-main);
-            border-radius: var(--radius-md);
-            padding: 4px;
-            gap: 2px;
-        }
-
-        .view-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-light);
-            transition: var(--transition);
-            font-size: 1rem;
-        }
-
-        .view-btn.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .view-btn:hover:not(.active) {
-            color: var(--primary);
-        }
-
-        /* Filter Chips */
-        .filter-chips {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-chip {
-            padding: 0.6rem 1.25rem;
-            background: var(--bg-main);
-            border: 2px solid transparent;
-            border-radius: var(--radius-md);
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: inherit;
-        }
-
-        .filter-chip:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .filter-chip.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .sort-control {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            position: relative;
-            top: -2px;
-        }
-
-        .sort-control label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            position: relative;
-            top: -2px;
-        }
-
-        .sort-select {
-            padding: 0.5rem 2rem 0.5rem 0.75rem;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
-            appearance: none;
-            font-size: 0.8rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-            font-family: inherit;
-            position: relative;
-            top: 2px;
-        }
-
-        .sort-select:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-
-        .checkbox-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-weight: 500;
-            position: relative;
-            top: -4px;
-        }
-
-        .checkbox-control input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .bulk-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .bulk-btn {
-            padding: 0.65rem 1.25rem;
-            border-radius: var(--radius-md);
-            border: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: inherit;
-        }
-
-        .bulk-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .bulk-btn.delete {
-            background: #fef2f2;
-            color: var(--danger);
-            border: 1px solid #fecaca;
-        }
-
-        .bulk-btn.delete:not(:disabled):hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        .bulk-btn.export {
-            background: #f0fdf4;
-            color: var(--success);
-            border: 1px solid #bbf7d0;
-        }
-
-        .bulk-btn.export:not(:disabled):hover {
-            background: var(--success);
-            color: white;
-        }
-
-        .results-info {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .results-info strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        /* Category Grid - Premium Cards */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .category-grid.list-view {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        /* Premium Card Styles */
-        .category-card {
-            background: white;
-            border-radius: var(--radius-xl);
-            padding: 1.75rem;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-card);
-        }
-
-        .category-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--accent-gradient);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .category-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: transparent;
-        }
-
-        .category-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        /* List View Styles */
-        .category-grid.list-view .category-card {
-            flex-direction: row;
-            align-items: center;
-            padding: 1.25rem 1.75rem;
-            gap: 1.5rem;
-        }
-
-        .category-grid.list-view .category-card:hover {
-            transform: translateX(8px) translateY(0);
-        }
-
-        .category-grid.list-view .card-header {
-            margin-bottom: 0;
-            flex-shrink: 0;
-            align-items: center;
-        }
-
-        .category-grid.list-view .card-checkbox-wrapper {
-            align-self: center;
-            margin-left: 1rem;
-        }
-
-        .category-grid.list-view .card-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .category-grid.list-view .card-content .category-name {
-            flex: 1;
-            min-width: 150px;
-            margin-bottom: 0;
-        }
-
-        .category-grid.list-view .card-content .category-serial {
-            flex-shrink: 0;
-        }
-
-        .category-grid.list-view .card-content .status-badge {
-            margin-top: 0;
-            flex-shrink: 0;
-        }
-
-        .category-grid.list-view .card-footer {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-            flex-shrink: 0;
-            min-width: 200px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .category-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary-light) 0%, #cce5ff 100%);
-            border-radius: var(--radius-lg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: var(--transition-bounce);
-            position: relative;
-        }
-
-        .category-icon i {
-            font-size: 1.75rem;
-            color: var(--primary);
-        }
-
-        .category-icon .icon-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.65rem;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
-        }
-
-        .category-card:hover .category-icon {
-            transform: scale(1.1) rotate(-5deg);
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.25);
-        }
-
-        .card-checkbox-wrapper {
-            position: relative;
-        }
-
-        .card-checkbox {
-            width: 22px;
-            height: 22px;
-            accent-color: var(--primary);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .card-checkbox:checked {
-            transform: scale(1.1);
-        }
-
-        .card-content {
-            flex: 1;
-        }
-
-        .category-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            line-height: 1.3;
-            word-break: break-word;
-            transition: var(--transition);
-        }
-
-        .category-card:hover .category-name {
-            color: var(--primary);
-        }
-
-        .category-serial {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            font-family: 'SF Mono', 'Courier New', monospace;
-            background: var(--bg-main);
-            padding: 0.5rem 0.875rem;
-            border-radius: var(--radius-md);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            word-break: break-all;
-            border: 1px solid var(--border-color);
-        }
-
-        .category-serial i {
-            font-size: 0.7rem;
-            opacity: 0.6;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.5rem;
-            padding-top: 1.25rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .product-count {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .product-count .count-badge {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 0.35rem 0.875rem;
-            border-radius: var(--radius-md);
-            font-weight: 700;
-            font-size: 0.9rem;
-            min-width: 32px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 180, 216, 0.3);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            opacity: 0;
-            transform: translateX(10px);
-            transition: var(--transition);
-        }
-
-        .category-card:hover .card-actions {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .action-btn.preview {
-            background: #f0fdf4;
-            color: var(--success);
-        }
-
-        .action-btn.preview:hover {
-            background: var(--success);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .action-btn.edit {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .action-btn.edit:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .action-btn.delete {
-            background: #fef2f2;
-            color: var(--danger);
-        }
-
-        .action-btn.delete:hover {
-            background: var(--danger);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        /* Quick Preview Modal */
-        .preview-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .preview-modal.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .preview-content {
-            background: white;
-            border-radius: var(--radius-xl);
-            max-width: 480px;
-            width: 100%;
-            max-height: 80vh;
-            overflow: hidden;
-            box-shadow: var(--shadow-xl);
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .preview-header {
-            padding: 1.75rem;
-            background: var(--dark-gradient);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-header h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .preview-close {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: rgba(255,255,255,0.15);
-            border-radius: var(--radius-md);
-            color: white;
-            font-size: 1.25rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .preview-close:hover {
-            background: rgba(255,255,255,0.25);
-            transform: rotate(90deg);
-        }
-
-        .preview-body {
-            padding: 1.75rem;
-        }
-
-        .preview-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .preview-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--bg-main);
-            border-radius: var(--radius-md);
-        }
-
-        .preview-row label {
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .preview-row span {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .preview-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.75rem;
-        }
-
-        .preview-btn {
-            flex: 1;
-            padding: 1rem;
-            border-radius: var(--radius-lg);
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            font-family: inherit;
-        }
-
-        .preview-btn.primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-
-        .preview-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.4);
-        }
-
-        .preview-btn.secondary {
-            background: var(--bg-main);
-            color: var(--text-primary);
-        }
-
-        .preview-btn.secondary:hover {
-            background: var(--border-color);
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.75rem;
-            margin-top: 3rem;
-        }
-
-        .pagination a, .pagination span {
-            padding: 0.85rem 1.5rem;
-            background: white;
-            color: var(--text-primary);
-            border-radius: var(--radius-lg);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .pagination a:hover {
-            background: var(--accent-gradient);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.3);
-        }
-
-        .pagination .page-info {
-            background: transparent;
-            box-shadow: none;
-            border: none;
-            color: var(--text-secondary);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 5rem 2rem;
-            grid-column: 1/-1;
-            background: white;
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-card);
-        }
-
-        .empty-state .empty-icon {
-            width: 120px;
-            height: 120px;
-            background: var(--bg-main);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
-
-        .empty-state .empty-icon i {
-            font-size: 3rem;
-            color: var(--text-light);
-        }
-
-        .empty-state h3 {
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-state p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .toolbar-top {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-section {
-                max-width: none;
-            }
-
-            .quick-actions {
-                justify-content: flex-end;
-            }
-
-            .toolbar-actions {
-                justify-content: space-between;
-            }
-
-            .hero-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .hero-stats {
-                justify-content: flex-start;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: 2rem 1rem 6rem;
-            }
-
-            .hero-title-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .hero-text h1 {
-                font-size: 1.75rem;
-            }
-
-            .hero-stats {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .hero-stat {
-                flex: 1;
-                min-width: auto;
-            }
-
-            .category-list-container {
-                padding: 0 1rem 2rem;
-                margin-top: -4rem;
-            }
-
-            .toolbar-card {
-                padding: 1rem;
-            }
-
-            .toolbar-bottom {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .toolbar-actions {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.75rem;
-            }
-
-            .view-toggle, .filter-chips {
-                justify-content: center;
-            }
-
-            .sort-control, .checkbox-control, .bulk-actions {
-                justify-content: space-between;
-            }
-
-            .category-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .category-card {
-                padding: 1.25rem;
-            }
-
-            .card-actions {
-                opacity: 1;
-                transform: translateX(0);
-            }
-
-            .quick-actions {
-                width: 100%;
-            }
-
-            .add-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .results-info {
-                text-align: center;
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="category-bg">
-        <!-- Premium Hero Section -->
-        <section class="hero-section">
-            <div class="hero-glow hero-glow-1"></div>
-            <div class="hero-glow hero-glow-2"></div>
-            <div class="hero-content">
-                <div class="hero-header">
-                    <div class="hero-title-section">
-                        <div class="hero-icon">
-                            <i class="fas fa-folder-open"></i>
-                        </div>
-                        <div class="hero-text">
-                            <div class="breadcrumb">
-                                <a href="/"><i class="fas fa-home"></i> Home</a>
-                                <i class="fas fa-chevron-right"></i>
-                                <span>{{ selected_stream }}</span>
-                                <i class="fas fa-chevron-right"></i>
-                                <span>Categories</span>
-                            </div>
-                            <h1>{{ selected_stream }} Categories</h1>
-                        </div>
-                    </div>
-                    <div class="hero-stats">
-                        <div class="hero-stat">
-                            <div class="hero-stat-value">{{ categories|length }}</div>
-                            <div class="hero-stat-label">Total Categories</div>
-                        </div>
-                        <div class="hero-stat">
-                            <div class="hero-stat-value" id="products-total">-</div>
-                            <div class="hero-stat-label">Total Products</div>
-                        </div>
-                    </div>
-                </div>
+<style>
+/* ===== Design Tokens ===== */
+:root {
+    --primary: #0066cc;
+    --primary-dark: #004d99;
+    --primary-light: #e6f0ff;
+    --accent: #0891b2;
+    --accent-light: #ecfeff;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --purple: #0044CC;
+    --purple-light: #f3e8ff;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-cat-theme="dark"] .cat-page {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-color: #334155;
+    --border-hover: #475569;
+    --primary-light: #1e3a5f;
+    --success-light: #064e3b;
+    --warning-light: #451a03;
+    --danger-light: #450a0a;
+    --info-light: #1e3a5f;
+    --purple-light: #2e1065;
+    --accent-light: #164e63;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.25);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+    --shadow-xl: 0 20px 25px rgba(0,0,0,0.35);
+}
+
+/* ===== Base ===== */
+.cat-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding-top: 1.25rem;
+    max-width: 1900px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 3rem;
+    background: var(--bg-secondary);
+    min-height: calc(100vh - 106px);
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Breadcrumbs ===== */
+.cat-breadcrumbs {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem; color: var(--text-muted);
+}
+.cat-breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: var(--transition); }
+.cat-breadcrumbs a:hover { color: var(--primary); }
+.cat-breadcrumbs .bc-sep { font-size: 0.7rem; opacity: 0.5; }
+.cat-breadcrumbs .bc-current { color: var(--primary); font-weight: 600; }
+
+/* ===== Gradient Header ===== */
+.cat-header {
+    background: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+    border-radius: var(--radius-xl);
+    padding: 2rem 2.5rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
+}
+.cat-header::before {
+    content: '';
+    position: absolute; top: -50%; right: -10%;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+}
+.cat-header::after {
+    content: '';
+    position: absolute; bottom: -40%; left: 20%;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+}
+.cat-header-left { display: flex; align-items: center; gap: 1rem; position: relative; z-index: 2; }
+.cat-header-left h1 { font-size: 1.75rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.75rem; color: #fff !important; }
+.cat-header-left .subtitle { font-size: 0.92rem; opacity: 0.85; margin-top: 0.15rem; }
+.cat-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; position: relative; z-index: 2; }
+.header-btn {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: var(--transition);
+}
+.header-btn:hover { background: rgba(255,255,255,0.28); color: #fff; text-decoration: none; }
+
+
+/* ===== Stats Row ===== */
+.cat-stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.cat-stat-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.15rem 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+.cat-stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.cat-stat-icon {
+    width: 46px; height: 46px;
+    border-radius: var(--radius-lg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; flex-shrink: 0;
+}
+.cat-stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+.cat-stat-icon.amber { background: var(--warning-light); color: var(--warning); }
+.cat-stat-icon.green { background: var(--success-light); color: var(--success); }
+.cat-stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+.cat-stat-icon.teal { background: var(--accent-light); color: var(--accent); }
+.cat-stat-info { display: flex; flex-direction: column; }
+.cat-stat-value { font-size: 1.65rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+.cat-stat-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; margin-top: 0.1rem; }
+
+/* ===== Panel ===== */
+.cat-panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.cat-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+.cat-panel-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.55rem; }
+.cat-panel-title i { font-size: 1.05rem; }
+.cat-panel-body { padding: 1.25rem 1.5rem; }
+.cat-panel-body-flush { padding: 0; }
+
+/* ===== Toolbar ===== */
+.cat-toolbar {
+    display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); margin-bottom: 1.25rem;
+}
+.cat-toolbar-label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-right: 0.5rem; }
+.cat-toolbar-sep { width: 1px; height: 24px; background: var(--border-color); margin: 0 0.35rem; }
+
+/* Search Bar */
+.cat-search { position: relative; flex: 1; min-width: 260px; max-width: 420px; }
+.cat-search input {
+    width: 100%;
+    padding: 0.55rem 1rem 0.55rem 2.5rem;
+    border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+    font-size: 0.88rem; background: var(--bg-primary); transition: var(--transition);
+    color: var(--text-primary); font-family: inherit;
+}
+.cat-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.08); }
+.cat-search .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.88rem; }
+.cat-search-counter { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+/* View Toggle */
+.cat-view-toggle {
+    display: flex; background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 3px; gap: 2px;
+}
+.cat-view-btn {
+    width: 36px; height: 36px; border: none; background: transparent;
+    border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); transition: var(--transition); font-size: 0.92rem;
+}
+.cat-view-btn.active { background: var(--bg-primary); color: var(--primary); box-shadow: var(--shadow-sm); }
+.cat-view-btn:hover:not(.active) { color: var(--text-primary); }
+
+/* Sort Dropdown */
+.cat-sort-select {
+    appearance: none;
+    padding: 0.4rem 2rem 0.4rem 0.75rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.6rem center;
+    background-size: 12px;
+    font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; transition: var(--transition);
+    min-width: 150px; color: var(--text-primary);
+    font-family: inherit;
+}
+.cat-sort-select:focus { outline: none; border-color: var(--primary); }
+
+/* Filter Chips */
+.cat-filter-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.cat-filter-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.85rem; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 600;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-primary); color: var(--text-secondary);
+    cursor: pointer; transition: var(--transition);
+}
+.cat-filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+.cat-filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.cat-filter-chip .chip-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; border-radius: 50%;
+    font-size: 0.68rem; font-weight: 700;
+    background: rgba(0,0,0,0.08);
+}
+.cat-filter-chip.active .chip-count { background: rgba(255,255,255,0.25); }
+
+/* Bulk Controls */
+.cat-bulk-wrap { display: flex; align-items: center; gap: 0.5rem; }
+.cat-select-all { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
+.cat-select-all input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+/* Action Buttons */
+.cat-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.75rem; border-radius: var(--radius-sm);
+    font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer;
+    transition: var(--transition); text-decoration: none; white-space: nowrap; font-family: inherit;
+}
+.cat-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); text-decoration: none; }
+.cat-btn.green { background: var(--success-light); color: var(--success); border: 1px solid #a7f3d0; }
+.cat-btn.green:hover { background: var(--success); color: #fff; }
+.cat-btn.red { background: var(--danger-light); color: var(--danger); border: 1px solid #fecaca; }
+.cat-btn.red:hover { background: var(--danger); color: #fff; }
+.cat-btn.blue { background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe; }
+.cat-btn.blue:hover { background: var(--primary); color: #fff; }
+.cat-btn.amber { background: var(--warning-light); color: var(--warning); border: 1px solid #fde68a; }
+.cat-btn.amber:hover { background: var(--warning); color: #fff; }
+.cat-btn.teal { background: var(--accent-light); color: var(--accent); border: 1px solid #a5f3fc; }
+.cat-btn.teal:hover { background: var(--accent); color: #fff; }
+.cat-btn.outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+.cat-btn.outline:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.cat-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ===== Category Grid ===== */
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.cat-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+.cat-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.75rem;
+}
+
+/* Category Card */
+.cat-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+.cat-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+    transform: translateY(-4px);
+}
+.cat-card:hover::before { transform: scaleX(1); }
+.cat-card.selected { border-color: var(--primary); background: var(--primary-light); }
+
+/* Card Top */
+.cat-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.cat-card-icon {
+    width: 52px; height: 52px;
+    border-radius: var(--radius-lg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--primary-light), #cce5ff);
+    color: var(--primary);
+    transition: var(--transition);
+    position: relative;
+    flex-shrink: 0;
+}
+.cat-card:hover .cat-card-icon { transform: scale(1.08) rotate(-3deg); }
+.cat-card-icon .star-badge {
+    position: absolute; top: -5px; right: -5px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 0.55rem; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(245,158,11,0.4);
+}
+.cat-card-chk { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+/* Card Body */
+.cat-card-name {
+    font-size: 1.12rem; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 0.5rem; line-height: 1.3; word-break: break-word;
+    transition: color 0.2s;
+}
+.cat-card:hover .cat-card-name { color: var(--primary); }
+.cat-card-serial {
+    font-size: 0.78rem; color: var(--text-secondary);
+    font-family: 'SF Mono', 'Courier New', monospace;
+    background: var(--bg-tertiary);
+    padding: 0.35rem 0.65rem; border-radius: var(--radius-sm);
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    border: 1px solid var(--border-color); word-break: break-all;
+    margin-bottom: 0.75rem;
+}
+.cat-card-meta {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    font-size: 0.78rem; color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+.cat-card-meta-item { display: flex; align-items: center; gap: 0.3rem; }
+.cat-card-meta-item i { font-size: 0.72rem; }
+
+/* Card Footer */
+.cat-card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: auto; padding-top: 0.85rem;
+    border-top: 1px solid var(--border-color);
+}
+.cat-product-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;
+}
+.cat-product-badge .count-num {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-md); font-weight: 700; font-size: 0.85rem;
+    min-width: 28px; text-align: center;
+    box-shadow: 0 2px 8px rgba(0,102,204,0.25);
+}
+.cat-card-actions {
+    display: flex; gap: 0.35rem;
+    opacity: 0; transform: translateX(8px);
+    transition: var(--transition);
+}
+.cat-card:hover .cat-card-actions { opacity: 1; transform: translateX(0); }
+.cat-action-btn {
+    width: 34px; height: 34px; border-radius: var(--radius-md); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition); text-decoration: none; font-size: 0.85rem;
+    color: inherit; background: transparent;
+}
+.cat-action-btn.view { background: var(--success-light); color: var(--success); }
+.cat-action-btn.view:hover { background: var(--success); color: #fff; transform: scale(1.1); }
+.cat-action-btn.edit { background: var(--primary-light); color: var(--primary); }
+.cat-action-btn.edit:hover { background: var(--primary); color: #fff; transform: scale(1.1); }
+.cat-action-btn.delete { background: var(--danger-light); color: var(--danger); }
+.cat-action-btn.delete:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+
+/* ===== List View Card ===== */
+.cat-grid.list-view .cat-card {
+    flex-direction: row; align-items: center;
+    padding: 1rem 1.5rem; gap: 1.25rem;
+}
+.cat-grid.list-view .cat-card:hover { transform: translateX(4px) translateY(0); }
+.cat-grid.list-view .cat-card-top { margin-bottom: 0; flex-shrink: 0; }
+.cat-grid.list-view .cat-card-body { flex: 1; display: flex; align-items: center; gap: 1.5rem; min-width: 0; }
+.cat-grid.list-view .cat-card-name { margin-bottom: 0; flex: 1; min-width: 120px; }
+.cat-grid.list-view .cat-card-serial { margin-bottom: 0; }
+.cat-grid.list-view .cat-card-meta { display: none; }
+.cat-grid.list-view .cat-card-footer { margin-top: 0; padding-top: 0; border-top: none; flex-shrink: 0; }
+.cat-grid.list-view .cat-card-actions { opacity: 1; transform: none; }
+
+/* ===== Compact View Card ===== */
+.cat-grid.compact-view .cat-card { padding: 1rem; }
+.cat-grid.compact-view .cat-card-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+.cat-grid.compact-view .cat-card-name { font-size: 0.95rem; }
+
+/* ===== Pagination ===== */
+.cat-pagination {
+    display: flex; justify-content: center; align-items: center;
+    gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;
+}
+.cat-pagination a, .cat-pagination span {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1.15rem;
+    background: var(--bg-primary); color: var(--text-primary);
+    border-radius: var(--radius-md); text-decoration: none;
+    font-weight: 600; font-size: 0.85rem;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+.cat-pagination a:hover {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+    transform: translateY(-1px); box-shadow: var(--shadow-md);
+}
+.cat-pagination .page-current {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+}
+.cat-pagination .page-info {
+    background: transparent; box-shadow: none; border: none; color: var(--text-muted);
+}
+
+/* ===== Preview Modal ===== */
+.cat-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: var(--transition);
+}
+.cat-modal-overlay.show { opacity: 1; visibility: visible; }
+.cat-modal-box {
+    background: var(--bg-primary); border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl); min-width: 420px; max-width: 520px;
+    width: 90vw; max-height: 85vh; overflow-y: auto;
+    transform: scale(0.92) translateY(10px); transition: var(--transition);
+}
+.cat-modal-overlay.show .cat-modal-box { transform: scale(1) translateY(0); }
+.cat-modal-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #0066cc 0%, #0891b2 100%);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    color: #fff;
+}
+.cat-modal-top h3 { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.55rem; }
+.cat-modal-close {
+    background: rgba(255,255,255,0.15); border: none; font-size: 1.1rem; color: #fff;
+    cursor: pointer; padding: 0.35rem; border-radius: var(--radius-sm); transition: var(--transition);
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+}
+.cat-modal-close:hover { background: rgba(255,255,255,0.3); }
+.cat-modal-body { padding: 1.5rem; }
+.preview-detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.85rem 1rem; background: var(--bg-secondary);
+    border-radius: var(--radius-md); margin-bottom: 0.65rem;
+    border: 1px solid var(--border-color);
+}
+.preview-detail-row label { font-weight: 600; color: var(--text-secondary); font-size: 0.82rem; display: flex; align-items: center; gap: 0.4rem; }
+.preview-detail-row span { font-weight: 600; color: var(--text-primary); font-size: 0.88rem; }
+.cat-modal-actions {
+    display: flex; gap: 0.65rem; margin-top: 1.25rem;
+}
+.cat-modal-actions a, .cat-modal-actions button {
+    flex: 1; padding: 0.65rem 1rem; border-radius: var(--radius-md);
+    border: none; font-weight: 600; cursor: pointer; transition: var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    text-decoration: none; font-family: inherit; font-size: 0.88rem;
+}
+.cat-modal-btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; }
+.cat-modal-btn-primary:hover { box-shadow: 0 4px 15px rgba(0,102,204,0.35); transform: translateY(-1px); color: #fff; }
+.cat-modal-btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+.cat-modal-btn-secondary:hover { background: var(--border-color); }
+
+/* ===== Empty State ===== */
+.cat-empty-state {
+    text-align: center; padding: 4rem 2rem;
+    grid-column: 1 / -1;
+    background: var(--bg-primary); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+}
+.cat-empty-state .empty-icon {
+    width: 100px; height: 100px;
+    background: var(--bg-tertiary); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem; font-size: 2.5rem; color: var(--text-muted);
+}
+.cat-empty-state h3 { color: var(--text-primary); font-size: 1.25rem; margin-bottom: 0.35rem; }
+.cat-empty-state p { color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem; }
+
+/* ===== Bulk Action Bar ===== */
+.cat-bulk-bar {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: var(--text-primary); color: #fff;
+    padding: 0.75rem 1.5rem; border-radius: var(--radius-xl);
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    z-index: 2000; min-width: 380px;
+    opacity: 0; visibility: hidden; translate: 0 20px;
+    transition: opacity 0.25s, visibility 0.25s, translate 0.25s;
+}
+.cat-bulk-bar.show { opacity: 1; visibility: visible; translate: 0 0; }
+.cat-bulk-bar .bulk-count { font-weight: 700; font-size: 0.88rem; }
+.cat-bulk-bar .bulk-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
+.cat-bulk-bar .bulk-btn {
+    padding: 0.4rem 0.85rem; border-radius: var(--radius-md);
+    font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.35rem; transition: var(--transition);
+    font-family: inherit;
+}
+.cat-bulk-bar .bulk-btn.delete { background: var(--danger); color: #fff; }
+.cat-bulk-bar .bulk-btn.delete:hover { background: #b91c1c; }
+.cat-bulk-bar .bulk-btn.export { background: var(--success); color: #fff; }
+.cat-bulk-bar .bulk-btn.export:hover { background: #047857; }
+.cat-bulk-bar .bulk-btn.cancel { background: rgba(255,255,255,0.12); color: #fff; }
+.cat-bulk-bar .bulk-btn.cancel:hover { background: rgba(255,255,255,0.25); }
+
+/* ===== Toast ===== */
+.cat-toast-container { position: fixed; top: 70px; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+.cat-toast {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: catSlideIn 0.35s ease-out;
+    pointer-events: auto; min-width: 280px;
+}
+.cat-toast.success { background: var(--success-light); color: #065f46; border-left: 4px solid var(--success); }
+.cat-toast.error { background: var(--danger-light); color: #991b1b; border-left: 4px solid var(--danger); }
+.cat-toast.warning { background: var(--warning-light); color: #92400e; border-left: 4px solid var(--warning); }
+.cat-toast.info { background: var(--info-light); color: #1e40af; border-left: 4px solid var(--info); }
+@keyframes catSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ===== Footer ===== */
+.cat-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 0; border-top: 1px solid var(--border-color); margin-top: 1rem;
+    font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.5rem;
+}
+.cat-footer a { text-decoration: none; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) { .cat-stats-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1024px) {
+    .cat-page { padding-left: 1rem; padding-right: 1rem; }
+    .cat-header { padding: 1.25rem 1.5rem; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+    .cat-stats-row { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+@media (max-width: 768px) {
+    .cat-stats-row { grid-template-columns: 1fr; }
+    .cat-toolbar { flex-direction: column; align-items: stretch; }
+    .cat-search { max-width: none; }
+    .cat-grid { grid-template-columns: 1fr; }
+    .cat-card-actions { opacity: 1; transform: none; }
+    .cat-header-right { display: none; }
+    .cat-bulk-bar { min-width: auto; width: calc(100% - 2rem); }
+}
+
+/* ===== Print ===== */
+@media print {
+    .cat-toolbar, .cat-search, .cat-bulk-bar, .cat-bulk-wrap,
+    .cat-card-actions, .cat-card-chk, .stream-tabs,
+    .cat-header-right, .cat-breadcrumbs, .cat-footer { display: none !important; }
+    .cat-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cat-panel, .cat-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+
+/* ===== Scrollbar ===== */
+.cat-page ::-webkit-scrollbar { width: 5px; }
+.cat-page ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+.cat-page ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 10px; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<div class="cat-page" id="catPage">
+
+    <!-- Gradient Header -->
+    <header class="cat-header">
+        <div class="cat-header-left">
+            <div>
+                <h1><i class="fas fa-folder-open"></i> {{ selected_stream }} Categories</h1>
+                <div class="subtitle">Manage and organize product categories for the {{ selected_stream }} stream</div>
             </div>
-        </section>
+        </div>
+        <div class="cat-header-right">
+            <button class="header-btn" id="restartTourBtn" title="Page Tour"><i class="fas fa-question-circle"></i></button>
+            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+            <a href="{{ BU_URL_PREFIX }}/stream/{{ selected_stream }}/categories/add/" class="header-btn"><i class="fas fa-plus"></i> Add Category</a>
+            {% endif %}
+            <button class="header-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+    </header>
 
-        <div class="category-list-container">
-            <!-- Premium Toolbar Card -->
-            <div class="toolbar-card">
-                <div class="toolbar-top">
-                    <div class="search-section">
-                        <form method="get" action="" class="search-form" id="categorylist-search-form">
-                            <div class="search-input-wrapper">
-                                <i class="fas fa-search"></i>
-                                <input type="text" name="q" id="category-search-input" value="{{ q|default:'' }}" placeholder="Search categories by name or serial..." class="search-input" autocomplete="off">
-                            </div>
-                            <button type="submit" class="search-btn"><i class="fas fa-search"></i> Search</button>
-                        </form>
-                    </div>
-                    <div class="quick-actions">
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn"><i class="fas fa-plus"></i> Add Category</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="toolbar-bottom">
-                    <div class="toolbar-actions">
-                        <!-- View Toggle -->
-                        <div class="view-toggle">
-                            <button class="view-btn active" data-view="grid" title="Grid View"><i class="fas fa-th-large"></i></button>
-                            <button class="view-btn" data-view="list" title="List View"><i class="fas fa-list"></i></button>
-                        </div>
-
-                        <!-- Filter Chips -->
-                        <div class="filter-chips">
-                            <button class="filter-chip active" data-filter="all">
-                                <i class="fas fa-asterisk"></i> All
-                            </button>
-                            <button class="filter-chip" data-filter="with-products">
-                                <i class="fas fa-box"></i> With Products
-                            </button>
-                            <button class="filter-chip" data-filter="empty">
-                                <i class="fas fa-box-open"></i> Empty
-                            </button>
-                        </div>
-
-                        <div class="sort-control">
-                            <label>Sort by</label>
-                            <select id="category-sort" class="sort-select">
-                                <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest First</option>
-                                <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
-                                <option value="-name" {% if selected_sort == '-name' %}selected{% endif %}>Name (Z–A)</option>
-                                <option value="product_count" {% if selected_sort == 'product_count' %}selected{% endif %}>Most Products</option>
-                                <option value="-product_count" {% if selected_sort == '-product_count' %}selected{% endif %}>Least Products</option>
-                            </select>
-                        </div>
-
-                        <label class="checkbox-control">
-                            <input type="checkbox" id="select-all-checkbox">
-                            Select All
-                        </label>
-
-                        <div class="bulk-actions">
-                            <button id="bulk-delete-btn" class="bulk-btn delete" disabled><i class="fas fa-trash"></i> Delete</button>
-                            <button id="bulk-export-btn" class="bulk-btn export" disabled><i class="fas fa-download"></i> Export</button>
-                        </div>
-                    </div>
-                    <div class="results-info">
-                        Showing <strong id="visible-count">{{ categories|length }}</strong> of <strong>{{ categories|length }}</strong> categories
-                    </div>
-                </div>
+    <!-- Stats Row -->
+    <section class="cat-stats-row">
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon blue"><i class="fas fa-folder-open"></i></div>
+            <div class="cat-stat-info">
+                <span class="cat-stat-value" id="statTotal">{{ categories|length }}</span>
+                <span class="cat-stat-label">Total Categories</span>
             </div>
+        </div>
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon green"><i class="fas fa-box"></i></div>
+            <div class="cat-stat-info">
+                <span class="cat-stat-value" id="statProducts">0</span>
+                <span class="cat-stat-label">Total Products</span>
+            </div>
+        </div>
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon amber"><i class="fas fa-folder-plus"></i></div>
+            <div class="cat-stat-info">
+                <span class="cat-stat-value" id="statWithProducts">0</span>
+                <span class="cat-stat-label">With Products</span>
+            </div>
+        </div>
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon purple"><i class="fas fa-folder-minus"></i></div>
+            <div class="cat-stat-info">
+                <span class="cat-stat-value" id="statEmpty">0</span>
+                <span class="cat-stat-label">Empty Categories</span>
+            </div>
+        </div>
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon teal"><i class="fas fa-chart-bar"></i></div>
+            <div class="cat-stat-info">
+                <span class="cat-stat-value" id="statAvgProducts">0</span>
+                <span class="cat-stat-label">Avg Products/Category</span>
+            </div>
+        </div>
+    </section>
 
-            <div class="category-grid" id="category-grid">
-                {% for category in categories %}
-                <div class="category-card" 
-                     data-name="{{ category.name|lower }}" 
-                     data-serial="{{ category.serial_number|lower }}" 
-                     data-id="{{ category.id }}"
-                     data-product-count="{{ category.product_count|default:0 }}"
-                     style="animation-delay: {{ forloop.counter0|stringformat:'d' }}00ms;">
-                    <div class="card-header">
-                        <div class="category-icon">
-                            {% if forloop.counter|divisibleby:4 %}
-                            <i class="fas fa-microchip"></i>
-                            {% elif forloop.counter|divisibleby:3 %}
-                            <i class="fas fa-server" style="color: var(--accent-2);"></i>
-                            {% elif forloop.counter|divisibleby:2 %}
-                            <i class="fas fa-database" style="color: var(--accent);"></i>
-                            {% else %}
-                            <i class="fas fa-cube"></i>
-                            {% endif %}
-                            {% if category.product_count|default:0 > 10 %}
-                            <span class="icon-badge"><i class="fas fa-star"></i></span>
-                            {% endif %}
-                        </div>
-                        <div class="card-checkbox-wrapper">
-                            <input type="checkbox" class="card-checkbox" value="{{ category.id }}">
-                        </div>
-                    </div>
-                    <a href="/stream/{{ selected_stream }}/products/?category={{ category.id }}" style="text-decoration: none; color: inherit;">
-                        <div class="card-content">
-                            <div class="category-name">{{ category.name }}</div>
-                            <div class="category-serial"><i class="fas fa-hashtag"></i> {{ category.serial_number }}</div>
-                        </div>
-                    </a>
-                    <div class="card-footer">
-                        <div class="product-count">
-                            <i class="fas fa-box"></i>
-                            <span class="count-badge">{{ category.product_count|default:0 }}</span>
-                            Products
-                        </div>
-                        <div class="card-actions">
-                            <button class="action-btn preview" title="Quick Preview" onclick="showPreview({{ category.id }}, '{{ category.name|escapejs }}', '{{ category.serial_number|escapejs }}', {{ category.product_count|default:0 }})"><i class="fas fa-eye"></i></button>
-                            <a href="{% url 'category_edit_stream' selected_stream category.id %}" class="action-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
-                            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                            <a href="{% url 'category_delete_stream' selected_stream category.id %}" class="action-btn delete" title="Delete"><i class="fas fa-trash"></i></a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <h3>No categories found</h3>
-                    <p>Get started by creating your first category</p>
-                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                    <a href="/stream/{{ selected_stream }}/categories/add/" class="add-btn"><i class="fas fa-plus"></i> Add Category</a>
+    <!-- Toolbar -->
+    <div class="cat-toolbar">
+        <span class="cat-toolbar-label"><i class="fas fa-sliders-h"></i> Controls</span>
+        <div class="cat-toolbar-sep"></div>
+
+        <!-- Search -->
+        <div class="cat-search">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="catSearchInput" value="{{ q|default:'' }}" placeholder="Search by name or serial number..." autocomplete="off">
+            <div class="cat-search-counter" id="catSearchCounter"></div>
+        </div>
+
+        <div class="cat-toolbar-sep"></div>
+
+        <!-- View Toggle -->
+        <div class="cat-view-toggle" id="catViewToggle">
+            <button class="cat-view-btn active" data-view="grid" title="Grid View"><i class="fas fa-th-large"></i></button>
+            <button class="cat-view-btn" data-view="list" title="List View"><i class="fas fa-list"></i></button>
+            <button class="cat-view-btn" data-view="compact" title="Compact View"><i class="fas fa-th"></i></button>
+        </div>
+
+        <div class="cat-toolbar-sep"></div>
+
+        <!-- Sort -->
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span class="cat-toolbar-label">Sort</span>
+            <select id="catSortSelect" class="cat-sort-select">
+                <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name (A&#8211;Z)</option>
+                <option value="product_count" {% if selected_sort == 'product_count' %}selected{% endif %}>Most Products</option>
+            </select>
+        </div>
+
+        <div class="cat-toolbar-sep"></div>
+
+        <!-- Filters -->
+        <div class="cat-filter-chips" id="catFilterChips">
+            <button class="cat-filter-chip active" data-filter="all">
+                <i class="fas fa-asterisk"></i> All
+                <span class="chip-count" id="chipCountAll">{{ categories|length }}</span>
+            </button>
+            <button class="cat-filter-chip" data-filter="with-products">
+                <i class="fas fa-box"></i> With Products
+                <span class="chip-count" id="chipCountWith">0</span>
+            </button>
+            <button class="cat-filter-chip" data-filter="empty">
+                <i class="fas fa-box-open"></i> Empty
+                <span class="chip-count" id="chipCountEmpty">0</span>
+            </button>
+        </div>
+
+        <div class="cat-toolbar-sep"></div>
+
+        <!-- Bulk -->
+        <div class="cat-bulk-wrap">
+            <label class="cat-select-all">
+                <input type="checkbox" id="catSelectAll"> Select All
+            </label>
+        </div>
+
+        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+        {% comment %} <div class="cat-toolbar-sep"></div> {% endcomment %}
+        {% comment %} <a href="{{ BU_URL_PREFIX }}/stream/{{ selected_stream }}/categories/add/" class="cat-btn blue"><i class="fas fa-plus"></i> Add Category</a> {% endcomment %}
+        {% endif %}
+    </div>
+
+    <!-- Category Grid -->
+    <div class="cat-grid" id="catGrid">
+        {% for category in categories %}
+        <div class="cat-card"
+             data-id="{{ category.id }}"
+             data-name="{{ category.name|lower }}"
+             data-serial="{{ category.serial_number|lower }}"
+             data-product-count="{{ category.product_count|default:0 }}"
+             data-url="/stream/{{ selected_stream }}/products/?category={{ category.id }}"
+             data-created="{{ category.created_at|date:'M d, Y' }}"
+             data-created-by="{% if category.created_by %}{{ category.created_by.username }}{% else %}System{% endif %}"
+             onclick="if(!event.target.closest('a, button, input, .cat-card-actions, .cat-card-chk')){window.location.href=this.dataset.url;}">
+
+            <div class="cat-card-top">
+                <div class="cat-card-icon"
+                     {% if forloop.counter|divisibleby:4 %}style="background:linear-gradient(135deg,var(--purple-light),#e8d5ff);color:var(--purple);"
+                     {% elif forloop.counter|divisibleby:3 %}style="background:linear-gradient(135deg,var(--accent-light),#b2f5ea);color:var(--accent);"
+                     {% elif forloop.counter|divisibleby:2 %}style="background:linear-gradient(135deg,var(--success-light),#a7f3d0);color:var(--success);"
+                     {% endif %}>
+                    {% if forloop.counter|divisibleby:4 %}<i class="fas fa-microchip"></i>
+                    {% elif forloop.counter|divisibleby:3 %}<i class="fas fa-server"></i>
+                    {% elif forloop.counter|divisibleby:2 %}<i class="fas fa-database"></i>
+                    {% else %}<i class="fas fa-cube"></i>{% endif %}
+                    {% if category.product_count|default:0 > 10 %}
+                    <span class="star-badge"><i class="fas fa-star"></i></span>
                     {% endif %}
                 </div>
-                {% endfor %}
+                <input type="checkbox" class="cat-card-chk" value="{{ category.id }}" onclick="event.stopPropagation();">
             </div>
 
-            {% if page_obj %}
-            <div class="pagination">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}"><i class="fas fa-chevron-left"></i> Previous</a>
-                {% endif %}
-                <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next <i class="fas fa-chevron-right"></i></a>
-                {% endif %}
+            <div class="cat-card-body">
+                <div class="cat-card-name">{{ category.name }}</div>
+                <div class="cat-card-serial"><i class="fas fa-hashtag"></i> {{ category.serial_number }}</div>
+                <div class="cat-card-meta">
+                    <span class="cat-card-meta-item"><i class="fas fa-calendar"></i> {{ category.created_at|date:'M d, Y' }}</span>
+                    {% if category.created_by %}
+                    <span class="cat-card-meta-item"><i class="fas fa-user"></i> {{ category.created_by.username }}</span>
+                    {% endif %}
+                </div>
             </div>
+
+            <div class="cat-card-footer">
+                <div class="cat-product-badge">
+                    <span class="count-num">{{ category.product_count|default:0 }}</span>
+                    <span>Products</span>
+                </div>
+                <div class="cat-card-actions">
+                    <button class="cat-action-btn view" title="Quick Preview"
+                            onclick="event.stopPropagation(); showPreview({{ category.id }}, '{{ category.name|escapejs }}', '{{ category.serial_number|escapejs }}', {{ category.product_count|default:0 }}, '{{ category.created_at|date:"M d, Y" }}', '{% if category.created_by %}{{ category.created_by.username|escapejs }}{% else %}System{% endif %}');">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <a href="{% url 'category_edit_stream' selected_stream category.id %}" class="cat-action-btn edit" title="Edit" onclick="event.stopPropagation();">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+                    <a href="{% url 'category_delete_stream' selected_stream category.id %}" class="cat-action-btn delete" title="Delete" onclick="event.stopPropagation();">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="cat-empty-state">
+            <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+            <h3>No categories found</h3>
+            <p>Get started by creating your first category in the {{ selected_stream }} stream</p>
+            {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+            <a href="{{ BU_URL_PREFIX }}/stream/{{ selected_stream }}/categories/add/" class="cat-btn blue" style="padding:0.55rem 1.25rem;font-size:0.92rem;"><i class="fas fa-plus"></i> Add Category</a>
             {% endif %}
         </div>
+        {% endfor %}
     </div>
 
-    <!-- Quick Preview Modal -->
-    <div class="preview-modal" id="preview-modal">
-        <div class="preview-content">
-            <div class="preview-header">
-                <h3 id="preview-title">Category Preview</h3>
-                <button class="preview-close" onclick="closePreview()"><i class="fas fa-times"></i></button>
+    <!-- Pagination -->
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <div class="cat-pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" title="First page"><i class="fas fa-angle-double-left"></i></a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}"><i class="fas fa-chevron-left"></i> Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+            <span class="page-current">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next <i class="fas fa-chevron-right"></i></a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" title="Last page"><i class="fas fa-angle-double-right"></i></a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% comment %} <!-- Footer -->
+    <footer class="cat-footer">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <span><i class="fas fa-stream"></i> Stream: <strong>{{ selected_stream }}</strong></span>
+            <span><i class="fas fa-folder"></i> {{ categories|length }} categories on this page</span>
+            <span><i class="fas fa-shield-alt"></i> Logged in as <strong>{{ request.user.username }}</strong></span>
+        </div>
+    </footer> {% endcomment %}
+
+</div>
+
+<!-- Bulk Action Bar (outside page wrapper for fixed positioning) -->
+<div class="cat-bulk-bar" id="catBulkBar">
+    <span class="bulk-count"><span id="catBulkCount">0</span> selected</span>
+    <span class="bulk-sep"></span>
+    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+    <button class="bulk-btn delete" id="catBulkDeleteBtn"><i class="fas fa-trash"></i> Delete</button>
+    {% endif %}
+    <button class="bulk-btn export" id="catBulkExportBtn"><i class="fas fa-download"></i> Export CSV</button>
+    <span class="bulk-sep"></span>
+    <button class="bulk-btn cancel" id="catBulkCancelBtn"><i class="fas fa-times"></i> Clear</button>
+</div>
+
+<!-- Quick Preview Modal -->
+<div class="cat-modal-overlay" id="catPreviewModal">
+    <div class="cat-modal-box">
+        <div class="cat-modal-top">
+            <h3><i class="fas fa-eye"></i> Category Preview</h3>
+            <button class="cat-modal-close" onclick="closePreview()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cat-modal-body">
+            <div class="preview-detail-row">
+                <label><i class="fas fa-folder"></i> Name</label>
+                <span id="previewName">-</span>
             </div>
-            <div class="preview-body">
-                <div class="preview-info">
-                    <div class="preview-row">
-                        <label>Name</label>
-                        <span id="preview-name">-</span>
-                    </div>
-                    <div class="preview-row">
-                        <label>Serial Number</label>
-                        <span id="preview-serial">-</span>
-                    </div>
-                    <div class="preview-row">
-                        <label>Products</label>
-                        <span id="preview-products">-</span>
-                    </div>
-                </div>
-                <div class="preview-actions">
-                    <a href="#" id="preview-view-btn" class="preview-btn primary"><i class="fas fa-arrow-right"></i> View Products</a>
-                    <button class="preview-btn secondary" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
-                </div>
+            <div class="preview-detail-row">
+                <label><i class="fas fa-hashtag"></i> Serial Number</label>
+                <span id="previewSerial">-</span>
+            </div>
+            <div class="preview-detail-row">
+                <label><i class="fas fa-box"></i> Products</label>
+                <span id="previewProducts">-</span>
+            </div>
+            <div class="preview-detail-row">
+                <label><i class="fas fa-calendar"></i> Created</label>
+                <span id="previewCreated">-</span>
+            </div>
+            <div class="preview-detail-row">
+                <label><i class="fas fa-user"></i> Created By</label>
+                <span id="previewCreatedBy">-</span>
+            </div>
+            <div class="cat-modal-actions">
+                <a href="#" id="previewViewBtn" class="cat-modal-btn-primary"><i class="fas fa-arrow-right"></i> View Products</a>
+                <button class="cat-modal-btn-secondary" onclick="closePreview()"><i class="fas fa-times"></i> Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Helper: debounce
-        function debounce(fn, delay){
-            let t;
-            return function(){
-                const args = arguments;
-                clearTimeout(t);
-                t = setTimeout(() => fn.apply(this, args), delay);
-            };
-        }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initStats();
+    initSearch();
+    initViewToggle();
+    initSort();
+    initFilters();
+    initSelection();
+    initToasts();
+    initStaggeredAnimation();
+    initKeyboardShortcuts();
+});
 
-        // Quick Preview Modal
-        let currentPreviewId = null;
+/* ===== Stats ===== */
+function initStats() {
+    var cards = document.querySelectorAll('#catGrid .cat-card');
+    var totalProducts = 0, withProducts = 0, emptyCount = 0;
+    cards.forEach(function(card) {
+        var pc = parseInt(card.dataset.productCount) || 0;
+        totalProducts += pc;
+        if (pc > 0) withProducts++; else emptyCount++;
+    });
+    var avg = cards.length > 0 ? (totalProducts / cards.length).toFixed(1) : '0';
 
-        function showPreview(id, name, serial, productCount) {
-            currentPreviewId = id;
-            document.getElementById('preview-name').textContent = name;
-            document.getElementById('preview-serial').textContent = serial;
-            document.getElementById('preview-products').textContent = productCount + ' products';
-            document.getElementById('preview-view-btn').href = '/stream/{{ selected_stream }}/products/?category=' + id;
-            document.getElementById('preview-modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+    animateCounter('statProducts', totalProducts);
+    animateCounter('statWithProducts', withProducts);
+    animateCounter('statEmpty', emptyCount);
+    document.getElementById('statAvgProducts').textContent = avg;
 
-        function closePreview() {
-            document.getElementById('preview-modal').classList.remove('active');
-            document.body.style.overflow = '';
-            currentPreviewId = null;
-        }
+    document.getElementById('chipCountAll').textContent = cards.length;
+    document.getElementById('chipCountWith').textContent = withProducts;
+    document.getElementById('chipCountEmpty').textContent = emptyCount;
+}
 
-        // Close modal on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('preview-modal').classList.contains('active')) {
-                closePreview();
-            }
+function animateCounter(id, target) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var start = 0, duration = 600, startTime = null;
+    function step(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(eased * target);
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+    }
+    if (target > 0) requestAnimationFrame(step);
+    else el.textContent = '0';
+}
+
+/* ===== Search ===== */
+function initSearch() {
+    var input = document.getElementById('catSearchInput');
+    if (!input) return;
+    var debounceTimer;
+    input.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() { applyAllFilters(); }, 200);
+    });
+}
+
+/* ===== View Toggle ===== */
+function initViewToggle() {
+    var btns = document.querySelectorAll('#catViewToggle .cat-view-btn');
+    var grid = document.getElementById('catGrid');
+    btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            btns.forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            grid.classList.remove('list-view', 'compact-view');
+            var view = btn.dataset.view;
+            if (view === 'list') grid.classList.add('list-view');
+            else if (view === 'compact') grid.classList.add('compact-view');
+            localStorage.setItem('catViewPref', view);
         });
+    });
+    var saved = localStorage.getItem('catViewPref') || 'grid';
+    var target = document.querySelector('#catViewToggle .cat-view-btn[data-view="' + saved + '"]');
+    if (target) target.click();
+}
 
-        // Close modal on backdrop click
-        document.getElementById('preview-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closePreview();
-            }
+/* ===== Sort ===== */
+function initSort() {
+    var select = document.getElementById('catSortSelect');
+    if (!select) return;
+    select.addEventListener('change', function() {
+        var url = new URL(window.location.href);
+        url.searchParams.set('sort', this.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    });
+}
+
+/* ===== Filters ===== */
+function initFilters() {
+    var chips = document.querySelectorAll('#catFilterChips .cat-filter-chip');
+    chips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            chips.forEach(function(c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            applyAllFilters();
         });
+    });
+}
 
-        // Client-side live fuzzy filter
-        function liveFilter() {
-            const q = document.getElementById('category-search-input').value.trim().toLowerCase();
-            const cards = document.querySelectorAll('#category-grid .category-card');
-            let visibleCount = 0;
-            cards.forEach(card => {
-                const name = card.dataset.name || '';
-                const serial = card.dataset.serial || '';
-                if (!q || name.includes(q) || serial.includes(q)) {
-                    card.style.display = '';
-                    visibleCount++;
+function applyAllFilters() {
+    var q = (document.getElementById('catSearchInput').value || '').trim().toLowerCase();
+    var activeChip = document.querySelector('#catFilterChips .cat-filter-chip.active');
+    var filter = activeChip ? activeChip.dataset.filter : 'all';
+    var cards = document.querySelectorAll('#catGrid .cat-card');
+    var counter = document.getElementById('catSearchCounter');
+    var visible = 0;
+    cards.forEach(function(card) {
+        var name = card.dataset.name || '';
+        var serial = card.dataset.serial || '';
+        var pc = parseInt(card.dataset.productCount) || 0;
+
+        var matchesSearch = !q || name.indexOf(q) !== -1 || serial.indexOf(q) !== -1;
+        var matchesFilter = filter === 'all' || (filter === 'with-products' && pc > 0) || (filter === 'empty' && pc === 0);
+
+        if (matchesSearch && matchesFilter) {
+            card.style.display = '';
+            visible++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    if (counter) counter.textContent = q ? visible + ' of ' + cards.length + ' results' : '';
+}
+
+/* ===== Selection & Bulk ===== */
+function initSelection() {
+    var selectAll = document.getElementById('catSelectAll');
+    var bulkBar = document.getElementById('catBulkBar');
+    var bulkCount = document.getElementById('catBulkCount');
+    var deleteBtn = document.getElementById('catBulkDeleteBtn');
+    var exportBtn = document.getElementById('catBulkExportBtn');
+    var cancelBtn = document.getElementById('catBulkCancelBtn');
+
+    function getChecked() { return document.querySelectorAll('.cat-card-chk:checked'); }
+
+    function updateBulkBar() {
+        var checked = getChecked();
+        bulkCount.textContent = checked.length;
+        if (checked.length > 0) bulkBar.classList.add('show');
+        else bulkBar.classList.remove('show');
+        document.querySelectorAll('.cat-card').forEach(function(card) {
+            var chk = card.querySelector('.cat-card-chk');
+            if (chk && chk.checked) card.classList.add('selected');
+            else card.classList.remove('selected');
+        });
+    }
+
+    document.querySelectorAll('.cat-card-chk').forEach(function(chk) {
+        chk.addEventListener('change', updateBulkBar);
+    });
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            var all = document.querySelectorAll('.cat-card-chk');
+            all.forEach(function(chk) {
+                var card = chk.closest('.cat-card');
+                if (card && card.style.display !== 'none') chk.checked = selectAll.checked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            document.querySelectorAll('.cat-card-chk').forEach(function(chk) { chk.checked = false; });
+            if (selectAll) selectAll.checked = false;
+            updateBulkBar();
+        });
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            var ids = Array.from(getChecked()).map(function(c) { return c.value; });
+            if (!ids.length) return;
+            if (!confirm('Delete ' + ids.length + ' categories? This action cannot be undone.')) return;
+            fetch('{% url "category_bulk_delete_stream" selected_stream %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ ids: ids })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) {
+                    ids.forEach(function(id) {
+                        var card = document.querySelector('.cat-card[data-id="' + id + '"]');
+                        if (card) card.remove();
+                    });
+                    showToast('Deleted ' + data.deleted + ' categories successfully.', 'success');
+                    initStats();
+                    updateBulkBar();
                 } else {
-                    card.style.display = 'none';
+                    showToast('Error: ' + (data.error || 'Unable to delete'), 'error');
                 }
-            });
-            // Apply current filter
-            applyFilter();
-        }
-
-        // Filter functionality
-        function applyFilter() {
-            const activeFilter = document.querySelector('.filter-chip.active').dataset.filter;
-            const cards = document.querySelectorAll('#category-grid .category-card');
-            const q = document.getElementById('category-search-input').value.trim().toLowerCase();
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const productCount = parseInt(card.dataset.productCount) || 0;
-                const name = card.dataset.name || '';
-                const serial = card.dataset.serial || '';
-                
-                // Check filter condition
-                let matchesFilter = true;
-                if (activeFilter === 'with-products') {
-                    matchesFilter = productCount > 0;
-                } else if (activeFilter === 'empty') {
-                    matchesFilter = productCount === 0;
-                }
-                // 'all' filter matches everything
-
-                // Check search condition
-                const matchesSearch = !q || name.includes(q) || serial.includes(q);
-
-                // Show only if both conditions are met
-                if (matchesFilter && matchesSearch) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            document.getElementById('visible-count').textContent = visibleCount;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('category-search-input');
-            const sortSelect = document.getElementById('category-sort');
-            const selectAll = document.getElementById('select-all-checkbox');
-            const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
-            const bulkExportBtn = document.getElementById('bulk-export-btn');
-            const grid = document.getElementById('category-grid');
-
-            // View toggle
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    const view = this.dataset.view;
-                    if (view === 'list') {
-                        grid.classList.add('list-view');
-                    } else {
-                        grid.classList.remove('list-view');
-                    }
-                    // Save preference
-                    localStorage.setItem('category-view', view);
-                });
-            });
-
-            // Restore view preference
-            const savedView = localStorage.getItem('category-view');
-            if (savedView === 'list') {
-                document.querySelector('.view-btn[data-view="list"]').click();
-            }
-
-            // Filter chips
-            document.querySelectorAll('.filter-chip').forEach(chip => {
-                chip.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    applyFilter();
-                });
-            });
-
-            if (searchInput) {
-                searchInput.addEventListener('input', debounce(function(e){
-                    applyFilter();
-                    if (this.value.trim() === '') {
-                        const url = new URL(window.location.href);
-                        url.searchParams.delete('q');
-                        url.searchParams.delete('page');
-                        window.history.replaceState({}, '', url);
-                    }
-                }, 200));
-
-                // Focus search with '/'
-                document.addEventListener('keydown', function(e){
-                    if (e.key === '/' && !e.ctrlKey && !e.metaKey){
-                        const active = document.activeElement;
-                        if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
-                            e.preventDefault();
-                            searchInput.focus();
-                            searchInput.select();
-                        }
-                    }
-                });
-            }
-
-            if (sortSelect){
-                sortSelect.addEventListener('change', function(){
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('sort', this.value);
-                    url.searchParams.delete('page');
-                    window.location.href = url.toString();
-                });
-            }
-
-            // Checkbox selection logic
-            function updateBulkState(){
-                const checked = document.querySelectorAll('.card-checkbox:checked');
-                const any = checked.length > 0;
-                bulkDeleteBtn.disabled = !any;
-                bulkExportBtn.disabled = !any;
-            }
-
-            document.querySelectorAll('.card-checkbox').forEach(cb => {
-                cb.addEventListener('change', updateBulkState);
-                cb.addEventListener('click', function(e){ e.stopPropagation(); });
-            });
-
-            if (selectAll){
-                selectAll.addEventListener('change', function(){
-                    const all = document.querySelectorAll('.card-checkbox');
-                    all.forEach(cb => cb.checked = selectAll.checked);
-                    updateBulkState();
-                });
-            }
-
-            // CSRF helper
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            }
-            const csrftoken = getCookie('csrftoken');
-
-            // Bulk delete
-            bulkDeleteBtn.addEventListener('click', function(){
-                const ids = Array.from(document.querySelectorAll('.card-checkbox:checked')).map(c=>c.value);
-                if (!ids.length) return;
-                if (!confirm('Delete '+ids.length+' categories? This cannot be undone.')) return;
-                if (!confirm('Note: Deleting the categories will delete all its belonging products as well.')) return;
-                fetch(`/stream/${encodeURIComponent('{{ selected_stream }}')}/categories/bulk-delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: JSON.stringify({ids: ids})
-                }).then(r=>r.json()).then(data=>{
-                    if (data.success){
-                        ids.forEach(id => {
-                            const card = document.querySelector('.category-card[data-id="'+id+'"]');
-                            if (card) card.remove();
-                        });
-                        alert('Deleted '+data.deleted+' categories.');
-                        applyFilter();
-                    } else {
-                        alert('Error: '+(data.error||'Unable to delete'));
-                    }
-                }).catch(err=>{ alert('Request failed'); });
-            });
-
-            // Bulk export CSV
-            bulkExportBtn.addEventListener('click', function(){
-                const ids = Array.from(document.querySelectorAll('.card-checkbox:checked')).map(c=>c.value);
-                if (!ids.length) return;
-                fetch(`/stream/${encodeURIComponent('{{ selected_stream }}')}/categories/export-csv/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: JSON.stringify({ids: ids})
-                }).then(resp=>{
-                    if (!resp.ok) throw new Error('Export failed');
-                    return resp.blob();
-                }).then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `categories_{{ selected_stream }}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                }).catch(err=>{ alert('Export failed'); });
-            });
-
-            // Keyboard shortcut: N -> new category (admins only)
-            document.addEventListener('keydown', function(e){
-                if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey){
-                    const active = document.activeElement;
-                    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        window.location.href = '/stream/{{ selected_stream }}/categories/add/';
-                        {% endif %}
-                    }
-                }
-            });
-
-            // Initial filter application
-            applyFilter();
-
-            // Calculate and display total products
-            const allCards = document.querySelectorAll('.category-card');
-            let totalProducts = 0;
-            allCards.forEach(card => {
-                totalProducts += parseInt(card.dataset.productCount) || 0;
-            });
-            const productsTotal = document.getElementById('products-total');
-            if (productsTotal) {
-                productsTotal.textContent = totalProducts;
-            }
-
-            // Staggered card animation on load
-            const cards = document.querySelectorAll('.category-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 50);
-            });
+            }).catch(function() { showToast('Request failed. Please try again.', 'error'); });
         });
-    </script>
-  </body>
-</html>
+    }
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            var ids = Array.from(getChecked()).map(function(c) { return c.value; });
+            if (!ids.length) return;
+            fetch('{% url "category_export_csv_stream" selected_stream %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ ids: ids })
+            }).then(function(resp) {
+                if (!resp.ok) throw new Error('Export failed');
+                return resp.blob();
+            }).then(function(blob) {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'categories_{{ selected_stream }}.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                showToast('CSV exported successfully', 'success');
+            }).catch(function() { showToast('Export failed. Please try again.', 'error'); });
+        });
+    }
+}
+
+
+/* ===== Preview Modal ===== */
+function showPreview(id, name, serial, productCount, created, createdBy) {
+    document.getElementById('previewName').textContent = name;
+    document.getElementById('previewSerial').textContent = serial;
+    document.getElementById('previewProducts').textContent = productCount + ' products';
+    document.getElementById('previewCreated').textContent = created;
+    document.getElementById('previewCreatedBy').textContent = createdBy;
+    document.getElementById('previewViewBtn').href = '/stream/{{ selected_stream }}/products/?category=' + id;
+    document.getElementById('catPreviewModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePreview() {
+    document.getElementById('catPreviewModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('catPreviewModal').addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePreview();
+});
+
+/* ===== Toast ===== */
+function initToasts() {
+    var container = document.getElementById('catToastContainer');
+    if (!container) return;
+    var toasts = container.querySelectorAll('.cat-toast');
+    toasts.forEach(function(toast) {
+        setTimeout(function() {
+            toast.style.animation = 'catSlideIn 0.3s ease reverse forwards';
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    });
+}
+
+function showToast(msg, type) {
+    var container = document.getElementById('catToastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'cat-toast-container';
+        container.id = 'catToastContainer';
+        document.body.appendChild(container);
+    }
+    var iconMap = { success: 'check-circle', error: 'exclamation-triangle', warning: 'exclamation-circle', info: 'info-circle' };
+    var toast = document.createElement('div');
+    toast.className = 'cat-toast ' + (type || 'info');
+    toast.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i><span>' + escapeHtml(msg) + '</span>';
+    container.appendChild(toast);
+    setTimeout(function() {
+        toast.style.animation = 'catSlideIn 0.3s ease reverse forwards';
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 4000);
+}
+
+/* ===== Staggered Animation ===== */
+function initStaggeredAnimation() {
+    var cards = document.querySelectorAll('#catGrid .cat-card');
+    cards.forEach(function(card, i) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(16px)';
+        setTimeout(function() {
+            card.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, i * 40);
+    });
+}
+
+/* ===== Keyboard Shortcuts ===== */
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        var active = document.activeElement;
+        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT') return;
+
+        if (e.key === '/') {
+            e.preventDefault();
+            var input = document.getElementById('catSearchInput');
+            if (input) { input.focus(); input.select(); }
+        }
+        if (e.key === 'g') {
+            var gridBtn = document.querySelector('#catViewToggle .cat-view-btn[data-view="grid"]');
+            if (gridBtn) gridBtn.click();
+        }
+        if (e.key === 'l') {
+            var listBtn = document.querySelector('#catViewToggle .cat-view-btn[data-view="list"]');
+            if (listBtn) listBtn.click();
+        }
+    });
+}
+
+window.showPreview = showPreview;
+window.closePreview = closePreview;
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ONBOARDING GUIDED TOUR — Category List                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<style>
+.tour-backdrop{position:fixed;inset:0;z-index:10010;background:rgba(0,0,0,0);transition:background .4s ease;pointer-events:none;display:none}
+.tour-backdrop.active{background:rgba(0,0,0,.55);pointer-events:auto;display:block}
+.tour-highlight-ring{position:fixed;z-index:10011;border-radius:14px;box-shadow:0 0 0 4000px rgba(0,0,0,.55),0 0 0 4px rgba(0,102,204,.7),0 0 30px rgba(0,102,204,.3);transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none;display:none}
+.tour-highlight-ring::after{content:'';position:absolute;inset:-6px;border-radius:18px;border:2px solid rgba(0,102,204,.4);animation:tour-pulse 2s ease-in-out infinite}
+@keyframes tour-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.02)}}
+.tour-tooltip{position:fixed;z-index:10012;width:370px;max-width:calc(100vw - 32px);background:var(--bg-primary,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:0;opacity:0;transform:translateY(12px) scale(.96);transition:all .35s cubic-bezier(.4,0,.2,1);overflow:hidden;display:none}
+.tour-tooltip.visible{opacity:1;transform:translateY(0) scale(1)}
+.tour-tooltip-header{background:linear-gradient(135deg,#0066cc 0%,#0891b2 50%,#0d9488 100%);padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem}
+.tour-tooltip-header-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+.tour-tooltip-header-text h4{color:#fff;font-size:.95rem;font-weight:700;margin:0 0 .125rem 0}
+.tour-tooltip-header-text span{color:rgba(255,255,255,.7);font-size:.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.tour-tooltip-body{padding:1.25rem}
+.tour-tooltip-body p{color:var(--text-secondary,#475569);font-size:.88rem;line-height:1.6;margin:0}
+.tour-tooltip-footer{padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-color,#e2e8f0);background:var(--bg-secondary,#f8fafc)}
+.tour-progress{display:flex;align-items:center;gap:5px}
+.tour-progress-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color,#CBD5E1);transition:all .3s ease}
+.tour-progress-dot.active{width:22px;border-radius:4px;background:linear-gradient(135deg,#0066cc,#0d9488)}
+.tour-progress-dot.completed{background:#0d9488}
+.tour-btn-group{display:flex;gap:.5rem}
+.tour-btn{padding:.45rem 1rem;border-radius:8px;border:none;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s ease;display:inline-flex;align-items:center;gap:.35rem}
+.tour-btn-skip{background:transparent;color:var(--text-muted,#94A3B8);border:1px solid var(--border-color,#CBD5E1)}
+.tour-btn-skip:hover{color:var(--text-secondary,#475569);border-color:var(--text-secondary,#475569)}
+.tour-btn-next{background:linear-gradient(135deg,#0066cc,#0d9488);color:#fff;box-shadow:0 2px 8px rgba(0,102,204,.3)}
+.tour-btn-next:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,102,204,.4)}
+.tour-btn-prev{background:var(--bg-primary,#fff);color:var(--text-secondary,#475569);border:1px solid var(--border-color,#CBD5E1)}
+.tour-btn-prev:hover{border-color:var(--primary,#0066cc);color:var(--primary,#0066cc)}
+.tour-welcome-modal{position:fixed;inset:0;z-index:10015;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+.tour-welcome-modal.active{display:flex}
+.tour-welcome-card{background:var(--bg-primary,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:20px;width:440px;max-width:92vw;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,.35);animation:tour-modal-in .4s ease forwards}
+@keyframes tour-modal-in{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.tour-welcome-header{background:linear-gradient(135deg,#0066cc 0%,#0891b2 50%,#0d9488 100%);padding:2rem 2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.tour-welcome-header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 60%);animation:tour-shimmer 6s linear infinite}
+@keyframes tour-shimmer{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.tour-welcome-header i{font-size:2.5rem;color:rgba(255,255,255,.9);margin-bottom:.75rem;display:block;position:relative}
+.tour-welcome-header h2{color:#fff;font-size:1.35rem;font-weight:800;margin:0 0 .375rem 0;position:relative}
+.tour-welcome-header p{color:rgba(255,255,255,.8);font-size:.85rem;margin:0;position:relative}
+.tour-welcome-body{padding:1.5rem 2rem}
+.tour-welcome-features{list-style:none;padding:0;margin:0 0 1.25rem 0}
+.tour-welcome-features li{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;color:var(--text-secondary,#475569);font-size:.85rem;font-weight:500}
+.tour-welcome-features li i{width:28px;height:28px;border-radius:8px;background:rgba(0,102,204,.1);color:#0066cc;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+.tour-welcome-actions{display:flex;gap:.75rem}
+.tour-welcome-actions .tour-btn{flex:1;justify-content:center;padding:.6rem 1rem;font-size:.85rem}
+.tour-confetti-container{position:fixed;inset:0;z-index:10016;pointer-events:none;overflow:hidden}
+.tour-confetti{position:absolute;width:10px;height:10px;border-radius:2px;animation:tour-confetti-fall 3s ease-out forwards}
+@keyframes tour-confetti-fall{0%{opacity:1;transform:translateY(-20px) rotate(0) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(.5)}}
+</style>
+
+<div class="tour-backdrop" id="tourBackdrop"></div>
+<div class="tour-highlight-ring" id="tourHighlight"></div>
+<div class="tour-tooltip" id="tourTooltip">
+    <div class="tour-tooltip-header">
+        <div class="tour-tooltip-header-icon" id="tourStepIcon"><i class="fas fa-info"></i></div>
+        <div class="tour-tooltip-header-text">
+            <h4 id="tourStepTitle">Step</h4>
+            <span id="tourStepLabel">Step 1 of 6</span>
+        </div>
+    </div>
+    <div class="tour-tooltip-body"><p id="tourStepDesc"></p></div>
+    <div class="tour-tooltip-footer">
+        <div class="tour-progress" id="tourProgressDots"></div>
+        <div class="tour-btn-group">
+            <button class="tour-btn tour-btn-skip" id="tourSkipBtn">Skip</button>
+            <button class="tour-btn tour-btn-prev" id="tourPrevBtn" style="display:none"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="tour-btn tour-btn-next" id="tourNextBtn">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourWelcomeModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header">
+            <i class="fas fa-th-large"></i>
+            <h2>Categories Page</h2>
+            <p>Let's explore how categories organize your inventory</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-folder-open"></i> Browse and manage categories</li>
+                <li><i class="fas fa-search"></i> Search, filter, and sort</li>
+                <li><i class="fas fa-eye"></i> Switch between grid, list & compact views</li>
+                <li><i class="fas fa-check-square"></i> Bulk select, delete, or export</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-skip" id="tourWelcomeSkip">Skip Tour</button>
+                <button class="tour-btn tour-btn-next" id="tourWelcomeStart"><i class="fas fa-play"></i> Start Tour</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourCompleteModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header" style="background:linear-gradient(135deg,#059669 0%,#0d9488 100%)">
+            <i class="fas fa-check-circle"></i>
+            <h2>You're All Set!</h2>
+            <p>You know your way around the Categories page</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-keyboard" style="background:rgba(5,150,105,.1);color:#059669"></i> Press <strong>/</strong> to jump to search, <strong>G</strong> for grid, <strong>L</strong> for list</li>
+                <li><i class="fas fa-mouse-pointer" style="background:rgba(0,102,204,.1);color:#0066cc"></i> Click on a category card to view its products</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-next" id="tourCompleteDone" style="background:linear-gradient(135deg,#059669,#0d9488)"><i class="fas fa-thumbs-up"></i> Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-confetti-container" id="tourConfetti"></div>
+
+<script>
+(function() {
+    'use strict';
+    var TOUR_KEY = 'category_list';
+    var _buPrefix = (function(){ var p=window.location.pathname; var i=p.indexOf('/stream/'); if(i>0) return p.substring(0,i); return ''; })();
+
+    var TOUR_STEPS = [
+        { target: '.cat-header', icon: 'fas fa-layer-group', title: 'Page Header', desc: 'The header shows the current stream name and quick action buttons — <strong>Add Category</strong> and <strong>Print</strong>.', position: 'bottom', padding: 8 },
+        { target: '.cat-stats-row', icon: 'fas fa-chart-bar', title: 'Statistics Cards', desc: 'At-a-glance metrics: total categories, total products, categories with products, empty categories, and average products per category.', position: 'bottom', padding: 8 },
+        { target: '.cat-toolbar', icon: 'fas fa-sliders-h', title: 'Toolbar & Controls', desc: 'Search by name or serial, toggle between <strong>Grid</strong>, <strong>List</strong>, and <strong>Compact</strong> views, sort by newest/name/product count, and use filter chips.', position: 'bottom', padding: 8 },
+        { target: '#catFilterChips', icon: 'fas fa-filter', title: 'Filter Chips', desc: 'Quick-filter categories: <strong>All</strong>, <strong>With Products</strong>, or <strong>Empty</strong>. Click a chip to instantly filter your view.', position: 'bottom', padding: 4, optional: true },
+        { target: '#catGrid', icon: 'fas fa-th-large', title: 'Category Cards', desc: 'Each card displays the category name, serial number, creation date, and product count. Hover to reveal action buttons — <strong>Preview</strong>, <strong>Edit</strong>, and <strong>Delete</strong>.', position: 'top', padding: 8 },
+        { target: '.cat-card:first-child', icon: 'fas fa-mouse-pointer', title: 'Card Interactions', desc: 'Click a card to open that category\'s products. Use the <strong>checkbox</strong> to select multiple cards for bulk delete or CSV export via the bottom action bar.', position: 'right', padding: 8, optional: true }
+    ];
+
+    var currentStep = 0, activeSteps = [], tourActive = false;
+    var backdrop = document.getElementById('tourBackdrop');
+    var highlight = document.getElementById('tourHighlight');
+    var tooltip = document.getElementById('tourTooltip');
+    var stepIcon = document.getElementById('tourStepIcon');
+    var stepTitle = document.getElementById('tourStepTitle');
+    var stepLabel = document.getElementById('tourStepLabel');
+    var stepDesc = document.getElementById('tourStepDesc');
+    var progressDots = document.getElementById('tourProgressDots');
+    var nextBtn = document.getElementById('tourNextBtn');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var skipBtn = document.getElementById('tourSkipBtn');
+    var welcomeModal = document.getElementById('tourWelcomeModal');
+    var completeModal = document.getElementById('tourCompleteModal');
+    var confettiEl = document.getElementById('tourConfetti');
+
+    var CSRF_TOKEN = '{{ csrf_token }}';
+    var LS_KEY = 'tour_done_' + TOUR_KEY;
+    function markComplete() {
+        try { localStorage.setItem(LS_KEY, '1'); } catch(e) {}
+        fetch(_buPrefix + '/api/onboarding/complete/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({ tour_key: TOUR_KEY })
+        }).catch(function(){});
+    }
+    function filterSteps() {
+        activeSteps = TOUR_STEPS.filter(function(s) { return !!document.querySelector(s.target); });
+    }
+    function buildDots() {
+        var h = '';
+        for (var i = 0; i < activeSteps.length; i++) {
+            var c = i < currentStep ? 'completed' : (i === currentStep ? 'active' : '');
+            h += '<div class="tour-progress-dot ' + c + '"></div>';
+        }
+        progressDots.innerHTML = h;
+    }
+    function positionTooltip(el, pos) {
+        var r = el.getBoundingClientRect(), tw = 370, th = tooltip.offsetHeight || 220, m = 16, t, l;
+        if (pos === 'right') { t = r.top + r.height/2 - th/2; l = r.right + m; if (l + tw > window.innerWidth) l = r.left - tw - m; }
+        else if (pos === 'left') { t = r.top + r.height/2 - th/2; l = r.left - tw - m; if (l < 0) l = r.right + m; }
+        else if (pos === 'top') { t = r.top - th - m; l = r.left + r.width/2 - tw/2; if (t < 0) t = r.bottom + m; }
+        else { t = r.bottom + m; l = r.left + r.width/2 - tw/2; if (t + th > window.innerHeight) t = r.top - th - m; }
+        if (l < 8) l = 8; if (l + tw > window.innerWidth - 8) l = window.innerWidth - tw - 8;
+        if (t < 8) t = 8; if (t + th > window.innerHeight - 8) t = window.innerHeight - th - 8;
+        tooltip.style.top = t + 'px'; tooltip.style.left = l + 'px';
+    }
+    function showStep(idx) {
+        currentStep = idx;
+        var step = activeSteps[idx], el = document.querySelector(step.target);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() {
+            var r = el.getBoundingClientRect(), pad = step.padding || 0;
+            highlight.style.display = 'block';
+            highlight.style.top = (r.top - pad) + 'px'; highlight.style.left = (r.left - pad) + 'px';
+            highlight.style.width = (r.width + pad*2) + 'px'; highlight.style.height = (r.height + pad*2) + 'px';
+            stepIcon.innerHTML = '<i class="' + step.icon + '"></i>';
+            stepTitle.textContent = step.title;
+            stepLabel.textContent = 'Step ' + (idx+1) + ' of ' + activeSteps.length;
+            stepDesc.innerHTML = step.desc;
+            buildDots();
+            prevBtn.style.display = idx > 0 ? 'inline-flex' : 'none';
+            nextBtn.innerHTML = idx === activeSteps.length - 1 ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+            tooltip.style.display = 'block'; tooltip.classList.remove('visible');
+            positionTooltip(el, step.position);
+            requestAnimationFrame(function() { tooltip.classList.add('visible'); });
+        }, 350);
+    }
+    function startTour() {
+        welcomeModal.classList.remove('active');
+        filterSteps(); if (!activeSteps.length) return;
+        tourActive = true; currentStep = 0;
+        backdrop.style.display = 'block'; backdrop.style.pointerEvents = 'auto'; backdrop.classList.add('active');
+        showStep(0);
+    }
+    function endTour(completed) {
+        tourActive = false; backdrop.classList.remove('active');
+        highlight.style.display = 'none'; tooltip.style.display = 'none'; tooltip.classList.remove('visible');
+        backdrop.style.display = 'none'; backdrop.style.pointerEvents = 'none';
+        if (completed) { markComplete(); fireConfetti(); completeModal.classList.add('active'); }
+    }
+    function fireConfetti() {
+        var colors = ['#0066cc','#0d9488','#0891b2','#059669','#FFD200','#dc3545','#0B5FFF'];
+        for (var i = 0; i < 80; i++) {
+            var p = document.createElement('div'); p.className = 'tour-confetti';
+            p.style.left = Math.random()*100+'%'; p.style.top = '-10px';
+            p.style.width = (Math.random()*8+5)+'px'; p.style.height = (Math.random()*8+5)+'px';
+            p.style.background = colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1)+'s';
+            p.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+            confettiEl.appendChild(p);
+        }
+        setTimeout(function() { confettiEl.innerHTML = ''; }, 5000);
+    }
+
+    nextBtn.addEventListener('click', function() { if (currentStep < activeSteps.length - 1) showStep(currentStep+1); else endTour(true); });
+    prevBtn.addEventListener('click', function() { if (currentStep > 0) showStep(currentStep-1); });
+    skipBtn.addEventListener('click', function() { markComplete(); endTour(false); });
+    document.getElementById('tourWelcomeStart').addEventListener('click', startTour);
+    document.getElementById('tourWelcomeSkip').addEventListener('click', function() { welcomeModal.classList.remove('active'); markComplete(); });
+    document.getElementById('tourCompleteDone').addEventListener('click', function() { completeModal.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (tourActive) { markComplete(); endTour(false); }
+            else if (welcomeModal.classList.contains('active')) { welcomeModal.classList.remove('active'); markComplete(); }
+            else if (completeModal.classList.contains('active')) { completeModal.classList.remove('active'); }
+        }
+    });
+    window.addEventListener('resize', function() { if (tourActive && activeSteps[currentStep]) showStep(currentStep); });
+
+    var restartBtn = document.getElementById('restartTourBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function() {
+            try { localStorage.removeItem(LS_KEY); } catch(e) {}
+            fetch(_buPrefix + '/api/onboarding/reset/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify({ tour_key: TOUR_KEY })
+            }).then(function(){ welcomeModal.classList.add('active'); })
+              .catch(function(){ welcomeModal.classList.add('active'); });
+        });
+    }
+
+    {% if show_onboarding_tour %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var alreadyDone = false;
+        try { alreadyDone = localStorage.getItem(LS_KEY) === '1'; } catch(e) {}
+        if (!alreadyDone) {
+            setTimeout(function() { welcomeModal.classList.add('active'); }, 1200);
+        }
+    });
+    {% endif %}
+})();
+</script>
 {% endblock %}

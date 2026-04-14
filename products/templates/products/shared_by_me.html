@@ -3,1148 +3,685 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shared by Me - IGT MoS Inventory</title>
+    <title>Shared by Me - {{ BU_TITLE|default:'NexusOps' }}</title>
     {% load static %}
-    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
-    
-    <!-- Modern CSS Framework and Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary-900: #0c1929;
-            --primary-800: #0f2942;
-            --primary-700: #1a365d;
-            --primary-600: #234876;
-            --primary-500: #2c5a8f;
-            --primary-400: #4a7ab5;
-            --primary-300: #7ba3d1;
-            --primary-200: #b8d4f0;
-            --primary-100: #e3eff9;
-            --accent-500: #0891b2;
-            --accent-400: #22d3ee;
-            --accent-300: #67e8f9;
-            --success-500: #059669;
-            --success-400: #10b981;
-            --success-100: #d1fae5;
-            --warning-500: #d97706;
-            --warning-400: #f59e0b;
-            --warning-100: #fef3c7;
-            --danger-500: #dc2626;
-            --danger-400: #ef4444;
-            --danger-100: #fee2e2;
-            --purple-500: #7c3aed;
-            --purple-400: #8b5cf6;
-            --purple-100: #ede9fe;
-            --neutral-950: #0a0a0a;
-            --neutral-900: #171717;
-            --neutral-800: #262626;
-            --neutral-700: #404040;
-            --neutral-600: #525252;
-            --neutral-500: #737373;
-            --neutral-400: #a3a3a3;
-            --neutral-300: #d4d4d4;
-            --neutral-200: #e5e5e5;
-            --neutral-100: #f5f5f5;
-            --neutral-50: #fafafa;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            --shadow-glow: 0 0 40px rgba(124, 58, 237, 0.15);
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--neutral-100);
-            color: var(--neutral-800);
-            line-height: 1.6;
-            min-height: 100vh;
-            position: relative;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 400px;
-            background: linear-gradient(135deg, var(--purple-500) 0%, var(--primary-600) 50%, var(--accent-500) 100%);
-            z-index: -1;
-        }
-        
-        .app-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 0 32px;
-        }
-        
-        /* Top Navigation Bar */
-        .top-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 0;
-            margin-bottom: 8px;
-        }
-        
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .back-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            transform: translateX(-2px);
-        }
-        
-        .breadcrumb-nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
-        }
-        
-        .breadcrumb-nav a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .breadcrumb-nav a:hover {
-            color: white;
-        }
-        
-        .breadcrumb-nav .current {
-            color: white;
-            font-weight: 500;
-        }
-        
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .nav-btn {
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .nav-btn-ghost {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white;
-            backdrop-filter: blur(10px);
-        }
-        
-        .nav-btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        
-        .nav-badge {
-            background: var(--accent-400);
-            color: var(--primary-900);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 50px;
-            margin-left: 4px;
-        }
-        
-        /* Hero Section */
-        .hero-section {
-            padding: 24px 0 48px;
-            color: white;
-        }
-        
-        .hero-content {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 32px;
-        }
-        
-        .hero-text {
-            flex: 1;
-        }
-        
-        .hero-title {
-            font-size: 2.75rem;
-            font-weight: 800;
-            margin: 0 0 12px;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.125rem;
-            opacity: 0.85;
-            margin: 0;
-            font-weight: 400;
-            max-width: 500px;
-        }
-        
-        /* Stats Cards Row */
-        .stats-row {
-            display: flex;
-            gap: 16px;
-        }
-        
-        .stat-pill {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-lg);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-pill:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .stat-pill-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        
-        .stat-pill-icon.purple { background: rgba(139, 92, 246, 0.3); }
-        .stat-pill-icon.green { background: rgba(16, 185, 129, 0.3); }
-        .stat-pill-icon.amber { background: rgba(245, 158, 11, 0.3); }
-        
-        .stat-pill-content {
-            text-align: left;
-        }
-        
-        .stat-pill-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 2px;
-        }
-        
-        .stat-pill-label {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
-        }
-        
-        /* Main Content Area */
-        .main-content {
-            background: white;
-            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-            min-height: calc(100vh - 250px);
-            padding: 32px;
-            padding-bottom: 48px;
-            margin-top: -20px;
-            box-shadow: var(--shadow-2xl);
-        }
-        
-        /* Toolbar */
-        .content-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--neutral-200);
-        }
-        
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .search-box {
-            position: relative;
-        }
-        
-        .search-box input {
-            width: 320px;
-            padding: 10px 16px 10px 42px;
-            border: 1px solid var(--neutral-300);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            transition: all 0.2s;
-            background: var(--neutral-50);
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--purple-400);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-            background: white;
-        }
-        
-        .search-box i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--neutral-400);
-        }
-        
-        .toolbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .sort-select {
-            padding: 10px 36px 10px 14px;
-            border: 1px solid var(--neutral-300);
-            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23737373' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E") no-repeat right 12px center;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            color: var(--neutral-700);
-            cursor: pointer;
-            appearance: none;
-            transition: all 0.2s;
-        }
-        
-        .sort-select:focus {
-            outline: none;
-            border-color: var(--purple-400);
-        }
-        
-        /* Alert Messages */
-        .alert {
-            border-radius: var(--radius-md);
-            border: none;
-            padding: 14px 18px;
-            margin-bottom: 24px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .alert-success {
-            background: var(--success-100);
-            color: var(--success-500);
-        }
-        
-        .alert-info {
-            background: var(--purple-100);
-            color: var(--purple-500);
-        }
-        
-        .alert-warning {
-            background: var(--warning-100);
-            color: var(--warning-500);
-        }
-        
-        /* Notes Grid */
-        .notes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-            gap: 24px;
-        }
-        
-        .note-card {
-            background: white;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--neutral-200);
-            overflow: hidden;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .note-card:hover {
-            border-color: var(--purple-300);
-            box-shadow: var(--shadow-lg), var(--shadow-glow);
-            transform: translateY(-4px);
-        }
-        
-        .note-card-header {
-            padding: 20px;
-            background: linear-gradient(135deg, var(--purple-100), white);
-            border-bottom: 1px solid var(--neutral-100);
-        }
-        
-        .note-card-title-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-        }
-        
-        .card-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--purple-500), var(--accent-500));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.125rem;
-            flex-shrink: 0;
-        }
-        
-        .card-note-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .card-note-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--neutral-900);
-            margin: 0 0 6px;
-            line-height: 1.3;
-        }
-        
-        .card-note-preview {
-            font-size: 0.8125rem;
-            color: var(--neutral-500);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .note-card-body {
-            padding: 20px;
-        }
-        
-        .recipients-section {
-            margin-bottom: 16px;
-        }
-        
-        /* Avatar Stack - Collapsed View */
-        .avatar-stack {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        
-        .avatar-stack-items {
-            display: flex;
-            align-items: center;
-        }
-        
-        .stack-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--purple-400), var(--accent-500));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 3px solid white;
-            margin-left: -12px;
-            position: relative;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .stack-avatar:first-child {
-            margin-left: 0;
-        }
-        
-        .stack-avatar:hover {
-            transform: translateY(-2px);
-            z-index: 10;
-        }
-        
-        .stack-avatar.more {
-            background: var(--neutral-200);
-            color: var(--neutral-700);
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-        
-        .stack-label {
-            margin-left: 14px;
-            font-size: 0.875rem;
-            color: var(--neutral-600);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .stack-label i {
-            font-size: 0.75rem;
-            transition: transform 0.2s ease;
-        }
-        
-        .avatar-stack.expanded .stack-label i {
-            transform: rotate(180deg);
-        }
-        
-        .stack-hint {
-            font-size: 0.75rem;
-            color: var(--neutral-400);
-            margin-left: 8px;
-            transition: opacity 0.2s ease;
-        }
-        
-        .avatar-stack.expanded .stack-hint {
-            opacity: 0;
-        }
-        
-        /* Recipients List - Expanded View */
-        .recipients-list {
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px dashed var(--neutral-200);
-            animation: slideDown 0.2s ease;
-        }
-        
-        .recipients-list.show {
-            display: flex;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .recipient-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            background: var(--neutral-50);
-            border-radius: var(--radius-md);
-            border: 1px solid var(--neutral-100);
-            transition: all 0.2s ease;
-        }
-        
-        .recipient-item:hover {
-            background: white;
-            border-color: var(--purple-200);
-            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
-        }
-        
-        .recipient-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--neutral-200);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--neutral-600);
-            flex-shrink: 0;
-        }
-        
-        .recipient-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .recipient-name {
-            font-weight: 600;
-            color: var(--neutral-800);
-            font-size: 0.875rem;
-        }
-        
-        .recipient-time {
-            font-size: 0.75rem;
-            color: var(--neutral-500);
-        }
-        
-        .recipient-status {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        
-        .status-badge.read {
-            background: var(--success-100);
-            color: var(--success-500);
-        }
-        
-        .status-badge.unread {
-            background: var(--warning-100);
-            color: var(--warning-500);
-        }
-        
-        .status-badge .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-        
-        .card-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 16px;
-            border-top: 1px solid var(--neutral-100);
-        }
-        
-        .meta-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .meta-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            background: var(--neutral-100);
-            border-radius: 50px;
-            font-size: 0.75rem;
-            color: var(--neutral-600);
-        }
-        
-        .note-card-actions {
-            padding: 16px 20px;
-            background: var(--neutral-50);
-            display: flex;
-            gap: 10px;
-        }
-        
-        .card-btn {
-            flex: 1;
-            padding: 10px 16px;
-            border-radius: var(--radius-md);
-            font-size: 0.8125rem;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .card-btn-primary {
-            background: var(--purple-500);
-            color: white;
-            border: none;
-        }
-        
-        .card-btn-primary:hover {
-            background: var(--primary-700);
-            color: white;
-        }
-        
-        .card-btn-outline {
-            background: white;
-            color: var(--neutral-700);
-            border: 1px solid var(--neutral-300);
-        }
-        
-        .card-btn-outline:hover {
-            border-color: var(--primary-400);
-            color: var(--primary-600);
-            background: var(--primary-100);
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 80px 40px;
-        }
-        
-        .empty-illustration {
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 32px;
-            background: linear-gradient(135deg, var(--purple-100), var(--neutral-200));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .empty-illustration::before {
-            content: '';
-            position: absolute;
-            inset: -10px;
-            border-radius: 50%;
-            border: 2px dashed var(--purple-300);
-        }
-        
-        .empty-illustration i {
-            font-size: 4rem;
-            color: var(--purple-400);
-        }
-        
-        .empty-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--neutral-900);
-            margin: 0 0 12px;
-        }
-        
-        .empty-description {
-            font-size: 1rem;
-            color: var(--neutral-500);
-            max-width: 420px;
-            margin: 0 auto 32px;
-            line-height: 1.7;
-        }
-        
-        .empty-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background: var(--purple-500);
-            color: white;
-            border: none;
-        }
-        
-        .btn-primary:hover {
-            background: var(--purple-400);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: var(--neutral-700);
-            border: 1px solid var(--neutral-300);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--neutral-50);
-            border-color: var(--neutral-400);
-        }
-        
-        /* Footer */
-        .content-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 0;
-            margin-top: 32px;
-            border-top: 1px solid var(--neutral-200);
-        }
-        
-        .footer-info {
-            font-size: 0.875rem;
-            color: var(--neutral-500);
-        }
-        
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero-content {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .stats-row {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-            
-            .stat-pill {
-                flex: 1;
-                min-width: 160px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 0 16px;
-            }
-            
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .main-content {
-                padding: 20px;
-            }
-            
-            .content-toolbar {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-            
-            .search-box input {
-                width: 100%;
-            }
-            
-            .notes-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <!-- Top Navigation -->
-        <nav class="top-nav">
-            <div class="nav-brand">
-                <a href="{% url 'notes_list' %}" class="back-btn">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-                <div class="breadcrumb-nav">
-                    <a href="{% url 'dashboard' %}">Dashboard</a>
-                    <i class="bi bi-chevron-right"></i>
-                    <a href="{% url 'notes_list' %}">Notes</a>
-                    <i class="bi bi-chevron-right"></i>
-                    <span class="current">Shared by Me</span>
-                </div>
-            </div>
-            <div class="nav-actions">
-                <a href="{% url 'shared_notes' %}" class="nav-btn nav-btn-ghost">
-                    <i class="bi bi-share-fill"></i>
-                    Shared with Me
-                    {% if shared_with_me_count %}<span class="nav-badge">{{ shared_with_me_count }}</span>{% endif %}
-                </a>
-                <a href="{% url 'notes_list' %}" class="nav-btn nav-btn-ghost">
-                    <i class="bi bi-journal-text"></i>
-                    All Notes
-                </a>
-            </div>
-        </nav>
-        
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1 class="hero-title">Shared by Me</h1>
-                    <p class="hero-subtitle">View and manage notes you've shared with your colleagues. Track who has read your shared notes.</p>
-                </div>
-                <div class="stats-row">
-                    <div class="stat-pill">
-                        <div class="stat-pill-icon purple">
-                            <i class="bi bi-send-fill"></i>
-                        </div>
-                        <div class="stat-pill-content">
-                            <div class="stat-pill-value">{{ shared_notes|length }}</div>
-                            <div class="stat-pill-label">Total Shares</div>
-                        </div>
-                    </div>
-                    <div class="stat-pill">
-                        <div class="stat-pill-icon green">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-                        <div class="stat-pill-content">
-                            <div class="stat-pill-value">{{ notes_shared|length }}</div>
-                            <div class="stat-pill-label">Notes Shared</div>
-                        </div>
-                    </div>
-                    <div class="stat-pill">
-                        <div class="stat-pill-icon amber">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <div class="stat-pill-content">
-                            <div class="stat-pill-value">{{ shared_notes|length }}</div>
-                            <div class="stat-pill-label">Recipients</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="app-container">
-            <!-- Toolbar -->
-            <div class="content-toolbar">
-                <div class="toolbar-left">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search shared notes..." id="searchInput" onkeyup="filterNotes()">
-                    </div>
-                </div>
-                <div class="toolbar-right">
-                    <select class="sort-select">
-                        <option>Sort by: Recent</option>
-                        <option>Sort by: Title</option>
-                        <option>Sort by: Recipients</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Alert Messages -->
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'warning' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-            {% endif %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-            {% if notes_shared %}
-            <!-- Notes Grid -->
-            <div class="notes-grid" id="notesGrid">
-                {% for item in notes_shared %}
-                <div class="note-card" data-title="{{ item.note.title|lower }}">
-                    <div class="note-card-header">
-                        <div class="note-card-title-row">
-                            <div class="card-avatar">
-                                {{ item.note.title|first|upper }}
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-dark: #004999;
+        --primary-light: #e6f0fa;
+        --success: #22c55e;
+        --success-dark: #16a34a;
+        --success-light: #f0fdf4;
+        --warning: #f59e0b;
+        --warning-dark: #b45309;
+        --warning-light: #fffbeb;
+        --info: #0ea5e9;
+        --info-light: #f0f9ff;
+        --danger: #dc2626;
+        --danger-light: #fef2f2;
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-subtle: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --radius: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg-body);
+        color: var(--text-primary);
+    }
+
+    .top-bar .top-left a:nth-child(n+3) { display: none !important; }
+
+    .sbm-page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--bg-body) 0%, #e2e8f0 100%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .sbm-content-wrapper {
+        max-width: 960px;
+        width: 100%;
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Breadcrumb Navigation */
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .breadcrumb-item { display: flex; align-items: center; }
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    .breadcrumb-item a:hover { color: var(--primary-dark); background: var(--primary-light); }
+    .breadcrumb-item a i { margin-right: 0.375rem; }
+    .breadcrumb-separator { color: var(--text-muted); margin: 0 0.25rem; font-size: 0.75rem; }
+    .breadcrumb-item.current { color: var(--text-primary); font-weight: 500; padding: 0.25rem 0.5rem; }
+
+    /* Main Card */
+    .sbm-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+    }
+
+    /* Header Banner */
+    .header-banner {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .header-banner i { color: rgba(255,255,255,0.9); font-size: 1.25rem; }
+    .header-banner span { color: white; font-weight: 500; font-size: 0.9rem; }
+
+    /* Card Header */
+    .card-header-section {
+        padding: 1.75rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-subtle);
+    }
+    .card-header-section h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .card-header-section h1 .icon-wrapper {
+        width: 42px; height: 42px;
+        background: var(--primary-light);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .card-header-section h1 .icon-wrapper i { color: var(--primary); font-size: 1.125rem; }
+    .card-header-section p {
+        margin: 0.5rem 0 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        padding-left: 54px;
+    }
+
+    /* Stats Row */
+    .sbm-stats-row {
+        display: flex;
+        gap: 1rem;
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-card);
+    }
+    .sbm-stat-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-subtle);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+    }
+    .sbm-stat-icon {
+        width: 36px; height: 36px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.875rem;
+    }
+    .sbm-stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+    .sbm-stat-icon.green { background: var(--success-light); color: var(--success-dark); }
+    .sbm-stat-icon.amber { background: var(--warning-light); color: var(--warning-dark); }
+    .sbm-stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .sbm-stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+    /* Card Body */
+    .card-body-section { padding: 1.5rem 2rem 2rem; }
+
+    /* Toolbar */
+    .sbm-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        gap: 1rem;
+    }
+    .sbm-search {
+        position: relative;
+        flex: 1;
+        max-width: 320px;
+    }
+    .sbm-search input {
+        width: 100%;
+        padding: 0.625rem 1rem 0.625rem 2.25rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        background: var(--bg-subtle);
+    }
+    .sbm-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.1); background: #fff; }
+    .sbm-search i { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem; }
+
+    .sbm-nav-actions { display: flex; gap: 0.5rem; }
+    .sbm-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .sbm-nav-btn:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-light); }
+    .sbm-nav-btn .badge {
+        background: var(--primary);
+        color: #fff;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    /* Notes List */
+    .sbm-notes-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .sbm-note-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: all 0.25s;
+    }
+    .sbm-note-card:hover { border-color: #93c5fd; box-shadow: var(--shadow-lg); }
+
+    .sbm-note-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    }
+
+    .sbm-note-icon {
+        width: 44px; height: 44px; min-width: 44px;
+        background: linear-gradient(135deg, var(--primary-light), #dbeafe);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: var(--shadow-sm);
+    }
+    .sbm-note-icon i { color: var(--primary); font-size: 1.125rem; }
+
+    .sbm-note-details { flex: 1; min-width: 0; }
+    .sbm-note-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.35rem 0;
+        line-height: 1.3;
+    }
+    .sbm-note-preview {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
+    }
+    .sbm-note-meta {
+        display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);
+    }
+    .sbm-note-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .sbm-note-meta i { font-size: 0.7rem; }
+
+    .sbm-note-actions-top {
+        display: flex; gap: 0.5rem; flex-shrink: 0; align-self: center;
+    }
+    .sbm-btn-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border-radius: var(--radius);
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .sbm-btn-primary { background: var(--primary); color: #fff; }
+    .sbm-btn-primary:hover { background: var(--primary-dark); color: #fff; }
+    .sbm-btn-outline { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-color); }
+    .sbm-btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    /* Recipients */
+    .sbm-recipients { padding: 1rem 1.5rem; }
+    .sbm-recipients-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        padding: 0.5rem 0;
+        user-select: none;
+    }
+
+    .sbm-avatars { display: flex; align-items: center; }
+    .sbm-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 600; color: #fff;
+        border: 2px solid #fff;
+        margin-left: -8px;
+        box-shadow: var(--shadow-sm);
+    }
+    .sbm-avatar:first-child { margin-left: 0; }
+    .sbm-avatar.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .sbm-avatar.green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .sbm-avatar.purple { background: linear-gradient(135deg, #4A90FF, #0044CC); }
+    .sbm-avatar.orange { background: linear-gradient(135deg, #d48806, #b8860b); }
+    .sbm-avatar.pink { background: linear-gradient(135deg, #0B5FFF, #0044CC); }
+    .sbm-avatar.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+    .sbm-avatar.more { background: var(--bg-subtle); color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; border-color: var(--border-color); }
+
+    .sbm-toggle-label {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+    .sbm-toggle-label i { font-size: 0.65rem; transition: transform 0.2s; }
+    .sbm-recipients-toggle.expanded .sbm-toggle-label i { transform: rotate(180deg); }
+
+    .sbm-recipients-list {
+        display: none;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border-color);
+        animation: slideDown 0.2s ease;
+    }
+    .sbm-recipients-list.show { display: flex; }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sbm-recipient {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background: var(--bg-subtle);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        transition: all 0.2s;
+    }
+    .sbm-recipient:hover { background: #fff; border-color: #93c5fd; }
+
+    .sbm-recipient-avatar {
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: var(--bg-subtle);
+        border: 1px solid var(--border-color);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); flex-shrink: 0;
+    }
+    .sbm-recipient-info { flex: 1; min-width: 0; }
+    .sbm-recipient-name { font-weight: 600; font-size: 0.8125rem; color: var(--text-primary); }
+    .sbm-recipient-time { font-size: 0.7rem; color: var(--text-muted); }
+
+    .sbm-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.675rem;
+        font-weight: 600;
+    }
+    .sbm-status-badge.read { background: var(--success-light); color: var(--success-dark); }
+    .sbm-status-badge.unread { background: var(--warning-light); color: var(--warning-dark); }
+
+    /* Empty State */
+    .sbm-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    .sbm-empty-icon {
+        width: 80px; height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--primary-light);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .sbm-empty-icon i { font-size: 2rem; color: var(--primary); }
+    .sbm-empty h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.5rem; }
+    .sbm-empty p { color: var(--text-secondary); font-size: 0.9rem; max-width: 360px; margin: 0 auto 1.5rem; line-height: 1.6; }
+    .sbm-empty-actions { display: flex; gap: 0.75rem; justify-content: center; }
+    .sbm-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: var(--radius);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .sbm-empty-btn.primary { background: var(--primary); color: #fff; }
+    .sbm-empty-btn.primary:hover { background: var(--primary-dark); color: #fff; }
+    .sbm-empty-btn.secondary { background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border-color); }
+    .sbm-empty-btn.secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Alert Messages */
+    .sbm-alert {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .sbm-alert.success { background: var(--success-light); color: var(--success-dark); }
+    .sbm-alert.info { background: var(--info-light); color: #0369a1; }
+
+    /* Footer */
+    .sbm-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0 0;
+        margin-top: 1.25rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sbm-page-container { padding: 1rem; }
+        .card-header-section, .card-body-section { padding: 1.25rem; }
+        .card-header-section h1 { font-size: 1.25rem; }
+        .card-header-section p { padding-left: 0; }
+        .sbm-stats-row { flex-direction: column; padding: 1rem 1.25rem; }
+        .sbm-toolbar { flex-direction: column; align-items: stretch; }
+        .sbm-search { max-width: 100%; }
+        .sbm-note-header { flex-direction: column; }
+        .sbm-note-actions-top { align-self: flex-start; }
+        .sbm-nav-actions { flex-wrap: wrap; }
+    }
+</style>
+
+<!-- Page Navigation Toolbar (Breadcrumbs) -->
+{% if user.is_authenticated and page_nav_breadcrumbs %}
+<div class="pnav-bar" id="pnavBarSharedByMe">
+    <a href="{% url 'page_nav_action' %}?action=back" class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}" title="Go Back"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'page_nav_action' %}?action=forward" class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}" title="Go Forward"><i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home"><i class="fas fa-home"></i></a>
+    <span class="pnav-sep"></span>
+    <div class="pnav-crumbs">
+        {% for crumb in page_nav_breadcrumbs %}{% if crumb.active %}<span class="pnav-crumb pnav-active">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</span>{% else %}<a href="{{ crumb.url }}" class="pnav-crumb">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</a><span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>{% endif %}{% endfor %}
+    </div>
+</div>
+<style>
+    .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+    .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+    .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+    .pnav-disabled{opacity:.3;pointer-events:none}
+    .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+    .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+    .pnav-crumbs::-webkit-scrollbar{display:none}
+    .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+    .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+    .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+    .pnav-chevron{color:#94a3b8;font-size:.6rem;flex-shrink:0;user-select:none}
+</style>
+{% endif %}
+<!-- End Page Navigation Toolbar -->
+
+<div class="sbm-page-container">
+    <div class="sbm-content-wrapper">
+
+        <!-- Main Card -->
+        <div class="sbm-card">
+            <!-- Header Banner -->
+            <div class="header-banner">
+                <i class="fas fa-paper-plane"></i>
+                <span>Notes you've shared with your team</span>
+            </div>
+
+            <!-- Card Header -->
+            <div class="card-header-section">
+                <h1>
+                    <div class="icon-wrapper">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    Shared by Me
+                </h1>
+                <p>Track and manage notes you've shared with colleagues.</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="sbm-stats-row">
+                <div class="sbm-stat-item">
+                    <div class="sbm-stat-icon blue"><i class="fas fa-paper-plane"></i></div>
+                    <div>
+                        <div class="sbm-stat-value">{{ shared_notes|length }}</div>
+                        <div class="sbm-stat-label">Total Shares</div>
+                    </div>
+                </div>
+                <div class="sbm-stat-item">
+                    <div class="sbm-stat-icon green"><i class="fas fa-file-alt"></i></div>
+                    <div>
+                        <div class="sbm-stat-value">{{ notes_shared|length }}</div>
+                        <div class="sbm-stat-label">Notes Shared</div>
+                    </div>
+                </div>
+                <div class="sbm-stat-item">
+                    <div class="sbm-stat-icon amber"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="sbm-stat-value">{{ shared_notes|length }}</div>
+                        <div class="sbm-stat-label">Recipients</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body-section">
+                <!-- Toolbar -->
+                <div class="sbm-toolbar">
+                    <div class="sbm-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search shared notes..." oninput="filterNotes()">
+                    </div>
+                    <div class="sbm-nav-actions">
+                        <a href="{% url 'shared_notes' %}" class="sbm-nav-btn">
+                            <i class="fas fa-share"></i> Shared with Me
+                            {% if shared_with_me_count %}<span class="badge">{{ shared_with_me_count }}</span>{% endif %}
+                        </a>
+                        <a href="{% url 'notes_list' %}" class="sbm-nav-btn">
+                            <i class="fas fa-list"></i> All Notes
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                {% if messages %}
+                {% for message in messages %}
+                <div class="sbm-alert {% if message.tags == 'success' %}success{% else %}info{% endif %}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if notes_shared %}
+                <!-- Notes List -->
+                <div class="sbm-notes-list" id="notesGrid">
+                    {% for item in notes_shared %}
+                    <div class="sbm-note-card" data-title="{{ item.note.title|lower }}">
+                        <div class="sbm-note-header">
+                            <div class="sbm-note-icon">
+                                <i class="fas fa-sticky-note"></i>
                             </div>
-                            <div class="card-note-info">
-                                <h4 class="card-note-title">{{ item.note.title }}</h4>
-                                <p class="card-note-preview">{{ item.note.content|truncatewords:20 }}</p>
+                            <div class="sbm-note-details">
+                                <h4 class="sbm-note-title">{{ item.note.title }}</h4>
+                                <p class="sbm-note-preview">{{ item.note.content|truncatewords:25 }}</p>
+                                <div class="sbm-note-meta">
+                                    <span><i class="fas fa-calendar"></i> {{ item.note.created_at|date:"M d, Y" }}</span>
+                                    {% if item.note.attachments.count > 0 %}
+                                    <span><i class="fas fa-paperclip"></i> {{ item.note.attachments.count }} file{{ item.note.attachments.count|pluralize }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="sbm-note-actions-top">
+                                <a href="{% url 'note_detail' item.note.pk %}" class="sbm-btn-sm sbm-btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'share_note' item.note.pk %}" class="sbm-btn-sm sbm-btn-outline">
+                                    <i class="fas fa-share"></i> Share More
+                                </a>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="note-card-body">
-                        <div class="recipients-section">
-                            <!-- Collapsed Avatar Stack -->
-                            <div class="avatar-stack" onclick="toggleRecipients(this)">
-                                <div class="avatar-stack-items">
-                                    {% for recipient in item.recipients|slice:":3" %}
-                                    <div class="stack-avatar" title="{{ recipient.user.get_full_name|default:recipient.user.username }}">
+
+                        <div class="sbm-recipients">
+                            <!-- Toggle -->
+                            <div class="sbm-recipients-toggle" onclick="toggleRecipients(this)">
+                                <div class="sbm-avatars">
+                                    {% for recipient in item.recipients|slice:":4" %}
+                                    <div class="sbm-avatar {% cycle 'blue' 'green' 'purple' 'orange' 'pink' 'teal' %}">
                                         {{ recipient.user.username|first|upper }}
                                     </div>
                                     {% endfor %}
-                                    {% if item.recipients|length > 3 %}
-                                    <div class="stack-avatar more">+{{ item.recipients|length|add:"-3" }}</div>
+                                    {% if item.recipients|length > 4 %}
+                                    <div class="sbm-avatar more">+{{ item.recipients|length|add:"-4" }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="stack-label">
+                                <div class="sbm-toggle-label">
                                     <span>Shared with {{ item.recipients|length }} person{{ item.recipients|length|pluralize }}</span>
-                                    <i class="bi bi-chevron-down"></i>
+                                    <i class="fas fa-chevron-down"></i>
                                 </div>
-                                <span class="stack-hint">Click to view details</span>
                             </div>
-                            
-                            <!-- Expanded Recipients List -->
-                            <div class="recipients-list">
+
+                            <!-- Expanded List -->
+                            <div class="sbm-recipients-list">
                                 {% for recipient in item.recipients %}
-                                <div class="recipient-item">
-                                    <div class="recipient-avatar">
+                                <div class="sbm-recipient">
+                                    <div class="sbm-recipient-avatar">
                                         {{ recipient.user.username|first|upper }}
                                     </div>
-                                    <div class="recipient-info">
-                                        <div class="recipient-name">
-                                            <i class="bi bi-arrow-right me-1" style="color: var(--purple-400);"></i>
-                                            {{ recipient.user.get_full_name|default:recipient.user.username }}
-                                        </div>
-                                        <div class="recipient-time">
-                                            <i class="bi bi-clock me-1"></i>Shared {{ recipient.shared_at|timesince }} ago
-                                        </div>
+                                    <div class="sbm-recipient-info">
+                                        <div class="sbm-recipient-name">{{ recipient.user.get_full_name|default:recipient.user.username }}</div>
+                                        <div class="sbm-recipient-time"><i class="fas fa-clock"></i> Shared {{ recipient.shared_at|timesince }} ago</div>
                                     </div>
-                                    <div class="recipient-status">
-                                        {% if recipient.is_read %}
-                                        <span class="status-badge read" title="Recipient has viewed this note">
-                                            <i class="bi bi-check2-all"></i>
-                                            Seen
-                                        </span>
-                                        {% else %}
-                                        <span class="status-badge unread" title="Recipient has not viewed yet">
-                                            <i class="bi bi-clock-history"></i>
-                                            Pending
-                                        </span>
-                                        {% endif %}
-                                    </div>
+                                    {% if recipient.is_read %}
+                                    <span class="sbm-status-badge read"><i class="fas fa-check-double"></i> Seen</span>
+                                    {% else %}
+                                    <span class="sbm-status-badge unread"><i class="fas fa-clock"></i> Pending</span>
+                                    {% endif %}
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
-                        
-                        <div class="card-meta">
-                            <div class="meta-tags">
-                                <span class="meta-tag">
-                                    <i class="bi bi-calendar3"></i>
-                                    Created {{ item.note.created_at|date:"M d, Y" }}
-                                </span>
-                                {% if item.note.attachments.count > 0 %}
-                                <span class="meta-tag">
-                                    <i class="bi bi-paperclip"></i>
-                                    {{ item.note.attachments.count }} file{{ item.note.attachments.count|pluralize }}
-                                </span>
-                                {% endif %}
-                            </div>
-                        </div>
                     </div>
-                    
-                    <div class="note-card-actions">
-                        <a href="{% url 'note_detail' item.note.pk %}" class="card-btn card-btn-primary">
-                            <i class="bi bi-eye"></i>
-                            View Note
+                    {% endfor %}
+                </div>
+
+                <!-- Footer -->
+                <div class="sbm-footer">
+                    <span>Showing <strong>{{ notes_shared|length }}</strong> shared note{{ notes_shared|length|pluralize }} with <strong>{{ shared_notes|length }}</strong> total recipient{{ shared_notes|length|pluralize }}</span>
+                </div>
+
+                {% else %}
+                <!-- Empty State -->
+                <div class="sbm-empty">
+                    <div class="sbm-empty-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <h3>No Shared Notes Yet</h3>
+                    <p>You haven't shared any notes with colleagues yet. Start collaborating by sharing your notes.</p>
+                    <div class="sbm-empty-actions">
+                        <a href="{% url 'notes_list' %}" class="sbm-empty-btn primary">
+                            <i class="fas fa-list"></i> Browse Notes
                         </a>
-                        <a href="{% url 'share_note' item.note.pk %}" class="card-btn card-btn-outline">
-                            <i class="bi bi-share"></i>
-                            Share More
+                        <a href="{% url 'note_create' %}" class="sbm-empty-btn secondary">
+                            <i class="fas fa-plus"></i> Create Note
                         </a>
                     </div>
                 </div>
-                {% endfor %}
+                {% endif %}
             </div>
-            
-            <!-- Footer -->
-            <div class="content-footer">
-                <div class="footer-info">
-                    Showing <strong>{{ notes_shared|length }}</strong> shared note{{ notes_shared|length|pluralize }} with <strong>{{ shared_notes|length }}</strong> total recipient{{ shared_notes|length|pluralize }}
-                </div>
-            </div>
-            
-            {% else %}
-            <!-- Empty State -->
-            <div class="empty-state">
-                <div class="empty-illustration">
-                    <i class="bi bi-send"></i>
-                </div>
-                <h2 class="empty-title">No Shared Notes Yet</h2>
-                <p class="empty-description">
-                    You haven't shared any notes with colleagues yet. Start collaborating by sharing your notes with team members.
-                </p>
-                <div class="empty-actions">
-                    <a href="{% url 'notes_list' %}" class="btn btn-primary">
-                        <i class="bi bi-journal-text"></i>
-                        Browse Your Notes
-                    </a>
-                    <a href="{% url 'note_create' %}" class="btn btn-secondary">
-                        <i class="bi bi-plus-lg"></i>
-                        Create New Note
-                    </a>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Search/Filter Notes
-        function filterNotes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const noteCards = document.querySelectorAll('.note-card');
-            
-            noteCards.forEach(card => {
-                const title = card.dataset.title || '';
-                if (title.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-        
-        // Toggle Recipients List
-        function toggleRecipients(avatarStack) {
-            const recipientsList = avatarStack.nextElementSibling;
-            const chevron = avatarStack.querySelector('.bi-chevron-down, .bi-chevron-up');
-            
-            recipientsList.classList.toggle('show');
-            avatarStack.classList.toggle('expanded');
-            
-            // Toggle chevron icon
-            if (chevron) {
-                if (chevron.classList.contains('bi-chevron-down')) {
-                    chevron.classList.remove('bi-chevron-down');
-                    chevron.classList.add('bi-chevron-up');
-                } else {
-                    chevron.classList.remove('bi-chevron-up');
-                    chevron.classList.add('bi-chevron-down');
-                }
-            }
-        }
-    </script>
+<script>
+function filterNotes() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.sbm-note-card').forEach(card => {
+        card.style.display = (card.dataset.title || '').includes(term) ? '' : 'none';
+    });
+}
+
+function toggleRecipients(toggle) {
+    const list = toggle.nextElementSibling;
+    list.classList.toggle('show');
+    toggle.classList.toggle('expanded');
+}
+</script>
 </body>
 </html>

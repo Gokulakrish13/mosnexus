@@ -1,0 +1,204 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}New Purchase Order — {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF; --philips-blue-dark: #0047AB; --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --bg-primary: #F8FAFC; --bg-secondary: #EEF2F7; --surface: #FFFFFF;
+        --text-primary: #0F172A; --text-secondary: #475569; --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0; --success: #10B981; --danger: #EF4444;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    }
+    body { background:var(--bg-primary);min-height:100vh;font-family:'Plus Jakarta Sans','Inter',sans-serif;color:var(--text-primary); }
+
+    .po-page { padding:2rem;max-width:1060px;margin:0 auto; }
+    .po-header { display:flex;align-items:center;gap:1rem;margin-bottom:2rem; }
+    .po-header .icon-wrap { width:48px;height:48px;background:var(--gradient-primary);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,95,255,0.25); }
+    .po-header .icon-wrap i { color:#fff;font-size:1.15rem; }
+    .po-header h1 { font-size:1.5rem;font-weight:800;letter-spacing:-0.025em; }
+    .po-header p { font-size:0.85rem;color:var(--text-secondary);font-weight:500;margin-top:0.1rem; }
+
+    .form-card { background:var(--surface);border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-md);border:1px solid var(--border-color); }
+    .form-section { margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border-color); }
+    .form-section:last-of-type { border-bottom:none;margin-bottom:0;padding-bottom:0; }
+    .form-section-title { font-size:0.8rem;font-weight:700;color:var(--philips-blue);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem; }
+    .form-section-title i { font-size:0.85rem; }
+    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.15rem; }
+    .form-group { display:flex;flex-direction:column;gap:0.35rem; }
+    .form-group.full { grid-column:1/-1; }
+    .form-group label { font-weight:600;font-size:0.8rem;color:var(--text-secondary); }
+    .form-group label .req { color:var(--philips-blue);font-weight:700; }
+    .form-group input,.form-group select,.form-group textarea { padding:0.6rem 0.9rem;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);font-size:0.88rem;background:var(--bg-primary);color:var(--text-primary);transition:border-color 0.2s;font-family:inherit; }
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus { border-color:var(--philips-blue);outline:none;box-shadow:0 0 0 3px rgba(11,95,255,0.1); }
+    .form-group textarea { min-height:70px;resize:vertical; }
+
+    /* Line Items */
+    .items-table { width:100%;border-collapse:collapse;margin-top:0.5rem; }
+    .items-table th { background:var(--bg-secondary);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);padding:0.65rem 0.6rem;text-align:left;border-bottom:2px solid var(--border-color); }
+    .items-table td { padding:0.5rem 0.4rem;border-bottom:1px solid var(--border-color);vertical-align:top; }
+    .items-table input { width:100%;padding:0.45rem 0.55rem;border:1.5px solid var(--border-color);border-radius:6px;font-size:0.82rem;background:var(--bg-primary);color:var(--text-primary);font-family:inherit; }
+    .items-table input:focus { border-color:var(--philips-blue);outline:none; }
+    .item-row .remove-btn { background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.85rem;padding:6px;border-radius:4px;transition:background 0.15s; }
+    .item-row .remove-btn:hover { background:#FEF2F2; }
+
+    .add-item-btn { display:inline-flex;align-items:center;gap:0.4rem;background:var(--bg-secondary);border:1.5px dashed var(--border-color);border-radius:var(--radius-sm);color:var(--text-tertiary);cursor:pointer;font-size:0.82rem;font-weight:600;padding:0.5rem 1rem;margin-top:0.75rem;transition:all 0.2s;font-family:inherit; }
+    .add-item-btn:hover { border-color:var(--philips-blue);color:var(--philips-blue);background:rgba(11,95,255,0.04); }
+
+    .form-actions { display:flex;gap:0.75rem;margin-top:2rem;justify-content:flex-end;padding-top:1.75rem;border-top:1px solid var(--border-color); }
+    .btn-ph { padding:0.65rem 1.5rem;border-radius:var(--radius-sm);font-weight:600;font-size:0.875rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:0.5rem;transition:all 0.25s;text-decoration:none;font-family:inherit; }
+    .btn-primary { background:var(--gradient-primary);color:#fff;box-shadow:0 2px 8px rgba(11,95,255,0.25); }
+    .btn-primary:hover { transform:translateY(-1px);box-shadow:0 4px 14px rgba(11,95,255,0.35); }
+    .btn-cancel { background:var(--surface);border:1.5px solid var(--border-color);color:var(--text-secondary); }
+    .btn-cancel:hover { border-color:var(--philips-blue);color:var(--philips-blue); }
+
+    @media(max-width:768px){ .po-page{padding:1.25rem;} .form-grid{grid-template-columns:1fr;} }
+</style>
+
+<div class="po-page">
+    <div class="po-header">
+        <div class="icon-wrap"><i class="fas fa-shopping-cart"></i></div>
+        <div>
+            <h1>New Purchase Order</h1>
+            <p>{{ vendor.name }} &middot; {{ stream }}</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form method="post" id="poForm">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-info-circle"></i> Order Details</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Title / Description <span class="req">*</span></label>
+                        <input type="text" name="title" required placeholder="e.g. Q1 2026 Lab Equipment Order">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select name="priority">
+                            <option value="low">Low</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Order Date <span class="req">*</span></label>
+                        <input type="date" name="order_date" required value="{{ today }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Expected Delivery Date</label>
+                        <input type="date" name="expected_delivery_date">
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <input type="text" name="currency" value="{{ vendor.currency|default:'EUR' }}" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Shipping Address</label>
+                        <input type="text" name="shipping_address" placeholder="Delivery address">
+                    </div>
+                    <div class="form-group full">
+                        <label>Notes</label>
+                        <textarea name="notes" rows="2" placeholder="Additional instructions or notes for this order"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-list"></i> Line Items</div>
+                <table class="items-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th style="width:22%;">Item Name *</th>
+                            <th style="width:14%;">Part #</th>
+                            <th style="width:18%;">Description</th>
+                            <th style="width:7%;">Qty</th>
+                            <th style="width:7%;">Unit</th>
+                            <th style="width:12%;">Unit Price</th>
+                            <th style="width:12%;">Line Total</th>
+                            <th style="width:4%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <tr class="item-row">
+                            <td><input type="text" name="item_name" required placeholder="Item name"></td>
+                            <td><input type="text" name="item_part" placeholder="Part #"></td>
+                            <td><input type="text" name="item_desc" placeholder="Description"></td>
+                            <td><input type="number" name="item_qty" value="1" min="1" onchange="calcLineTotal(this)"></td>
+                            <td><input type="text" name="item_unit" value="pcs" style="width:60px;"></td>
+                            <td><input type="number" name="item_price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"></td>
+                            <td class="line-total" style="font-weight:700;font-size:0.85rem;padding-top:0.75rem;">0.00</td>
+                            <td><button type="button" class="remove-btn" onclick="removeItem(this)" title="Remove"><i class="fas fa-times"></i></button></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" style="text-align:right;font-weight:700;font-size:0.85rem;padding:0.75rem 0.6rem;border-bottom:none;">Grand Total:</td>
+                            <td colspan="2" style="font-weight:800;font-size:1rem;color:var(--philips-blue);padding:0.75rem 0.4rem;border-bottom:none;" id="grandTotal">0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="button" class="add-item-btn" onclick="addItem()"><i class="fas fa-plus"></i> Add Item</button>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'vendor_detail' stream=stream pk=vendor.pk %}" class="btn-ph btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                <button type="submit" class="btn-ph btn-primary"><i class="fas fa-save"></i> Create Purchase Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let itemCounter = 1;
+
+function addItem() {
+    itemCounter++;
+    const row = document.createElement('tr');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <td><input type="text" name="item_name" required placeholder="Item name"></td>
+        <td><input type="text" name="item_part" placeholder="Part #"></td>
+        <td><input type="text" name="item_desc" placeholder="Description"></td>
+        <td><input type="number" name="item_qty" value="1" min="1" onchange="calcLineTotal(this)"></td>
+        <td><input type="text" name="item_unit" value="pcs" style="width:60px;"></td>
+        <td><input type="number" name="item_price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"></td>
+        <td class="line-total" style="font-weight:700;font-size:0.85rem;padding-top:0.75rem;">0.00</td>
+        <td><button type="button" class="remove-btn" onclick="removeItem(this)" title="Remove"><i class="fas fa-times"></i></button></td>
+    `;
+    document.getElementById('itemsBody').appendChild(row);
+}
+
+function removeItem(btn) {
+    const rows = document.querySelectorAll('.item-row');
+    if (rows.length <= 1) return alert('At least one item is required.');
+    btn.closest('.item-row').remove();
+    calcGrandTotal();
+}
+
+function calcLineTotal(input) {
+    const row = input.closest('.item-row');
+    const qty = parseFloat(row.querySelector('[name="item_qty"]').value) || 0;
+    const price = parseFloat(row.querySelector('[name="item_price"]').value) || 0;
+    row.querySelector('.line-total').textContent = (qty * price).toFixed(2);
+    calcGrandTotal();
+}
+
+function calcGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('.line-total').forEach(el => {
+        total += parseFloat(el.textContent) || 0;
+    });
+    document.getElementById('grandTotal').textContent = total.toFixed(2);
+}
+</script>
+{% endblock %}

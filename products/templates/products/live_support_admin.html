@@ -1,0 +1,347 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Live Support — Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Shell ── */
+    .lsa-page { max-width: 1600px; margin: 0 auto; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* ── Hero Header ── */
+    .lsa-hero {
+        background: linear-gradient(135deg, #003366 0%, #0066cc 50%, #00a8cc 100%);
+        border-radius: 18px; padding: 1.5rem 2rem; color: #fff;
+        display: flex; align-items: center; justify-content: space-between;
+        position: relative; overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,51,102,0.22);
+    }
+    .lsa-hero::before { content:''; position:absolute; top:-60%; right:-10%; width:320px; height:320px; background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%); border-radius:50%; }
+    .lsa-hero-left h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 0.3rem; display: flex; align-items: center; gap: 0.55rem; position: relative; z-index: 1; }
+    .lsa-hero-left p { margin: 0; font-size: 0.84rem; opacity: 0.8; position: relative; z-index: 1; }
+    .lsa-hero-right { display: flex; gap: 0.5rem; position: relative; z-index: 1; }
+    .lsa-stat-pill { background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 0.55rem 1rem; text-align: center; min-width: 72px; }
+    .lsa-stat-pill .val { font-size: 1.35rem; font-weight: 800; line-height: 1; }
+    .lsa-stat-pill .lbl { font-size: 0.65rem; font-weight: 600; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    /* ── Split Panel Container ── */
+    .lsa-split { display: flex; gap: 1.25rem; flex: 1; min-height: calc(100vh - 200px); }
+
+    /* ── Left: Session Queue ── */
+    .lsa-queue { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; }
+    .lsa-queue-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; flex: 1; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .lsa-queue-header { padding: 0.85rem 1.15rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+    .lsa-queue-header h2 { font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.45rem; margin: 0; color: #1e293b; }
+    .lsa-queue-header h2 i { color: #0066cc; font-size: 0.85rem; }
+    .lsa-q-count { background: #e0f2fe; color: #0369a1; font-size: 0.65rem; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 20px; }
+    .lsa-refresh { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s; }
+    .lsa-refresh:hover { background: #e0f2fe; color: #0066cc; border-color: #0066cc; }
+    .lsa-refresh.spinning i { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .lsa-sessions { flex: 1; overflow-y: auto; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .lsa-sess { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.9rem; cursor: pointer; transition: all 0.2s; position: relative; }
+    .lsa-sess:hover { border-color: #cbd5e1; background: #fafbfc; }
+    .lsa-sess.active { border-color: #0066cc; background: rgba(0,102,204,0.02); box-shadow: 0 0 0 2.5px rgba(0,102,204,0.1); }
+    .lsa-sess-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem; }
+    .lsa-sess-user { font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; color: #1e293b; }
+    .lsa-sess-user .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
+    .lsa-status { padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .lsa-status.waiting { background: #fef3c7; color: #92400e; }
+    .lsa-status.active { background: #d1fae5; color: #065f46; }
+    .lsa-sess-subject { font-size: 0.78rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.1rem; }
+    .lsa-sess-time { font-size: 0.7rem; color: #94a3b8; }
+    .lsa-sess .waiting-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%,100%{ box-shadow: 0 0 0 0 rgba(245,158,11,0.4); } 50%{ box-shadow: 0 0 0 6px rgba(245,158,11,0); } }
+
+    .lsa-empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .lsa-empty i { font-size: 2rem; color: #cbd5e1; display: block; margin-bottom: 0.65rem; }
+    .lsa-empty p { font-size: 0.84rem; margin: 0; }
+
+    /* ── Right: Chat Panel ── */
+    .lsa-chat { flex: 1; display: flex; flex-direction: column; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; min-width: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .lsa-chat-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; padding: 2rem; }
+    .lsa-chat-placeholder i { font-size: 2.5rem; color: #cbd5e1; margin-bottom: 0.75rem; }
+    .lsa-chat-placeholder p { font-size: 0.9rem; margin: 0; }
+    .lsa-chat-placeholder .sub { font-size: 0.78rem; color: #cbd5e1; margin-top: 0.25rem; }
+
+    .lsa-chat-header {
+        padding: 0.85rem 1.25rem; background: linear-gradient(135deg,#003366,#004d99); color: #fff;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .lsa-chat-header .info { display: flex; align-items: center; gap: 0.65rem; }
+    .lsa-chat-header .info .av { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+    .lsa-chat-header .info .user-name { font-weight: 700; font-size: 0.92rem; }
+    .lsa-chat-header .info .subject { font-size: 0.72rem; opacity: 0.7; }
+    .lsa-chat-header .actions { display: flex; gap: 0.4rem; }
+    .lsa-chat-header .actions button { padding: 0.35rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .lsa-chat-header .actions button:hover { background: rgba(255,255,255,0.22); }
+    .lsa-chat-header .actions .close-btn { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.15); }
+    .lsa-chat-header .actions .close-btn:hover { background: rgba(239,68,68,0.35); }
+
+    .lsa-chat-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; min-height: 200px; }
+    .lsa-msg { display: flex; max-width: 78%; }
+    .lsa-msg.user-msg { align-self: flex-start; }
+    .lsa-msg.admin-msg { align-self: flex-end; }
+    .lsa-msg .bubble { padding: 0.6rem 0.9rem; border-radius: 16px; font-size: 0.84rem; line-height: 1.55; position: relative; }
+    .lsa-msg.user-msg .bubble { background: #fff; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; color: #334155; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .lsa-msg.admin-msg .bubble { background: linear-gradient(135deg,#0066cc,#0077e6); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 2px 8px rgba(0,102,204,0.2); }
+    .lsa-msg .bubble .sender { font-size: 0.66rem; font-weight: 700; margin-bottom: 2px; opacity: 0.65; }
+    .lsa-msg .bubble .time { font-size: 0.62rem; opacity: 0.55; margin-top: 3px; display: block; text-align: right; }
+    .lsa-msg.system-msg { align-self: center; max-width: 90%; }
+    .lsa-msg.system-msg .bubble { background: #f1f5f9; color: #94a3b8; font-size: 0.74rem; border-radius: 20px; padding: 0.3rem 0.9rem; border: none; text-align: center; }
+
+    .lsa-chat-footer { padding: 0.75rem 1rem; border-top: 1px solid #e2e8f0; display: flex; gap: 0.45rem; background: #fff; }
+    .lsa-chat-footer input { flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.86rem; font-family: inherit; transition: border 0.2s, box-shadow 0.2s; }
+    .lsa-chat-footer input:focus { border-color: #0066cc; outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.08); }
+    .lsa-chat-footer button { width: 44px; height: 44px; border-radius: 12px; border: none; background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 12px rgba(0,102,204,0.28); transition: all 0.15s; flex-shrink: 0; }
+    .lsa-chat-footer button:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,102,204,0.38); }
+
+    @media (max-width: 768px) {
+        .lsa-split { flex-direction: column; }
+        .lsa-queue { width: 100%; max-height: 220px; }
+        .lsa-hero { flex-direction: column; gap: 1rem; align-items: flex-start; padding: 1.25rem 1.5rem; }
+    }
+</style>
+
+<div class="lsa-page">
+    <!-- Hero Header -->
+    <div class="lsa-hero">
+        <div class="lsa-hero-left">
+            <h1><i class="fas fa-headset"></i> Live Support Admin</h1>
+            <p>Manage and respond to real-time support sessions</p>
+        </div>
+        <div class="lsa-hero-right">
+            <div class="lsa-stat-pill"><div class="val" id="waitingCount">0</div><div class="lbl">Waiting</div></div>
+            <div class="lsa-stat-pill"><div class="val" id="activeCount">0</div><div class="lbl">Active</div></div>
+        </div>
+    </div>
+
+    <!-- Split Panel -->
+    <div class="lsa-split">
+        <!-- Session Queue -->
+        <div class="lsa-queue">
+            <div class="lsa-queue-card">
+                <div class="lsa-queue-header">
+                    <h2><i class="fas fa-users"></i> Sessions <span class="lsa-q-count" id="queueCount">0</span></h2>
+                    <button class="lsa-refresh" id="refreshBtn" onclick="loadQueue()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <div class="lsa-sessions" id="sessionsList">
+                    <div class="lsa-empty" id="emptyQueue">
+                        <i class="fas fa-inbox"></i>
+                        <p>No active sessions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="lsa-chat" id="chatPanel">
+            <div class="lsa-chat-placeholder" id="chatPlaceholder">
+                <i class="fas fa-comments"></i>
+                <p>Select a session to start chatting</p>
+                <span class="sub">Sessions will appear in the queue when users request support</span>
+            </div>
+            <div id="chatActive" style="display:none;flex:1;flex-direction:column;">
+                <div class="lsa-chat-header" id="chatHeader">
+                    <div class="info">
+                        <div class="av" id="chatAvatar"></div>
+                        <div>
+                            <div class="user-name" id="chatUserName"></div>
+                            <div class="subject" id="chatSubject"></div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button onclick="closeSession()" class="close-btn"><i class="fas fa-times"></i> Close</button>
+                    </div>
+                </div>
+                <div class="lsa-chat-body" id="chatMessages"></div>
+                <div class="lsa-chat-footer">
+                    <input type="text" id="chatInput" placeholder="Type your reply..."
+                        onkeydown="if(event.key==='Enter')sendAdminMsg()" />
+                    <button onclick="sendAdminMsg()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const _buPrefix = (function(){ const m=window.location.pathname.match(/^\/bu\/[^/]+\//); return m?m[0]:'/'; })();
+function getCsrf(){
+    const el=document.querySelector('[name=csrfmiddlewaretoken]')||document.querySelector('meta[name=csrf-token]');
+    if(el) return el.content||el.value||'';
+    const m=document.cookie.match(/csrftoken=([^;]+)/); return m?m[1]:'';
+}
+const ADMIN_USER = '{{ request.user.username }}';
+
+let _activeSessionId = null;
+let _lastMsgId = 0;
+let _msgPoller = null;
+let _queuePoller = null;
+
+// ── Queue ──
+function loadQueue() {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
+    fetch(`${_buPrefix}live-support/admin-queue/`)
+    .then(r => r.json())
+    .then(data => {
+        btn.classList.remove('spinning');
+        const list = document.getElementById('sessionsList');
+        const empty = document.getElementById('emptyQueue');
+        const sessions = data.sessions || [];
+
+        // Update hero counters
+        let wc = 0, ac = 0;
+        sessions.forEach(s => { if(s.status === 'waiting') wc++; else if(s.status === 'active') ac++; });
+        document.getElementById('waitingCount').textContent = wc;
+        document.getElementById('activeCount').textContent = ac;
+        document.getElementById('queueCount').textContent = sessions.length;
+
+        if (sessions.length === 0) {
+            list.innerHTML = '';
+            list.appendChild(empty);
+            empty.style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        const frag = document.createDocumentFragment();
+        sessions.forEach(s => {
+            const div = document.createElement('div');
+            div.className = `lsa-sess${s.id === _activeSessionId ? ' active' : ''}`;
+            div.onclick = () => openSession(s.id, s.user, s.subject, s.status);
+            const waitDot = s.status === 'waiting' ? '<span class="waiting-dot"></span>' : '';
+            div.innerHTML = `${waitDot}
+                <div class="lsa-sess-top">
+                    <span class="lsa-sess-user">
+                        <span class="avatar">${escapeHtml(s.user.charAt(0).toUpperCase())}</span>
+                        ${escapeHtml(s.user)}
+                    </span>
+                    <span class="lsa-status ${s.status}">${s.status}</span>
+                </div>
+                <div class="lsa-sess-subject">${escapeHtml(s.subject)}</div>
+                <div class="lsa-sess-time">${escapeHtml(s.created_at)}</div>`;
+            frag.appendChild(div);
+        });
+        list.innerHTML = '';
+        list.appendChild(frag);
+    })
+    .catch(() => { btn.classList.remove('spinning'); });
+}
+
+// ── Open Session ──
+function openSession(sessionId, user, subject, status) {
+    _activeSessionId = sessionId;
+    _lastMsgId = 0;
+
+    document.querySelectorAll('.lsa-sess').forEach(el => el.classList.remove('active'));
+    if(event && event.currentTarget) event.currentTarget.classList.add('active');
+
+    document.getElementById('chatPlaceholder').style.display = 'none';
+    const chatActive = document.getElementById('chatActive');
+    chatActive.style.display = 'flex';
+
+    document.getElementById('chatUserName').textContent = user;
+    document.getElementById('chatSubject').textContent = subject;
+    document.getElementById('chatAvatar').textContent = user.charAt(0).toUpperCase();
+    document.getElementById('chatMessages').innerHTML = '';
+    document.getElementById('chatInput').focus();
+
+    if (status === 'waiting') {
+        addSystemMsg('This user is waiting for support. Send a message to connect.');
+    }
+
+    if (_msgPoller) clearInterval(_msgPoller);
+    pollMessages();
+    _msgPoller = setInterval(pollMessages, 3000);
+}
+
+// ── Messages ──
+function pollMessages() {
+    if (!_activeSessionId) return;
+    fetch(`${_buPrefix}live-support/${_activeSessionId}/messages/?after=${_lastMsgId}`)
+    .then(r => r.json())
+    .then(data => {
+        if (data.messages) {
+            data.messages.forEach(m => {
+                appendMsg(m);
+                _lastMsgId = Math.max(_lastMsgId, m.id);
+            });
+        }
+        if (data.status === 'closed') {
+            addSystemMsg('Session closed.');
+            clearInterval(_msgPoller);
+        }
+    })
+    .catch(() => {});
+}
+
+function appendMsg(m) {
+    if (document.querySelector(`[data-mid="${m.id}"]`)) return;
+    const container = document.getElementById('chatMessages');
+    const isAdmin = (m.user === ADMIN_USER);
+    const div = document.createElement('div');
+    div.className = `lsa-msg ${isAdmin ? 'admin-msg' : 'user-msg'}`;
+    div.setAttribute('data-mid', m.id);
+    div.innerHTML = `<div class="bubble">
+        <div class="sender">${escapeHtml(m.user)}</div>
+        ${escapeHtml(m.message)}
+        <span class="time">${escapeHtml(m.created_at)}</span>
+    </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function addSystemMsg(text) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'lsa-msg system-msg';
+    div.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendAdminMsg() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !_activeSessionId) return;
+    input.value = '';
+
+    fetch(`${_buPrefix}live-support/${_activeSessionId}/messages/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+        body: JSON.stringify({ message: text }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.id) {
+            appendMsg(data);
+            _lastMsgId = Math.max(_lastMsgId, data.id);
+            loadQueue();
+        }
+    });
+}
+
+function closeSession() {
+    if (!_activeSessionId || !confirm('Close this support session?')) return;
+    fetch(`${_buPrefix}live-support/${_activeSessionId}/close/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrf() },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.closed) {
+            addSystemMsg('Session closed.');
+            clearInterval(_msgPoller);
+            _activeSessionId = null;
+            loadQueue();
+        }
+    });
+}
+
+// ── Init ──
+loadQueue();
+_queuePoller = setInterval(loadQueue, 8000);
+</script>
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Lifecycle Record - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0044CC;
+        --primary-dark: #003399;
+        --primary-light: #e8f0fe;
+        --accent: #0B5FFF;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --border-focus: #0044CC;
+        --bg-light: #f8fafc;
+        --bg-card: #ffffff;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+        --success: #10b981;
+        --danger: #ef4444;
+    }
+
+    .form-page { max-width: 1500px; margin: 0 auto; padding: 2rem 2rem 3rem; }
+
+    /* Page Header */
+    .form-page-header {
+        background: linear-gradient(135deg, #0044CC 0%, #003399 50%, #002266 100%);
+        color: white; padding: 2.5rem 2.5rem; border-radius: 20px;
+        margin-bottom: 2rem; display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 1.5rem;
+        position: relative; overflow: hidden;
+        box-shadow: 0 10px 40px rgba(118, 75, 162, 0.3);
+    }
+    .form-page-header::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .header-info { position: relative; z-index: 1; }
+    .form-page-header h1 {
+        font-size: 1.85rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+    .form-page-header h1 i {
+        background: rgba(255,255,255,0.2); padding: 0.65rem;
+        border-radius: 14px; font-size: 1.2rem;
+    }
+    .form-page-header .subtitle { opacity: 0.9; margin-top: 0.5rem; font-size: 0.95rem; }
+    .header-nav { display: flex; gap: 0.75rem; position: relative; z-index: 1; flex-wrap: wrap; }
+    .header-nav .nav-btn {
+        padding: 0.6rem 1.15rem; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
+        border: 2px solid rgba(255,255,255,0.3); color: white;
+        background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;
+        text-decoration: none; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .header-nav .nav-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+
+    /* Product Info Banner */
+    .product-banner {
+        display: flex; align-items: center; gap: 1.25rem; padding: 1.25rem 1.5rem;
+        background: white; border-radius: 14px; margin-bottom: 1.75rem;
+        border: 1px solid var(--border-color); box-shadow: var(--card-shadow);
+    }
+    .product-banner-icon {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: var(--primary-light); color: var(--primary);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; flex-shrink: 0;
+    }
+    .product-banner-info h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+    .product-banner-info p { margin: 0.15rem 0 0; font-size: 0.85rem; color: var(--text-secondary); }
+    .product-banner-badges { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .p-badge {
+        padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600;
+    }
+
+    /* Two-Column Layout */
+    .form-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; }
+
+    /* Form Sections */
+    .form-section {
+        background: var(--bg-card); border-radius: 16px;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        transition: box-shadow 0.3s;
+    }
+    .form-section:hover { box-shadow: var(--card-shadow-hover); }
+    .form-section.span-full { grid-column: 1 / -1; }
+
+    .section-header {
+        padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
+        display: flex; align-items: center; gap: 0.6rem;
+        background: var(--bg-light); border-radius: 16px 16px 0 0;
+    }
+    .section-icon {
+        width: 34px; height: 34px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; flex-shrink: 0;
+    }
+    .section-header h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .section-header .section-desc { font-size: 0.78rem; color: var(--text-muted); margin: 0; }
+
+    .section-body { padding: 1.5rem; }
+
+    /* Form Inputs */
+    .field-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;
+    }
+    .field-grid-3 {
+        display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.15rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field.span-full { grid-column: 1 / -1; }
+
+    .field label {
+        font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.04em;
+        display: flex; align-items: center; gap: 0.3rem;
+    }
+    .field label .req { color: var(--danger); font-size: 0.7rem; }
+
+    .field input, .field select, .field textarea {
+        padding: 0.6rem 0.9rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.88rem; background: var(--bg-light);
+        transition: all 0.2s; font-family: inherit; color: var(--text-primary);
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+        border-color: var(--border-focus); outline: none;
+        box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        background: white;
+    }
+    .field input::placeholder, .field textarea::placeholder {
+        color: var(--text-muted); font-style: italic;
+    }
+    .field textarea { min-height: 90px; resize: vertical; }
+
+    .field .input-prefix {
+        position: relative;
+    }
+    .field .input-prefix span {
+        position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+        color: var(--text-muted); font-weight: 600; font-size: 0.88rem;
+    }
+    .field .input-prefix input {
+        padding-left: 1.75rem;
+    }
+
+    .field-hint {
+        font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem;
+    }
+
+    /* Form Actions */
+    .form-actions-bar {
+        display: flex; gap: 0.75rem; justify-content: flex-end;
+        margin-top: 2rem; padding-top: 1.5rem;
+        border-top: 2px solid var(--border-color);
+    }
+    .action-btn {
+        padding: 0.75rem 2rem; border-radius: 12px; font-weight: 700;
+        font-size: 0.92rem; border: none; cursor: pointer; transition: all 0.3s;
+        display: flex; align-items: center; gap: 0.5rem; text-decoration: none;
+    }
+    .action-btn-primary { background: var(--primary); color: white; }
+    .action-btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3); }
+    .action-btn-cancel {
+        background: white; color: var(--text-secondary);
+        border: 1.5px solid var(--border-color);
+    }
+    .action-btn-cancel:hover { background: var(--bg-light); border-color: #cbd5e1; }
+
+    /* Messages */
+    .alert-msg {
+        padding: 1rem 1.25rem; border-radius: 12px;
+        margin-bottom: 1rem; font-weight: 500;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .alert-msg-error { background: #fde2e2; color: #c53030; border: 1px solid #fca5a5; }
+    .alert-msg-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .alert-msg-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    @media (max-width: 1024px) {
+        .form-layout { grid-template-columns: 1fr; }
+        .form-section.span-full { grid-column: 1; }
+        .field-grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+        .form-page { padding: 1rem; }
+        .field-grid, .field-grid-3 { grid-template-columns: 1fr; }
+        .product-banner { flex-direction: column; text-align: center; }
+        .product-banner-badges { margin-left: 0; justify-content: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <!-- Messages -->
+    {% for message in messages %}
+    <div class="alert-msg alert-msg-{{ message.tags }}">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}exclamation-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    <!-- Page Header -->
+    <div class="form-page-header">
+        <div class="header-info">
+            <h1>
+                <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %}"></i>
+                {% if is_edit %}Edit Lifecycle Record{% else %}Enroll in Lifecycle Tracking{% endif %}
+            </h1>
+            <p class="subtitle">
+                {% if is_edit %}Update procurement, warranty, depreciation & insurance details{% else %}Set up lifecycle tracking for {{ product.name }}{% endif %}
+            </p>
+        </div>
+        <div class="header-nav">
+            {% if is_edit %}
+            <a href="{% url 'asset_lifecycle_detail' stream=stream pk=record.pk %}" class="nav-btn">
+                <i class="fas fa-eye"></i> View Detail
+            </a>
+            {% endif %}
+            <a href="{% if is_edit %}{% url 'asset_lifecycle_detail' stream=stream pk=record.pk %}{% else %}{% url 'asset_lifecycle_list' stream=stream %}{% endif %}" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Product Info Banner -->
+    <div class="product-banner">
+        <div class="product-banner-icon">
+            <i class="fas fa-box"></i>
+        </div>
+        <div class="product-banner-info">
+            <h3>{% if is_edit %}{{ record.product.name }}{% else %}{{ product.name }}{% endif %}</h3>
+            <p>
+                {% if is_edit %}
+                    {% if record.product.serial_number %}SN: {{ record.product.serial_number }} &middot; {% endif %}
+                    {{ record.product.category.name|default:"Uncategorized" }} &middot; {{ stream }}
+                {% else %}
+                    {% if product.serial_number %}SN: {{ product.serial_number }} &middot; {% endif %}
+                    {{ product.category.name|default:"Uncategorized" }} &middot; {{ stream }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="product-banner-badges">
+            {% if is_edit and record.current_stage %}
+            <span class="p-badge" style="background: {{ record.current_stage.color }}15; color: {{ record.current_stage.color }}; border: 1px solid {{ record.current_stage.color }}30;">
+                <i class="{{ record.current_stage.icon_class }}"></i> {{ record.current_stage.name }}
+            </span>
+            {% endif %}
+            {% if is_edit %}
+            <span class="p-badge" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">
+                {{ record.get_condition_display }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <div class="form-layout">
+            <!-- LEFT COLUMN -->
+
+            <!-- Stage & Condition -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e8f0fe; color: #0044CC;">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div>
+                        <h3>{% if is_edit %}Condition{% else %}Stage & Condition{% endif %}</h3>
+                        <p class="section-desc">{% if is_edit %}Update asset condition{% else %}Set initial lifecycle stage{% endif %}</p>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="field-grid">
+                        {% if not is_edit %}
+                        <div class="field">
+                            <label>Lifecycle Stage <span class="req">*</span></label>
+                            <select name="current_stage" required>
+                                <option value="">Select Stage</option>
+                                {% for stage in stages %}
+                                <option value="{{ stage.id }}">{{ stage.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <div class="field{% if is_edit %} span-full{% endif %}">
+                            <label>Condition</label>
+                            <select name="condition">
+                                {% for val, label in condition_choices %}
+                                <option value="{{ val }}" {% if is_edit and record.condition == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Procurement Details -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <h3>Procurement Details</h3>
+                        <p class="section-desc">Purchase and vendor information</p>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="field-grid">
+                        <div class="field">
+                            <label>Purchase Date</label>
+                            <input type="date" name="purchase_date" value="{% if is_edit %}{{ record.purchase_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        <div class="field">
+                            <label>Purchase Cost</label>
+                            <div class="input-prefix">
+                                <span>$</span>
+                                <input type="number" step="0.01" name="purchase_cost" value="{% if is_edit %}{{ record.purchase_cost }}{% endif %}" placeholder="0.00" style="padding-left: 1.75rem;">
+                            </div>
+                        </div>
+                        <div class="field span-full">
+                            <label>Vendor / Supplier</label>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <select name="vendor_link" style="flex:1;" id="vendorSelect">
+                                    <option value="">— No vendor linked —</option>
+                                    {% for v in vendors %}
+                                    <option value="{{ v.pk }}" {% if is_edit and record.vendor_link_id == v.pk %}selected{% endif %}>{{ v.name }} ({{ v.code }})</option>
+                                    {% endfor %}
+                                </select>
+                                {% if is_edit and record.vendor_link %}
+                                <a href="{% url 'vendor_detail' stream=stream pk=record.vendor_link.pk %}" title="View vendor details" style="padding:0.45rem 0.75rem;background:#0044CC;color:white;border-radius:8px;font-size:0.82rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem;white-space:nowrap;">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                                {% endif %}
+                            </div>
+                            <span class="field-hint">Select from your registered vendors, or type a name below if vendor is not yet registered</span>
+                        </div>
+                        <div class="field span-full">
+                            <label>Vendor Name (Manual)</label>
+                            <input type="text" name="vendor" value="{% if is_edit %}{{ record.vendor }}{% endif %}" placeholder="e.g., Dell Technologies, HP Inc. — used if no vendor selected above">
+                        </div>
+                        <div class="field">
+                            <label>Purchase Order #</label>
+                            <input type="text" name="purchase_order_number" value="{% if is_edit %}{{ record.purchase_order_number }}{% endif %}" placeholder="PO-XXXX-XXXX">
+                        </div>
+                        <div class="field">
+                            <label>Invoice #</label>
+                            <input type="text" name="invoice_number" value="{% if is_edit %}{{ record.invoice_number }}{% endif %}" placeholder="INV-XXXX-XXXX">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warranty Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #dcfce7; color: #16a34a;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h3>Warranty Information</h3>
+                        <p class="section-desc">Coverage and provider details</p>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="field-grid">
+                        <div class="field">
+                            <label>Warranty Start</label>
+                            <input type="date" name="warranty_start_date" value="{% if is_edit %}{{ record.warranty_start_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        <div class="field">
+                            <label>Warranty End</label>
+                            <input type="date" name="warranty_end_date" value="{% if is_edit %}{{ record.warranty_end_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        <div class="field span-full">
+                            <label>Warranty Provider</label>
+                            <input type="text" name="warranty_provider" value="{% if is_edit %}{{ record.warranty_provider }}{% endif %}" placeholder="e.g., Manufacturer, Extended Warranty Co.">
+                        </div>
+                        <div class="field span-full">
+                            <label>Warranty Terms</label>
+                            <textarea name="warranty_terms" placeholder="Coverage details, exclusions, claim process...">{% if is_edit %}{{ record.warranty_terms }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Depreciation & Financial -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fef3c7; color: #d97706;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3>Depreciation & Financial</h3>
+                        <p class="section-desc">Asset valuation and depreciation settings</p>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="field-grid">
+                        <div class="field">
+                            <label>Expected Lifespan (Years)</label>
+                            <input type="number" name="expected_lifespan_years" value="{% if is_edit %}{{ record.expected_lifespan_years }}{% endif %}" min="1" placeholder="e.g., 5">
+                            <span class="field-hint">Used for depreciation calculation</span>
+                        </div>
+                        <div class="field">
+                            <label>Salvage Value</label>
+                            <div class="input-prefix">
+                                <span>$</span>
+                                <input type="number" step="0.01" name="salvage_value" value="{% if is_edit %}{{ record.salvage_value }}{% endif %}" placeholder="0.00" style="padding-left: 1.75rem;">
+                            </div>
+                            <span class="field-hint">Estimated value at end of life</span>
+                        </div>
+                        <div class="field">
+                            <label>Depreciation Method</label>
+                            <select name="depreciation_method">
+                                <option value="straight_line" {% if is_edit and record.depreciation_method == 'straight_line' %}selected{% endif %}>Straight Line</option>
+                                <option value="declining_balance" {% if is_edit and record.depreciation_method == 'declining_balance' %}selected{% endif %}>Declining Balance</option>
+                                <option value="none" {% if is_edit and record.depreciation_method == 'none' %}selected{% endif %}>None</option>
+                            </select>
+                        </div>
+                        {% if is_edit %}
+                        <div class="field">
+                            <label>Next Maintenance Due</label>
+                            <input type="date" name="next_maintenance_due" value="{{ record.next_maintenance_due|date:'Y-m-d' }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance — span full width -->
+            <div class="form-section span-full">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fce7f3; color: #0044CC;">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div>
+                        <h3>Insurance</h3>
+                        <p class="section-desc">Policy and coverage information</p>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="field-grid-3">
+                        <div class="field">
+                            <label>Insurance Policy #</label>
+                            <input type="text" name="insurance_policy" value="{% if is_edit %}{{ record.insurance_policy }}{% endif %}" placeholder="POL-XXXXX">
+                        </div>
+                        <div class="field">
+                            <label>Insured Value</label>
+                            <div class="input-prefix">
+                                <span>$</span>
+                                <input type="number" step="0.01" name="insured_value" value="{% if is_edit %}{{ record.insured_value }}{% endif %}" placeholder="0.00" style="padding-left: 1.75rem;">
+                            </div>
+                        </div>
+                        <div class="field">
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions-bar">
+            <a href="{% if is_edit %}{% url 'asset_lifecycle_detail' stream=stream pk=record.pk %}{% else %}{% url 'asset_lifecycle_list' stream=stream %}{% endif %}" class="action-btn action-btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="action-btn action-btn-primary">
+                <i class="fas fa-{% if is_edit %}save{% else %}plus-circle{% endif %}"></i>
+                {% if is_edit %}Save Changes{% else %}Create Record{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

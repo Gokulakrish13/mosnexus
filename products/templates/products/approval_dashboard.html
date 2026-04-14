@@ -1,0 +1,1391 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Approval Workflows{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --danger: #EF4444;
+        --info: #6366F1;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+        --shadow-xl: 0 20px 40px -5px rgba(0,0,0,0.12);
+        --shadow-glow: 0 0 40px rgba(11, 95, 255, 0.15);
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+    }
+    body { background: var(--bg-primary); font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif; color: var(--text-primary); }
+    .aw-container { max-width: 1440px; margin: 0 auto; padding: 2rem; }
+
+    /* Header */
+    .aw-header { text-align: center; margin-bottom: 2.5rem; }
+    .aw-header::after { content: ''; display: block; width: 80px; height: 4px; background: var(--gradient-primary); border-radius: 2px; margin: 1rem auto 0; }
+    .aw-header h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; letter-spacing: -0.025em; }
+    .aw-header h1 .icon-wrap { width: 52px; height: 52px; background: var(--gradient-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(11, 95, 255, 0.3); }
+    .aw-header h1 .icon-wrap i { color: #fff; font-size: 1.35rem; }
+    .aw-header p { color: var(--text-secondary); font-size: 1.05rem; font-weight: 500; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border-radius: var(--radius-md); padding: 1.25rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--philips-blue); }
+    .stat-icon { width: 48px; height: 48px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+    .stat-icon.blue { background: rgba(11, 95, 255, 0.1); color: var(--philips-blue); }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .stat-icon.yellow { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .stat-icon.purple { background: rgba(99, 102, 241, 0.1); color: var(--info); }
+    .stat-icon.teal { background: rgba(0, 196, 180, 0.1); color: var(--philips-teal); }
+    .stat-value { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem; }
+
+    /* Tabs */
+    .aw-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0; }
+    .aw-tab { padding: 0.75rem 1.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+    .aw-tab:hover { color: var(--philips-blue); background: rgba(11, 95, 255, 0.04); }
+    .aw-tab.active { color: var(--philips-blue); border-bottom-color: var(--philips-blue); background: rgba(11, 95, 255, 0.06); }
+    .aw-tab .badge { background: var(--philips-blue); color: #fff; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+
+    /* Section */
+    .aw-section { display: none; }
+    .aw-section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Action Bar */
+    .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .action-bar .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-select { padding: 0.5rem 1rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; background: var(--surface); color: var(--text-primary); font-weight: 500; cursor: pointer; transition: border-color 0.2s; }
+    .filter-select:focus { outline: none; border-color: var(--philips-blue); }
+    .btn-primary { background: var(--gradient-primary); color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(11, 95, 255, 0.25); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11, 95, 255, 0.35); }
+    .btn-outline { background: transparent; color: var(--philips-blue); border: 1.5px solid var(--philips-blue); padding: 0.5rem 1.25rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+    .btn-outline:hover { background: rgba(11, 95, 255, 0.06); }
+
+    /* Request Cards */
+    .request-list { display: flex; flex-direction: column; gap: 1rem; }
+    .request-card { background: var(--surface); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); border: 1.5px solid var(--border-color); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; position: relative; overflow: hidden; }
+    .request-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+    .request-card.priority-low::before { background: var(--success); }
+    .request-card.priority-medium::before { background: var(--philips-blue); }
+    .request-card.priority-high::before { background: var(--warning); }
+    .request-card.priority-critical::before { background: var(--danger); }
+    .request-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--philips-blue); }
+    .request-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .request-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .request-meta { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .meta-item { font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem; }
+    .meta-item i { font-size: 0.7rem; }
+
+    /* Status / Priority badges */
+    .badge-status { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-pending { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+    .badge-in_review { background: rgba(11, 95, 255, 0.1); color: var(--philips-blue); }
+    .badge-approved { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .badge-rejected { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
+    .badge-cancelled { background: rgba(148, 163, 184, 0.15); color: #64748B; }
+    .badge-expired { background: rgba(148, 163, 184, 0.15); color: #64748B; }
+    .badge-priority { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .badge-p-low { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-p-medium { background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); }
+    .badge-p-high { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+    .badge-p-critical { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
+
+    /* Progress bar */
+    .progress-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
+    .progress-bar-wrap { flex: 1; height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 3px; background: var(--gradient-primary); transition: width 0.5s ease; }
+    .progress-text { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+
+    /* Step timeline */
+    .step-timeline { display: flex; align-items: center; gap: 0; margin-top: 0.75rem; flex-wrap: wrap; }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .step-dot.completed { background: var(--success); }
+    .step-dot.current { background: var(--philips-blue); box-shadow: 0 0 0 4px rgba(11, 95, 255, 0.2); }
+    .step-dot.pending { background: var(--bg-secondary); color: var(--text-tertiary); }
+    .step-dot.rejected { background: var(--danger); }
+    .step-line { width: 24px; height: 2px; background: var(--border-color); flex-shrink: 0; }
+    .step-line.completed { background: var(--success); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 9000; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-content { background: var(--surface); border-radius: var(--radius-lg); max-width: 720px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); }
+    .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .modal-header h2 .mh-icon { width: 40px; height: 40px; background: var(--gradient-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+    .modal-header h2 .mh-icon i { color: #fff; font-size: 1rem; }
+    .modal-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: all 0.2s; }
+    .modal-close:hover { background: var(--danger); color: #fff; }
+    .modal-body { padding: 2rem; }
+    .modal-footer { padding: 1rem 2rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+    /* Form */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 0.65rem 1rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit; color: var(--text-primary); background: var(--surface); transition: border-color 0.2s; box-sizing: border-box; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--philips-blue); box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.1); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    /* Steps builder */
+    .steps-builder { background: var(--bg-primary); border-radius: var(--radius-sm); padding: 1rem; border: 1px solid var(--border-color); }
+    .step-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    .step-row input, .step-row select { flex: 1; padding: 0.5rem 0.75rem; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; font-family: inherit; background: #fff; }
+    .step-row input:focus, .step-row select:focus { outline: none; border-color: var(--philips-blue); }
+    .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; flex-shrink: 0; }
+    .btn-icon.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-icon.danger:hover { background: var(--danger); color: #fff; }
+    .btn-add-step { background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); border: 1.5px dashed var(--philips-blue); padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; }
+    .btn-add-step:hover { background: rgba(11, 95, 255, 0.14); }
+
+    /* Detail panel */
+    .detail-panel { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); overflow: hidden; display: none; }
+    .detail-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    .detail-header { background: var(--gradient-primary); color: #fff; padding: 1.5rem 2rem; position: relative; overflow: hidden; }
+    .detail-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+    .detail-header h3 { font-size: 1.3rem; font-weight: 700; position: relative; z-index: 1; }
+    .detail-header .detail-meta { display: flex; gap: 1.5rem; margin-top: 0.5rem; position: relative; z-index: 1; opacity: 0.9; font-size: 0.85rem; }
+    .detail-body { padding: 2rem; }
+    .detail-section { margin-bottom: 2rem; }
+    .detail-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .detail-section-title i { color: var(--philips-blue); }
+
+    /* Step detail cards */
+    .step-detail-card { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--bg-primary); border-radius: var(--radius-sm); margin-bottom: 0.75rem; border: 1px solid var(--border-color); }
+    .step-detail-card .step-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; color: #fff; flex-shrink: 0; }
+    .step-detail-card .step-info { flex: 1; }
+    .step-detail-card .step-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.15rem; }
+    .step-detail-card .step-info p { font-size: 0.8rem; color: var(--text-secondary); }
+    .step-actions-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .btn-approve { background: var(--success); color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .btn-approve:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-reject { background: var(--danger); color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .btn-reject:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-delegate { background: var(--bg-secondary); color: var(--text-secondary); border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .btn-delegate:hover { background: var(--border-color); }
+
+    /* Comment thread */
+    .comment-thread { max-height: 300px; overflow-y: auto; }
+    .comment-item { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+    .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+    .comment-bubble { background: var(--bg-primary); border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm); padding: 0.6rem 1rem; flex: 1; }
+    .comment-bubble .c-author { font-size: 0.75rem; font-weight: 700; color: var(--philips-blue); }
+    .comment-bubble .c-text { font-size: 0.85rem; color: var(--text-primary); margin-top: 0.15rem; }
+    .comment-bubble .c-time { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.25rem; }
+    .comment-input-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .comment-input-row input { flex: 1; }
+
+    /* Template cards (admin) */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    .template-card { background: var(--surface); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); border: 1.5px solid var(--border-color); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .template-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--philips-blue); }
+    .template-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .template-name { font-size: 1.05rem; font-weight: 700; }
+    .template-type { font-size: 0.7rem; padding: 3px 10px; background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); border-radius: 20px; font-weight: 600; }
+    .template-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; }
+    .template-steps-preview { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+    .template-step-pill { padding: 3px 10px; background: var(--bg-secondary); border-radius: 20px; font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); }
+    .template-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+    .template-footer .template-meta { font-size: 0.75rem; color: var(--text-tertiary); }
+    .template-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .template-actions button { padding: 0.35rem 0.75rem; border-radius: 6px; border: none; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .template-actions .btn-edit { background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); }
+    .template-actions .btn-edit:hover { background: rgba(11, 95, 255, 0.15); }
+    .template-actions .btn-del { background: rgba(239, 68, 68, 0.08); color: var(--danger); }
+    .template-actions .btn-del:hover { background: rgba(239, 68, 68, 0.15); }
+    .template-actions .btn-toggle-on { background: rgba(16, 185, 129, 0.08); color: #059669; }
+    .template-actions .btn-toggle-on:hover { background: rgba(16, 185, 129, 0.18); }
+    .template-actions .btn-toggle-off { background: rgba(245, 158, 11, 0.08); color: #d97706; }
+    .template-actions .btn-toggle-off:hover { background: rgba(245, 158, 11, 0.18); }
+
+    /* Settings row items */
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); background: var(--bg-secondary); font-size: 0.85rem; margin-bottom: 0.4rem; transition: all 0.2s; }
+    .settings-row:hover { background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .settings-row.inactive { opacity: 0.55; }
+    .settings-row .sr-label { font-weight: 600; }
+    .settings-row .sr-key { font-size: 0.72rem; color: var(--text-tertiary); margin-left: 0.5rem; font-family: monospace; }
+    .settings-row .sr-badge { font-size: 0.62rem; padding: 0.12rem 0.45rem; border-radius: 9999px; color: #fff; margin-left: 0.45rem; font-weight: 600; }
+    .settings-row .sr-badge.system { background: var(--philips-blue); }
+    .settings-row .sr-badge.custom { background: #8b5cf6; }
+    .settings-row .sr-badge.off { background: var(--text-tertiary); }
+    .settings-row .sr-actions { display: flex; gap: 0.4rem; align-items: center; }
+    .settings-row .sr-actions button { padding: 0.3rem 0.65rem; border-radius: 6px; border: none; font-size: 0.73rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap; }
+    .settings-row .sr-actions .btn-activate { background: rgba(16, 185, 129, 0.08); color: #059669; }
+    .settings-row .sr-actions .btn-activate:hover { background: rgba(16, 185, 129, 0.18); }
+    .settings-row .sr-actions .btn-deactivate { background: rgba(245, 158, 11, 0.08); color: #d97706; }
+    .settings-row .sr-actions .btn-deactivate:hover { background: rgba(245, 158, 11, 0.18); }
+    .settings-row .sr-actions .btn-remove { background: rgba(239, 68, 68, 0.06); color: var(--danger); }
+    .settings-row .sr-actions .btn-remove:hover { background: rgba(239, 68, 68, 0.14); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+    .empty-state .empty-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--bg-secondary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+    .empty-state .empty-icon i { font-size: 2rem; color: var(--text-tertiary); }
+    .empty-state h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .aw-container { padding: 1rem; }
+        .aw-header h1 { font-size: 1.5rem; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .aw-tabs { overflow-x: auto; flex-wrap: nowrap; }
+        .template-grid { grid-template-columns: 1fr; }
+        .modal-content { width: 100%; max-height: 100vh; border-radius: 0; }
+    }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { padding: 0.75rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow-lg); animation: slideInRight 0.3s ease; }
+    .toast.success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .toast.error { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+
+<div class="aw-container">
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <div class="aw-header">
+        <h1>
+            <span class="icon-wrap"><i class="fas fa-clipboard-check"></i></span>
+            Approval Workflows
+        </h1>
+        <p>Generic configurable approval pipeline — route any action through single or multi-level approvals</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-file-signature"></i></div>
+            <div><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Total Requests</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
+            <div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">Pending</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="fas fa-eye"></i></div>
+            <div><div class="stat-value">{{ stats.in_review }}</div><div class="stat-label">In Review</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+            <div><div class="stat-value">{{ stats.approved }}</div><div class="stat-label">Approved</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+            <div><div class="stat-value">{{ stats.rejected }}</div><div class="stat-label">Rejected</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon teal"><i class="fas fa-user-clock"></i></div>
+            <div><div class="stat-value">{{ stats.my_pending }}</div><div class="stat-label">Awaiting My Action</div></div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="aw-tabs">
+        <div class="aw-tab active" data-tab="my-pending" onclick="switchTab('my-pending')">
+            <i class="fas fa-bell"></i> My Pending
+            {% if stats.my_pending %}<span class="badge">{{ stats.my_pending }}</span>{% endif %}
+        </div>
+        <div class="aw-tab" data-tab="my-requests" onclick="switchTab('my-requests')">
+            <i class="fas fa-paper-plane"></i> My Requests
+            <span class="badge">{{ stats.my_submitted }}</span>
+        </div>
+        <div class="aw-tab" data-tab="all-requests" onclick="switchTab('all-requests')">
+            <i class="fas fa-list"></i> All Requests
+        </div>
+        {% if is_admin %}
+        <div class="aw-tab" data-tab="templates" onclick="switchTab('templates')">
+            <i class="fas fa-cogs"></i> Templates
+        </div>
+        <div class="aw-tab" data-tab="triggers" onclick="switchTab('triggers'); loadTriggers();">
+            <i class="fas fa-bolt"></i> Trigger Rules
+        </div>
+        <div class="aw-tab" data-tab="settings" onclick="switchTab('settings'); loadTypeSettings();">
+            <i class="fas fa-sliders-h"></i> Settings
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- My Pending Section -->
+    <div class="aw-section active" id="sec-my-pending">
+        <div class="request-list" id="pendingList">
+            {% for ar in pending_my_action %}
+            <div class="request-card priority-{{ ar.priority }}" onclick="openDetail({{ ar.id }})">
+                <div class="request-card-header">
+                    <div class="request-title">
+                        <i class="fas fa-clipboard-check" style="color: var(--philips-blue);"></i>
+                        {{ ar.title }}
+                        {% if ar.is_enforced %}<span style="font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:9999px;background:linear-gradient(135deg,#0B5FFF,#00C4B4);color:#fff;font-weight:600;margin-left:0.5rem;"><i class="fas fa-shield-alt"></i> Enforced</span>{% endif %}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span class="badge-status badge-{{ ar.status }}">{{ ar.get_status_display }}</span>
+                        <span class="badge-priority badge-p-{{ ar.priority }}">{{ ar.get_priority_display }}</span>
+                    </div>
+                </div>
+                <div class="request-meta">
+                    <span class="meta-item"><i class="fas fa-layer-group"></i> {{ ar.template.name|default:"—" }}</span>
+                    <span class="meta-item"><i class="fas fa-user"></i> {{ ar.requested_by.username }}</span>
+                    <span class="meta-item"><i class="fas fa-calendar"></i> {{ ar.created_at|date:"M d, Y" }}</span>
+                    {% if ar.is_overdue %}<span class="meta-item" style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Overdue</span>{% endif %}
+                </div>
+                <div class="progress-row">
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: {{ ar.progress_percent }}%;"></div></div>
+                    <span class="progress-text">Step {{ ar.current_step }}/{{ ar.total_steps }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-check-double"></i></div>
+                <h3>All caught up!</h3>
+                <p>No approvals awaiting your action right now.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- My Requests Section -->
+    <div class="aw-section" id="sec-my-requests">
+        <div class="action-bar">
+            <div class="filters">
+                <select class="filter-select" id="filterMyStatus" onchange="filterMyRequests()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in_review">In Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i> New Request
+            </button>
+        </div>
+        <div class="request-list" id="myRequestsList">
+            {% for ar in my_requests %}
+            <div class="request-card priority-{{ ar.priority }}" data-status="{{ ar.status }}" onclick="openDetail({{ ar.id }})">
+                <div class="request-card-header">
+                    <div class="request-title">
+                        {{ ar.title }}
+                        {% if ar.is_enforced %}<span style="font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:9999px;background:linear-gradient(135deg,#0B5FFF,#00C4B4);color:#fff;font-weight:600;margin-left:0.5rem;"><i class="fas fa-shield-alt"></i> Enforced</span>{% endif %}
+                    </div>
+                    <span class="badge-status badge-{{ ar.status }}">{{ ar.get_status_display }}</span></span>
+                </div>
+                <div class="request-meta">
+                    <span class="meta-item"><i class="fas fa-layer-group"></i> {{ ar.template.name|default:"—" }}</span>
+                    <span class="meta-item"><i class="fas fa-calendar"></i> {{ ar.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="progress-row">
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: {{ ar.progress_percent }}%;"></div></div>
+                    <span class="progress-text">{{ ar.progress_percent }}%</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-paper-plane"></i></div>
+                <h3>No requests yet</h3>
+                <p>Create a new approval request to get started.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- All Requests Section -->
+    <div class="aw-section" id="sec-all-requests">
+        <div class="action-bar">
+            <div class="filters">
+                <select class="filter-select" id="filterAllStatus" onchange="filterAllRequests()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in_review">In Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <select class="filter-select" id="filterAllPriority" onchange="filterAllRequests()">
+                    <option value="">All Priority</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+        </div>
+        <div class="request-list" id="allRequestsList">
+            {% for ar in all_requests %}
+            <div class="request-card priority-{{ ar.priority }}" data-status="{{ ar.status }}" data-priority="{{ ar.priority }}" onclick="openDetail({{ ar.id }})">
+                <div class="request-card-header">
+                    <div class="request-title">
+                        {{ ar.title }}
+                        {% if ar.is_enforced %}<span style="font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:9999px;background:linear-gradient(135deg,#0B5FFF,#00C4B4);color:#fff;font-weight:600;margin-left:0.5rem;"><i class="fas fa-shield-alt"></i> Enforced</span>{% endif %}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span class="badge-status badge-{{ ar.status }}">{{ ar.get_status_display }}</span>
+                        <span class="badge-priority badge-p-{{ ar.priority }}">{{ ar.get_priority_display }}</span>
+                    </div>
+                </div>
+                <div class="request-meta">
+                    <span class="meta-item"><i class="fas fa-layer-group"></i> {{ ar.template.name|default:"—" }}</span>
+                    <span class="meta-item"><i class="fas fa-user"></i> {{ ar.requested_by.username }}</span>
+                    <span class="meta-item"><i class="fas fa-calendar"></i> {{ ar.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="progress-row">
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: {{ ar.progress_percent }}%;"></div></div>
+                    <span class="progress-text">Step {{ ar.current_step }}/{{ ar.total_steps }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Templates Section (Admin) -->
+    {% if is_admin %}
+    <div class="aw-section" id="sec-templates">
+        <div class="action-bar">
+            <div></div>
+            <button class="btn-primary" onclick="openTemplateModal()">
+                <i class="fas fa-plus"></i> New Template
+            </button>
+        </div>
+        <div class="template-grid" id="templateGrid">
+            {% for t in templates %}
+            <div class="template-card">
+                <div class="template-card-header">
+                    <div class="template-name">{{ t.name }}</div>
+                    <span class="template-type">{{ t.get_entity_type_display }}</span>
+                </div>
+                <div class="template-desc">{{ t.description|default:"No description" }}</div>
+                <div class="template-steps-preview">
+                    {% for step in t.steps.all %}
+                    <span class="template-step-pill">{{ step.order }}. {{ step.name }}</span>
+                    {% endfor %}
+                </div>
+                <div class="template-footer">
+                    <span class="template-meta">{{ t.step_count }} steps &middot; {{ t.created_at|date:"M d, Y" }}</span>
+                    <div class="template-actions">
+                        <button class="btn-edit" onclick="editTemplate({{ t.id }})"><i class="fas fa-pen"></i> Edit</button>
+                        <button class="btn-del" onclick="deleteTemplate({{ t.id }})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state" style="grid-column: 1/-1;">
+                <div class="empty-icon"><i class="fas fa-cogs"></i></div>
+                <h3>No Templates</h3>
+                <p>Create your first approval workflow template to get started.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trigger Rules Section (Admin) -->
+    {% if is_admin %}
+    <div class="aw-section" id="sec-triggers">
+        <div class="action-bar">
+            <div>
+                <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;"><i class="fas fa-info-circle" style="color:var(--philips-blue);"></i> Trigger rules automatically create approval requests when major events occur in the application.</p>
+            </div>
+            <button class="btn-primary" onclick="resetTriggerModal(); openModal('triggerModal')">
+                <i class="fas fa-plus"></i> New Trigger Rule
+            </button>
+        </div>
+        <div class="template-grid" id="triggerGrid">
+            <div style="text-align:center;padding:2rem;color:var(--text-tertiary);grid-column:1/-1;">
+                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+                <p>Loading trigger rules...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Section (Admin) — Manage Entity Types & Event Types -->
+    <div class="aw-section" id="sec-settings">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+            <!-- Entity Types -->
+            <div class="template-card" style="padding:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h3 style="margin:0;font-size:1rem;"><i class="fas fa-cubes" style="color:var(--philips-blue);"></i> Entity Types</h3>
+                    <button class="btn-primary" style="font-size:0.78rem;padding:0.4rem 0.8rem;" onclick="openEntityTypePicker()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <p style="font-size:0.8rem;color:var(--text-tertiary);margin-bottom:1rem;">Entity types available for workflow templates. System types can be deactivated but not deleted.</p>
+                <div id="entityTypesList" style="display:flex;flex-direction:column;gap:0.5rem;">
+                    <div style="text-align:center;padding:1rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+            <!-- Event Types -->
+            <div class="template-card" style="padding:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h3 style="margin:0;font-size:1rem;"><i class="fas fa-bolt" style="color:var(--philips-blue);"></i> Trigger Event Types</h3>
+                    <button class="btn-primary" style="font-size:0.78rem;padding:0.4rem 0.8rem;" onclick="openEventTypePicker()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <p style="font-size:0.8rem;color:var(--text-tertiary);margin-bottom:1rem;">Event types available for trigger rules. Grouped by category. System events can be deactivated but not deleted.</p>
+                <div id="eventTypesList" style="display:flex;flex-direction:column;gap:0.5rem;">
+                    <div style="text-align:center;padding:1rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detail panel (loaded via AJAX) -->
+    <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<!-- Add Entity Type Modal — Selectable List -->
+{% if is_admin %}
+<div class="modal-overlay" id="entityTypeModal">
+    <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+            <h2><span class="mh-icon"><i class="fas fa-cubes"></i></span> Add Entity Type</h2>
+            <button class="modal-close" onclick="closeModal('entityTypeModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="max-height:450px;overflow-y:auto;">
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1rem;"><i class="fas fa-info-circle" style="color:var(--philips-blue);"></i> Select from the available entity types below. These are all the entity scopes the application supports.</p>
+            <div id="entityTypePickerList" style="display:flex;flex-direction:column;gap:0.5rem;">
+                <div style="text-align:center;padding:1.5rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin"></i> Loading available types...</div>
+            </div>
+            <div id="entityTypePickerEmpty" style="display:none;text-align:center;padding:1.5rem;color:var(--text-tertiary);">
+                <i class="fas fa-check-circle" style="font-size:1.5rem;color:#22c55e;"></i>
+                <p style="margin-top:0.5rem;">All available entity types have already been added.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Event Type Modal — Selectable List -->
+{% if is_admin %}
+<div class="modal-overlay" id="eventTypeModal">
+    <div class="modal-content" style="max-width:640px;">
+        <div class="modal-header">
+            <h2><span class="mh-icon"><i class="fas fa-bolt"></i></span> Add Trigger Event</h2>
+            <button class="modal-close" onclick="closeModal('eventTypeModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="max-height:500px;overflow-y:auto;">
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1rem;"><i class="fas fa-info-circle" style="color:var(--philips-blue);"></i> Select from the available trigger events below. <span style="color:var(--philips-blue);font-weight:600;">Blue</span> items are already wired in the application code. <span style="color:var(--text-tertiary);">Grey</span> items are available for future use.</p>
+            <div id="eventTypePickerList" style="display:flex;flex-direction:column;gap:0.4rem;">
+                <div style="text-align:center;padding:1.5rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin"></i> Loading available events...</div>
+            </div>
+            <div id="eventTypePickerEmpty" style="display:none;text-align:center;padding:1.5rem;color:var(--text-tertiary);">
+                <i class="fas fa-check-circle" style="font-size:1.5rem;color:#22c55e;"></i>
+                <p style="margin-top:0.5rem;">All available event types have already been added.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Create / Edit Trigger Rule Modal -->
+{% if is_admin %}
+<div class="modal-overlay" id="triggerModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="mh-icon"><i class="fas fa-bolt"></i></span> <span id="triggerModalTitle">New Trigger Rule</span></h2>
+            <button class="modal-close" onclick="closeModal('triggerModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="triggerEditId" value="">
+            <div class="form-group">
+                <label class="form-label">Rule Name *</label>
+                <input type="text" class="form-input" id="triggerName" placeholder="e.g. Auto-approve product scrapping">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Trigger Event *</label>
+                <select class="form-select" id="triggerEvent" style="max-height:250px;">
+                    <option value="">Select an event...</option>
+                </select>
+                <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.35rem;">When this event occurs, the selected workflow template will be triggered automatically.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Workflow Template *</label>
+                <select class="form-select" id="triggerTemplate">
+                    <option value="">Select a template...</option>
+                    {% for t in templates %}
+                    <option value="{{ t.id }}">{{ t.name }} ({{ t.get_entity_type_display }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select class="form-select" id="triggerPriority">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high" selected>High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal('triggerModal')">Cancel</button>
+            <button class="btn-primary" id="triggerSubmitBtn" onclick="submitTrigger()"><i class="fas fa-bolt"></i> Create Trigger</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Create Request Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="mh-icon"><i class="fas fa-plus"></i></span> New Approval Request</h2>
+            <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Workflow Template *</label>
+                <select class="form-select" id="reqTemplate">
+                    <option value="">Select a template...</option>
+                    {% for t in templates %}
+                    <option value="{{ t.id }}" data-steps="{{ t.step_count }}">{{ t.name }} ({{ t.get_entity_type_display }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Title *</label>
+                <input type="text" class="form-input" id="reqTitle" placeholder="e.g. PO #1234 Approval">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="reqDesc" placeholder="Provide details about what needs approval..."></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="reqPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date (optional)</label>
+                    <input type="datetime-local" class="form-input" id="reqDueDate">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal('createModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitRequest()"><i class="fas fa-paper-plane"></i> Submit Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Template Modal -->
+<div class="modal-overlay" id="templateModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><span class="mh-icon"><i class="fas fa-cogs"></i></span> <span id="tmplModalTitle">New Template</span></h2>
+            <button class="modal-close" onclick="closeModal('templateModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Template Name *</label>
+                <input type="text" class="form-input" id="tmplName" placeholder="e.g. Purchase Order Approval">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Entity Type</label>
+                <select class="form-select" id="tmplEntityType">
+                    <option value="custom">Loading...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="tmplDesc" placeholder="Describe the workflow purpose..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Approval Steps</label>
+                <div class="steps-builder" id="stepsBuilder">
+                    <div class="step-row" data-idx="1">
+                        <span style="font-weight: 700; font-size: 0.85rem; width: 20px; text-align: center; color: var(--philips-blue);">1</span>
+                        <input type="text" placeholder="Step name (e.g. Manager Review)" class="step-name">
+                        <select class="step-role">
+                            <option value="lab_incharge">Lab Incharge</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="app_admin">App Admin</option>
+                        </select>
+                        <button class="btn-icon danger" onclick="removeStep(this)" title="Remove step"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <button class="btn-add-step" onclick="addStep()"><i class="fas fa-plus"></i> Add Step</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal('templateModal')">Cancel</button>
+            <button class="btn-primary" id="tmplSubmitBtn" onclick="submitTemplate()"><i class="fas fa-save"></i> Create Template</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const APPROVALS_BASE = '{% url "approval_dashboard" %}';
+const URL_TEMPLATES_API = APPROVALS_BASE + 'api/templates/';
+const URL_TEMPLATE_DETAIL = (id) => APPROVALS_BASE + `api/templates/${id}/`;
+const URL_REQUEST_CREATE = APPROVALS_BASE + 'api/request/create/';
+const URL_REQUEST_DETAIL = (id) => APPROVALS_BASE + `api/request/${id}/`;
+const URL_REQUEST_ACTION = (id) => APPROVALS_BASE + `api/request/${id}/action/`;
+const URL_REQUEST_COMMENT = (id) => APPROVALS_BASE + `api/request/${id}/comment/`;
+const URL_TRIGGERS_API = APPROVALS_BASE + 'api/triggers/';
+const URL_TRIGGER_DETAIL = (id) => APPROVALS_BASE + `api/triggers/${id}/`;
+const URL_ENTITY_TYPES_API = APPROVALS_BASE + 'api/entity-types/';
+const URL_EVENT_TYPES_API = APPROVALS_BASE + 'api/event-types/';
+
+function switchTab(tab) {
+    document.querySelectorAll('.aw-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.aw-section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + tab));
+    // Close detail panel
+    document.getElementById('detailPanel').classList.remove('active');
+}
+
+function toast(type, msg) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+
+function openCreateModal() { openModal('createModal'); }
+function openTemplateModal(editId) {
+    ensureEntityTypesLoaded();
+    document.getElementById('tmplModalTitle').textContent = editId ? 'Edit Template' : 'New Template';
+    document.getElementById('tmplSubmitBtn').textContent = editId ? ' Update Template' : ' Create Template';
+    document.getElementById('tmplSubmitBtn').dataset.editId = editId || '';
+    if (!editId) {
+        document.getElementById('tmplName').value = '';
+        document.getElementById('tmplDesc').value = '';
+        document.getElementById('tmplEntityType').value = 'custom';
+        document.getElementById('stepsBuilder').innerHTML = '';
+        addStep();
+    }
+    openModal('templateModal');
+}
+
+/* Steps builder */
+let stepCounter = 0;
+function addStep() {
+    stepCounter++;
+    const builder = document.getElementById('stepsBuilder');
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    row.dataset.idx = stepCounter;
+    row.innerHTML = `
+        <span style="font-weight:700;font-size:0.85rem;width:20px;text-align:center;color:var(--philips-blue);">${builder.children.length + 1}</span>
+        <input type="text" placeholder="Step name" class="step-name">
+        <select class="step-role">
+            <option value="lab_incharge">Lab Incharge</option>
+            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="app_admin">App Admin</option>
+        </select>
+        <button class="btn-icon danger" onclick="removeStep(this)" title="Remove"><i class="fas fa-times"></i></button>`;
+    builder.appendChild(row);
+}
+function removeStep(btn) {
+    const builder = document.getElementById('stepsBuilder');
+    if (builder.children.length <= 1) return toast('error', 'At least one step required');
+    btn.closest('.step-row').remove();
+    // Re-number
+    builder.querySelectorAll('.step-row').forEach((r, i) => r.querySelector('span').textContent = i + 1);
+}
+
+async function submitTemplate() {
+    const name = document.getElementById('tmplName').value.trim();
+    if (!name) return toast('error', 'Template name is required');
+    const steps = [];
+    document.querySelectorAll('#stepsBuilder .step-row').forEach(r => {
+        steps.push({ name: r.querySelector('.step-name').value.trim() || `Step ${steps.length+1}`, approver_role: r.querySelector('.step-role').value, approver_type: 'role', is_mandatory: true });
+    });
+    if (steps.length === 0) return toast('error', 'Add at least one step');
+    const editId = document.getElementById('tmplSubmitBtn').dataset.editId;
+    const url = editId ? URL_TEMPLATE_DETAIL(editId) : URL_TEMPLATES_API;
+    const method = editId ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ name, description: document.getElementById('tmplDesc').value, entity_type: document.getElementById('tmplEntityType').value, steps }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); closeModal('templateModal'); setTimeout(() => location.reload(), 600); }
+    else toast('error', data.error || 'Failed');
+}
+async function deleteTemplate(id) {
+    if (!confirm('Delete this template? Existing requests will keep their data.')) return;
+    const res = await fetch(URL_TEMPLATE_DETAIL(id), { method: 'DELETE', headers: { 'X-CSRFToken': CSRF } });
+    const data = await res.json();
+    if (data.success) { toast('success', 'Template deleted'); setTimeout(() => location.reload(), 600); }
+    else toast('error', data.error);
+}
+async function editTemplate(id) {
+    const res = await fetch(URL_TEMPLATE_DETAIL(id));
+    const data = await res.json();
+    if (!data.success) return toast('error', 'Failed to load template');
+    const t = data.template;
+    document.getElementById('tmplName').value = t.name;
+    document.getElementById('tmplDesc').value = t.description;
+    document.getElementById('tmplEntityType').value = t.entity_type;
+    const builder = document.getElementById('stepsBuilder');
+    builder.innerHTML = '';
+    stepCounter = 0;
+    t.steps.forEach(s => { addStep(); const row = builder.lastChild; row.querySelector('.step-name').value = s.name; row.querySelector('.step-role').value = s.approver_role; });
+    openTemplateModal(id);
+}
+
+async function submitRequest() {
+    const template_id = document.getElementById('reqTemplate').value;
+    const title = document.getElementById('reqTitle').value.trim();
+    if (!template_id) return toast('error', 'Select a template');
+    if (!title) return toast('error', 'Title is required');
+    const body = { template_id: parseInt(template_id), title, description: document.getElementById('reqDesc').value, priority: document.getElementById('reqPriority').value };
+    const due = document.getElementById('reqDueDate').value;
+    if (due) body.due_date = new Date(due).toISOString();
+    const res = await fetch(URL_REQUEST_CREATE, { method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); closeModal('createModal'); setTimeout(() => location.reload(), 600); }
+    else toast('error', data.error || 'Failed');
+}
+
+/* ── Enforcement banner for enforced requests ── */
+function renderEnforcementBanner(r) {
+    const c = r.intended_changes || {};
+    const actionType = c.action_type || '';
+    const meta = c.metadata || {};
+    const changes = c.changes || {};
+    const revert = c.revert || {};
+
+    let actionDesc = '';
+    if (actionType === 'status_change') {
+        const field = Object.keys(changes)[0] || 'status';
+        actionDesc = `Change <strong>${field}</strong> from <code>${revert[field] || '—'}</code> to <code>${changes[field] || '—'}</code>`;
+        if (meta.entity_name) actionDesc += ` on <strong>${meta.entity_name}</strong>`;
+    } else if (actionType === 'delete') {
+        actionDesc = `Delete <strong>${meta.entity_name || 'entity'}</strong>`;
+    } else if (actionType === 'bulk_delete') {
+        actionDesc = `Bulk delete <strong>${meta.count || c.pks?.length || '?'}</strong> item(s)`;
+    } else if (actionType === 'bulk_status_change') {
+        const field = Object.keys(changes)[0] || 'status';
+        actionDesc = `Bulk change <strong>${field}</strong> to <code>${changes[field]}</code> for <strong>${meta.count || c.pks?.length || '?'}</strong> item(s)`;
+    }
+
+    let resultBadge = '';
+    if (r.enforcement_result === 'executed') {
+        resultBadge = '<span style="color:#10B981;font-weight:600;font-size:0.8rem;"><i class="fas fa-check-circle"></i> Action Executed</span>';
+    } else if (r.enforcement_result === 'failed') {
+        resultBadge = '<span style="color:#EF4444;font-weight:600;font-size:0.8rem;"><i class="fas fa-times-circle"></i> Execution Failed</span>';
+    } else if (r.enforcement_result === 'cancelled') {
+        resultBadge = '<span style="color:#F59E0B;font-weight:600;font-size:0.8rem;"><i class="fas fa-ban"></i> Action Discarded (Rejected)</span>';
+    }
+
+    const borderColor = r.status === 'approved' ? '#10B981' : r.status === 'rejected' ? '#EF4444' : '#0B5FFF';
+    return `<div style="margin-bottom:1.25rem;padding:1rem 1.25rem;border-radius:12px;border-left:4px solid ${borderColor};background:rgba(11,95,255,0.06);">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <i class="fas fa-shield-alt" style="color:var(--philips-blue);"></i>
+            <strong style="font-size:0.85rem;color:var(--text-primary);">Enforced Action</strong>
+            ${resultBadge}
+        </div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            ${actionDesc}
+            ${r.status === 'in_review' || r.status === 'pending' ? '<div style="margin-top:0.5rem;color:var(--philips-blue);font-weight:500;font-size:0.8rem;"><i class="fas fa-hourglass-half"></i> Action is blocked until this request is approved or rejected.</div>' : ''}
+        </div>
+    </div>`;
+}
+
+async function openDetail(id) {
+    const res = await fetch(URL_REQUEST_DETAIL(id));
+    const data = await res.json();
+    if (!data.success) return toast('error', 'Failed to load details');
+    const r = data.request;
+    const panel = document.getElementById('detailPanel');
+
+    let stepsHtml = '';
+    r.steps.forEach(s => {
+        const colors = { pending: 'var(--text-tertiary)', approved: 'var(--success)', rejected: 'var(--danger)', delegated: 'var(--warning)', skipped: 'var(--text-tertiary)' };
+        const icons = { pending: 'fa-hourglass-half', approved: 'fa-check', rejected: 'fa-times', delegated: 'fa-share', skipped: 'fa-forward' };
+        const bgColor = colors[s.action] || 'var(--text-tertiary)';
+        stepsHtml += `<div class="step-detail-card">
+            <div class="step-num" style="background:${bgColor};"><i class="fas ${icons[s.action]||'fa-hourglass-half'}"></i></div>
+            <div class="step-info"><h4>Step ${s.step_order}: ${s.step_name}</h4><p>${s.acted_by__username ? 'By: '+s.acted_by__username : 'Awaiting action'} ${s.comments ? '&mdash; '+s.comments : ''}</p>
+            ${s.action === 'pending' && r.status !== 'approved' && r.status !== 'rejected' ? `<div class="step-actions-row"><button class="btn-approve" onclick="actOnRequest(${r.id},'approved')"><i class="fas fa-check"></i> Approve</button><button class="btn-reject" onclick="actOnRequest(${r.id},'rejected')"><i class="fas fa-times"></i> Reject</button></div>` : ''}
+            </div></div>`;
+    });
+
+    let commentsHtml = '';
+    r.comments.forEach(c => {
+        const initials = (c.author__username || 'U').substring(0,2).toUpperCase();
+        commentsHtml += `<div class="comment-item"><div class="comment-avatar">${initials}</div><div class="comment-bubble"><div class="c-author">${c.author__username}</div><div class="c-text">${c.message}</div><div class="c-time">${new Date(c.created_at).toLocaleString()}</div></div></div>`;
+    });
+
+    panel.innerHTML = `
+        <div class="detail-header">
+            <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <h3>${r.title}</h3>
+                <span class="badge-status badge-${r.status}" style="font-size:0.75rem;">${r.status_display}</span>
+                ${r.is_enforced ? '<span style="font-size:0.7rem;padding:0.2rem 0.6rem;border-radius:9999px;background:linear-gradient(135deg,#0B5FFF,#00C4B4);color:#fff;font-weight:600;letter-spacing:0.03em;"><i class="fas fa-shield-alt"></i> Enforced</span>' : ''}
+            </div>
+            <div class="detail-meta">
+                <span><i class="fas fa-layer-group"></i> ${r.template_name}</span>
+                <span><i class="fas fa-user"></i> ${r.requested_by}</span>
+                <span><i class="fas fa-calendar"></i> ${new Date(r.created_at).toLocaleDateString()}</span>
+                ${r.is_overdue ? '<span style="color:#FCA5A5;"><i class="fas fa-exclamation-triangle"></i> Overdue</span>' : ''}
+            </div>
+        </div>
+        <div class="detail-body">
+            ${r.description ? `<p style="margin-bottom:1rem;color:var(--text-secondary);">${r.description}</p>` : ''}
+            ${r.is_enforced && r.intended_changes ? renderEnforcementBanner(r) : ''}
+            <div class="detail-section">
+                <div class="detail-section-title"><i class="fas fa-tasks"></i> Approval Steps</div>
+                ${stepsHtml}
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title"><i class="fas fa-comments"></i> Comments</div>
+                <div class="comment-thread">${commentsHtml || '<p style="color:var(--text-tertiary);font-size:0.85rem;">No comments yet.</p>'}</div>
+                <div class="comment-input-row">
+                    <input type="text" class="form-input" id="commentInput" placeholder="Add a comment..." style="flex:1;">
+                    <button class="btn-primary" onclick="postComment(${r.id})" style="padding:0.5rem 1rem;"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>`;
+    panel.classList.add('active');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function actOnRequest(id, action) {
+    const comments = prompt(`Add a comment for ${action}:`, '') || '';
+    const res = await fetch(URL_REQUEST_ACTION(id), { method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ action, comments }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); openDetail(id); if (data.new_status === 'approved' || data.new_status === 'rejected') setTimeout(() => location.reload(), 800); }
+    else toast('error', data.error || 'Action failed');
+}
+
+async function postComment(id) {
+    const input = document.getElementById('commentInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    const res = await fetch(URL_REQUEST_COMMENT(id), { method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) });
+    const data = await res.json();
+    if (data.success) { input.value = ''; openDetail(id); }
+    else toast('error', data.error || 'Failed');
+}
+
+function filterMyRequests() {
+    const status = document.getElementById('filterMyStatus').value;
+    document.querySelectorAll('#myRequestsList .request-card').forEach(c => {
+        c.style.display = (!status || c.dataset.status === status) ? '' : 'none';
+    });
+}
+function filterAllRequests() {
+    const status = document.getElementById('filterAllStatus').value;
+    const priority = document.getElementById('filterAllPriority').value;
+    document.querySelectorAll('#allRequestsList .request-card').forEach(c => {
+        const show = (!status || c.dataset.status === status) && (!priority || c.dataset.priority === priority);
+        c.style.display = show ? '' : 'none';
+    });
+}
+
+/* ══════════════════════════════════════════════════════
+   TRIGGER RULES
+   ══════════════════════════════════════════════════════ */
+
+let triggersLoaded = false;
+
+async function loadTriggers() {
+    if (triggersLoaded) return;
+    try {
+        const res = await fetch(URL_TRIGGERS_API);
+        const data = await res.json();
+        if (!data.success) { toast('error', data.error); return; }
+        triggersLoaded = true;
+
+        // Populate event dropdown grouped by category
+        const evtSelect = document.getElementById('triggerEvent');
+        if (evtSelect && data.event_choices_grouped) {
+            evtSelect.innerHTML = '<option value="">Select an event...</option>';
+            const groups = {};
+            data.event_choices_grouped.forEach(e => {
+                const cat = e.category || 'General';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(e);
+            });
+            Object.keys(groups).sort().forEach(cat => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = cat;
+                groups[cat].forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.key;
+                    opt.textContent = e.label;
+                    optgroup.appendChild(opt);
+                });
+                evtSelect.appendChild(optgroup);
+            });
+        } else if (evtSelect && data.event_choices) {
+            evtSelect.innerHTML = '<option value="">Select an event...</option>';
+            data.event_choices.forEach(([val, label]) => {
+                evtSelect.innerHTML += `<option value="${val}">${label}</option>`;
+            });
+        }
+
+        renderTriggers(data.triggers);
+    } catch (e) { toast('error', 'Failed to load trigger rules'); }
+}
+
+function renderTriggers(triggers) {
+    const grid = document.getElementById('triggerGrid');
+    if (!triggers.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-icon"><i class="fas fa-bolt"></i></div>
+            <h3>No Trigger Rules</h3>
+            <p>Create trigger rules to automatically launch approval requests when major events occur — product scrapping, vendor blacklisting, server decommission, etc.</p>
+        </div>`;
+        return;
+    }
+
+    const priorityColors = { low: 'var(--success)', medium: 'var(--philips-blue)', high: 'var(--warning)', critical: 'var(--danger)' };
+    grid.innerHTML = triggers.map(t => `
+        <div class="template-card" style="border-left:4px solid ${priorityColors[t.priority] || 'var(--border-color)'};">
+            <div class="template-card-header">
+                <div class="template-name"><i class="fas fa-bolt" style="color:var(--warning);margin-right:0.4rem;font-size:0.85rem;"></i> ${t.name}</div>
+                <span class="badge-status ${t.is_active ? 'badge-approved' : 'badge-cancelled'}" style="font-size:0.65rem;">${t.is_active ? 'Active' : 'Inactive'}</span>
+            </div>
+            <div class="template-desc" style="margin:0.5rem 0;">
+                <span style="font-weight:600;color:var(--text-primary);">Event:</span> ${t.event_display}<br>
+                <span style="font-weight:600;color:var(--text-primary);">Template:</span> ${t.template_name}<br>
+                <span style="font-weight:600;color:var(--text-primary);">Priority:</span> <span style="text-transform:capitalize;">${t.priority}</span>
+            </div>
+            <div class="template-footer">
+                <span class="template-meta">By ${t.created_by || 'System'} &middot; ${new Date(t.created_at).toLocaleDateString()}</span>
+                <div class="template-actions">
+                    <button class="btn-edit" onclick="editTrigger(${t.id})" title="Edit trigger rule"><i class="fas fa-pencil-alt"></i> Edit</button>
+                    <button class="${t.is_active ? 'btn-toggle-off' : 'btn-toggle-on'}" onclick="toggleTrigger(${t.id}, ${!t.is_active})"><i class="fas ${t.is_active ? 'fa-toggle-off' : 'fa-toggle-on'}"></i> ${t.is_active ? 'Disable' : 'Enable'}</button>
+                    <button class="btn-del" onclick="deleteTrigger(${t.id})" title="Delete trigger"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+        </div>`).join('');
+}
+
+function resetTriggerModal() {
+    document.getElementById('triggerEditId').value = '';
+    document.getElementById('triggerName').value = '';
+    document.getElementById('triggerEvent').value = '';
+    document.getElementById('triggerTemplate').value = '';
+    document.getElementById('triggerPriority').value = 'high';
+    document.getElementById('triggerModalTitle').textContent = 'New Trigger Rule';
+    document.getElementById('triggerSubmitBtn').innerHTML = '<i class="fas fa-bolt"></i> Create Trigger';
+}
+
+async function editTrigger(id) {
+    try {
+        // Ensure event choices are loaded
+        if (!triggersLoaded) {
+            await loadTriggers();
+        }
+        const res = await fetch(URL_TRIGGER_DETAIL(id));
+        const data = await res.json();
+        if (!data.success) { toast('error', data.error || 'Failed to load trigger'); return; }
+        const t = data.trigger;
+        document.getElementById('triggerEditId').value = t.id;
+        document.getElementById('triggerName').value = t.name;
+        document.getElementById('triggerEvent').value = t.event_action;
+        document.getElementById('triggerTemplate').value = t.template_id;
+        document.getElementById('triggerPriority').value = t.priority;
+        document.getElementById('triggerModalTitle').textContent = 'Edit Trigger Rule';
+        document.getElementById('triggerSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        openModal('triggerModal');
+    } catch (e) { toast('error', 'Failed to load trigger details'); }
+}
+
+async function submitTrigger() {
+    const editId = document.getElementById('triggerEditId').value;
+    const name = document.getElementById('triggerName').value.trim();
+    const event_action = document.getElementById('triggerEvent').value;
+    const template_id = document.getElementById('triggerTemplate').value;
+    const priority = document.getElementById('triggerPriority').value;
+
+    if (!name) return toast('error', 'Rule name is required');
+    if (!event_action) return toast('error', 'Select a trigger event');
+    if (!template_id) return toast('error', 'Select a workflow template');
+
+    const isEdit = !!editId;
+    const url = isEdit ? URL_TRIGGER_DETAIL(editId) : URL_TRIGGERS_API;
+    const method = isEdit ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+        method,
+        headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, event_action, template_id: parseInt(template_id), priority })
+    });
+    const data = await res.json();
+    if (data.success) {
+        toast('success', data.message || (isEdit ? 'Trigger updated' : 'Trigger created'));
+        closeModal('triggerModal');
+        triggersLoaded = false;
+        loadTriggers();
+        resetTriggerModal();
+    } else {
+        toast('error', data.error || 'Failed to save trigger');
+    }
+}
+
+async function toggleTrigger(id, activate) {
+    const res = await fetch(URL_TRIGGER_DETAIL(id), {
+        method: 'PUT',
+        headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: activate })
+    });
+    const data = await res.json();
+    if (data.success) {
+        toast('success', activate ? 'Trigger enabled' : 'Trigger disabled');
+        triggersLoaded = false;
+        loadTriggers();
+    } else toast('error', data.error || 'Failed');
+}
+
+async function deleteTrigger(id) {
+    if (!confirm('Delete this trigger rule?')) return;
+    const res = await fetch(URL_TRIGGER_DETAIL(id), { method: 'DELETE', headers: { 'X-CSRFToken': CSRF } });
+    const data = await res.json();
+    if (data.success) {
+        toast('success', 'Trigger deleted');
+        triggersLoaded = false;
+        loadTriggers();
+    } else toast('error', data.error || 'Failed');
+}
+
+// ========================================================================
+// SETTINGS TAB — ENTITY TYPES & EVENT TYPES MANAGEMENT
+// ========================================================================
+
+let settingsLoaded = false;
+let cachedEntityTypes = [];
+let cachedEventTypes = [];
+let cachedAvailableEntityTypes = [];
+let cachedAvailableEventTypes = [];
+
+async function loadTypeSettings() {
+    settingsLoaded = false;
+    try {
+        const [etRes, evRes] = await Promise.all([
+            fetch(URL_ENTITY_TYPES_API),
+            fetch(URL_EVENT_TYPES_API),
+        ]);
+        const etData = await etRes.json();
+        const evData = await evRes.json();
+        if (etData.success) {
+            cachedEntityTypes = etData.entity_types;
+            cachedAvailableEntityTypes = etData.available_entity_types || [];
+            renderEntityTypes(etData.entity_types);
+        }
+        if (evData.success) {
+            cachedEventTypes = evData.event_types;
+            cachedAvailableEventTypes = evData.available_event_types || [];
+            renderEventTypes(evData.event_types);
+        }
+        settingsLoaded = true;
+    } catch (e) { toast('error', 'Failed to load settings'); }
+}
+
+function renderEntityTypes(types) {
+    const el = document.getElementById('entityTypesList');
+    if (!types.length) { el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-tertiary);">No entity types yet. Click "Add" to get started.</div>'; return; }
+    el.innerHTML = types.map(t => `
+        <div class="settings-row ${!t.is_active ? 'inactive' : ''}">
+            <div>
+                <span class="sr-label">${t.label}</span>
+                <span class="sr-key">${t.key}</span>
+                ${t.is_system ? '<span class="sr-badge system">System</span>' : '<span class="sr-badge custom">Custom</span>'}
+                ${!t.is_active ? '<span class="sr-badge off">Inactive</span>' : ''}
+            </div>
+            <div class="sr-actions">
+                ${!t.is_active ? `<button class="btn-activate" onclick="toggleEntityType(${t.id}, true)"><i class="fas fa-toggle-on"></i> Activate</button>` : ''}
+                ${t.is_system
+                    ? (t.is_active ? `<button class="btn-deactivate" onclick="toggleEntityType(${t.id}, false)"><i class="fas fa-toggle-off"></i> Deactivate</button>` : '')
+                    : `<button class="btn-remove" onclick="deleteEntityType(${t.id}, '${t.label.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Delete</button>`
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderEventTypes(types) {
+    const el = document.getElementById('eventTypesList');
+    if (!types.length) { el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-tertiary);">No event types yet. Click "Add" to get started.</div>'; return; }
+    const groups = {};
+    types.forEach(t => { const c = t.category || 'General'; if (!groups[c]) groups[c] = []; groups[c].push(t); });
+    let html = '';
+    Object.keys(groups).sort().forEach(cat => {
+        html += `<div style="font-weight:700;font-size:0.78rem;color:var(--philips-blue);margin-top:0.75rem;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.03em;">${cat}</div>`;
+        groups[cat].forEach(t => {
+            html += `<div class="settings-row ${!t.is_active ? 'inactive' : ''}">
+                <div>
+                    <span class="sr-label">${t.label}</span>
+                    <span class="sr-key">${t.key}</span>
+                    ${t.is_system ? '<span class="sr-badge system">System</span>' : '<span class="sr-badge custom">Custom</span>'}
+                    ${!t.is_active ? '<span class="sr-badge off">Inactive</span>' : ''}
+                </div>
+                <div class="sr-actions">
+                    ${!t.is_active ? `<button class="btn-activate" onclick="toggleEventType(${t.id}, true)"><i class="fas fa-toggle-on"></i> Activate</button>` : ''}
+                    ${t.is_system
+                        ? (t.is_active ? `<button class="btn-deactivate" onclick="toggleEventType(${t.id}, false)"><i class="fas fa-toggle-off"></i> Deactivate</button>` : '')
+                        : `<button class="btn-remove" onclick="deleteEventType(${t.id}, '${t.label.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Delete</button>`
+                    }
+                </div>
+            </div>`;
+        });
+    });
+    el.innerHTML = html;
+}
+
+// ── Entity Type Picker (modal) ─────────────────────────────────────────
+function openEntityTypePicker() {
+    renderEntityTypePicker();
+    openModal('entityTypeModal');
+}
+
+function renderEntityTypePicker() {
+    const list = document.getElementById('entityTypePickerList');
+    const empty = document.getElementById('entityTypePickerEmpty');
+    const items = cachedAvailableEntityTypes;
+    if (!items.length) { list.style.display = 'none'; empty.style.display = 'block'; return; }
+    list.style.display = 'flex'; empty.style.display = 'none';
+    list.innerHTML = items.map(t => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0.9rem;border-radius:var(--radius-sm);background:var(--bg-secondary);border:1px solid var(--border-color);cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--philips-blue)';this.style.background='rgba(11,95,255,0.04)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.background='var(--bg-secondary)'">
+            <div>
+                <div style="font-weight:600;font-size:0.88rem;">${t.label}</div>
+                <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:0.15rem;">${t.description}</div>
+                <div style="font-size:0.7rem;color:var(--text-tertiary);margin-top:0.1rem;font-family:monospace;">key: ${t.key}</div>
+            </div>
+            <button class="btn-primary" style="font-size:0.75rem;padding:0.35rem 0.7rem;white-space:nowrap;" onclick="addEntityTypeFromPicker('${t.key}', '${t.label.replace(/'/g, "\\'")}')"><i class="fas fa-plus"></i> Add</button>
+        </div>
+    `).join('');
+}
+
+async function addEntityTypeFromPicker(key, label) {
+    const res = await fetch(URL_ENTITY_TYPES_API, { method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ key, label }) });
+    const data = await res.json();
+    if (data.success) {
+        toast('success', `Added: ${label}`);
+        entityTypesLoadedForTemplate = false;
+        await loadTypeSettings();
+        renderEntityTypePicker();
+    } else toast('error', data.error || 'Failed');
+}
+
+// ── Event Type Picker (modal) ──────────────────────────────────────────
+function openEventTypePicker() {
+    renderEventTypePicker();
+    openModal('eventTypeModal');
+}
+
+function renderEventTypePicker() {
+    const list = document.getElementById('eventTypePickerList');
+    const empty = document.getElementById('eventTypePickerEmpty');
+    const items = cachedAvailableEventTypes;
+    if (!items.length) { list.style.display = 'none'; empty.style.display = 'block'; return; }
+    list.style.display = 'flex'; empty.style.display = 'none';
+
+    // Group by category
+    const groups = {};
+    items.forEach(t => { const c = t.category || 'General'; if (!groups[c]) groups[c] = []; groups[c].push(t); });
+    let html = '';
+    Object.keys(groups).sort().forEach(cat => {
+        html += `<div style="font-weight:700;font-size:0.8rem;color:var(--philips-blue);margin-top:0.8rem;margin-bottom:0.35rem;text-transform:uppercase;padding-left:0.2rem;">${cat}</div>`;
+        groups[cat].forEach(t => {
+            const wiredColor = t.is_wired ? 'var(--philips-blue)' : 'var(--text-tertiary)';
+            const wiredBadge = t.is_wired
+                ? '<span style="font-size:0.6rem;padding:0.1rem 0.35rem;border-radius:9999px;background:var(--philips-blue);color:#fff;margin-left:0.4rem;">Active in Code</span>'
+                : '<span style="font-size:0.6rem;padding:0.1rem 0.35rem;border-radius:9999px;background:var(--text-tertiary);color:#fff;margin-left:0.4rem;">Future Use</span>';
+            html += `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.55rem 0.9rem;border-radius:var(--radius-sm);background:var(--bg-secondary);border:1px solid var(--border-color);border-left:3px solid ${wiredColor};transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--philips-blue)';this.style.background='rgba(11,95,255,0.04)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.borderLeftColor='${wiredColor}';this.style.background='var(--bg-secondary)'">
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+                        <span style="font-weight:600;font-size:0.85rem;">${t.label}</span>
+                        ${wiredBadge}
+                    </div>
+                    <div style="font-size:0.74rem;color:var(--text-tertiary);margin-top:0.15rem;">${t.description}</div>
+                    <div style="font-size:0.68rem;color:var(--text-tertiary);margin-top:0.1rem;font-family:monospace;">key: ${t.key}</div>
+                </div>
+                <button class="btn-primary" style="font-size:0.75rem;padding:0.35rem 0.7rem;white-space:nowrap;margin-left:0.5rem;" onclick="addEventTypeFromPicker('${t.key}', '${t.label.replace(/'/g, "\\'")}', '${t.category.replace(/'/g, "\\'")}')"><i class="fas fa-plus"></i> Add</button>
+            </div>`;
+        });
+    });
+    list.innerHTML = html;
+}
+
+async function addEventTypeFromPicker(key, label, category) {
+    const res = await fetch(URL_EVENT_TYPES_API, { method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ key, label, category }) });
+    const data = await res.json();
+    if (data.success) {
+        toast('success', `Added: ${label}`);
+        triggersLoaded = false;
+        await loadTypeSettings();
+        renderEventTypePicker();
+    } else toast('error', data.error || 'Failed');
+}
+
+// ── Toggle / Delete helpers ────────────────────────────────────────────
+async function toggleEntityType(id, activate) {
+    const res = await fetch(URL_ENTITY_TYPES_API, { method: activate ? 'PUT' : 'DELETE', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ id, is_active: activate }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); entityTypesLoadedForTemplate = false; await loadTypeSettings(); }
+    else toast('error', data.error || 'Failed');
+}
+
+async function deleteEntityType(id, label) {
+    if (!confirm(`Delete entity type "${label}"?`)) return;
+    const res = await fetch(URL_ENTITY_TYPES_API, { method: 'DELETE', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); entityTypesLoadedForTemplate = false; await loadTypeSettings(); }
+    else toast('error', data.error || 'Failed');
+}
+
+async function toggleEventType(id, activate) {
+    const res = await fetch(URL_EVENT_TYPES_API, { method: activate ? 'PUT' : 'DELETE', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ id, is_active: activate }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); triggersLoaded = false; await loadTypeSettings(); }
+    else toast('error', data.error || 'Failed');
+}
+
+async function deleteEventType(id, label) {
+    if (!confirm(`Delete event type "${label}"?`)) return;
+    const res = await fetch(URL_EVENT_TYPES_API, { method: 'DELETE', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    const data = await res.json();
+    if (data.success) { toast('success', data.message); triggersLoaded = false; await loadTypeSettings(); }
+    else toast('error', data.error || 'Failed');
+}
+
+// ========================================================================
+// DYNAMIC ENTITY TYPE LOADING FOR TEMPLATE MODAL
+// ========================================================================
+let entityTypesLoadedForTemplate = false;
+
+async function ensureEntityTypesLoaded() {
+    if (entityTypesLoadedForTemplate) return;
+    try {
+        const res = await fetch(URL_TEMPLATES_API);
+        const data = await res.json();
+        if (data.success && data.entity_type_choices) {
+            const sel = document.getElementById('tmplEntityType');
+            sel.innerHTML = data.entity_type_choices.map(c =>
+                `<option value="${c.key}">${c.label}</option>`
+            ).join('');
+            entityTypesLoadedForTemplate = true;
+        }
+    } catch (e) { /* fallback */ }
+}
+</script>
+{% endblock %}

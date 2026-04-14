@@ -1,0 +1,836 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if document %}Edit{% else %}Upload{% endif %} Compliance Document - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 700px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+        height: 44px;
+        box-sizing: border-box;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child { border-bottom: none; }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* Form Elements */
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    .form-label .required { color: #ef4444; }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    textarea.form-control { resize: vertical; }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
+    }
+
+    /* File Upload Zone */
+    .file-upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: var(--bg-light);
+    }
+
+    .file-upload-zone:hover, .file-upload-zone.dragover {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .file-upload-zone .upload-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .file-upload-zone .upload-icon i {
+        font-size: 1.75rem;
+        color: var(--emerald);
+    }
+
+    .file-upload-zone:hover .upload-icon {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+    }
+
+    .file-upload-zone:hover .upload-icon i { color: white; }
+
+    .file-upload-zone h5 {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .file-upload-zone p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    .file-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: #f0fdf4;
+        border-radius: 12px;
+        border: 1px solid #a7f3d0;
+        margin-top: 1rem;
+    }
+
+    .file-preview .file-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: #d1fae5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .file-preview .file-icon i { font-size: 1.25rem; color: #047857; }
+    .file-preview .file-name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+    .file-preview .file-size { font-size: 0.8rem; color: var(--text-secondary); }
+
+    .file-preview .remove-file {
+        margin-left: auto;
+        color: #ef4444;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #fee2e2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .file-preview .remove-file:hover {
+        background: #fecaca;
+        transform: scale(1.1);
+    }
+
+    /* Checkbox Card */
+    .checkbox-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .checkbox-card:hover {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--emerald);
+        flex-shrink: 0;
+    }
+
+    .checkbox-card .checkbox-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .checkbox-card .checkbox-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        border: none;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #047857;
+        background: #d1fae5;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-download:hover { background: #a7f3d0; }
+
+    /* Grid Layout */
+    .form-grid { display: grid; gap: 1rem; }
+    .form-grid-2 { grid-template-columns: 1fr 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .form-grid-8-4 { grid-template-columns: 2fr 1fr; }
+    .form-grid-6-3-3 { grid-template-columns: 2fr 1fr 1fr; }
+    .span-full { grid-column: 1 / -1; }
+
+    .d-none { display: none; }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        .form-section { padding: 1.5rem; }
+        .form-grid-2, .form-grid-3, .form-grid-4,
+        .form-grid-8-4, .form-grid-6-3-3 { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-file-upload"></i>
+                {% if document %}Edit Document{% else %}Upload Compliance Document{% endif %}
+            </h1>
+            <p class="subtitle">
+                {% if document %}
+                    Update document details and upload a new version if needed
+                {% else %}
+                    Add a new compliance document to the {{ stream }} stream library
+                {% endif %}
+            </p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_documents_list' stream %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Documents
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" enctype="multipart/form-data" id="documentForm">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <!-- Document Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #d1fae5; color: #047857;">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Document Information</h5>
+                        <p class="section-subtitle">Basic details about the document</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-8-4">
+                    <div>
+                        <label class="form-label">Document Title <span class="required">*</span></label>
+                        <input type="text" name="title" class="form-control" required
+                               value="{{ document.title|default:'' }}"
+                               placeholder="Enter document title">
+                    </div>
+                    <div>
+                        <label class="form-label">Document ID <span class="required">*</span></label>
+                        <input type="text" name="document_id" class="form-control" required
+                               value="{{ document.document_id|default:'' }}"
+                               placeholder="e.g., POL-2026-001">
+                        <small class="form-text">Unique identifier for tracking</small>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-6-3-3" style="margin-top:1rem;">
+                    <div>
+                        <label class="form-label">Document Type <span class="required">*</span></label>
+                        <select name="document_type" class="form-select" required>
+                            <option value="">Select Type</option>
+                            {% for value, label in document_types %}
+                                <option value="{{ value }}" {% if document.document_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Version</label>
+                        <input type="text" name="version" class="form-control"
+                               value="{{ document.version|default:'1.0' }}"
+                               placeholder="e.g., 1.0">
+                    </div>
+                    <div>
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if document.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:1rem;">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3"
+                              placeholder="Brief description of the document">{{ document.description|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #dbeafe; color: #1e40af;">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Upload File</h5>
+                        <p class="section-subtitle">Upload the compliance document file</p>
+                    </div>
+                </div>
+
+                <div class="file-upload-zone" id="fileUploadZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h5>Drop your file here or click to browse</h5>
+                    <p>Supports PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX (Max 50MB)</p>
+                    <input type="file" name="file" id="fileInput" class="d-none"
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                </div>
+
+                <div class="file-preview d-none" id="filePreview">
+                    <div class="file-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div>
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-size" id="fileSize"></div>
+                    </div>
+                    <button type="button" class="remove-file" id="removeFile"><i class="fas fa-times"></i></button>
+                </div>
+
+                {% if document and document.file %}
+                <div style="margin-top:1rem;">
+                    <label class="form-label">Current file:</label>
+                    <div class="file-preview">
+                        <div class="file-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div>
+                            <div class="file-name">{{ document.original_filename }}</div>
+                            <div class="file-size">{{ document.file_size|filesizeformat }}</div>
+                        </div>
+                        <a href="{{ document.file.url }}" target="_blank" class="btn-download" style="margin-left:auto;">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Important Dates -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fef3c7; color: #b45309;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Important Dates</h5>
+                        <p class="section-subtitle">Track key dates for the document lifecycle</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-4">
+                    <div>
+                        <label class="form-label">Revision Date <span class="required">*</span></label>
+                        <input type="date" name="revision_date" class="form-control" required
+                               value="{{ document.revision_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Effective Date</label>
+                        <input type="date" name="effective_date" class="form-control"
+                               value="{{ document.effective_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" name="expiry_date" class="form-control"
+                               value="{{ document.expiry_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Next Review Date</label>
+                        <input type="date" name="review_date" class="form-control"
+                               value="{{ document.review_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scope & Keywords -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e8f0fe; color: #0044CC;">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Scope & Keywords</h5>
+                        <p class="section-subtitle">Define applicability and improve searchability</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Scope</label>
+                        <textarea name="scope" class="form-control" rows="3"
+                                  placeholder="Define the scope of applicability">{{ document.scope|default:'' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="form-label">Keywords</label>
+                        <textarea name="keywords" class="form-control" rows="3"
+                                  placeholder="Enter comma-separated keywords for search">{{ document.keywords|default:'' }}</textarea>
+                        <small class="form-text">e.g., safety, compliance, audit, ISO</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regulatory Association -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fee2e2; color: #b91c1c;">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Regulatory Association</h5>
+                        <p class="section-subtitle">Link document to regulatory requirements</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Linked Regulatory Requirement</label>
+                        <select name="regulatory_requirement" class="form-select">
+                            <option value="">None</option>
+                            {% for req in requirements %}
+                                <option value="{{ req.pk }}" {% if document.regulatory_requirement_id == req.pk %}selected{% endif %}>
+                                    {{ req.requirement_id }} - {{ req.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Document Author</label>
+                        <select name="author" class="form-select">
+                            <option value="">Select Author</option>
+                            {% for user in users %}
+                                <option value="{{ user.pk }}"
+                                    {% if document.author_id == user.pk %}selected{% elif not document and request.user.pk == user.pk %}selected{% endif %}>
+                                    {{ user.get_full_name|default:user.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribution & Access -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e0f2fe; color: #0891b2;">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Distribution & Access</h5>
+                        <p class="section-subtitle">Control document distribution and confidentiality</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Distribution List</label>
+                    <textarea name="distribution_list" class="form-control" rows="2"
+                              placeholder="List roles or users who should have access">{{ document.distribution_list|default:'' }}</textarea>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label class="checkbox-card">
+                        <input type="checkbox" name="is_confidential"
+                               {% if document.is_confidential %}checked{% endif %}>
+                        <div>
+                            <span class="checkbox-label">
+                                <i class="fas fa-lock" style="margin-right:0.35rem;"></i> Confidential Document
+                            </span>
+                            <p class="checkbox-desc">Restrict access to authorized users only</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Change Summary -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fef3c7; color: #b45309;">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Change Summary</h5>
+                        <p class="section-subtitle">Document what changed in this version</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Change Summary</label>
+                        <textarea name="change_summary" class="form-control" rows="3"
+                                  placeholder="Describe changes made in this version">{{ document.change_summary|default:'' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="form-label">Additional Notes</label>
+                        <textarea name="notes" class="form-control" rows="2"
+                                  placeholder="Any additional notes or comments">{{ document.notes|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'compliance_documents_list' stream %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i>
+                    {% if document %}Update Document{% else %}Upload Document{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var fileUploadZone = document.getElementById('fileUploadZone');
+    var fileInput = document.getElementById('fileInput');
+    var filePreview = document.getElementById('filePreview');
+    var fileName = document.getElementById('fileName');
+    var fileSize = document.getElementById('fileSize');
+    var removeFile = document.getElementById('removeFile');
+
+    // Click to upload
+    fileUploadZone.addEventListener('click', function() { fileInput.click(); });
+
+    // Drag and drop
+    fileUploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        fileUploadZone.classList.add('dragover');
+    });
+
+    fileUploadZone.addEventListener('dragleave', function() {
+        fileUploadZone.classList.remove('dragover');
+    });
+
+    fileUploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        fileUploadZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            displayFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length) {
+            displayFile(e.target.files[0]);
+        }
+    });
+
+    function displayFile(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        filePreview.classList.remove('d-none');
+        fileUploadZone.style.display = 'none';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        var k = 1024;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    removeFile.addEventListener('click', function() {
+        fileInput.value = '';
+        filePreview.classList.add('d-none');
+        fileUploadZone.style.display = 'block';
+    });
+
+    // Auto-generate document ID
+    var titleInput = document.querySelector('input[name="title"]');
+    var docIdInput = document.querySelector('input[name="document_id"]');
+    var docTypeSelect = document.querySelector('select[name="document_type"]');
+
+    function generateDocId() {
+        if (!docIdInput.value && titleInput.value) {
+            var type = docTypeSelect.value || 'DOC';
+            var typePrefix = type.substring(0, 3).toUpperCase();
+            var year = new Date().getFullYear();
+            var random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            docIdInput.value = typePrefix + '-' + year + '-' + random;
+        }
+    }
+
+    titleInput.addEventListener('blur', generateDocId);
+    docTypeSelect.addEventListener('change', generateDocId);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}AI Report: {{ schedule.title }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-white { background: #fff; color: #0B5FFF; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    /* Score cards row */
+    .score-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+    .score-card { background: #fff; border-radius: 14px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+    .score-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .score-card.green::before { background: var(--success); }
+    .score-card.amber::before { background: var(--warning); }
+    .score-card.red::before { background: var(--danger); }
+    .score-card.blue::before { background: var(--info); }
+    .score-card .sc-value { font-size: 2.2rem; font-weight: 800; line-height: 1.1; }
+    .score-card .sc-label { font-size: 0.78rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.35rem; }
+    .sc-value.text-green { color: var(--success); }
+    .sc-value.text-amber { color: var(--warning); }
+    .sc-value.text-red { color: var(--danger); }
+    .sc-value.text-blue { color: var(--info); }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    /* Recommendations */
+    .rec-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .rec-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border-left: 4px solid; }
+    .rec-item.critical { background: #fef2f2; border-color: #ef4444; }
+    .rec-item.warning { background: #fffbeb; border-color: #f59e0b; }
+    .rec-item.info { background: #eff6ff; border-color: #3b82f6; }
+    .rec-item.success { background: #f0fdf4; border-color: #10b981; }
+    .rec-item .rec-icon { font-size: 1.3rem; margin-top: 0.1rem; }
+    .rec-item.critical .rec-icon { color: #ef4444; }
+    .rec-item.warning .rec-icon { color: #f59e0b; }
+    .rec-item.info .rec-icon { color: #3b82f6; }
+    .rec-item.success .rec-icon { color: #10b981; }
+    .rec-item .rec-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .rec-item .rec-detail { font-size: 0.83rem; color: #475569; line-height: 1.5; }
+
+    /* Distribution chart */
+    .dist-bar { display: flex; height: 32px; border-radius: 8px; overflow: hidden; margin-top: 0.75rem; }
+    .dist-segment { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 700; white-space: nowrap; min-width: 30px; }
+
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th, .data-table td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .data-table th { font-weight: 600; color: #64748b; background: #f8fafc; position: sticky; top: 0; }
+    .data-table tr:hover { background: #f8fafc; }
+    .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-critical { background: #fecaca; color: #991b1b; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-low { background: #dbeafe; color: #1e40af; }
+    .badge-none { background: #e2e8f0; color: #475569; }
+
+    /* 2 col layout */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    .param-bar { height: 6px; border-radius: 3px; background: #e2e8f0; margin-top: 0.35rem; }
+    .param-bar-inner { height: 100%; border-radius: 3px; background: var(--primary); }
+    .empty-state { text-align: center; padding: 2rem; color: #94a3b8; }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-robot"></i> AI Calibration Report</h1>
+            <div class="subtitle">{{ schedule.title }} — Generated {{ report.generated_at|date:"M d, Y H:i" }}</div>
+        </div>
+        <div class="header-actions">
+            {% if db_report %}
+            <a href="{% url 'ai_calibration_report_pdf' stream=stream pk=db_report.pk %}" class="btn btn-white"><i class="fas fa-file-pdf"></i> Download PDF</a>
+            {% endif %}
+            <a href="{% url 'ai_calibration_report_hub' stream=stream %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+
+    {% with stats=report.stats %}
+    <!-- Score Cards -->
+    <div class="score-row">
+        <div class="score-card {% if stats.compliance_score >= 90 %}green{% elif stats.compliance_score >= 70 %}amber{% else %}red{% endif %}">
+            <div class="sc-value {% if stats.compliance_score >= 90 %}text-green{% elif stats.compliance_score >= 70 %}text-amber{% else %}text-red{% endif %}">{{ stats.compliance_score }}%</div>
+            <div class="sc-label">Compliance Score</div>
+        </div>
+        <div class="score-card {% if stats.pass_rate >= 95 %}green{% elif stats.pass_rate >= 80 %}amber{% else %}red{% endif %}">
+            <div class="sc-value {% if stats.pass_rate >= 95 %}text-green{% elif stats.pass_rate >= 80 %}text-amber{% else %}text-red{% endif %}">{{ stats.pass_rate }}%</div>
+            <div class="sc-label">Pass Rate</div>
+        </div>
+        <div class="score-card blue">
+            <div class="sc-value text-blue">{{ stats.total_records }}</div>
+            <div class="sc-label">Total Records</div>
+        </div>
+        <div class="score-card {% if stats.anomaly_count > 0 %}amber{% else %}green{% endif %}">
+            <div class="sc-value {% if stats.anomaly_count > 0 %}text-amber{% else %}text-green{% endif %}">{{ stats.anomaly_count }}</div>
+            <div class="sc-label">Anomalies Detected</div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    {% if stats.recommendations %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-brain"></i> AI Recommendations</div>
+        <div class="rec-list">
+            {% for rec in stats.recommendations %}
+            <div class="rec-item {{ rec.type }}">
+                <div class="rec-icon"><i class="fas {{ rec.icon }}"></i></div>
+                <div>
+                    <div class="rec-title">{{ rec.title }}</div>
+                    <div class="rec-detail">{{ rec.detail }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="two-col">
+        <!-- Result Distribution -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-pie"></i> Result Distribution</div>
+            {% if stats.result_distribution %}
+            <div class="dist-bar">
+                {% for result, count in stats.result_distribution.items %}
+                <div class="dist-segment" style="flex: {{ count }};
+                    {% if result == 'pass' %}background:#10b981;{% elif result == 'pass_adjusted' %}background:#3b82f6;{% elif result == 'fail' %}background:#ef4444;{% elif result == 'limited' %}background:#f59e0b;{% else %}background:#94a3b8;{% endif %}">
+                    {{ result }}: {{ count }}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="fas fa-chart-pie"></i>No result data</div>
+            {% endif %}
+        </div>
+
+        <!-- Cost & Environment -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-dollar-sign"></i> Cost & Environment</div>
+            <table class="data-table">
+                <tr><td><strong>Total Cost</strong></td><td>${{ stats.cost_analysis.total_cost|floatformat:2 }}</td></tr>
+                <tr><td><strong>Avg Cost/Calibration</strong></td><td>${{ stats.cost_analysis.average_cost|floatformat:2 }}</td></tr>
+                <tr><td><strong>Avg Temperature</strong></td><td>{% if stats.environmental.avg_temperature %}{{ stats.environmental.avg_temperature }}°C{% else %}N/A{% endif %}</td></tr>
+                <tr><td><strong>Avg Humidity</strong></td><td>{% if stats.environmental.avg_humidity %}{{ stats.environmental.avg_humidity }}%{% else %}N/A{% endif %}</td></tr>
+                <tr><td><strong>Avg Interval</strong></td><td>{% if stats.calibration_intervals.avg_days %}{{ stats.calibration_intervals.avg_days }} days{% else %}N/A{% endif %}</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Parameter Statistics -->
+    {% if stats.parameter_stats %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-ruler-combined"></i> Parameter Statistics</div>
+        <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr><th>Parameter</th><th>Count</th><th>Mean</th><th>Std Dev</th><th>Min</th><th>Max</th><th>CV%</th></tr>
+            </thead>
+            <tbody>
+                {% for param, ps in stats.parameter_stats.items %}
+                <tr>
+                    <td><strong>{{ param }}</strong></td>
+                    <td>{{ ps.count }}</td>
+                    <td>{{ ps.mean }}</td>
+                    <td>{{ ps.std }}</td>
+                    <td>{{ ps.min }}</td>
+                    <td>{{ ps.max }}</td>
+                    <td>{{ ps.cv }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Anomalies -->
+    {% if stats.anomalies %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Anomalous Measurements</div>
+        <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr><th>Date</th><th>Parameter</th><th>Value</th><th>Z-Score</th><th>Expected Range</th><th>Severity</th></tr>
+            </thead>
+            <tbody>
+                {% for a in stats.anomalies %}
+                <tr>
+                    <td>{{ a.date }}</td>
+                    <td><strong>{{ a.parameter }}</strong></td>
+                    <td>{{ a.value }}</td>
+                    <td>{{ a.z_score }}</td>
+                    <td>{{ a.expected_range.0 }} — {{ a.expected_range.1 }}</td>
+                    <td><span class="badge badge-{{ a.severity }}">{{ a.severity|upper }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Drift Analysis -->
+    {% if stats.drift_analysis %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-chart-line"></i> Calibration Drift Analysis</div>
+        <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr><th>Parameter</th><th>Trend</th><th>Direction</th><th>Severity</th></tr>
+            </thead>
+            <tbody>
+                {% for param, d in stats.drift_analysis.items %}
+                <tr>
+                    <td><strong>{{ param }}</strong></td>
+                    <td>{{ d.trend|default:"N/A" }}</td>
+                    <td>{{ d.direction|default:"—" }}</td>
+                    <td><span class="badge badge-{% if d.severity == 'high' %}critical{% elif d.severity == 'medium' %}warning{% elif d.severity == 'low' %}low{% else %}none{% endif %}">{{ d.severity|upper }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}

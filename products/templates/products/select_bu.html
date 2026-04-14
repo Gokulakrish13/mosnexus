@@ -1,0 +1,323 @@
+{% load static %}
+{% load product_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Business Unit — NexusOps</title>
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb;
+            --blue-700: #1d4ed8; --blue-800: #1e40af;
+            --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1; --slate-400: #94a3b8; --slate-500: #64748b;
+            --slate-600: #475569; --slate-700: #334155; --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --emerald-500: #10b981; --emerald-600: #059669;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #132244 40%, #0d3b6e 70%, #0a1628 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* ── Page transition overlay ── */
+        .page-transition-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            background: linear-gradient(135deg, #0a1628 0%, #132244 40%, #0d3b6e 70%, #0a1628 100%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .page-transition-overlay.active { opacity: 1; pointer-events: all; }
+
+        .bu-container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            max-width: 860px;
+            width: 100%;
+            padding: 3rem 2.5rem;
+            animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        body.page-exit .bu-container {
+            animation: fadeDown 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(-30px) scale(0.97); }
+        }
+
+        .bu-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .bu-header img {
+            height: 40px;
+            margin-bottom: 1rem;
+        }
+
+        .bu-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 0.4rem;
+        }
+
+        .bu-header p {
+            color: var(--slate-500);
+            font-size: 0.95rem;
+        }
+
+        .bu-greeting {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+            color: var(--slate-700);
+        }
+        .bu-greeting strong { color: var(--blue-700); }
+
+        .bu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bu-card {
+            position: relative;
+            background: var(--slate-50);
+            border: 2px solid var(--slate-200);
+            border-radius: 14px;
+            padding: 1.5rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+        }
+
+        .bu-card:hover {
+            border-color: var(--blue-600);
+            background: var(--blue-50);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.15);
+        }
+
+        .bu-card.selected {
+            border-color: var(--blue-700);
+            background: var(--blue-100);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+        }
+
+        .bu-card .bu-icon {
+            width: 52px; height: 52px;
+            margin: 0 auto 0.75rem;
+            background: linear-gradient(135deg, var(--blue-600), var(--blue-800));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.4rem;
+        }
+
+        .bu-card .bu-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .bu-card .bu-code {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bu-card .bu-desc {
+            font-size: 0.82rem;
+            color: var(--slate-500);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .bu-card input[type="radio"] {
+            display: none;
+        }
+
+
+        .no-bu-msg {
+            text-align: center;
+            padding: 2rem;
+            color: var(--slate-500);
+            border: 1px dashed var(--slate-300);
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .no-bu-msg > i { font-size: 2.5rem; margin-bottom: 1rem; display: block; color: var(--slate-300); }
+
+        .messages-area .msg {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .msg.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .msg.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            padding: 1rem 1.25rem;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            border-left: 4px solid #dc2626;
+        }
+        .msg.error i { color: #dc2626; font-size: 1.1rem; flex-shrink: 0; }
+
+        @media (max-width: 500px) {
+            .bu-container { padding: 2rem 1.5rem; }
+            .bu-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bu-container">
+        <div class="bu-header">
+            <img src="{% static 'products/philips.png' %}" alt="Philips">
+            <h1><i class="fas fa-building"></i> Select Business Unit</h1>
+            <p>Choose the Business Unit you want to work in</p>
+        </div>
+
+        <div class="bu-greeting">
+            Welcome, <strong>{{ user.username }}</strong>. Please confirm your Business Unit to continue.
+        </div>
+
+        {% if messages %}
+        <div class="messages-area">
+            {% for message in messages %}
+            <div class="msg {{ message.tags }}">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if business_units %}
+        <form method="post" id="buForm">
+            {% csrf_token %}
+            {% if form_error %}
+            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+            </div>
+            {% endif %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" name="bu_id" id="selectedBuId" value="">
+
+            <div class="bu-grid">
+                {% for bu in business_units %}
+                <div class="bu-card" data-bu-id="{{ bu.id }}" onclick="selectBU(this, {{ bu.id }})">
+                    <div class="bu-icon">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="bu-name">{{ bu.bu_name }}</div>
+                    <div class="bu-code">{{ bu.division }}</div>
+                    {% if bu.description %}
+                    <div class="bu-desc">{{ bu.description }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+
+        </form>
+
+        {% if user|is_app_admin %}
+        <div style="text-align:center;margin-top:1.5rem;">
+            <a href="/manage-business-units/" style="color:var(--slate-500);font-size:0.88rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;padding:0.45rem 0.9rem;border:1px dashed var(--slate-300);border-radius:0.5rem;transition:all 0.2s;" onmouseover="this.style.color='var(--blue-600)';this.style.borderColor='var(--blue-400)'" onmouseout="this.style.color='var(--slate-500)';this.style.borderColor='var(--slate-300)'">
+                <i class="fas fa-cog"></i> Manage Business Units
+            </a>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="no-bu-msg">
+            <i class="fas fa-info-circle"></i>
+            {% if user|is_app_admin %}
+            <p>No Business Units have been configured yet.<br>Use the option below to configure.</p>
+            <div style="text-align:center;margin-top:1rem;">
+                <a href="/manage-business-units/" style="color:var(--slate-500);font-size:0.88rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;transition:color 0.2s;" onmouseover="this.style.color='var(--blue-600)'" onmouseout="this.style.color='var(--slate-500)'">
+                    <i class="fas fa-cog"></i> Manage Business Units
+                </a>
+            </div>
+            {% else %}
+            <p>No Business Units have been configured yet.<br>Please contact your administrator.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Page‑transition overlay -->
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <script>
+        function selectBU(card, buId) {
+            document.querySelectorAll('.bu-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            document.getElementById('selectedBuId').value = buId;
+            document.getElementById('buForm').submit();
+        }
+
+        /* ── Smooth page‑transition for navigation links ── */
+        function navigateWithTransition(href) {
+            const overlay = document.getElementById('pageOverlay');
+            document.body.classList.add('page-exit');
+            overlay.classList.add('active');
+            setTimeout(() => { window.location.href = href; }, 380);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intercept all <a> tags that navigate between BU pages
+            document.querySelectorAll('a[href]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && (href.includes('manage-business-units') || href.includes('select-bu'))) {
+                    link.addEventListener('click', e => {
+                        e.preventDefault();
+                        navigateWithTransition(href);
+                    });
+                }
+            });
+
+            // Fade‑in on page load (remove overlay if user arrived via transition)
+            const overlay = document.getElementById('pageOverlay');
+            overlay.classList.add('active');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    overlay.classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

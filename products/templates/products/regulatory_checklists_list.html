@@ -1,0 +1,1206 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Regulatory Checklists - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --teal: #0d9488;
+        --teal-dark: #0f766e;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 450px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn i {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--emerald);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f0fdf4;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.emerald { background: #d1fae5; color: var(--emerald); }
+    .stat-icon.blue { background: #dbeafe; color: var(--primary-blue); }
+    .stat-icon.orange { background: #fef3c7; color: var(--warning-orange); }
+    .stat-icon.red { background: #fee2e2; color: var(--danger-red); }
+    .stat-icon.teal { background: #ccfbf1; color: var(--teal); }
+
+    .stat-content .value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-content .label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .filters-bar {
+        background: white;
+        padding: 1.25rem 1.5rem;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .filter-group select, .filter-group input {
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.875rem;
+        background: var(--bg-light);
+        min-width: 160px;
+        transition: all 0.2s ease;
+    }
+
+    .filter-group select:focus, .filter-group input:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .btn-filter {
+        background: var(--emerald);
+        color: white;
+        padding: 0.625rem 1.25rem;
+    }
+
+    .btn-filter:hover {
+        background: var(--emerald-dark);
+    }
+
+    .btn-clear {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-clear:hover {
+        background: #e2e8f0;
+        color: var(--text-primary);
+    }
+
+    .checklists-table {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);    }
+
+    .table-header {
+        padding: 1.5rem 1.75rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table-header h3 i {
+        color: var(--emerald);
+    }
+
+    .table-count {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        background: var(--bg-light);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        background: var(--bg-light);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+    }
+
+    .checklist-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .checklist-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .checklist-requirement {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .checklist-requirement i {
+        font-size: 0.7rem;
+        color: var(--emerald);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 0.875rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.not_started {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .status-badge.in_progress {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-badge.completed {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-badge.verified {
+        background: #ccfbf1;
+        color: #0d9488;
+    }
+
+    .status-badge.overdue {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .progress-cell {
+        min-width: 140px;
+    }
+
+    .progress-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+    }
+
+    .progress-text .items {
+        color: var(--text-secondary);
+    }
+
+    .progress-text .percent {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--emerald), var(--teal));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-fill.low {
+        background: linear-gradient(90deg, #f59e0b, #eab308);
+    }
+
+    .progress-fill.high {
+        background: linear-gradient(90deg, var(--emerald), #10b981);
+    }
+
+    .assignee-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .assignee-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--emerald), var(--teal));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .assignee-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .assignee-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .assignee-role {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .date-cell {
+        white-space: nowrap;
+    }
+
+    .date-primary {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .date-secondary {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .days-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-top: 0.25rem;
+        display: inline-block;
+        font-weight: 600;
+    }
+
+    .days-badge.overdue {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .days-badge.urgent {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .days-badge.normal {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        background: var(--emerald);
+        color: white;
+        border-color: var(--emerald);
+        transform: translateY(-2px);
+    }
+
+    .btn-action.edit:hover {
+        background: #f59e0b;
+        border-color: #f59e0b;
+    }
+
+    .btn-action.delete:hover {
+        background: var(--danger-red);
+        border-color: var(--danger-red);
+    }
+
+    .btn-action.verify:hover {
+        background: var(--teal);
+        border-color: var(--teal);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-state-icon i {
+        font-size: 2.5rem;
+        color: var(--emerald);
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 1.5rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .empty-state .btn-primary {
+        background: var(--emerald);
+        color: white;
+    }
+
+    .empty-state .btn-primary:hover {
+        background: var(--emerald-dark);
+    }
+
+    /* Quick View Panel */
+    .quick-view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: auto;
+    }
+
+    .view-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .view-btn.active, .view-btn:hover {
+        background: var(--emerald);
+        color: white;
+        border-color: var(--emerald);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background: var(--success-green-light);
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+        background: var(--danger-red-light);
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-warning {
+        background: var(--warning-orange-light);
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
+    .alert-info {
+        background: var(--primary-blue-light);
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Card View Styles */
+    .checklists-grid {
+        display: none;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .checklists-grid.active {
+        display: grid;
+    }
+
+    .checklists-table.hidden {
+        display: none;
+    }
+
+    .checklist-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .checklist-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .card-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+    }
+
+    .card-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.375rem;
+    }
+
+    .card-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .card-progress {
+        margin-bottom: 1rem;
+    }
+
+    .card-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .card-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .card-meta-item i {
+        color: var(--emerald);
+        width: 16px;
+    }
+
+    .card-footer {
+        padding: 1rem 1.25rem;
+        background: var(--bg-light);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .card-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+
+        .filters-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-group select, .filter-group input {
+            flex: 1;
+            width: 100%;
+        }
+
+        .checklists-table {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 900px;
+        }
+
+        .checklists-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Messages Container -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-clipboard-check"></i> Regulatory Checklists</h1>
+            <p class="subtitle">Track and manage compliance verification tasks for {{ stream }} stream</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_dashboard' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'regulatory_checklist_create' stream=stream %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Checklist
+            </a>
+        </div>
+    </div>    <!-- Statistics -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon emerald">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <div class="value">{{ total_count|default:0 }}</div>
+                <div class="label">Total Checklists</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-spinner"></i>
+            </div>
+            <div class="stat-content">
+                <div class="value">{{ in_progress_count|default:0 }}</div>
+                <div class="label">In Progress</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon teal">
+                <i class="fas fa-check-double"></i>
+            </div>
+            <div class="stat-content">
+                <div class="value">{{ verified_count|default:0 }}</div>
+                <div class="label">Verified</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="value">{{ not_started_count|default:0 }}</div>
+                <div class="label">Not Started</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <form method="GET" class="filters-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-filter" style="margin-right: 0.25rem;"></i> Status:</label>
+            <select name="status">
+                <option value="">All Statuses</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-file-alt" style="margin-right: 0.25rem;"></i> Requirement:</label>
+            <select name="requirement">
+                <option value="">All Requirements</option>
+                {% for req in requirements %}
+                <option value="{{ req.pk }}" {% if requirement_filter == req.pk|stringformat:"s" %}selected{% endif %}>{{ req.title|truncatechars:30 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-filter">
+            <i class="fas fa-search"></i> Filter
+        </button>
+        {% if status_filter or requirement_filter %}
+        <a href="{% url 'regulatory_checklists_list' stream=stream %}" class="btn btn-clear">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+        
+        <div class="quick-view-toggle">
+            <button type="button" class="view-btn active" onclick="showTableView()" title="Table View">
+                <i class="fas fa-th-list"></i>
+            </button>
+            <button type="button" class="view-btn" onclick="showCardView()" title="Card View">
+                <i class="fas fa-th-large"></i>
+            </button>
+        </div>
+    </form>
+
+    <!-- Table View -->
+    <div class="checklists-table" id="tableView">
+        <div class="table-header">
+            <h3><i class="fas fa-tasks"></i> Checklists Overview</h3>
+            <span class="table-count">{{ checklists|length }} checklist{{ checklists|length|pluralize }}</span>
+        </div>
+        
+        {% if checklists %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Checklist</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Assigned To</th>
+                    <th>Target Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checklist in checklists %}
+                <tr>
+                    <td>
+                        <div class="checklist-info">
+                            <span class="checklist-title">{{ checklist.title }}</span>
+                            {% if checklist.regulatory_requirement %}
+                            <span class="checklist-requirement">
+                                <i class="fas fa-link"></i> {{ checklist.regulatory_requirement.title|truncatechars:40 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge {{ checklist.status }}">
+                            <i class="fas fa-{% if checklist.status == 'completed' %}check{% elif checklist.status == 'verified' %}check-double{% elif checklist.status == 'in_progress' %}spinner fa-spin{% elif checklist.status == 'overdue' %}exclamation{% else %}hourglass-start{% endif %}"></i>
+                            {{ checklist.get_status_display|default:checklist.status|title }}
+                        </span>
+                    </td>
+                    <td class="progress-cell">
+                        <div class="progress-wrapper">
+                            <div class="progress-text">
+                                <span class="items">{{ checklist.items.filter.is_completed|yesno:"✓,○"|default:"0" }}/{{ checklist.items.count|default:0 }} items</span>
+                                <span class="percent">{{ checklist.completion_percentage|default:0 }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill {% if checklist.completion_percentage >= 75 %}high{% elif checklist.completion_percentage < 25 %}low{% endif %}" style="width: {{ checklist.completion_percentage|default:0 }}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if checklist.assigned_to %}
+                        <div class="assignee-cell">
+                            <div class="assignee-avatar">
+                                {{ checklist.assigned_to.first_name|slice:":1"|upper|default:checklist.assigned_to.username|slice:":1"|upper }}
+                            </div>
+                            <div class="assignee-info">
+                                <span class="assignee-name">{{ checklist.assigned_to.get_full_name|default:checklist.assigned_to.username }}</span>
+                                <span class="assignee-role">Assignee</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <span style="color: var(--text-secondary); font-style: italic;">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="date-cell">
+                        {% if checklist.target_date %}
+                        <div class="date-primary">{{ checklist.target_date|date:"M d, Y" }}</div>
+                        {% with days_left=checklist.target_date|timesince_days %}
+                            {% if days_left is not None %}
+                                {% if days_left < 0 %}
+                                <span class="days-badge overdue">{{ days_left|abs_value }} days overdue</span>
+                                {% elif days_left == 0 %}
+                                <span class="days-badge urgent">Due today</span>
+                                {% elif days_left <= 7 %}
+                                <span class="days-badge urgent">{{ days_left }} days left</span>
+                                {% else %}
+                                <span class="days-badge normal">{{ days_left }} days left</span>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <span style="color: var(--text-secondary);">No target date</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'regulatory_checklist_detail' stream=stream pk=checklist.pk %}" class="btn-action" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if checklist.status == 'completed' and checklist.completion_percentage == 100 %}
+                            <a href="#" onclick="verifyChecklist({{ checklist.pk }}); return false;" class="btn-action verify" title="Verify">
+                                <i class="fas fa-check-double"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'regulatory_checklist_edit' stream=stream pk=checklist.pk %}" class="btn-action edit" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'regulatory_checklist_delete' stream=stream pk=checklist.pk %}" class="btn-action delete" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>No Checklists Found</h3>
+            <p>No regulatory checklists match your current filters, or no checklists have been created yet.</p>
+            <a href="{% url 'regulatory_checklist_create' stream=stream %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create First Checklist
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Card View -->
+    <div class="checklists-grid" id="cardView">
+        {% if checklists %}
+        {% for checklist in checklists %}
+        <div class="checklist-card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">{{ checklist.title }}</div>
+                    <div class="card-subtitle">
+                        {% if checklist.regulatory_requirement %}
+                        <i class="fas fa-link"></i> {{ checklist.regulatory_requirement.title|truncatechars:35 }}
+                        {% else %}
+                        No linked requirement
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="status-badge {{ checklist.status }}">
+                    <i class="fas fa-{% if checklist.status == 'completed' %}check{% elif checklist.status == 'verified' %}check-double{% elif checklist.status == 'in_progress' %}spinner{% else %}hourglass-start{% endif %}"></i>
+                    {{ checklist.get_status_display|default:checklist.status|title }}
+                </span>
+            </div>
+            
+            <div class="card-body">
+                <div class="card-progress">
+                    <div class="progress-wrapper">
+                        <div class="progress-text">
+                            <span class="items">{{ checklist.items.count|default:0 }} items</span>
+                            <span class="percent">{{ checklist.completion_percentage|default:0 }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if checklist.completion_percentage >= 75 %}high{% elif checklist.completion_percentage < 25 %}low{% endif %}" style="width: {{ checklist.completion_percentage|default:0 }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-meta">
+                    <div class="card-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>{{ checklist.target_date|date:"M d, Y"|default:"No due date" }}</span>
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>{{ checklist.assigned_to.get_full_name|default:checklist.assigned_to.username|default:"Unassigned" }}</span>
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>{{ checklist.items.count|default:0 }} Items</span>
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>{{ checklist.created_by.get_full_name|default:checklist.created_by.username|default:"Unknown" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="card-actions">
+                    <a href="{% url 'regulatory_checklist_detail' stream=stream pk=checklist.pk %}" class="btn-action" title="View">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'regulatory_checklist_edit' stream=stream pk=checklist.pk %}" class="btn-action edit" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'regulatory_checklist_delete' stream=stream pk=checklist.pk %}" class="btn-action delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+                <span class="card-time">
+                    <i class="fas fa-clock"></i> Updated {{ checklist.updated_at|timesince }} ago
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>No Checklists Found</h3>
+            <p>Create your first regulatory checklist to start tracking compliance tasks.</p>
+            <a href="{% url 'regulatory_checklist_create' stream=stream %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Checklist
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// View toggle functions
+function showTableView() {
+    document.getElementById('tableView').classList.remove('hidden');
+    document.getElementById('cardView').classList.remove('active');
+    document.querySelectorAll('.view-btn')[0].classList.add('active');
+    document.querySelectorAll('.view-btn')[1].classList.remove('active');
+    localStorage.setItem('checklistView', 'table');
+}
+
+function showCardView() {
+    document.getElementById('tableView').classList.add('hidden');
+    document.getElementById('cardView').classList.add('active');
+    document.querySelectorAll('.view-btn')[0].classList.remove('active');
+    document.querySelectorAll('.view-btn')[1].classList.add('active');
+    localStorage.setItem('checklistView', 'card');
+}
+
+// Verify checklist function
+function verifyChecklist(checklistId) {
+    if (confirm('Are you sure you want to verify this checklist?')) {
+        fetch(`{% url 'regulatory_checklist_verify' stream=stream pk=0 %}`.replace('/0/', '/' + checklistId + '/'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                console.error('Verify failed:', data.error);
+                alert('Failed to verify checklist.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while verifying the checklist');
+        });
+    }
+}
+
+// Auto-close alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    // Restore view preference
+    const savedView = localStorage.getItem('checklistView');
+    if (savedView === 'card') {
+        showCardView();
+    }
+
+    // Auto-close alerts
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

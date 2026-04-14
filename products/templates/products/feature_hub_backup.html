@@ -1,0 +1,773 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Feature Hub{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #0B5FFF;
+        --indigo: #0B5FFF;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .hub-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .hub-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .hub-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .hub-header h1 i {
+        color: var(--primary-blue);
+    }
+
+    .hub-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        background: white;
+        color: var(--primary-blue);
+    }
+
+    /* ─── Feature Selector ─── */
+    .feature-selector {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .feature-selector h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .feature-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .feature-tab {
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .feature-tab:hover {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue-light);
+    }
+
+    .feature-tab.active {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .feature-tab i {
+        font-size: 1.25rem;
+    }
+
+    .feature-tab .tab-desc {
+        display: none;
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .feature-tab.active .tab-desc {
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* ─── Streams Grid ─── */
+    .streams-section h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .streams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stream-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stream-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--indigo));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .stream-card:hover {
+        border-color: var(--primary-blue);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .stream-card:hover::before {
+        opacity: 1;
+    }
+
+    .stream-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--indigo));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .stream-icon i {
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stream-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stream-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .stream-arrow {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        opacity: 0;
+        transition: all 0.3s;
+    }
+
+    .stream-card:hover .stream-arrow {
+        opacity: 1;
+        right: 1rem;
+        color: var(--primary-blue);
+    }
+
+    /* ─── Direct-link card (no stream) ─── */
+    .direct-links {
+        margin-top: 2rem;
+    }
+
+    .direct-links h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .direct-links-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .direct-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .direct-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 4px; height: 100%;
+        background: transparent;
+        transition: background 0.25s;
+    }
+
+    .direct-card:hover {
+        border-color: var(--primary-blue);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        transform: translateX(4px);
+    }
+
+    .direct-card:hover::before {
+        background: var(--primary-blue);
+    }
+
+    .direct-card-icon {
+        flex-shrink: 0;
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.15rem;
+    }
+
+    .direct-card-body { flex: 1; }
+
+    .direct-card-body h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.15rem;
+    }
+
+    .direct-card-body p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .direct-card-arrow {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: all 0.25s;
+    }
+
+    .direct-card:hover .direct-card-arrow {
+        opacity: 1;
+        color: var(--primary-blue);
+        transform: translateX(3px);
+    }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* ─── AI Section ─── */
+    .ai-section {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 2px solid transparent;
+        transition: border-color 0.3s;
+        overflow: hidden;
+    }
+
+    .ai-section.has-active {
+        border-color: rgba(11, 95, 255, 0.35);
+    }
+
+    .ai-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 2rem;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .ai-section-header:hover {
+        background: linear-gradient(135deg, #272463 0%, #3b3890 100%);
+    }
+
+    .ai-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+
+    .ai-section-title i {
+        font-size: 1.3rem;
+        background: linear-gradient(135deg, #a78bfa, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .ai-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: rgba(167, 139, 250, 0.2);
+        color: #c4b5fd;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid rgba(167, 139, 250, 0.25);
+    }
+
+    .ai-toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .ai-toggle-label {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.65);
+        font-weight: 500;
+    }
+
+    .ai-toggle {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .ai-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .ai-slider {
+        position: absolute;
+        inset: 0;
+        background: rgba(255,255,255,0.2);
+        border-radius: 24px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .ai-slider::before {
+        content: '';
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+
+    .ai-toggle input:checked + .ai-slider {
+        background: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .ai-toggle input:checked + .ai-slider::before {
+        transform: translateX(20px);
+    }
+
+    .ai-section-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, padding 0.3s ease;
+        padding: 0 2rem;
+    }
+
+    .ai-section-body.open {
+        max-height: 500px;
+        padding: 1.5rem 2rem 2rem;
+    }
+
+    .ai-feature-tabs {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .ai-feature-tab {
+        padding: 0.75rem 1.25rem;
+        border: 2px solid rgba(99, 102, 241, 0.2);
+        border-radius: 12px;
+        background: linear-gradient(135deg, #eef4ff, #eef2ff);
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #003399;
+    }
+
+    .ai-feature-tab:hover {
+        border-color: #818cf8;
+        background: linear-gradient(135deg, #e8f0fe, #e8f0fe);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+
+    .ai-feature-tab.active {
+        border-color: #0B5FFF;
+        background: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        color: white;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+
+    .ai-feature-tab i {
+        font-size: 1.1rem;
+    }
+
+    .ai-feature-tab .ai-tab-new {
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    .ai-feature-tab.active .ai-tab-new {
+        background: rgba(255,255,255,0.25);
+        color: white;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+        .hub-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .feature-tabs {
+            flex-direction: column;
+        }
+
+        .ai-feature-tabs {
+            flex-direction: column;
+        }
+
+        .streams-grid,
+        .direct-links-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-section-header {
+            padding: 1rem 1.25rem;
+        }
+
+        .ai-section-body.open {
+            padding: 1rem 1.25rem 1.5rem;
+        }
+    }
+</style>
+
+<div class="hub-container">
+
+    <div class="hub-header">
+        <h1><i class="fas fa-rocket"></i> Feature Hub</h1>
+        <p>Advanced tools & management — select a feature, then choose a stream to proceed</p>
+    </div>
+
+    <!-- ─── Core Features ─── -->
+    <div class="feature-selector">
+        <h2><i class="fas fa-layer-group"></i> Select Feature</h2>
+
+        <div class="feature-tabs" id="featureTabs">
+            <div class="feature-tab active" data-feature="asset_lifecycle" onclick="selectFeature('asset_lifecycle')">
+                <i class="fas fa-heartbeat"></i>
+                <span>Asset Lifecycle</span>
+            </div>
+            <div class="feature-tab" data-feature="maintenance_calendar" onclick="selectFeature('maintenance_calendar')">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Maintenance Calendar</span>
+            </div>
+            <div class="feature-tab" data-feature="inventory_alerts" onclick="selectFeature('inventory_alerts')">
+                <i class="fas fa-bell"></i>
+                <span>Inventory Alerts</span>
+            </div>
+            <div class="feature-tab" data-feature="inventory_thresholds" onclick="selectFeature('inventory_thresholds')">
+                <i class="fas fa-sliders-h"></i>
+                <span>Threshold Rules</span>
+            </div>
+            <div class="feature-tab" data-feature="lifecycle_dashboard" onclick="selectFeature('lifecycle_dashboard')">
+                <i class="fas fa-chart-pie"></i>
+                <span>Lifecycle Dashboard</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── AI-Powered Features (collapsible) ─── -->
+    <div class="ai-section" id="aiSection">
+        <div class="ai-section-header" onclick="document.getElementById('aiToggle').click();">
+            <div class="ai-section-title">
+                <i class="fas fa-robot"></i>
+                <span>AI-Powered Features</span>
+                <span class="ai-badge">8 Tools</span>
+            </div>
+            <div class="ai-toggle-wrap" onclick="event.stopPropagation();">
+                <span class="ai-toggle-label" id="aiToggleLabel">Show</span>
+                <label class="ai-toggle">
+                    <input type="checkbox" id="aiToggle" onchange="toggleAI(this.checked)">
+                    <span class="ai-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="ai-section-body" id="aiBody">
+            <div class="ai-feature-tabs" id="aiFeatureTabs">
+                <div class="ai-feature-tab" data-feature="ai_calibration" onclick="selectFeature('ai_calibration')">
+                    <i class="fas fa-robot"></i>
+                    <span>Calibration Reports</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_ocr" onclick="selectFeature('ai_ocr')">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Document OCR</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_forecast" onclick="selectFeature('ai_forecast')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Inventory Forecast</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_scheduler" onclick="selectFeature('ai_scheduler')">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Smart Scheduler</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_nl_dashboard" onclick="selectFeature('ai_nl_dashboard')">
+                    <i class="fas fa-comments"></i>
+                    <span>NL Query</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_model_mgmt" onclick="selectFeature('ai_model_mgmt')">
+                    <i class="fas fa-cogs"></i>
+                    <span>Model Management</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_usage_analytics" onclick="selectFeature('ai_usage_analytics')">
+                    <i class="fas fa-chart-area"></i>
+                    <span>Usage Analytics</span>
+                    <span class="ai-tab-new">New</span>
+                </div>
+                <div class="ai-feature-tab" data-feature="ai_anomaly_detection" onclick="selectFeature('ai_anomaly_detection')">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Anomaly Detection</span>
+                    <span class="ai-tab-new">New</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Stream Selector (shared) ─── -->
+    <div class="feature-selector">
+        <div class="streams-section">
+            <h3><i class="fas fa-sitemap"></i> Select Stream</h3>
+            {% if streams %}
+            <div class="streams-grid" id="streamsGrid">
+                {% for stream in streams %}
+                <a href="#" class="stream-card" data-stream="{{ stream.name }}" onclick="navigateToFeature('{{ stream.name }}'); return false;">
+                    <div class="stream-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stream-name">{{ stream.name }}</div>
+                    <div class="stream-label">Click to access selected feature</div>
+                    <div class="stream-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No Streams Available</h3>
+                <p>Contact your administrator to get access to streams.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ─── Direct-link Features (no stream required) ─── -->
+    {% if is_admin %}
+    <div class="direct-links">
+        <h2><i class="fas fa-bolt"></i> Quick Access (No Stream Required)</h2>
+        <div class="direct-links-grid">
+            <a href="{% url 'audit_log_list' %}" class="direct-card">
+                <div class="direct-card-icon" style="background: linear-gradient(135deg, #232526, #414345);">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="direct-card-body">
+                    <h3>Audit Log</h3>
+                    <p>Global activity timeline & security audit trail</p>
+                </div>
+                <span class="direct-card-arrow"><i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    let selectedFeature = 'asset_lifecycle';
+
+    function selectFeature(feature) {
+        selectedFeature = feature;
+        /* Clear active from BOTH tab groups */
+        document.querySelectorAll('.feature-tab, .ai-feature-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.feature === feature);
+        });
+        /* Highlight AI section border when an AI feature is active */
+        const aiSection = document.getElementById('aiSection');
+        if (feature.startsWith('ai_')) {
+            aiSection.classList.add('has-active');
+        } else {
+            aiSection.classList.remove('has-active');
+        }
+    }
+
+    /* ─── AI Toggle ─── */
+    function toggleAI(show) {
+        const body = document.getElementById('aiBody');
+        const label = document.getElementById('aiToggleLabel');
+        if (show) {
+            body.classList.add('open');
+            label.textContent = 'Hide';
+        } else {
+            body.classList.remove('open');
+            label.textContent = 'Show';
+            /* If an AI feature was selected, reset to the default core feature */
+            if (selectedFeature.startsWith('ai_')) {
+                selectFeature('asset_lifecycle');
+            }
+        }
+        try { localStorage.setItem('nexusops_ai_visible', show ? '1' : '0'); } catch(e) {}
+    }
+
+    function navigateToFeature(stream) {
+        const routes = {
+            asset_lifecycle:      `/stream/${stream}/lifecycle/`,
+            maintenance_calendar: `/stream/${stream}/maintenance-calendar/`,
+            inventory_alerts:     `/stream/${stream}/inventory-alerts/`,
+            inventory_thresholds: `/stream/${stream}/inventory-alerts/thresholds/`,
+            lifecycle_dashboard:  `/stream/${stream}/lifecycle/dashboard/`,
+            ai_calibration:       `/stream/${stream}/ai/calibration-reports/`,
+            ai_ocr:               `/stream/${stream}/ai/ocr/`,
+            ai_nl_dashboard:      `/stream/${stream}/ai/nl-dashboard/`,
+            ai_forecast:          `/stream/${stream}/ai/inventory-forecast/`,
+            ai_scheduler:         `/stream/${stream}/ai/smart-scheduler/`,
+            ai_model_mgmt:        `/stream/${stream}/ai/model-management/`,
+            ai_usage_analytics:   `/stream/${stream}/ai/usage-analytics/`,
+            ai_anomaly_detection: `/stream/${stream}/ai/anomaly-detection/`,
+        };
+        const url = routes[selectedFeature];
+        if (url) window.location.href = url;
+    }
+
+    /* ─── Init ─── */
+    document.addEventListener('DOMContentLoaded', function() {
+        /* Restore AI toggle state from localStorage */
+        const aiToggle = document.getElementById('aiToggle');
+        let show = false;
+        try { show = localStorage.getItem('nexusops_ai_visible') === '1'; } catch(e) {}
+        aiToggle.checked = show;
+        toggleAI(show);
+
+        /* Pre-select feature from hash (e.g. /feature-hub/#ai_forecast) */
+        const hash = window.location.hash.replace('#', '');
+        if (hash && document.querySelector(`[data-feature="${hash}"]`)) {
+            selectFeature(hash);
+            /* Auto-open AI section if hash points to an AI feature */
+            if (hash.startsWith('ai_') && !aiToggle.checked) {
+                aiToggle.checked = true;
+                toggleAI(true);
+            }
+        }
+    });
+</script>
+{% endblock %}

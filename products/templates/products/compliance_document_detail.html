@@ -1,0 +1,722 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ document.title }} - Compliance Document{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --danger-red: #ef4444;
+        --warning-orange: #f59e0b;
+        --info-blue: #3b82f6;
+        --success-green: #10b981;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-content { flex: 1; }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .breadcrumb a { color: white; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.65rem;
+        border-radius: 12px;
+    }
+
+    .header-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .btn-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.25rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 42px;
+        box-sizing: border-box;
+    }
+
+    .btn-header-back {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-header-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+
+    .btn-header-primary {
+        background: white;
+        color: var(--emerald-dark);
+    }
+
+    .btn-header-primary:hover { background: #f0fdf4; }
+
+    .btn-header-edit {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-header-edit:hover { background: rgba(255,255,255,0.25); color: white; }
+
+    .btn-header-danger {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+
+    .btn-header-danger:hover { background: var(--danger-red); }
+
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* Cards */
+    .card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .card + .card { margin-top: 1.5rem; }
+
+    .card-header {
+        padding: 1.25rem 1.75rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-body { padding: 1.75rem; }
+
+    /* Detail Items */
+    .detail-item { margin-bottom: 1.5rem; }
+    .detail-item:last-child { margin-bottom: 0; }
+
+    .detail-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.35rem;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        line-height: 1.7;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-badge.draft { background: #e2e8f0; color: #475569; }
+    .status-badge.pending_review { background: #fef3c7; color: #b45309; }
+    .status-badge.approved { background: #d1fae5; color: #047857; }
+    .status-badge.archived { background: #f1f5f9; color: #64748b; }
+    .status-badge.superseded { background: #e8f0fe; color: #6d28d9; }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #f0fdf4;
+        color: #047857;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .info-card {
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .info-card .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--text-secondary);
+        margin-bottom: 0.35rem;
+    }
+
+    .info-card .info-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* File Preview */
+    .file-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        background: #f0fdf4;
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+    }
+
+    .file-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: #d1fae5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .file-icon i { font-size: 1.5rem; color: #047857; }
+
+    .file-info { flex: 1; }
+    .file-name { font-weight: 700; color: var(--text-primary); font-size: 0.95rem; }
+    .file-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem; }
+
+    .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        background: var(--emerald);
+        color: white;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .btn-download:hover {
+        background: var(--emerald-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Date Items */
+    .date-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .date-item {
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+    }
+
+    .date-item .date-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--text-secondary);
+        margin-bottom: 0.35rem;
+    }
+
+    .date-item .date-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .date-item.expired .date-value { color: var(--danger-red); }
+    .date-item.soon .date-value { color: var(--warning-orange); }
+
+    /* Version History */
+    .version-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        border-radius: 10px;
+        background: var(--bg-light);
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .version-item:last-child { margin-bottom: 0; }
+    .version-item:hover { background: #f0fdf4; }
+
+    .version-badge {
+        background: #d1fae5;
+        color: #047857;
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        flex-shrink: 0;
+    }
+
+    .version-item.current .version-badge {
+        background: var(--emerald);
+        color: white;
+    }
+
+    .version-info { flex: 1; }
+    .version-title { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
+    .version-date { font-size: 0.78rem; color: var(--text-secondary); }
+
+    /* Confidential Banner */
+    .confidential-banner {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .confidential-banner i { color: #b45309; font-size: 1.1rem; }
+    .confidential-banner span { font-size: 0.88rem; font-weight: 600; color: #92400e; }
+
+    /* Keywords */
+    .keyword-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .keyword-tag {
+        padding: 0.3rem 0.75rem;
+        background: #f1f5f9;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .page-header { padding: 1.5rem; }
+        .header-top { flex-direction: column; }
+        .date-grid, .info-grid { grid-template-columns: 1fr; }
+        .file-card { flex-direction: column; text-align: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-top">
+            <div class="header-content">
+                <div class="breadcrumb">
+                    <a href="{% url 'compliance_dashboard' stream %}">Compliance</a>
+                    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+                    <a href="{% url 'compliance_documents_list' stream %}">Documents</a>
+                    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+                    <span>{{ document.document_id }}</span>
+                </div>
+                <h1>
+                    <i class="fas fa-file-alt"></i>
+                    {{ document.title }}
+                </h1>
+                <div class="header-badges">
+                    <span class="header-badge">
+                        <i class="fas fa-hashtag"></i>
+                        {{ document.document_id }}
+                    </span>
+                    <span class="header-badge">
+                        <i class="fas fa-code-branch"></i>
+                        Version {{ document.version }}
+                    </span>
+                    <span class="header-badge">
+                        <i class="fas fa-folder"></i>
+                        {{ document.get_document_type_display }}
+                    </span>
+                    <span class="header-badge">
+                        <i class="fas fa-{% if document.status == 'approved' %}check-circle{% elif document.status == 'draft' %}pencil-alt{% else %}clock{% endif %}"></i>
+                        {{ document.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'compliance_documents_list' stream %}" class="btn-header btn-header-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                {% if document.file %}
+                <a href="{{ document.file.url }}" target="_blank" class="btn-header btn-header-primary">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% endif %}
+                <a href="{% url 'compliance_document_edit' stream document.pk %}" class="btn-header btn-header-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'compliance_document_delete' stream document.pk %}" class="btn-header btn-header-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div>
+            {% if document.is_confidential %}
+            <div class="confidential-banner">
+                <i class="fas fa-lock"></i>
+                <span>This document is marked as confidential — restricted access only</span>
+            </div>
+            {% endif %}
+
+            <!-- File Preview -->
+            {% if document.file %}
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-paperclip" style="color: var(--emerald);"></i> Attached File</h2>
+                </div>
+                <div class="card-body">
+                    <div class="file-card">
+                        <div class="file-icon">
+                            <i class="fas fa-file-{% if document.original_filename|lower|slice:'-4:' == '.pdf' %}pdf{% elif document.original_filename|lower|slice:'-5:' == '.docx' or document.original_filename|lower|slice:'-4:' == '.doc' %}word{% elif document.original_filename|lower|slice:'-5:' == '.xlsx' or document.original_filename|lower|slice:'-4:' == '.xls' %}excel{% else %}alt{% endif %}"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">{{ document.original_filename }}</div>
+                            <div class="file-meta">
+                                {% if document.file_size %}{{ document.file_size|filesizeformat }} · {% endif %}
+                                Uploaded {{ document.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        <a href="{{ document.file.url }}" target="_blank" class="btn-download">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Description & Scope -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle" style="color: var(--info-blue);"></i> Document Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">{{ document.description|default:"No description provided."|linebreaks }}</div>
+                    </div>
+
+                    {% if document.scope %}
+                    <div class="detail-item">
+                        <div class="detail-label">Scope</div>
+                        <div class="detail-value">{{ document.scope|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if document.keywords %}
+                    <div class="detail-item">
+                        <div class="detail-label">Keywords</div>
+                        <div class="keyword-tags">
+                            {% for kw in document.keywords.split %}
+                            <span class="keyword-tag">{{ kw|cut:"," }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if document.change_summary %}
+                    <div class="detail-item">
+                        <div class="detail-label">Change Summary</div>
+                        <div class="detail-value">{{ document.change_summary|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if document.notes %}
+                    <div class="detail-item">
+                        <div class="detail-label">Notes</div>
+                        <div class="detail-value">{{ document.notes|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Version History -->
+            {% if version_history.count > 1 %}
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-code-branch" style="color: #0044CC;"></i> Version History</h2>
+                </div>
+                <div class="card-body">
+                    {% for ver in version_history %}
+                    <div class="version-item {% if ver.pk == document.pk %}current{% endif %}">
+                        <span class="version-badge">v{{ ver.version }}</span>
+                        <div class="version-info">
+                            <div class="version-title">
+                                {{ ver.title }}
+                                {% if ver.pk == document.pk %}<small style="color: var(--emerald); font-weight: 700;"> (current)</small>{% endif %}
+                            </div>
+                            <div class="version-date">{{ ver.revision_date|date:"M d, Y" }} · {{ ver.get_status_display }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Quick Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clipboard-list" style="color: var(--emerald);"></i> Quick Info</h2>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge {{ document.status }}">{{ document.get_status_display }}</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Type</div>
+                            <div class="info-value">
+                                <span class="type-badge"><i class="fas fa-folder"></i> {{ document.get_document_type_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <div class="detail-item">
+                            <div class="detail-label">Document ID</div>
+                            <div class="detail-value" style="font-weight: 700;">{{ document.document_id }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Version</div>
+                            <div class="detail-value">{{ document.version }}</div>
+                        </div>
+                        {% if document.author %}
+                        <div class="detail-item">
+                            <div class="detail-label">Author</div>
+                            <div class="detail-value">{{ document.author.get_full_name|default:document.author.username }}</div>
+                        </div>
+                        {% endif %}
+                        {% if document.reviewed_by %}
+                        <div class="detail-item">
+                            <div class="detail-label">Reviewed By</div>
+                            <div class="detail-value">{{ document.reviewed_by.get_full_name|default:document.reviewed_by.username }}</div>
+                        </div>
+                        {% endif %}
+                        {% if document.approved_by %}
+                        <div class="detail-item">
+                            <div class="detail-label">Approved By</div>
+                            <div class="detail-value">{{ document.approved_by.get_full_name|default:document.approved_by.username }}</div>
+                        </div>
+                        {% endif %}
+                        {% if document.regulatory_requirement %}
+                        <div class="detail-item">
+                            <div class="detail-label">Linked Requirement</div>
+                            <div class="detail-value">{{ document.regulatory_requirement.requirement_id }} — {{ document.regulatory_requirement.title }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <div class="detail-label">Stream</div>
+                            <div class="detail-value">{{ document.stream }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Dates -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-alt" style="color: var(--warning-orange);"></i> Important Dates</h2>
+                </div>
+                <div class="card-body">
+                    <div class="date-grid">
+                        <div class="date-item">
+                            <div class="date-label">Revision Date</div>
+                            <div class="date-value">{{ document.revision_date|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="date-item">
+                            <div class="date-label">Effective Date</div>
+                            <div class="date-value">{{ document.effective_date|date:"M d, Y"|default:"—" }}</div>
+                        </div>
+                        <div class="date-item {% if document.expiry_date and document.needs_review %}expired{% endif %}">
+                            <div class="date-label">Expiry Date</div>
+                            <div class="date-value">{{ document.expiry_date|date:"M d, Y"|default:"—" }}</div>
+                        </div>
+                        <div class="date-item {% if document.needs_review %}soon{% endif %}">
+                            <div class="date-label">Next Review</div>
+                            <div class="date-value">{{ document.review_date|date:"M d, Y"|default:"—" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribution -->
+            {% if document.distribution_list %}
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-share-alt" style="color: #0891b2;"></i> Distribution</h2>
+                </div>
+                <div class="card-body">
+                    <div class="detail-value">{{ document.distribution_list|linebreaks }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

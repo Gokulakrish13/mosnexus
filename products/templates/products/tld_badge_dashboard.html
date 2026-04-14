@@ -1,0 +1,1646 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}TLD Badge Management{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #0B5FFF;
+        --indigo: #0B5FFF;
+        --teal: #14b8a6;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
+
+    .hub-container { max-width: 1500px; margin: 0 auto; padding: 2rem; }
+
+    .hub-header { text-align: center; margin-bottom: 2rem; }
+    .hub-header h1 {
+        font-size: 2.25rem; font-weight: 700; color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    }
+    .hub-header h1 i { color: var(--indigo); }
+    .hub-header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+    /* ===== Stream Tabs ===== */
+    .stream-tabs-section { margin-bottom: 1.75rem; }
+    .stream-tabs-section .section-label {
+        font-size: 0.8125rem; font-weight: 700; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .stream-tabs-section .section-label i { color: var(--indigo); }
+    .stream-tabs-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .stream-tab {
+        padding: 0.75rem 1.5rem; border: 2px solid var(--border-color);
+        border-radius: 12px; background: white; cursor: pointer;
+        transition: all 0.25s ease; display: flex; align-items: center;
+        gap: 0.75rem; font-weight: 600; font-size: 0.9375rem;
+        color: var(--text-secondary); text-decoration: none;
+        position: relative; overflow: hidden; box-shadow: var(--card-shadow);
+    }
+    .stream-tab::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--indigo));
+        opacity: 0; transition: opacity 0.25s;
+    }
+    .stream-tab:hover {
+        border-color: var(--primary-blue); color: var(--primary-blue);
+        transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .stream-tab:hover::before { opacity: 1; }
+    .stream-tab.active {
+        border-color: var(--primary-blue); background: var(--primary-blue);
+        color: white; box-shadow: 0 4px 12px rgba(0,102,204,0.25);
+    }
+    .stream-tab.active::before { opacity: 0; }
+    .stream-tab .stream-tab-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(99,102,241,0.1); color: var(--indigo);
+        font-size: 1rem; flex-shrink: 0; transition: all 0.25s;
+    }
+    .stream-tab.active .stream-tab-icon { background: rgba(255,255,255,0.2); color: white; }
+
+    /* ===== Expiry Alert Banner ===== */
+    .expiry-alert {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b; border-radius: 12px;
+        padding: 1rem 1.5rem; margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 1rem;
+        animation: pulseAlert 2s ease infinite;
+    }
+    @keyframes pulseAlert { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.2)} 50%{box-shadow:0 0 0 8px rgba(245,158,11,0)} }
+    .expiry-alert i { font-size: 1.5rem; color: #d97706; }
+    .expiry-alert .alert-text { flex: 1; }
+    .expiry-alert .alert-title { font-weight: 700; color: #92400e; font-size: 0.95rem; }
+    .expiry-alert .alert-desc { font-size: 0.85rem; color: #78350f; margin-top: 0.15rem; }
+
+    /* ===== Stats Row ===== */
+    .stats-row {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+        box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 1rem;
+        border: 1px solid transparent; transition: all 0.2s;
+    }
+    .stat-card:hover { border-color: var(--primary-blue); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    .stat-icon {
+        width: 52px; height: 52px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: rgba(0,102,204,0.1); color: var(--primary-blue); }
+    .stat-icon.green { background: rgba(16,185,129,0.1); color: var(--success-green); }
+    .stat-icon.orange { background: rgba(245,158,11,0.1); color: var(--warning-orange); }
+    .stat-icon.red { background: rgba(239,68,68,0.1); color: var(--danger-red); }
+    .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1; transition: all 0.3s; }
+    .stat-label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; margin-top: 0.125rem; }
+
+    /* ===== Charts (inside modal) ===== */
+    .charts-grid {
+        display: grid; grid-template-columns: 1fr 1.5fr;
+        gap: 1.25rem;
+    }
+    .chart-card {
+        background: var(--bg-light); border-radius: 12px; padding: 1.25rem 1.5rem;
+    }
+    .chart-card h4 {
+        font-size: 0.875rem; font-weight: 700; color: var(--text-primary);
+        margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .chart-card h4 i { color: var(--indigo); font-size: 0.85rem; }
+    .chart-container { position: relative; height: 250px; }
+
+    /* Analytics tab */
+    .analytics-tab {
+        padding: 0.75rem 1.5rem; border: 2px solid var(--border-color);
+        border-radius: 12px; background: white;
+        cursor: pointer; transition: all 0.25s ease;
+        display: flex; align-items: center; gap: 0.75rem;
+        font-weight: 600; font-size: 0.9375rem; color: var(--text-secondary);
+        text-decoration: none; box-shadow: var(--card-shadow);
+        position: relative; overflow: hidden;
+    }
+    .analytics-tab::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, var(--indigo), var(--purple));
+        opacity: 0; transition: opacity 0.25s;
+    }
+    .analytics-tab:hover {
+        border-color: var(--indigo); color: var(--indigo);
+        transform: translateY(-2px); box-shadow: 0 6px 16px rgba(99,102,241,0.15);
+    }
+    .analytics-tab:hover::before { opacity: 1; }
+    .analytics-tab:hover .stream-tab-icon { background: rgba(99,102,241,0.15); color: var(--indigo); }
+    .analytics-tab .stream-tab-icon {
+        background: rgba(99,102,241,0.1); color: var(--indigo);
+    }
+
+    /* ===== Toolbar ===== */
+    .toolbar {
+        background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+        box-shadow: var(--card-shadow); margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;
+    }
+    .toolbar select, .toolbar input[type="text"] {
+        padding: 0.5rem 0.75rem; border: 1px solid var(--border-color);
+        border-radius: 8px; font-size: 0.875rem; background: var(--bg-light);
+        color: var(--text-primary); transition: border 0.2s;
+    }
+    .toolbar select:focus, .toolbar input:focus { outline: none; border-color: var(--primary-blue); }
+    .toolbar input[type="text"] { min-width: 220px; }
+    .toolbar .spacer { flex: 1; }
+    .toolbar-divider {
+        width: 100%; height: 1px; background: var(--border-color);
+        margin: 0.5rem 0;
+    }
+    .toolbar-actions {
+        display: flex; align-items: center; gap: 0.5rem; width: 100;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.55rem 1.1rem; border-radius: 8px; font-size: 0.875rem;
+        font-weight: 600; border: none; cursor: pointer; text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary-blue); color: white; }
+    .btn-primary:hover { background: #0052a3; transform: translateY(-1px); }
+    .btn-success { background: var(--success-green); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-outline {
+        background: transparent; color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+    .btn-outline:hover { border-color: var(--primary-blue); color: var(--primary-blue); background: var(--primary-blue-light); }
+    .btn-danger { background: var(--danger-red); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-warning { background: var(--warning-orange); color: white; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+    /* ===== Bulk Action Bar ===== */
+    .bulk-bar {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--indigo) 100%);
+        color: white; border-radius: 14px; padding: 0.875rem 1.5rem;
+        margin-bottom: 1rem; display: none; align-items: center; gap: 1rem;
+        box-shadow: 0 4px 12px rgba(0,102,204,0.25);
+        animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } }
+    .bulk-bar.show { display: flex; }
+    .bulk-bar .bulk-count { font-weight: 700; font-size: 0.95rem; }
+    .bulk-bar .bulk-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+    .bulk-bar .btn { font-size: 0.8rem; padding: 0.4rem 0.9rem; }
+    .bulk-bar select {
+        padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15); color: white; font-size: 0.8rem;
+    }
+    .bulk-bar select option { color: var(--text-primary); background: white; }
+
+    /* ===== Table ===== */
+    .table-wrapper {
+        background: white; border-radius: 14px; box-shadow: var(--card-shadow);
+        overflow: hidden; position: relative;
+    }
+    .table-wrapper table { width: 100%; border-collapse: collapse; }
+    .table-wrapper th {
+        background: var(--bg-light); color: var(--text-secondary);
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.05em; padding: 0.875rem 1rem;
+        text-align: left; border-bottom: 2px solid var(--border-color); white-space: nowrap;
+    }
+    .table-wrapper td {
+        padding: 0.875rem 1rem; font-size: 0.875rem;
+        color: var(--text-primary); border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    .table-wrapper tbody tr { transition: background 0.15s; }
+    .table-wrapper tbody tr:hover { background: var(--primary-blue-light); }
+    .table-wrapper tbody tr:last-child td { border-bottom: none; }
+    .table-wrapper tbody tr.row-selected { background: rgba(0,102,204,0.08); }
+
+    .row-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-blue); }
+    .header-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-blue); }
+
+    /* ===== Badges ===== */
+    .badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.25rem 0.65rem; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-active { background: rgba(16,185,129,0.12); color: #059669; }
+    .badge-pending { background: rgba(245,158,11,0.12); color: #d97706; }
+    .badge-renewed { background: rgba(99,102,241,0.12); color: #0044CC; }
+    .badge-expired { background: rgba(239,68,68,0.12); color: #dc2626; }
+    .badge-returned { background: rgba(100,116,139,0.12); color: #475569; }
+    .badge-lost { background: rgba(239,68,68,0.12); color: #dc2626; }
+
+    /* ===== Quarter Tabs ===== */
+    .quarter-tabs { display: flex; gap: 0.5rem; }
+    .quarter-tab {
+        padding: 0.45rem 1rem; border-radius: 8px;
+        font-size: 0.8125rem; font-weight: 600;
+        border: 1px solid var(--border-color); background: white;
+        color: var(--text-secondary); cursor: pointer;
+        transition: all 0.2s; text-decoration: none;
+    }
+    .quarter-tab:hover { border-color: var(--primary-blue); color: var(--primary-blue); }
+    .quarter-tab.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+
+    /* ===== Pagination ===== */
+    .pagination-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1rem 1.5rem; background: var(--bg-light);
+        border-top: 1px solid var(--border-color);
+    }
+    .pagination-info { font-size: 0.8125rem; color: var(--text-secondary); }
+    .pagination-btns { display: flex; gap: 0.35rem; }
+    .pagination-btns a, .pagination-btns span {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; border-radius: 8px;
+        font-size: 0.8125rem; font-weight: 600;
+        text-decoration: none; transition: all 0.15s;
+        border: 1px solid var(--border-color); color: var(--text-secondary);
+        background: white; cursor: pointer;
+    }
+    .pagination-btns a:hover { border-color: var(--primary-blue); color: var(--primary-blue); }
+    .pagination-btns .current { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4); z-index: 9999;
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+        background: white; border-radius: 16px; width: 560px;
+        max-width: 95vw; max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 24px 48px rgba(0,0,0,0.15);
+        animation: modalIn 0.25s ease;
+    }
+    .modal-box.wide { width: 800px; }
+    .modal-box.extra-wide { width: 1050px; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
+    .modal-header {
+        padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 1.125rem; font-weight: 700; }
+    .modal-close {
+        width: 36px; height: 36px; border-radius: 8px;
+        border: none; background: var(--bg-light); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; color: var(--text-secondary); transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--danger-red); color: white; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+        padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);
+        display: flex; justify-content: flex-end; gap: 0.75rem;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+        display: block; margin-bottom: 0.35rem;
+        font-size: 0.8125rem; font-weight: 600; color: var(--text-primary);
+    }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 0.55rem 0.75rem;
+        border: 1px solid var(--border-color); border-radius: 8px;
+        font-size: 0.875rem; background: var(--bg-light);
+        color: var(--text-primary); transition: border 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        outline: none; border-color: var(--primary-blue);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Duplicate warning inline */
+    .dup-warning {
+        display: none; font-size: 0.8rem; color: var(--warning-orange);
+        margin-top: 0.25rem; font-weight: 600;
+    }
+    .dup-warning i { margin-right: 0.25rem; }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.35; }
+    .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+
+    .actions-cell { display: flex; gap: 0.35rem; }
+
+    /* ===== Timeline ===== */
+    .timeline { position: relative; padding-left: 1.5rem; }
+    .timeline::before {
+        content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px;
+        width: 2px; background: var(--border-color);
+    }
+    .timeline-item { position: relative; margin-bottom: 1.25rem; padding-left: 1.25rem; }
+    .timeline-item::before {
+        content: ''; position: absolute; left: -1.5rem; top: 6px;
+        width: 12px; height: 12px; border-radius: 50%;
+        border: 2px solid var(--primary-blue); background: white;
+    }
+    .timeline-item.active::before { background: var(--success-green); border-color: var(--success-green); }
+    .timeline-item.pending::before { background: var(--warning-orange); border-color: var(--warning-orange); }
+    .timeline-item.expired::before { background: var(--danger-red); border-color: var(--danger-red); }
+    .timeline-item.renewed::before { background: var(--indigo); border-color: var(--indigo); }
+    .timeline-header { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+    .timeline-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem; }
+
+    /* ===== Audit Log ===== */
+    .audit-entry {
+        padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);
+        display: flex; gap: 0.75rem; font-size: 0.85rem;
+    }
+    .audit-entry:last-child { border-bottom: none; }
+    .audit-icon {
+        width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem;
+    }
+    .audit-icon.create { background: rgba(16,185,129,0.12); color: #059669; }
+    .audit-icon.edit { background: rgba(0,102,204,0.12); color: var(--primary-blue); }
+    .audit-icon.delete { background: rgba(239,68,68,0.12); color: var(--danger-red); }
+    .audit-icon.bulk_import { background: rgba(99,102,241,0.12); color: var(--indigo); }
+    .audit-icon.bulk_status { background: rgba(245,158,11,0.12); color: #d97706; }
+
+    /* ===== Print Badge Cards ===== */
+    .print-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .print-card {
+        border: 2px solid var(--border-color); border-radius: 12px;
+        padding: 1.25rem; text-align: center; break-inside: avoid;
+    }
+    .print-card .pc-title { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .print-card .pc-name { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+    .print-card .pc-tld { font-size: 1.5rem; font-weight: 800; color: var(--primary-blue); margin: 0.5rem 0; font-family: monospace; }
+    .print-card .pc-detail { font-size: 0.8rem; color: var(--text-secondary); margin: 0.15rem 0; }
+
+    .toast {
+        position: fixed; top: 1.5rem; right: 1.5rem; z-index: 10001;
+        padding: 0.875rem 1.25rem; border-radius: 10px;
+        font-size: 0.875rem; font-weight: 600; color: white;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        transform: translateX(120%); transition: transform 0.35s ease;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-success { background: var(--success-green); }
+    .toast-error { background: var(--danger-red); }
+
+    .content-loading { opacity: 0.5; pointer-events: none; transition: opacity 0.2s; }
+
+    /* Import results */
+    .import-results { margin-top: 1rem; font-size: 0.85rem; }
+    .import-results .ir-success { color: var(--success-green); font-weight: 600; }
+    .import-results .ir-skip { color: var(--warning-orange); font-weight: 600; }
+    .import-errors { max-height: 150px; overflow-y: auto; margin-top: 0.5rem; font-size: 0.8rem; color: var(--danger-red); }
+
+    @media print {
+        .hub-header, .stream-tabs-section, .stats-row, .charts-section, .toolbar, .bulk-bar,
+        .pagination-bar, .modal-overlay, .toast, .table-wrapper, .expiry-alert,
+        .pnav-bar { display: none !important; }
+        .print-area { display: block !important; }
+        body { background: white !important; }
+    }
+
+    @media (max-width: 992px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .charts-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+        .hub-header h1 { font-size: 1.75rem; }
+        .stats-row { grid-template-columns: 1fr; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+        .table-wrapper { overflow-x: auto; }
+        .form-row { grid-template-columns: 1fr; }
+        .stream-tab { padding: 0.6rem 1rem; font-size: 0.85rem; }
+        .print-cards-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="hub-container">
+
+    <div class="hub-header">
+        <h1><i class="fas fa-id-badge"></i> TLD Badge Management</h1>
+        <p>Track Thermoluminescent Dosimeter badge assignments, renewals, and compliance by quarter</p>
+    </div>
+
+    <!-- ===== Stream Selector ===== -->
+    <div class="stream-tabs-section">
+        <div class="section-label"><i class="fas fa-code-branch"></i> Select Stream</div>
+        <div class="stream-tabs-grid">
+            <div class="stream-tab {% if not stream_filter %}active{% endif %}"
+                 data-stream="" onclick="selectStream('')">
+                <div class="stream-tab-icon"><i class="fas fa-layer-group"></i></div>
+                All Streams
+            </div>
+            {% for s in bu_streams %}
+            <div class="stream-tab {% if stream_filter == s.name %}active{% endif %}"
+                 data-stream="{{ s.name }}" onclick="selectStream('{{ s.name|escapejs }}')">
+                <div class="stream-tab-icon"><i class="fas fa-code-branch"></i></div>
+                {{ s.name }}
+            </div>
+            {% endfor %}
+            <!-- Analytics button -->
+            <div class="analytics-tab" onclick="openAnalyticsModal()">
+                <div class="stream-tab-icon"><i class="fas fa-chart-pie"></i></div>
+                Analytics
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Expiry Alert Banner ===== -->
+    <div id="expiryAlert" style="{% if not expiry_alert %}display:none;{% endif %}">
+        {% if expiry_alert %}
+        <div class="expiry-alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="alert-text">
+                <div class="alert-title">Badge Renewal Deadline Approaching!</div>
+                <div class="alert-desc">
+                    <strong>{{ expiry_alert.pending_count }}</strong> badge(s) pending renewal for {{ expiry_alert.quarter }}.
+                    Only <strong>{{ expiry_alert.days_left }}</strong> day(s) remaining until quarter end.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ===== Stats ===== -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-id-badge"></i></div>
+            <div>
+                <div class="stat-value" id="statTotal">{{ total_badges }}</div>
+                <div class="stat-label">Total Badges (<span id="statQuarterLabel">{{ current_quarter_label }} {{ selected_year }}</span>)</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+            <div>
+                <div class="stat-value" id="statActive">{{ active_badges }}</div>
+                <div class="stat-label">Active (<span class="stat-q-label">{{ current_quarter_label }}</span>)</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+            <div>
+                <div class="stat-value" id="statPending">{{ pending_renewal }}</div>
+                <div class="stat-label">Pending Renewal (<span class="stat-q-label">{{ current_quarter_label }}</span>)</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-value" id="statExpired">{{ expired_badges }}</div>
+                <div class="stat-label">Expired (<span class="stat-q-label">{{ current_quarter_label }}</span>)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Toolbar ===== -->
+    <div class="toolbar">
+        <select id="yearSelect" onchange="fetchData()">
+            {% for y in available_years %}
+            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="addCustomYear()" title="Add a new year">
+            <i class="fas fa-plus"></i> Year
+        </button>
+
+        <div class="quarter-tabs" id="quarterTabs">
+            <a href="javascript:void(0)" class="quarter-tab {% if not selected_quarter %}active{% endif %}"
+               data-quarter="" onclick="selectQuarter(this)">All Quarters</a>
+            {% for val, label in quarter_choices %}
+            <a href="javascript:void(0)" class="quarter-tab {% if selected_quarter == val %}active{% endif %}"
+               data-quarter="{{ val }}" onclick="selectQuarter(this)">{{ label }}</a>
+            {% endfor %}
+        </div>
+
+        <select id="statusFilter" onchange="fetchData()">
+            <option value="">All Statuses</option>
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="toolbar-divider"></div>
+        <div class="toolbar-actions">
+            <input type="text" id="searchInput" placeholder="Search name, email, TLD #..."
+                   value="{{ search_q }}">
+            <button class="btn btn-outline btn-sm" onclick="fetchData()">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <div class="spacer"></div>
+
+            <a href="#" class="btn btn-outline btn-sm" id="exportBtn" title="Export to Excel">
+                <i class="fas fa-file-excel"></i> Export
+            </a>
+            <button class="btn btn-outline btn-sm" onclick="openImportModal()" title="Bulk Import CSV/Excel">
+                <i class="fas fa-file-upload"></i> Import
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="openAuditLogModal()" title="View Audit Trail">
+                <i class="fas fa-history"></i> Audit
+            </button>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i> Add Badge
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Bulk Action Bar ===== -->
+    <div class="bulk-bar" id="bulkBar">
+        <i class="fas fa-check-double"></i>
+        <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
+        <div class="bulk-actions">
+            <select id="bulkStatusSelect">
+                {% for val, label in status_choices %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-warning btn-sm" onclick="bulkUpdateStatus()">
+                <i class="fas fa-sync-alt"></i> Update Status
+            </button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;" onclick="printSelectedBadges()">
+                <i class="fas fa-print"></i> Print Cards
+            </button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;" onclick="clearSelection()">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Table ===== -->
+    <div class="table-wrapper" id="tableWrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" class="header-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>TLD Number</th>
+                    <th>Stream</th>
+                    <th>CODE1 ID</th>
+                    <th>Employee ID</th>
+                    <th>Quarter</th>
+                    <th>Renewal Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for r in records %}
+                <tr id="row-{{ r.pk }}" data-pk="{{ r.pk }}">
+                    <td><input type="checkbox" class="row-checkbox" value="{{ r.pk }}" onchange="onRowCheck()"></td>
+                    <td><strong>{{ r.pk }}</strong></td>
+                    <td>{{ r.name }}</td>
+                    <td><a href="mailto:{{ r.email }}" style="color:var(--primary-blue);text-decoration:none;">{{ r.email }}</a></td>
+                    <td><code style="background:var(--bg-light);padding:2px 6px;border-radius:4px;">{{ r.tld_number }}</code></td>
+                    <td>{{ r.stream.name|default:"-" }}</td>
+                    <td>{{ r.code1_id|default:"-" }}</td>
+                    <td>{{ r.employee_id|default:"-" }}</td>
+                    <td>{{ r.get_quarter_display }}</td>
+                    <td>
+                        <span class="badge badge-{{ r.renewal_status }}">
+                            {{ r.get_renewal_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn btn-outline btn-sm" title="History"
+                                    onclick="openHistoryModal({{ r.pk }})">
+                                <i class="fas fa-clock-rotate-left"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" title="Edit"
+                                    onclick="openEditModal({{ r.pk }},'{{ r.name|escapejs }}','{{ r.email|escapejs }}','{{ r.tld_number|escapejs }}','{{ r.code1_id|escapejs }}','{{ r.employee_id|escapejs }}','{{ r.renewal_status }}','{{ r.notes|escapejs }}','{{ r.stream.name|default:""|escapejs }}','{{ r.year }}','{{ r.quarter }}')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" title="Delete" style="color:var(--danger-red);border-color:var(--danger-red);"
+                                    onclick="confirmDelete({{ r.pk }},'{{ r.name|escapejs }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="paginationBar">
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination-bar">
+            <div class="pagination-info">
+                Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+            </div>
+            <div class="pagination-btns">
+                {% if page_obj.has_previous %}
+                <a onclick="goToPage({{ page_obj.previous_page_number }})"><i class="fas fa-chevron-left"></i></a>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <a onclick="goToPage({{ num }})">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <a onclick="goToPage({{ page_obj.next_page_number }})"><i class="fas fa-chevron-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        </div>
+
+        <div id="emptyState" style="{% if records %}display:none;{% endif %}">
+            <div class="empty-state">
+                <i class="fas fa-id-badge"></i>
+                <h3>No TLD Badge Records</h3>
+                <p>No records found for the selected filters. Click <strong>Add Badge</strong> to create one.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CREATE / EDIT MODAL ===== -->
+<div class="modal-overlay" id="badgeModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add TLD Badge</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="badgeForm" onsubmit="submitBadgeForm(event)">
+            {% csrf_token %}
+            <input type="hidden" id="editPk" value="">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name <span style="color:var(--danger-red);">*</span></label>
+                        <input type="text" id="fName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span style="color:var(--danger-red);">*</span></label>
+                        <input type="email" id="fEmail" name="email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>TLD Number <span style="color:var(--danger-red);">*</span></label>
+                        <input type="text" id="fTldNumber" name="tld_number" required oninput="checkDuplicate()">
+                        <div class="dup-warning" id="dupWarning">
+                            <i class="fas fa-exclamation-triangle"></i> <span id="dupWarningText"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CODE1 ID</label>
+                        <input type="text" id="fCode1" name="code1_id">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employee ID</label>
+                        <input type="text" id="fEmployeeId" name="employee_id">
+                    </div>
+                    <div class="form-group">
+                        <label>Renewal Status</label>
+                        <select id="fStatus" name="renewal_status">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="periodRow">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <select id="fYear" name="year" onchange="checkDuplicate()">
+                            {% for y in available_years %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quarter</label>
+                        <select id="fQuarter" name="quarter" onchange="checkDuplicate()">
+                            {% for val, label in quarter_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="streamRow">
+                    <label>Stream <span style="color:var(--danger-red);">*</span></label>
+                    {% if bu_streams.count == 1 %}
+                        {% with only_stream=bu_streams.first %}
+                        <input type="text" value="{{ only_stream.name }}" readonly
+                               style="background:#f3f4f6; cursor:default; color:#374151;">
+                        <input type="hidden" id="fStream" name="stream" value="{{ only_stream.name }}">
+                        {% endwith %}
+                    {% else %}
+                    <select id="fStream" name="stream" onchange="checkDuplicate()" required>
+                        <option value="">&mdash; Select Stream &mdash;</option>
+                        {% for s in bu_streams %}
+                        <option value="{{ s.name }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="fNotes" name="notes" rows="2" placeholder="Optional remarks..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="modalSubmitBtn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== DELETE MODAL ===== -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="width:420px;">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete the TLD badge for <strong id="deleteName"></strong>?</p>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== IMPORT MODAL ===== -->
+<div class="modal-overlay" id="importModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-file-upload" style="color:var(--indigo);margin-right:0.5rem;"></i> Bulk Import</h3>
+            <button class="modal-close" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem;">
+                Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:
+                <code style="background:var(--bg-light);padding:2px 6px;border-radius:4px;font-size:0.8rem;">
+                    name, email, tld_number, code1_id, employee_id, year, quarter, status, stream, notes
+                </code>
+            </p>
+            <div class="form-group">
+                <label>Select File</label>
+                <input type="file" id="importFile" accept=".csv,.xlsx,.xls"
+                       style="padding:0.5rem;border:2px dashed var(--border-color);border-radius:8px;width:100%;cursor:pointer;">
+            </div>
+            <div id="importResults" class="import-results" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeImportModal()">Cancel</button>
+            <button class="btn btn-success" id="importSubmitBtn" onclick="submitImport()">
+                <i class="fas fa-upload"></i> Import
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== HISTORY / TIMELINE MODAL ===== -->
+<div class="modal-overlay" id="historyModal">
+    <div class="modal-box wide">
+        <div class="modal-header">
+            <h3><i class="fas fa-clock-rotate-left" style="color:var(--indigo);margin-right:0.5rem;"></i> Renewal History</h3>
+            <button class="modal-close" onclick="closeHistoryModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="historyPersonInfo" style="margin-bottom:1.25rem;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                <div>
+                    <h4 style="font-size:0.875rem;font-weight:700;margin-bottom:0.75rem;color:var(--text-primary);">
+                        <i class="fas fa-timeline" style="color:var(--indigo);"></i> Badge Timeline
+                    </h4>
+                    <div class="timeline" id="historyTimeline"></div>
+                </div>
+                <div>
+                    <h4 style="font-size:0.875rem;font-weight:700;margin-bottom:0.75rem;color:var(--text-primary);">
+                        <i class="fas fa-clipboard-list" style="color:var(--indigo);"></i> Audit Trail
+                    </h4>
+                    <div id="historyAudit"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== AUDIT LOG MODAL ===== -->
+<div class="modal-overlay" id="auditLogModal">
+    <div class="modal-box wide">
+        <div class="modal-header">
+            <h3><i class="fas fa-history" style="color:var(--indigo);margin-right:0.5rem;"></i> Audit Trail</h3>
+            <button class="modal-close" onclick="closeAuditLogModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="auditLogBody" style="max-height:500px;overflow-y:auto;">
+            <p style="color:var(--text-secondary);text-align:center;">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PRINT PREVIEW MODAL ===== -->
+<div class="modal-overlay" id="printModal">
+    <div class="modal-box wide">
+        <div class="modal-header">
+            <h3><i class="fas fa-print" style="color:var(--indigo);margin-right:0.5rem;"></i> Print Badge Cards</h3>
+            <button class="modal-close" onclick="closePrintModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="print-cards-grid" id="printCardsGrid"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closePrintModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="doPrint()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ANALYTICS MODAL ===== -->
+<div class="modal-overlay" id="analyticsModal">
+    <div class="modal-box extra-wide">
+        <div class="modal-header">
+            <h3><i class="fas fa-chart-pie" style="color:var(--indigo);margin-right:0.5rem;"></i> Analytics &amp; Insights</h3>
+            <button class="modal-close" onclick="closeAnalyticsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-pie"></i> Status Distribution</h4>
+                    <div class="chart-container">
+                        <canvas id="statusDonut"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-bar"></i> Quarter-over-Quarter (<span id="qoqYearLabel">{{ selected_year }}</span>)</h4>
+                    <div class="chart-container">
+                        <canvas id="qoqChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Area (hidden, shown only when printing) -->
+<div id="printArea" class="print-area" style="display:none;"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const csrfToken = '{{ csrf_token }}';
+    const dashboardUrl = '{% url "tld_badge_dashboard" %}';
+    const createUrl = '{% url "tld_badge_create" %}';
+    const editUrlTemplate = '{% url "tld_badge_edit" pk=0 %}'.replace('/0/', '/{pk}/');
+    const deleteUrlTemplate = '{% url "tld_badge_delete" pk=0 %}'.replace('/0/', '/{pk}/');
+    const exportBaseUrl = '{% url "tld_badge_export" %}';
+    const bulkImportUrl = '{% url "tld_badge_bulk_import" %}';
+    const bulkUpdateUrl = '{% url "tld_badge_bulk_update" %}';
+    const checkDupUrl = '{% url "tld_badge_check_duplicate" %}';
+    const historyUrlTemplate = '{% url "tld_badge_history" pk=0 %}'.replace('/0/', '/{pk}/');
+    const auditLogUrl = '{% url "tld_badge_audit_log" %}';
+    const printUrl = '{% url "tld_badge_print" %}';
+
+    let currentStream = '{{ stream_filter|escapejs }}';
+    let currentPage = {{ page_obj.number }};
+    let deletePk = null;
+    let searchTimeout = null;
+    let dupCheckTimeout = null;
+    let selectedPks = new Set();
+
+    // ===== Charts =====
+    const statusColors = {
+        active: '#10b981', pending: '#f59e0b', renewed: '#0B5FFF',
+        expired: '#ef4444', returned: '#64748b', lost: '#dc2626'
+    };
+
+    let donutChart = null;
+    let qoqChart = null;
+    let latestChartData = {
+        sd: {{ status_dist_json|safe }},
+        sl: {{ status_labels_json|safe }},
+        qd: {{ qoq_data_json|safe }}
+    };
+
+    function initCharts() {
+        // Just store initial data — charts render when modal opens
+    }
+
+    function openAnalyticsModal() {
+        document.getElementById('analyticsModal').classList.add('open');
+        document.getElementById('qoqYearLabel').textContent = document.getElementById('yearSelect').value;
+        // Destroy old chart instances before re-rendering
+        if (donutChart) { donutChart.destroy(); donutChart = null; }
+        if (qoqChart) { qoqChart.destroy(); qoqChart = null; }
+        // Wait for modal animation to complete so canvas gets proper dimensions
+        setTimeout(() => {
+            renderDonut(latestChartData.sd, latestChartData.sl);
+            renderQoQ(latestChartData.qd);
+            // Force resize after render
+            setTimeout(() => {
+                if (donutChart) donutChart.resize();
+                if (qoqChart) qoqChart.resize();
+            }, 100);
+        }, 150);
+    }
+    function closeAnalyticsModal() {
+        document.getElementById('analyticsModal').classList.remove('open');
+    }
+
+    function renderDonut(dist, labels) {
+        const ctx = document.getElementById('statusDonut').getContext('2d');
+        const keys = Object.keys(dist);
+        const vals = keys.map(k => dist[k]);
+        const cols = keys.map(k => statusColors[k] || '#94a3b8');
+        const lbls = keys.map(k => labels[k] || k);
+
+        if (donutChart) donutChart.destroy();
+        donutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: lbls,
+                datasets: [{ data: vals, backgroundColor: cols, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { position: 'right', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } }
+                }
+            }
+        });
+    }
+
+    function renderQoQ(data) {
+        const ctx = document.getElementById('qoqChart').getContext('2d');
+        const labels = data.map(d => d.quarter);
+
+        if (qoqChart) qoqChart.destroy();
+        qoqChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Active', data: data.map(d => d.active), backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Pending', data: data.map(d => d.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
+                    { label: 'Expired', data: data.map(d => d.expired), backgroundColor: '#ef4444', borderRadius: 4 },
+                    { label: 'Total', data: data.map(d => d.total), backgroundColor: 'rgba(0,102,204,0.15)', borderRadius: 4, type: 'line', borderColor: '#0066cc', pointBackgroundColor: '#0066cc', fill: false, tension: 0.3 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { padding: 10, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                    x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // ===== Stream Selection =====
+    function selectStream(streamName) {
+        currentStream = streamName;
+        currentPage = 1;
+        document.querySelectorAll('.stream-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.stream === streamName);
+        });
+        fetchData();
+    }
+
+    // ===== Quarter Selection =====
+    function selectQuarter(el) {
+        currentPage = 1;
+        document.querySelectorAll('.quarter-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        fetchData();
+    }
+
+    function getSelectedQuarter() {
+        const active = document.querySelector('.quarter-tab.active');
+        return active ? (active.dataset.quarter || '') : '';
+    }
+
+    // ===== Pagination =====
+    function goToPage(page) { currentPage = page; fetchData(); }
+
+    // ===== Add Custom Year =====
+    function addCustomYear() {
+        const input = prompt('Enter a year (e.g. 2029):');
+        if (!input) return;
+        const yr = parseInt(input, 10);
+        if (isNaN(yr) || yr < 2000 || yr > 2099) { showToast('Invalid year.', 'error'); return; }
+        const sel = document.getElementById('yearSelect');
+        for (let i = 0; i < sel.options.length; i++) {
+            if (parseInt(sel.options[i].value) === yr) { sel.value = yr; fetchData(); return; }
+        }
+        const opt = new Option(yr, yr, true, true);
+        let inserted = false;
+        for (let i = 0; i < sel.options.length; i++) {
+            if (parseInt(sel.options[i].value) > yr) { sel.add(opt, sel.options[i]); inserted = true; break; }
+        }
+        if (!inserted) sel.add(opt);
+        sel.value = yr;
+        fetchData();
+    }
+
+    // ===== Export Link =====
+    function updateExportLink() {
+        const year = document.getElementById('yearSelect').value;
+        const quarter = getSelectedQuarter();
+        let url = exportBaseUrl + '?year=' + year;
+        if (quarter) url += '&quarter=' + quarter;
+        if (currentStream) url += '&stream=' + encodeURIComponent(currentStream);
+        document.getElementById('exportBtn').href = url;
+    }
+
+    // ===== MAIN AJAX FETCH =====
+    function fetchData() {
+        const year = document.getElementById('yearSelect').value;
+        const quarter = getSelectedQuarter();
+        const status = document.getElementById('statusFilter').value;
+        const q = document.getElementById('searchInput').value;
+
+        let url = dashboardUrl + '?year=' + year;
+        if (quarter) url += '&quarter=' + quarter;
+        if (status) url += '&status=' + status;
+        if (q) url += '&q=' + encodeURIComponent(q);
+        if (currentStream) url += '&stream=' + encodeURIComponent(currentStream);
+        url += '&page=' + currentPage;
+
+        document.getElementById('tableWrapper').classList.add('content-loading');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            animateStat('statTotal', data.stats.total);
+            animateStat('statActive', data.stats.active);
+            animateStat('statPending', data.stats.pending);
+            animateStat('statExpired', data.stats.expired);
+
+            document.getElementById('statQuarterLabel').textContent = data.current_quarter_label + ' ' + year;
+            document.querySelectorAll('.stat-q-label').forEach(el => { el.textContent = data.current_quarter_label; });
+
+            renderTable(data.records);
+            renderPagination(data.pagination);
+            updateExportLink();
+
+            document.getElementById('emptyState').style.display = data.records.length ? 'none' : '';
+
+            // Update chart data (render if analytics modal is open)
+            if (data.chart_data) {
+                latestChartData.sd = data.chart_data.status_distribution;
+                latestChartData.sl = data.chart_data.status_labels;
+            }
+            if (data.qoq_data) {
+                latestChartData.qd = data.qoq_data;
+            }
+            if (document.getElementById('analyticsModal').classList.contains('open')) {
+                renderDonut(latestChartData.sd, latestChartData.sl);
+                renderQoQ(latestChartData.qd);
+                document.getElementById('qoqYearLabel').textContent = year;
+            }
+
+            // Update expiry alert
+            const alertEl = document.getElementById('expiryAlert');
+            if (data.expiry_alert) {
+                alertEl.innerHTML = `<div class="expiry-alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="alert-text">
+                        <div class="alert-title">Badge Renewal Deadline Approaching!</div>
+                        <div class="alert-desc">
+                            <strong>${data.expiry_alert.pending_count}</strong> badge(s) pending renewal for ${data.expiry_alert.quarter}.
+                            Only <strong>${data.expiry_alert.days_left}</strong> day(s) remaining until quarter end.
+                        </div>
+                    </div>
+                </div>`;
+                alertEl.style.display = '';
+            } else {
+                alertEl.style.display = 'none';
+            }
+
+            // Clear selection
+            selectedPks.clear();
+            updateBulkBar();
+            document.getElementById('selectAll').checked = false;
+
+            document.getElementById('tableWrapper').classList.remove('content-loading');
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            showToast('Error loading data.', 'error');
+            document.getElementById('tableWrapper').classList.remove('content-loading');
+        });
+    }
+
+    function animateStat(id, newVal) {
+        const el = document.getElementById(id);
+        const oldVal = parseInt(el.textContent) || 0;
+        if (oldVal === newVal) return;
+        el.style.transform = 'scale(1.15)';
+        el.style.color = 'var(--primary-blue)';
+        el.textContent = newVal;
+        setTimeout(() => { el.style.transform = ''; el.style.color = ''; }, 300);
+    }
+
+    // ===== RENDER TABLE =====
+    function renderTable(records) {
+        const tbody = document.getElementById('tableBody');
+        if (!records.length) { tbody.innerHTML = ''; return; }
+        let html = '';
+        records.forEach(r => {
+            const checked = selectedPks.has(r.pk) ? 'checked' : '';
+            const selectedClass = selectedPks.has(r.pk) ? 'row-selected' : '';
+            html += `<tr id="row-${r.pk}" data-pk="${r.pk}" class="${selectedClass}">
+                <td><input type="checkbox" class="row-checkbox" value="${r.pk}" ${checked} onchange="onRowCheck()"></td>
+                <td><strong>${r.pk}</strong></td>
+                <td>${escHtml(r.name)}</td>
+                <td><a href="mailto:${escHtml(r.email)}" style="color:var(--primary-blue);text-decoration:none;">${escHtml(r.email)}</a></td>
+                <td><code style="background:var(--bg-light);padding:2px 6px;border-radius:4px;">${escHtml(r.tld_number)}</code></td>
+                <td>${escHtml(r.stream || '-')}</td>
+                <td>${escHtml(r.code1_id || '-')}</td>
+                <td>${escHtml(r.employee_id || '-')}</td>
+                <td>${escHtml(r.quarter)}</td>
+                <td><span class="badge badge-${r.renewal_status}">${escHtml(r.renewal_status_display)}</span></td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn btn-outline btn-sm" title="History" onclick="openHistoryModal(${r.pk})">
+                            <i class="fas fa-clock-rotate-left"></i>
+                        </button>
+                        <button class="btn btn-outline btn-sm" title="Edit"
+                                onclick="openEditModal(${r.pk},'${escJs(r.name)}','${escJs(r.email)}','${escJs(r.tld_number)}','${escJs(r.code1_id)}','${escJs(r.employee_id)}','${escJs(r.renewal_status)}','${escJs(r.notes)}','${escJs(r.stream)}','${r.year}','${escJs(r.quarter_raw)}')">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-outline btn-sm" title="Delete" style="color:var(--danger-red);border-color:var(--danger-red);"
+                                onclick="confirmDelete(${r.pk},'${escJs(r.name)}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ===== RENDER PAGINATION =====
+    function renderPagination(pg) {
+        const bar = document.getElementById('paginationBar');
+        if (pg.num_pages <= 1) { bar.innerHTML = ''; return; }
+        let btns = '';
+        if (pg.has_previous) btns += `<a onclick="goToPage(${pg.page - 1})"><i class="fas fa-chevron-left"></i></a>`;
+        for (let n = 1; n <= pg.num_pages; n++) {
+            if (n === pg.page) btns += `<span class="current">${n}</span>`;
+            else if (n > pg.page - 3 && n < pg.page + 3) btns += `<a onclick="goToPage(${n})">${n}</a>`;
+        }
+        if (pg.has_next) btns += `<a onclick="goToPage(${pg.page + 1})"><i class="fas fa-chevron-right"></i></a>`;
+        bar.innerHTML = `<div class="pagination-bar">
+            <div class="pagination-info">Showing ${pg.start_index}&ndash;${pg.end_index} of ${pg.total_count} records</div>
+            <div class="pagination-btns">${btns}</div>
+        </div>`;
+    }
+
+    // ===== HELPERS =====
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function escJs(s) { return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n'); }
+
+    // ===== CHECKBOX / BULK SELECTION =====
+    function toggleSelectAll(el) {
+        const checked = el.checked;
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.checked = checked;
+            const row = cb.closest('tr');
+            const pk = parseInt(cb.value);
+            if (checked) { selectedPks.add(pk); row.classList.add('row-selected'); }
+            else { selectedPks.delete(pk); row.classList.remove('row-selected'); }
+        });
+        updateBulkBar();
+    }
+
+    function onRowCheck() {
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            const pk = parseInt(cb.value);
+            const row = cb.closest('tr');
+            if (cb.checked) { selectedPks.add(pk); row.classList.add('row-selected'); }
+            else { selectedPks.delete(pk); row.classList.remove('row-selected'); }
+        });
+        const all = document.querySelectorAll('.row-checkbox');
+        const allChecked = all.length > 0 && [...all].every(cb => cb.checked);
+        document.getElementById('selectAll').checked = allChecked;
+        updateBulkBar();
+    }
+
+    function updateBulkBar() {
+        const bar = document.getElementById('bulkBar');
+        const count = selectedPks.size;
+        document.getElementById('bulkCount').textContent = count;
+        bar.classList.toggle('show', count > 0);
+    }
+
+    function clearSelection() {
+        selectedPks.clear();
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.checked = false;
+            cb.closest('tr').classList.remove('row-selected');
+        });
+        document.getElementById('selectAll').checked = false;
+        updateBulkBar();
+    }
+
+    // ===== BULK STATUS UPDATE =====
+    function bulkUpdateStatus() {
+        if (selectedPks.size === 0) { showToast('No records selected.', 'error'); return; }
+        const newStatus = document.getElementById('bulkStatusSelect').value;
+        const statusLabel = document.getElementById('bulkStatusSelect').selectedOptions[0].text;
+
+        if (!confirm(`Update ${selectedPks.size} record(s) to "${statusLabel}"?`)) return;
+
+        fetch(bulkUpdateUrl, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: [...selectedPks], status: newStatus })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                clearSelection();
+                fetchData();
+            } else {
+                showToast(data.error || 'Error.', 'error');
+            }
+        })
+        .catch(() => showToast('Network error.', 'error'));
+    }
+
+    // ===== PRINT BADGE CARDS =====
+    function printSelectedBadges() {
+        if (selectedPks.size === 0) { showToast('No records selected.', 'error'); return; }
+        const ids = [...selectedPks].join(',');
+        fetch(printUrl + '?ids=' + ids)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { showToast(data.error, 'error'); return; }
+            renderPrintCards(data.cards);
+            document.getElementById('printModal').classList.add('open');
+        })
+        .catch(() => showToast('Network error.', 'error'));
+    }
+
+    function renderPrintCards(cards) {
+        const grid = document.getElementById('printCardsGrid');
+        let html = '';
+        cards.forEach(c => {
+            html += `<div class="print-card">
+                <div class="pc-title">${escHtml(c.bu_name)} ${c.stream ? '/ ' + escHtml(c.stream) : ''}</div>
+                <div class="pc-name">${escHtml(c.name)}</div>
+                <div class="pc-tld">TLD# ${escHtml(c.tld_number)}</div>
+                <div class="pc-detail"><strong>Email:</strong> ${escHtml(c.email)}</div>
+                ${c.employee_id ? `<div class="pc-detail"><strong>Emp ID:</strong> ${escHtml(c.employee_id)}</div>` : ''}
+                ${c.code1_id ? `<div class="pc-detail"><strong>CODE1:</strong> ${escHtml(c.code1_id)}</div>` : ''}
+                <div class="pc-detail"><strong>Period:</strong> ${escHtml(c.quarter)} ${c.year}</div>
+                <div class="pc-detail"><span class="badge badge-${c.renewal_status}">${escHtml(c.renewal_status_display)}</span></div>
+            </div>`;
+        });
+        grid.innerHTML = html;
+    }
+
+    function closePrintModal() { document.getElementById('printModal').classList.remove('open'); }
+
+    function doPrint() {
+        const printArea = document.getElementById('printArea');
+        printArea.innerHTML = document.getElementById('printCardsGrid').innerHTML;
+        printArea.style.display = 'block';
+        window.print();
+        setTimeout(() => { printArea.style.display = 'none'; }, 500);
+    }
+
+    // ===== DUPLICATE DETECTION =====
+    function checkDuplicate() {
+        clearTimeout(dupCheckTimeout);
+        const tld = document.getElementById('fTldNumber').value.trim();
+        if (!tld) { document.getElementById('dupWarning').style.display = 'none'; return; }
+
+        dupCheckTimeout = setTimeout(() => {
+            const year = document.getElementById('fYear').value;
+            const quarter = document.getElementById('fQuarter').value;
+            const stream = document.getElementById('fStream').value;
+            const pk = document.getElementById('editPk').value;
+
+            let url = checkDupUrl + '?tld_number=' + encodeURIComponent(tld) + '&year=' + year + '&quarter=' + quarter;
+            if (stream) url += '&stream=' + encodeURIComponent(stream);
+            if (pk) url += '&exclude_pk=' + pk;
+
+            fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                const w = document.getElementById('dupWarning');
+                if (data.exists) {
+                    document.getElementById('dupWarningText').textContent =
+                        'Duplicate detected! ' + (data.existing || 'This TLD number already exists.');
+                    w.style.display = 'block';
+                } else {
+                    w.style.display = 'none';
+                }
+            });
+        }, 400);
+    }
+
+    // ===== MODAL: CREATE =====
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = 'Add TLD Badge';
+        document.getElementById('editPk').value = '';
+        document.getElementById('badgeForm').reset();
+        document.getElementById('fYear').value = document.getElementById('yearSelect').value;
+        document.getElementById('periodRow').style.display = '';
+        document.getElementById('streamRow').style.display = '';
+        document.getElementById('dupWarning').style.display = 'none';
+        if (currentStream) document.getElementById('fStream').value = currentStream;
+        document.getElementById('modalSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Save';
+        document.getElementById('badgeModal').classList.add('open');
+    }
+
+    // ===== MODAL: EDIT =====
+    function openEditModal(pk, name, email, tld, code1, empId, status, notes, stream, year, quarter) {
+        document.getElementById('modalTitle').textContent = 'Edit TLD Badge';
+        document.getElementById('editPk').value = pk;
+        document.getElementById('fName').value = name;
+        document.getElementById('fEmail').value = email;
+        document.getElementById('fTldNumber').value = tld;
+        document.getElementById('fCode1').value = code1;
+        document.getElementById('fEmployeeId').value = empId;
+        document.getElementById('fStatus').value = status;
+        document.getElementById('fNotes').value = notes;
+        if (stream) document.getElementById('fStream').value = stream;
+        if (year) document.getElementById('fYear').value = year;
+        if (quarter) document.getElementById('fQuarter').value = quarter;
+        document.getElementById('periodRow').style.display = '';
+        document.getElementById('streamRow').style.display = '';
+        document.getElementById('dupWarning').style.display = 'none';
+        document.getElementById('modalSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update';
+        document.getElementById('badgeModal').classList.add('open');
+    }
+
+    function closeModal() { document.getElementById('badgeModal').classList.remove('open'); }
+
+    // ===== SUBMIT CREATE/EDIT =====
+    function submitBadgeForm(e) {
+        e.preventDefault();
+        const pk = document.getElementById('editPk').value;
+        const isEdit = !!pk;
+        const url = isEdit ? editUrlTemplate.replace('{pk}', pk) : createUrl;
+        const formData = new FormData(document.getElementById('badgeForm'));
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message || 'Saved!', 'success');
+                closeModal();
+                fetchData();
+            } else {
+                showToast(data.error || 'Error saving record.', 'error');
+            }
+        })
+        .catch(() => showToast('Network error.', 'error'));
+    }
+
+    // ===== DELETE =====
+    function confirmDelete(pk, name) {
+        deletePk = pk;
+        document.getElementById('deleteName').textContent = name;
+        document.getElementById('deleteModal').classList.add('open');
+    }
+    function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('open'); deletePk = null; }
+    function executeDelete() {
+        if (!deletePk) return;
+        fetch(deleteUrlTemplate.replace('{pk}', deletePk), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Record deleted.', 'success');
+                closeDeleteModal();
+                fetchData();
+            } else {
+                showToast(data.error || 'Delete failed.', 'error');
+            }
+        })
+        .catch(() => showToast('Network error.', 'error'));
+    }
+
+    // ===== IMPORT =====
+    function openImportModal() {
+        document.getElementById('importFile').value = '';
+        document.getElementById('importResults').style.display = 'none';
+        document.getElementById('importModal').classList.add('open');
+    }
+    function closeImportModal() { document.getElementById('importModal').classList.remove('open'); }
+
+    function submitImport() {
+        const fileInput = document.getElementById('importFile');
+        if (!fileInput.files.length) { showToast('Please select a file.', 'error'); return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        const btn = document.getElementById('importSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+
+        fetch(bulkImportUrl, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Import';
+
+            const res = document.getElementById('importResults');
+            if (data.success) {
+                let html = `<p class="ir-success"><i class="fas fa-check-circle"></i> ${data.message}</p>`;
+                if (data.errors && data.errors.length) {
+                    html += '<div class="import-errors">';
+                    data.errors.forEach(e => { html += `<div>${escHtml(e)}</div>`; });
+                    html += '</div>';
+                }
+                res.innerHTML = html;
+                res.style.display = 'block';
+                fetchData();
+            } else {
+                res.innerHTML = `<p class="ir-skip"><i class="fas fa-times-circle"></i> ${escHtml(data.error)}</p>`;
+                res.style.display = 'block';
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Import';
+            showToast('Network error.', 'error');
+        });
+    }
+
+    // ===== HISTORY TIMELINE =====
+    function openHistoryModal(pk) {
+        document.getElementById('historyTimeline').innerHTML = '<p style="color:var(--text-secondary)">Loading...</p>';
+        document.getElementById('historyAudit').innerHTML = '<p style="color:var(--text-secondary)">Loading...</p>';
+        document.getElementById('historyPersonInfo').innerHTML = '';
+        document.getElementById('historyModal').classList.add('open');
+
+        fetch(historyUrlTemplate.replace('{pk}', pk))
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { showToast(data.error, 'error'); closeHistoryModal(); return; }
+
+            // Person info
+            document.getElementById('historyPersonInfo').innerHTML = `
+                <div style="display:flex;gap:1.5rem;align-items:center;padding:1rem;background:var(--bg-light);border-radius:10px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,0.12);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:1.25rem;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;">${escHtml(data.person.name)}</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);">${escHtml(data.person.email)} &bull; TLD# ${escHtml(data.person.tld_number)}</div>
+                    </div>
+                </div>`;
+
+            // Timeline
+            let tl = '';
+            if (data.timeline.length) {
+                data.timeline.forEach(t => {
+                    tl += `<div class="timeline-item ${t.renewal_status}">
+                        <div class="timeline-header">${escHtml(t.quarter_display)} ${t.year}
+                            <span class="badge badge-${t.renewal_status}" style="margin-left:0.5rem;">${escHtml(t.renewal_status_display)}</span>
+                        </div>
+                        <div class="timeline-sub">TLD# ${escHtml(t.tld_number)}${t.stream ? ' &bull; ' + escHtml(t.stream) : ''}</div>
+                        ${t.created_at ? `<div class="timeline-sub">Created: ${t.created_at}</div>` : ''}
+                    </div>`;
+                });
+            } else {
+                tl = '<p style="color:var(--text-secondary);font-size:0.85rem;">No history found.</p>';
+            }
+            document.getElementById('historyTimeline').innerHTML = tl;
+
+            // Audit
+            let au = '';
+            if (data.audit_log.length) {
+                data.audit_log.forEach(a => {
+                    au += `<div class="audit-entry">
+                        <div class="audit-icon ${a.action.toLowerCase().replace(' ', '_')}">
+                            <i class="fas fa-${a.action === 'Created' ? 'plus' : a.action === 'Edited' ? 'pen' : a.action === 'Deleted' ? 'trash' : 'sync'}"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.85rem;">${escHtml(a.action)} by ${escHtml(a.performed_by)}</div>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);">${a.timestamp}</div>
+                            ${a.details ? `<div style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.15rem;">${escHtml(a.details)}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+            } else {
+                au = '<p style="color:var(--text-secondary);font-size:0.85rem;">No audit entries found.</p>';
+            }
+            document.getElementById('historyAudit').innerHTML = au;
+        })
+        .catch(() => showToast('Error loading history.', 'error'));
+    }
+    function closeHistoryModal() { document.getElementById('historyModal').classList.remove('open'); }
+
+    // ===== AUDIT LOG MODAL =====
+    function openAuditLogModal() {
+        document.getElementById('auditLogBody').innerHTML = '<p style="color:var(--text-secondary);text-align:center;">Loading...</p>';
+        document.getElementById('auditLogModal').classList.add('open');
+
+        fetch(auditLogUrl)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) { showToast(data.error, 'error'); return; }
+            let html = '';
+            if (data.entries.length) {
+                data.entries.forEach(e => {
+                    const iconMap = { create: 'fa-plus', edit: 'fa-pen', delete: 'fa-trash', bulk_import: 'fa-file-upload', bulk_status: 'fa-sync-alt' };
+                    html += `<div class="audit-entry">
+                        <div class="audit-icon ${e.action_code}">
+                            <i class="fas ${iconMap[e.action_code] || 'fa-circle'}"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight:600;font-size:0.85rem;">${escHtml(e.action)}</div>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);">
+                                ${escHtml(e.badge_name)}${e.badge_tld_number ? ' (TLD#' + escHtml(e.badge_tld_number) + ')' : ''}
+                            </div>
+                            ${e.details ? `<div style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.1rem;">${escHtml(e.details)}</div>` : ''}
+                        </div>
+                        <div style="text-align:right;flex-shrink:0;">
+                            <div style="font-size:0.8rem;font-weight:600;">${escHtml(e.performed_by)}</div>
+                            <div style="font-size:0.75rem;color:var(--text-secondary);">${e.timestamp}</div>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                html = '<p style="color:var(--text-secondary);text-align:center;">No audit log entries yet.</p>';
+            }
+            document.getElementById('auditLogBody').innerHTML = html;
+        })
+        .catch(() => showToast('Error loading audit log.', 'error'));
+    }
+    function closeAuditLogModal() { document.getElementById('auditLogModal').classList.remove('open'); }
+
+    // ===== TOAST =====
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast toast-' + type + ' show';
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ===== INIT =====
+    updateExportLink();
+    initCharts();
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => { currentPage = 1; fetchData(); }, 400);
+    });
+</script>
+{% endblock %}

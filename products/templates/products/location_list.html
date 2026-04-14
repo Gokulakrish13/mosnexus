@@ -5,1591 +5,1564 @@
 {% block title %}Location Management{% endblock %}
 
 {% block content %}
-<!-- Font Awesome CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Animate CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-<!-- Leaflet CSS and JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="{% static 'products/floor_map.js' %}"></script>
 
 <style>
-    /* CSS Custom Properties */
-    :root {
-        --primary: #0066cc;
-        --primary-dark: #004999;
-        --primary-light: #e6f0ff;
-        --secondary: #64748b;
-        --success: #059669;
-        --success-light: #d1fae5;
-        --warning: #d97706;
-        --warning-light: #fef3c7;
-        --danger: #dc2626;
-        --danger-light: #fee2e2;
-        --info: #0891b2;
-        --info-light: #cffafe;
-        --bg-body: #ffffff;
-        --bg-card: #ffffff;
-        --bg-subtle: #f8fafc;
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --text-muted: #94a3b8;
-        --border-color: #e2e8f0;
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --radius-sm: 6px;
-        --radius-md: 10px;
-        --radius-lg: 16px;
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body {
-        background: var(--bg-body) !important;
-    }
-
-    /* Page Container */
-    .location-page {
-        min-height: 100vh;
-        background: var(--bg-body);
-        padding: 6.5rem 2rem 2rem;
-    }
-
-    .page-wrapper {
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    /* Page Header */
-    .page-header {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        padding: 1.75rem 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--border-color);
-    }
-
-    .page-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .page-title-section {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .page-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: var(--radius-md);
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
-        box-shadow: var(--shadow-md);
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0;
-        letter-spacing: -0.02em;
-    }
-
-    .page-subtitle {
-        font-size: 0.95rem;
-        color: var(--text-secondary);
-        margin: 0.25rem 0 0 0;
-    }
-
-    .header-stats {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .stat-badge {
-        background: var(--primary-light);
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius-md);
-        text-align: center;
-        min-width: 100px;
-    }
-
-    .stat-badge-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary);
-        line-height: 1;
-    }
-
-    .stat-badge-label {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: 0.25rem;
-    }
-
-    /* Toast Notifications */
-    .toast-container {
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 1050;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .toast {
-        padding: 1rem 1.5rem;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        animation: slideInRight 0.3s ease;
-        border-left: 4px solid;
-        background: var(--bg-card);
-        min-width: 300px;
-    }
-
-    @keyframes slideInRight {
-        from { transform: translateX(100px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    .toast-success {
-        border-color: var(--success);
-    }
-
-    .toast-success .toast-icon {
-        color: var(--success);
-    }
-
-    .toast-danger, .toast-error {
-        border-color: var(--danger);
-    }
-
-    .toast-danger .toast-icon, .toast-error .toast-icon {
-        color: var(--danger);
-    }
-
-    .toast-info {
-        border-color: var(--primary);
-    }
-
-    .toast-info .toast-icon {
-        color: var(--primary);
-    }
-
-    .toast-icon {
-        font-size: 1.25rem;
-    }
-
-    .toast-message {
-        flex: 1;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-
-    .toast-close {
-        cursor: pointer;
-        color: var(--text-muted);
-        padding: 0;
-        background: none;
-        border: none;
-        font-size: 1rem;
-        transition: color 0.2s ease;
-    }
-
-    .toast-close:hover {
-        color: var(--text-primary);
-    }
-
-    /* Controls Bar */
-    .controls-bar {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .search-box {
-        flex: 1;
-        max-width: 400px;
-        display: flex;
-        align-items: center;
-        background: var(--bg-subtle);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding-left: 14px;
-        transition: all 0.2s ease;
-    }
-
-    .search-box:focus-within {
-        border-color: var(--primary);
-        background: var(--bg-card);
-        box-shadow: 0 0 0 3px var(--primary-light);
-    }
-
-    .search-box i {
-        color: var(--text-muted);
-        font-size: 14px;
-        flex-shrink: 0;
-        margin-right: 10px;
-    }
-
-    .search-input {
-        flex: 1;
-        border: none;
-        background: transparent;
-        padding: 12px 14px 12px 0;
-        font-size: 14px;
-        outline: none;
-        min-width: 0;
-    }
-
-    .search-input::placeholder {
-        color: var(--text-muted);
-        opacity: 1;
-    }
-
-    .search-input:focus {
-        outline: none;
-    }
-
-    .controls-actions {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-
-    .btn-add {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, var(--success), #047857);
-        color: white;
-        border: none;
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-add:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-    }
-
-    .view-toggle-btn {
-        width: 42px;
-        height: 42px;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
-        color: var(--text-secondary);
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .view-toggle-btn:hover {
-        background: var(--bg-subtle);
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .view-toggle-btn.active {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-    }
-
-    /* Table Styles */
-    .table-container {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-    }
-
-    .location-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .location-table thead {
-        background: var(--bg-subtle);
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .location-table th {
-        padding: 1rem 1.5rem;
-        text-align: left;
-        font-weight: 600;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .location-table th .sortable {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
-        transition: color 0.2s ease;
-    }
-
-    .location-table th .sortable:hover {
-        color: var(--primary);
-    }
-
-    .location-table tbody tr {
-        border-bottom: 1px solid var(--border-color);
-        transition: background-color 0.2s ease;
-    }
-
-    .location-table tbody tr:hover {
-        background-color: var(--bg-subtle);
-    }
-
-    .location-table tbody tr:last-child {
-        border-bottom: none;
-    }
-
-    .location-table td {
-        padding: 1rem 1.5rem;
-        font-size: 0.9rem;
-        color: var(--text-primary);
-    }
-
-    .location-name {
-        font-weight: 600;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .location-name-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: var(--radius-sm);
-        background: var(--primary-light);
-        color: var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-    }
-
-    .location-address {
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .location-address i {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-    }
-
-    .no-address {
-        color: var(--text-muted);
-        font-style: italic;
-    }
-
-    .table-actions {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-
-    .btn-action {
-        padding: 0.5rem 0.875rem;
-        border-radius: var(--radius-sm);
-        font-size: 0.8rem;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        text-decoration: none;
-    }
-
-    .btn-edit {
-        background: var(--warning-light);
-        color: var(--warning);
-    }
-
-    .btn-edit:hover {
-        background: var(--warning);
-        color: white;
-    }
-
-    .btn-delete {
-        background: var(--danger-light);
-        color: var(--danger);
-    }
-
-    .btn-delete:hover {
-        background: var(--danger);
-        color: white;
-    }
-
-    /* Card View Styles */
-    .cards-container {
-        display: none;
-    }
-
-    .location-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .location-card {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .location-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .card-header {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        padding: 1.25rem 1.5rem;
-        color: white;
-    }
-
-    .card-header h3 {
-        margin: 0;
-        font-size: 1.125rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .card-header h3 i {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .card-info {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .card-info i {
-        color: var(--text-muted);
-        margin-top: 0.15rem;
-    }
-
-    .card-info-content {
-        flex: 1;
-    }
-
-    .card-info-label {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-
-    .card-info-value {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-    }
-
-    .card-actions {
-        display: flex;
-        gap: 0.75rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border-color);
-    }
-
-    .card-btn {
-        flex: 1;
-        padding: 0.75rem;
-        border-radius: var(--radius-sm);
-        font-size: 0.875rem;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .card-btn-edit {
-        background: var(--warning-light);
-        color: var(--warning);
-    }
-
-    .card-btn-edit:hover {
-        background: var(--warning);
-        color: white;
-    }
-
-    .card-btn-delete {
-        background: var(--danger-light);
-        color: var(--danger);
-    }
-
-    .card-btn-delete:hover {
-        background: var(--danger);
-        color: white;
-    }
-
-    /* Map View Styles */
-    .map-container {
-        display: none;
-    }
-
-    .floor-map-wrapper {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-    }
-
-    .floor-map-header {
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .floor-map-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .floor-map-title i {
-        color: var(--primary);
-    }
-
-    .floor-controls {
-        display: none;
-    }
-
-    .floor-btn {
-        display: none;
-    }
-
-    .floor-map-container {
-        position: relative;
-        height: 500px;
-        background: var(--bg-subtle);
-        border-radius: var(--radius-md);
-        overflow: hidden;
-    }
-
-    #floorMap {
-        height: 100%;
-        width: 100%;
-        border-radius: var(--radius-md);
-    }
-
-    .leaflet-container {
-        height: 100%;
-        width: 100%;
-        background: var(--bg-subtle);
-    }
-
-    .map-legend {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background: var(--bg-card);
-        padding: 1rem 1.25rem;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-md);
-        z-index: 1000;
-        border: 1px solid var(--border-color);
-    }
-
-    .legend-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.75rem;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-    }
-
-    .legend-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .legend-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-    }
-
-    .legend-dot.bay {
-        background: var(--primary);
-    }
-
-    .legend-dot.desktop {
-        background: var(--success);
-    }
-
-    .legend-dot.system {
-        background: var(--danger);
-    }
-
-    .location-tooltip {
-        font-size: 0.9rem;
-        font-weight: 600;
-        background: var(--bg-card);
-        padding: 8px 12px;
-        border-radius: var(--radius-sm);
-        box-shadow: var(--shadow-md);
-        border: none;
-        min-width: 120px;
-        text-align: center;
-        border-left: 3px solid var(--primary);
-    }
-
-    .location-tooltip small {
-        display: block;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin-top: 3px;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-color);
-    }
-
-    .empty-state-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: var(--bg-subtle);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        color: var(--text-muted);
-        font-size: 2rem;
-    }
-
-    .empty-state-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-state-text {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        max-width: 400px;
-        margin: 0 auto 1.5rem;
-    }
-
-    .btn-primary-custom {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        color: white;
-        border: none;
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .btn-primary-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-    }
-
-    /* Modal Styles */
-    .location-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1051;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(4px);
-    }
-
-    .location-modal.show {
-        display: flex;
-    }
-
-    .location-modal .modal-content {
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        width: 100%;
-        max-width: 450px;
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-        animation: modalFadeIn 0.3s ease;
-    }
-
-    @keyframes modalFadeIn {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .location-modal .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.25rem 1.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        color: white;
-    }
-
-    .location-modal .modal-header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-
-    .location-modal .modal-header .close-modal {
-        cursor: pointer;
-        font-size: 1.25rem;
-        transition: transform 0.2s ease;
-    }
-
-    .location-modal .modal-header .close-modal:hover {
-        transform: scale(1.1);
-    }
-
-    .location-modal .modal-body {
-        padding: 1.5rem;
-    }
-
-    /* Location Marker Styles */
-    .location-marker {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-    }
-
-    .location-marker:hover {
-        transform: translateY(-5px) scale(1.1);
-    }
-
-    .marker-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        box-shadow: var(--shadow-md);
-    }
-
-    .marker-icon.bay {
-        background: var(--primary);
-    }
-
-    .marker-icon.desktop {
-        background: var(--success);
-    }
-
-    .marker-icon.system {
-        background: var(--danger);
-    }
-
-    .marker-label {
-        margin-top: 4px;
-        padding: 2px 8px;
-        background: var(--bg-card);
-        border-radius: var(--radius-sm);
-        font-size: 0.7rem;
-        font-weight: 600;
-        white-space: nowrap;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .location-page {
-            padding: 6rem 1rem 1rem;
-        }
-
-        .page-header-content {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .header-stats {
-            width: 100%;
-        }
-
-        .controls-bar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .search-box {
-            max-width: none;
-        }
-
-        .controls-actions {
-            justify-content: space-between;
-        }
-
-        .location-cards-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .table-actions {
-            flex-direction: column;
-        }
-    }
+/* ================================================================
+   LOCATION LIST — Corporate Design System
+   Consistent with product_list, sub_level_list, product_form
+   ================================================================ */
+
+/* ─── Design Tokens ─── */
+:root {
+  --ll-primary: #0066cc;
+  --ll-primary-dark: #004d99;
+  --ll-primary-light: #e0f0ff;
+  --ll-accent: #0891b2;
+  --ll-accent-dark: #0d9488;
+  --ll-gradient: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+  --ll-success: #10b981;
+  --ll-success-light: #d1fae5;
+  --ll-success-dark: #059669;
+  --ll-warning: #f59e0b;
+  --ll-warning-light: #fef3c7;
+  --ll-warning-dark: #d97706;
+  --ll-danger: #ef4444;
+  --ll-danger-light: #fee2e2;
+  --ll-danger-dark: #dc2626;
+  --ll-info: #06b6d4;
+  --ll-info-light: #cffafe;
+  --ll-purple: #0B5FFF;
+  --ll-purple-light: #eef4ff;
+  --ll-text: #0f172a;
+  --ll-text-secondary: #475569;
+  --ll-text-muted: #94a3b8;
+  --ll-border: #e2e8f0;
+  --ll-border-medium: #cbd5e1;
+  --ll-bg: #f8fafc;
+  --ll-surface: #ffffff;
+  --ll-shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --ll-shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --ll-shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05);
+  --ll-shadow-lg: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.04);
+  --ll-shadow-xl: 0 20px 25px -5px rgba(0,0,0,.08), 0 8px 10px -6px rgba(0,0,0,.04);
+  --ll-radius-sm: 6px;
+  --ll-radius: 10px;
+  --ll-radius-lg: 14px;
+  --ll-radius-xl: 20px;
+  --ll-transition: .2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Animations ─── */
+@keyframes llFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+@keyframes llSlideUp { from { opacity:0; transform:translateY(24px) scale(.98) } to { opacity:1; transform:translateY(0) scale(1) } }
+@keyframes llSlideDown { from { opacity:0; transform:translateY(-10px) } to { opacity:1; transform:translateY(0) } }
+@keyframes llCheckPop { 0%{transform:scale(0)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+@keyframes llPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes llShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+/* ─── Reset / Page ─── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+.ll-page {
+  padding-top: 1.25rem;
+  max-width: 1900px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 3rem;
+  min-height: calc(100vh - 106px);
+  font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  color: var(--ll-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Breadcrumbs ─── */
+.ll-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+  font-size: .85rem;
+  color: var(--ll-text-muted);
+  animation: llFadeIn .4s ease both;
+}
+.ll-breadcrumb a {
+  color: var(--ll-text-secondary);
+  text-decoration: none;
+  transition: color var(--ll-transition);
+}
+.ll-breadcrumb a:hover { color: var(--ll-primary); }
+.ll-breadcrumb .sep { font-size: .7rem; opacity: .5; }
+.ll-breadcrumb .bc-current { color: var(--ll-primary); font-weight: 600; }
+
+/* ─── Gradient Card Header ─── */
+.ll-header {
+  background: var(--ll-gradient);
+  border-radius: var(--ll-radius-xl);
+  padding: 2rem 2.5rem;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--ll-shadow-lg);
+  position: relative;
+  overflow: hidden;
+  min-height: 100px;
+  animation: llFadeIn .5s ease both;
+}
+.ll-header::before {
+  content:'';
+  position:absolute;
+  top:-50%; right:-10%;
+  width:300px; height:300px;
+  background:rgba(255,255,255,.05);
+  border-radius:50%;
+  pointer-events:none;
+}
+.ll-header::after {
+  content:'';
+  position:absolute;
+  bottom:-40%; left:20%;
+  width:200px; height:200px;
+  background:rgba(255,255,255,.03);
+  border-radius:50%;
+  pointer-events:none;
+}
+.ll-header-left {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  position:relative;
+  z-index:2;
+}
+.ll-header-icon {
+  width:52px; height:52px;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  border-radius:var(--ll-radius-lg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.4rem;
+  flex-shrink:0;
+}
+.ll-header-left h1 {
+  font-size:1.65rem;
+  font-weight:700;
+  margin:0;
+  color:#fff !important;
+}
+.ll-header-left .subtitle {
+  font-size:.88rem;
+  opacity:.85;
+  margin-top:.15rem;
+}
+.ll-header-right {
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:2;
+}
+.ll-header-btn {
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  padding:.55rem 1.15rem;
+  border-radius:var(--ll-radius);
+  font-size:.88rem;
+  font-weight:500;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  transition:all var(--ll-transition);
+  font-family:inherit;
+}
+.ll-header-btn:hover { background:rgba(255,255,255,.28); color:#fff; text-decoration:none; }
+.ll-header-btn.primary {
+  background:#fff;
+  color:var(--ll-primary);
+  font-weight:700;
+  border:none;
+  box-shadow:var(--ll-shadow-md);
+}
+.ll-header-btn.primary:hover {
+  background:#f0f4ff;
+  transform:translateY(-2px);
+  box-shadow:var(--ll-shadow-lg);
+  color:var(--ll-primary);
+  text-decoration:none;
+}
+
+/* ─── Stats Row ─── */
+.ll-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: llFadeIn .5s ease .1s both;
+}
+.ll-stat-card {
+  background: var(--ll-surface);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius-lg);
+  padding: 1.1rem 1.35rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--ll-shadow-sm);
+  border-left: 4px solid var(--accent, var(--ll-primary));
+  transition: all var(--ll-transition);
+}
+.ll-stat-card:hover { transform:translateY(-2px); box-shadow:var(--ll-shadow-md); }
+.ll-stat-icon {
+  width: 42px; height: 42px;
+  border-radius: var(--ll-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.ll-stat-icon.blue { background:var(--ll-primary-light); color:var(--ll-primary); }
+.ll-stat-icon.green { background:var(--ll-success-light); color:var(--ll-success-dark); }
+.ll-stat-icon.amber { background:var(--ll-warning-light); color:var(--ll-warning-dark); }
+.ll-stat-icon.purple { background:var(--ll-purple-light); color:var(--ll-purple); }
+.ll-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--ll-text); line-height: 1; }
+.ll-stat-label { font-size: .75rem; color: var(--ll-text-muted); margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 500; }
+
+/* ─── Toolbar ─── */
+.ll-toolbar {
+  background: var(--ll-surface);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius-lg);
+  padding: .85rem 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  box-shadow: var(--ll-shadow-xs);
+  animation: llFadeIn .5s ease .15s both;
+}
+.ll-search-box {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  background: var(--ll-bg);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  padding: 0 .85rem;
+  flex: 1;
+  max-width: 380px;
+  transition: all var(--ll-transition);
+}
+.ll-search-box:focus-within { border-color:var(--ll-primary); box-shadow:0 0 0 3px rgba(0,102,204,.1); background:#fff; }
+.ll-search-box i { color:var(--ll-text-muted); font-size:.85rem; flex-shrink:0; }
+.ll-page .ll-toolbar .ll-search-box input[type="text"].ll-search-input {
+  border: none !important;
+  background: transparent !important;
+  padding: .65rem .25rem !important;
+  font-size: .88rem !important;
+  outline: none !important;
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  color: var(--ll-text);
+  box-shadow: none !important;
+}
+.ll-search-box input::placeholder { color: var(--ll-text-muted); }
+.ll-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ll-view-btn {
+  width: 38px; height: 38px;
+  border: 1px solid var(--ll-border);
+  background: var(--ll-surface);
+  color: var(--ll-text-secondary);
+  border-radius: var(--ll-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  transition: all var(--ll-transition);
+}
+.ll-view-btn:hover { border-color:var(--ll-primary); color:var(--ll-primary); }
+.ll-view-btn.active { background:var(--ll-primary); border-color:var(--ll-primary); color:#fff; }
+.ll-results-count { font-size:.78rem; color:var(--ll-text-muted); white-space:nowrap; }
+
+/* ─── Table View ─── */
+.ll-table-wrap {
+  background: var(--ll-surface);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius-xl);
+  box-shadow: var(--ll-shadow-md);
+  overflow: hidden;
+  animation: llSlideUp .5s ease .2s both;
+}
+.ll-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ll-table thead {
+  background: var(--ll-bg);
+  border-bottom: 2px solid var(--ll-border);
+}
+.ll-table th {
+  padding: .85rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: .78rem;
+  color: var(--ll-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.ll-table th .sortable {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  cursor: pointer;
+  transition: color var(--ll-transition);
+}
+.ll-table th .sortable:hover { color: var(--ll-primary); }
+.ll-table tbody tr {
+  border-bottom: 1px solid var(--ll-border);
+  transition: background-color var(--ll-transition);
+}
+.ll-table tbody tr:hover { background-color: rgba(0,102,204,.02); }
+.ll-table tbody tr:last-child { border-bottom: none; }
+.ll-table td {
+  padding: .85rem 1.5rem;
+  font-size: .88rem;
+  color: var(--ll-text);
+  vertical-align: middle;
+}
+
+/* Cell styles */
+.ll-name-cell {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+.ll-name-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--ll-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.ll-name-icon.bay { background: var(--ll-primary-light); color: var(--ll-primary); }
+.ll-name-icon.desktop { background: var(--ll-success-light); color: var(--ll-success-dark); }
+.ll-name-icon.system { background: var(--ll-danger-light); color: var(--ll-danger-dark); }
+.ll-name-icon.other { background: var(--ll-purple-light); color: var(--ll-purple); }
+.ll-name-text { font-weight: 600; color: var(--ll-text); }
+.ll-name-meta { font-size: .75rem; color: var(--ll-text-muted); margin-top: .1rem; }
+
+.ll-address-cell { color: var(--ll-text-secondary); display: flex; align-items: center; gap: .5rem; }
+.ll-address-cell i { color: var(--ll-text-muted); font-size: .8rem; flex-shrink: 0; }
+.ll-no-address { color: var(--ll-text-muted); font-style: italic; font-size: .85rem; }
+
+.ll-date-cell { color: var(--ll-text-secondary); font-size: .82rem; }
+
+.ll-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .25rem .65rem;
+  border-radius: 9999px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.ll-type-badge.bay { background: var(--ll-primary-light); color: var(--ll-primary); }
+.ll-type-badge.desktop { background: var(--ll-success-light); color: var(--ll-success-dark); }
+.ll-type-badge.system { background: var(--ll-danger-light); color: var(--ll-danger-dark); }
+.ll-type-badge.other { background: var(--ll-purple-light); color: var(--ll-purple); }
+
+.ll-actions-cell {
+  display: flex;
+  gap: .4rem;
+  justify-content: center;
+}
+.ll-action-btn {
+  padding: .4rem .7rem;
+  border-radius: var(--ll-radius-sm);
+  font-size: .78rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all var(--ll-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  text-decoration: none;
+  font-family: inherit;
+}
+.ll-action-btn.edit { background: var(--ll-warning-light); color: var(--ll-warning-dark); }
+.ll-action-btn.edit:hover { background: var(--ll-warning); color: #fff; }
+.ll-action-btn.delete { background: var(--ll-danger-light); color: var(--ll-danger-dark); }
+.ll-action-btn.delete:hover { background: var(--ll-danger); color: #fff; }
+
+/* ─── Card View ─── */
+.ll-cards-container { display: none; animation: llSlideUp .5s ease both; }
+.ll-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+.ll-card {
+  background: var(--ll-surface);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius-xl);
+  box-shadow: var(--ll-shadow-sm);
+  overflow: hidden;
+  transition: all .3s ease;
+}
+.ll-card:hover { transform: translateY(-4px); box-shadow: var(--ll-shadow-lg); }
+.ll-card-top {
+  padding: 1.25rem 1.5rem;
+  background: var(--ll-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  position: relative;
+  overflow: hidden;
+}
+.ll-card-top::before {
+  content:'';
+  position:absolute;
+  top:-20px; right:-20px;
+  width:80px; height:80px;
+  background:rgba(255,255,255,.08);
+  border-radius:50%;
+}
+.ll-card-pin {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,.2);
+  border-radius: var(--ll-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.ll-card-top h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+.ll-card-top .ll-card-type-tag {
+  font-size: .65rem;
+  font-weight: 600;
+  padding: .15rem .5rem;
+  background: rgba(255,255,255,.2);
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-top: .25rem;
+  display: inline-block;
+}
+.ll-card-body { padding: 1.25rem 1.5rem; }
+.ll-card-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: .7rem;
+  margin-bottom: 1rem;
+}
+.ll-card-detail:last-child { margin-bottom: 0; }
+.ll-card-detail i { color: var(--ll-text-muted); margin-top: .15rem; font-size: .85rem; }
+.ll-card-detail-label { font-size: .72rem; color: var(--ll-text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .15rem; font-weight: 500; }
+.ll-card-detail-value { font-size: .88rem; color: var(--ll-text-secondary); }
+.ll-card-actions {
+  display: flex;
+  gap: .65rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ll-border);
+  margin-top: .5rem;
+}
+.ll-card-btn {
+  flex: 1;
+  padding: .65rem;
+  border-radius: var(--ll-radius-sm);
+  font-size: .82rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--ll-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  text-decoration: none;
+  font-family: inherit;
+}
+.ll-card-btn.edit { background: var(--ll-warning-light); color: var(--ll-warning-dark); }
+.ll-card-btn.edit:hover { background: var(--ll-warning); color: #fff; }
+.ll-card-btn.delete { background: var(--ll-danger-light); color: var(--ll-danger-dark); }
+.ll-card-btn.delete:hover { background: var(--ll-danger); color: #fff; }
+
+/* ─── Map View ─── */
+.ll-map-container { display: none; animation: llSlideUp .5s ease both; }
+.ll-map-wrap {
+  background: var(--ll-surface);
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius-xl);
+  box-shadow: var(--ll-shadow-md);
+  overflow: hidden;
+}
+.ll-map-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ll-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ll-map-title {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--ll-text);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ll-map-title i { color: var(--ll-primary); }
+.floor-map-container {
+  position: relative;
+  height: 500px;
+  background: var(--ll-bg);
+}
+#floorMap { height: 100%; width: 100%; }
+.ll-map-legend {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: var(--ll-surface);
+  padding: .85rem 1.1rem;
+  border-radius: var(--ll-radius);
+  box-shadow: var(--ll-shadow-md);
+  z-index: 1000;
+  border: 1px solid var(--ll-border);
+}
+.ll-map-legend .legend-title {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--ll-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: .5rem;
+}
+.ll-map-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .35rem;
+  font-size: .78rem;
+  color: var(--ll-text-secondary);
+}
+.ll-map-legend .legend-item:last-child { margin-bottom: 0; }
+.ll-map-legend .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.ll-map-legend .legend-dot.bay { background: var(--ll-primary); }
+.ll-map-legend .legend-dot.desktop { background: var(--ll-success); }
+.ll-map-legend .legend-dot.system { background: var(--ll-danger); }
+
+/* ─── Empty State ─── */
+.ll-empty {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  animation: llFadeIn .5s ease both;
+}
+.ll-empty-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--ll-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--ll-text-muted);
+  font-size: 1.75rem;
+}
+.ll-empty-title { font-size: 1.15rem; font-weight: 600; color: var(--ll-text); margin-bottom: .35rem; }
+.ll-empty-text { font-size: .88rem; color: var(--ll-text-secondary); max-width: 400px; margin: 0 auto 1.25rem; }
+.ll-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem 1.35rem;
+  background: var(--ll-gradient);
+  color: #fff;
+  border-radius: var(--ll-radius);
+  font-size: .88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--ll-transition);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(0,102,204,.25);
+}
+.ll-empty-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,102,204,.35); color:#fff; text-decoration:none; }
+
+/* ─── Modal ─── */
+.ll-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+.ll-modal-overlay.show { display: flex; }
+.ll-modal {
+  background: var(--ll-surface);
+  border-radius: var(--ll-radius-xl);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--ll-shadow-xl);
+  overflow: hidden;
+  animation: llSlideDown .3s ease both;
+}
+.ll-modal-header {
+  padding: 1.25rem 1.75rem;
+  background: var(--ll-gradient);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ll-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ll-modal-close {
+  cursor: pointer;
+  font-size: 1.1rem;
+  opacity: .8;
+  transition: all var(--ll-transition);
+  background: none;
+  border: none;
+  color: #fff;
+}
+.ll-modal-close:hover { opacity:1; transform:scale(1.15); }
+.ll-modal-body { padding: 1.5rem 1.75rem; }
+.ll-modal-body .ll-form-group {
+  margin-bottom: 1.15rem;
+}
+.ll-modal-body .ll-form-group label {
+  display: block;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--ll-text);
+  margin-bottom: .35rem;
+}
+.ll-modal-body .ll-form-group label .req { color: var(--ll-danger); }
+.ll-modal-body .ll-form-group input,
+.ll-modal-body .ll-form-group textarea {
+  width: 100%;
+  padding: .7rem 1rem;
+  border: 1.5px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  font-size: .88rem;
+  font-family: inherit;
+  background: var(--ll-bg);
+  color: var(--ll-text);
+  transition: all var(--ll-transition);
+}
+.ll-modal-body .ll-form-group input:focus,
+.ll-modal-body .ll-form-group textarea:focus {
+  border-color: var(--ll-primary);
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,102,204,.1);
+}
+.ll-modal-body .ll-form-group textarea { min-height: 80px; resize: vertical; }
+.ll-modal-footer {
+  padding: 1rem 1.75rem 1.35rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: .65rem;
+}
+.ll-modal-btn {
+  padding: .6rem 1.35rem;
+  border-radius: var(--ll-radius);
+  font-size: .88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--ll-transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  text-decoration: none;
+}
+.ll-modal-btn.cancel { background:var(--ll-bg); color:var(--ll-text-secondary); border:1px solid var(--ll-border); }
+.ll-modal-btn.cancel:hover { background:var(--ll-border); color:var(--ll-text); }
+.ll-modal-btn.save { background:var(--ll-gradient); color:#fff; box-shadow:0 4px 14px rgba(0,102,204,.25); }
+.ll-modal-btn.save:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,102,204,.35); }
+.ll-modal-btn.danger { background:var(--ll-danger); color:#fff; box-shadow:0 4px 14px rgba(239,68,68,.25); }
+.ll-modal-btn.danger:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(239,68,68,.35); }
+
+/* ─── Toast ─── */
+.ll-toast-container {
+  position:fixed; top:80px; right:1.5rem;
+  z-index:20000;
+  display:flex; flex-direction:column; gap:.5rem;
+}
+.ll-toast {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.75rem 1.25rem;
+  background:var(--ll-surface);
+  border:1px solid var(--ll-border);
+  border-radius:var(--ll-radius);
+  box-shadow:var(--ll-shadow-lg);
+  font-size:.85rem; font-weight:500;
+  color:var(--ll-text);
+  animation:llFadeIn .3s ease both;
+  max-width:360px;
+  min-width:280px;
+}
+.ll-toast.success { border-left:4px solid var(--ll-success); }
+.ll-toast.error { border-left:4px solid var(--ll-danger); }
+.ll-toast.info { border-left:4px solid var(--ll-primary); }
+.ll-toast .toast-icon { flex-shrink:0; font-size:.95rem; }
+.ll-toast.success .toast-icon { color:var(--ll-success); }
+.ll-toast.error .toast-icon { color:var(--ll-danger); }
+.ll-toast.info .toast-icon { color:var(--ll-primary); }
+.ll-toast .toast-msg { flex:1; }
+.ll-toast .toast-close { cursor:pointer; background:none; border:none; color:var(--ll-text-muted); font-size:.85rem; padding:0; transition:color var(--ll-transition); }
+.ll-toast .toast-close:hover { color:var(--ll-text); }
+
+/* Leaflet tooltip  */
+.location-tooltip {
+  font-size: .88rem;
+  font-weight: 600;
+  background: var(--ll-surface);
+  padding: 8px 12px;
+  border-radius: var(--ll-radius-sm);
+  box-shadow: var(--ll-shadow-md);
+  border: none;
+  min-width: 120px;
+  text-align: center;
+  border-left: 3px solid var(--ll-primary);
+}
+.location-tooltip small {
+  display: block;
+  font-size: .72rem;
+  color: var(--ll-text-muted);
+  margin-top: 3px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .ll-page { padding-left: 1rem; padding-right: 1rem; }
+  .ll-header { padding: 1.5rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .ll-header-left h1 { font-size: 1.35rem; }
+  .ll-header-right { width: 100%; justify-content: flex-end; }
+  .ll-stats { grid-template-columns: repeat(2, 1fr); }
+  .ll-toolbar { flex-direction: column; align-items: stretch; }
+  .ll-search-box { max-width: none; }
+  .ll-cards-grid { grid-template-columns: 1fr; }
+  .ll-table th, .ll-table td { padding: .75rem .85rem; }
+}
+@media (max-width: 480px) {
+  .ll-stats { grid-template-columns: 1fr; }
+  .ll-table th:nth-child(3), .ll-table td:nth-child(3) { display: none; }
+}
 </style>
 
-<div class="location-page">
-    <div class="page-wrapper">
-        <!-- Page Header -->
-        <div class="page-header animate__animated animate__fadeIn">
-            <div class="page-header-content">
-                <div class="page-title-section">
-                    <div class="page-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div>
-                        <h1 class="page-title">Location Management</h1>
-                        <p class="page-subtitle">Manage your inventory locations efficiently</p>
-                    </div>
-                </div>
-                <div class="header-stats">
-                    <div class="stat-badge">
-                        <div class="stat-badge-value">{{ locations|length }}</div>
-                        <div class="stat-badge-label">Total Locations</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toast Messages -->
-        {% if messages %}
-        <div class="toast-container">
-            {% for message in messages %}
-            <div class="toast {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}toast-danger{% elif 'added' in message|lower or message.tags == 'success' %}toast-success{% else %}toast-info{% endif %} animate__animated animate__fadeInRight">
-                <i class="toast-icon fas {% if 'removed' in message|lower or message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif 'added' in message|lower or message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
-                <span class="toast-message">{{ message }}</span>
-                <button type="button" class="toast-close"><i class="fas fa-times"></i></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Controls Bar -->
-        <div class="controls-bar animate__animated animate__fadeIn">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="locationSearch" class="search-input" placeholder="Search by name or address...">
-            </div>
-            <div class="controls-actions">
-                {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                <a href="{% url 'location_create_stream' stream %}" class="btn-add">
-                    <i class="fas fa-plus-circle"></i> Add Location
-                </a>
-                {% endif %}
-                <button id="toggleMapView" class="view-toggle-btn" title="Map View">
-                    <i class="fas fa-map"></i>
-                </button>
-                <button id="toggleView" class="view-toggle-btn" title="Toggle View">
-                    <i class="fas fa-th-large"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Table View -->
-        <div id="tableView" class="table-container animate__animated animate__fadeIn">
-            <table class="location-table">
-                <thead>
-                    <tr>
-                        <th>
-                            <span class="sortable">
-                                <i class="fas fa-building"></i>
-                                Name
-                                <i class="fas fa-sort"></i>
-                            </span>
-                        </th>
-                        <th>
-                            <span class="sortable">
-                                <i class="fas fa-map-marked-alt"></i>
-                                Address
-                                <i class="fas fa-sort"></i>
-                            </span>
-                        </th>
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        <th style="text-align: center;">Actions</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody class="location-items">
-                    {% for location in locations %}
-                    <tr class="location-row" data-name="{{ location.name|lower }}" data-location-id="{{ location.id }}">
-                        <td>
-                            <div class="location-name">
-                                <div class="location-name-icon">
-                                    <i class="fas fa-map-pin"></i>
-                                </div>
-                                {{ location.name }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="location-address">
-                                {% if location.address %}
-                                <i class="fas fa-location-dot"></i>
-                                <span>{{ location.address }}</span>
-                                {% else %}
-                                <span class="no-address">No address specified</span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        <td>
-                            <div class="table-actions">
-                                <a href="{% url 'location_edit_stream' stream location.id %}" class="btn-action btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="{% url 'location_delete_stream' stream location.id %}" class="btn-action btn-delete location-delete-btn">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </a>
-                            </div>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                                <div class="empty-state-title">No locations found</div>
-                                <p class="empty-state-text">Add your first location to start organizing your inventory</p>
-                                {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                                <a href="{% url 'location_create_stream' stream %}" class="btn-primary-custom">
-                                    <i class="fas fa-plus-circle"></i> Add First Location
-                                </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Map View (Initially Hidden) -->
-        <div id="mapView" class="map-container animate__animated animate__fadeIn">
-            <div class="floor-map-wrapper">
-                <div class="floor-map-header">
-                    <div class="floor-map-title">
-                        <i class="fas fa-map"></i>
-                        <span>Location Map View</span>
-                    </div>
-                </div>
-                <!-- Map container -->
-                <div class="floor-map-container">
-                    <div id="floorMap"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card View (Initially Hidden) -->
-        <div id="cardView" class="cards-container">
-            <div class="location-cards-grid animate__animated animate__fadeIn">
-                {% for location in locations %}
-                <div class="location-card" data-name="{{ location.name|lower }}" data-location-id="{{ location.id }}">
-                    <div class="card-header">
-                        <h3>
-                            <i class="fas fa-map-pin"></i>
-                            {{ location.name }}
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-info">
-                            <i class="fas fa-location-dot"></i>
-                            <div class="card-info-content">
-                                <div class="card-info-label">Address</div>
-                                <div class="card-info-value">
-                                    {% if location.address %}
-                                    {{ location.address }}
-                                    {% else %}
-                                    <span class="no-address">No address specified</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                        <div class="card-actions">
-                            <a href="{% url 'location_edit_stream' stream location.id %}" class="card-btn card-btn-edit">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <a href="{% url 'location_delete_stream' stream location.id %}" class="card-btn card-btn-delete location-delete-btn">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% empty %}
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="empty-state-title">No locations found</div>
-                    <p class="empty-state-text">Add your first location to start organizing your inventory</p>
-                    {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
-                    <a href="{% url 'location_create_stream' stream %}" class="btn-primary-custom">
-                        <i class="fas fa-plus-circle"></i> Add First Location
-                    </a>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+<!-- ═══════════════════════ HTML ═══════════════════════ -->
+<div class="ll-page">
+  <!-- Gradient Card Header -->
+  <section class="ll-header">
+    <div class="ll-header-left">
+      <div class="ll-header-icon"><i class="fas fa-map-marker-alt"></i></div>
+      <div>
+        <h1>Location Management</h1>
+        <div class="subtitle">Organize and manage physical inventory locations for <strong>{{ selected_stream }}</strong></div>
+      </div>
     </div>
+    <div class="ll-header-right">
+      <button class="ll-header-btn" id="restartTourBtn" title="Page Tour"><i class="fas fa-question-circle"></i></button>
+      {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+      <button class="ll-header-btn primary" onclick="llOpenAddModal()">
+        <i class="fas fa-plus-circle"></i> Add Location
+      </button>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Stats Row -->
+  <div class="ll-stats">
+    <div class="ll-stat-card" style="--accent:var(--ll-primary);">
+      <div class="ll-stat-icon blue"><i class="fas fa-map-pin"></i></div>
+      <div>
+        <div class="ll-stat-value" id="llStatTotal">{{ locations|length }}</div>
+        <div class="ll-stat-label">Total Locations</div>
+      </div>
+    </div>
+    <div class="ll-stat-card" style="--accent:var(--ll-success);">
+      <div class="ll-stat-icon green"><i class="fas fa-location-dot"></i></div>
+      <div>
+        <div class="ll-stat-value" id="llStatWithAddr">0</div>
+        <div class="ll-stat-label">With Address</div>
+      </div>
+    </div>
+    <div class="ll-stat-card" style="--accent:var(--ll-warning);">
+      <div class="ll-stat-icon amber"><i class="fas fa-location-crosshairs"></i></div>
+      <div>
+        <div class="ll-stat-value" id="llStatNoAddr">0</div>
+        <div class="ll-stat-label">No Address</div>
+      </div>
+    </div>
+    <div class="ll-stat-card" style="--accent:var(--ll-purple);">
+      <div class="ll-stat-icon purple"><i class="fas fa-clock"></i></div>
+      <div>
+        <div class="ll-stat-value" id="llStatRecent">0</div>
+        <div class="ll-stat-label">Added This Month</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="ll-toolbar">
+    <div class="ll-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="llSearch" class="ll-search-input" placeholder="Search locations by name or address...">
+    </div>
+    <div class="ll-toolbar-actions">
+      <span class="ll-results-count" id="llResultsCount">{{ locations|length }} location{{ locations|length|pluralize }}</span>
+      <button class="ll-view-btn active" id="llViewTable" title="Table View"><i class="fas fa-list"></i></button>
+      <button class="ll-view-btn" id="llViewCard" title="Card View"><i class="fas fa-th-large"></i></button>
+      <button class="ll-view-btn" id="llViewMap" title="Map View"><i class="fas fa-map"></i></button>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div id="llTableView" class="ll-table-wrap">
+    <table class="ll-table">
+      <thead>
+        <tr>
+          <th><span class="sortable" data-sort="name"><i class="fas fa-building"></i> Name <i class="fas fa-sort ll-sort-icon"></i></span></th>
+          <th><span class="sortable" data-sort="address"><i class="fas fa-map-marked-alt"></i> Address <i class="fas fa-sort ll-sort-icon"></i></span></th>
+          <th>Type</th>
+          <th><span class="sortable" data-sort="date"><i class="fas fa-calendar"></i> Created <i class="fas fa-sort ll-sort-icon"></i></span></th>
+          {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+          <th style="text-align:center;">Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody id="llTableBody" class="location-items">
+        {% for location in locations %}
+        <tr class="location-row ll-row"
+            data-name="{{ location.name|lower }}"
+            data-address="{% if location.address %}{{ location.address|lower }}{% endif %}"
+            data-date="{{ location.created_at|date:'Y-m-d' }}"
+            data-location-id="{{ location.id }}">
+          <td>
+            <div class="ll-name-cell">
+              <div class="ll-name-icon {% if 'bay' in location.name|lower %}bay{% elif 'desktop' in location.name|lower %}desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}system{% else %}other{% endif %}">
+                <i class="fas {% if 'bay' in location.name|lower %}fa-warehouse{% elif 'desktop' in location.name|lower %}fa-desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}fa-server{% else %}fa-map-pin{% endif %}"></i>
+              </div>
+              <div>
+                <div class="ll-name-text">{{ location.name }}</div>
+                <div class="ll-name-meta">ID: {{ location.id }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            {% if location.address %}
+            <div class="ll-address-cell"><i class="fas fa-location-dot"></i> {{ location.address }}</div>
+            {% else %}
+            <span class="ll-no-address">No address specified</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="ll-type-badge {% if 'bay' in location.name|lower %}bay{% elif 'desktop' in location.name|lower %}desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}system{% else %}other{% endif %}">
+              <i class="fas {% if 'bay' in location.name|lower %}fa-warehouse{% elif 'desktop' in location.name|lower %}fa-desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}fa-server{% else %}fa-map-pin{% endif %}"></i>
+              {% if 'bay' in location.name|lower %}Bay{% elif 'desktop' in location.name|lower %}Desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}System{% else %}Other{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="ll-date-cell">
+              <i class="fas fa-calendar-alt" style="color:var(--ll-text-muted);font-size:.8rem;margin-right:.3rem;"></i>
+              {{ location.created_at|date:"M d, Y" }}
+            </div>
+          </td>
+          {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+          <td>
+            <div class="ll-actions-cell">
+              <button class="ll-action-btn edit" onclick="llOpenEditModal({{ location.id }}, '{{ location.name|escapejs }}', '{{ location.address|escapejs }}')" title="Edit">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="ll-action-btn delete" onclick="llOpenDeleteModal({{ location.id }}, '{{ location.name|escapejs }}')" title="Delete">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="ll-empty">
+              <div class="ll-empty-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div class="ll-empty-title">No locations found</div>
+              <p class="ll-empty-text">Add your first location to start organizing your inventory</p>
+              {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+              <button class="ll-empty-btn" onclick="llOpenAddModal()"><i class="fas fa-plus-circle"></i> Add First Location</button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Card View -->
+  <div id="llCardView" class="ll-cards-container">
+    <div class="ll-cards-grid" id="llCardsGrid">
+      {% for location in locations %}
+      <div class="ll-card" data-name="{{ location.name|lower }}" data-address="{% if location.address %}{{ location.address|lower }}{% endif %}" data-location-id="{{ location.id }}">
+        <div class="ll-card-top">
+          <div class="ll-card-pin"><i class="fas {% if 'bay' in location.name|lower %}fa-warehouse{% elif 'desktop' in location.name|lower %}fa-desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}fa-server{% else %}fa-map-pin{% endif %}"></i></div>
+          <div>
+            <h3>{{ location.name }}</h3>
+            <span class="ll-card-type-tag">
+              {% if 'bay' in location.name|lower %}Bay{% elif 'desktop' in location.name|lower %}Desktop{% elif 'system' in location.name|lower or 'full' in location.name|lower %}System{% else %}Location{% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="ll-card-body">
+          <div class="ll-card-detail">
+            <i class="fas fa-location-dot"></i>
+            <div>
+              <div class="ll-card-detail-label">Address</div>
+              <div class="ll-card-detail-value">{% if location.address %}{{ location.address }}{% else %}<span class="ll-no-address">No address specified</span>{% endif %}</div>
+            </div>
+          </div>
+          <div class="ll-card-detail">
+            <i class="fas fa-calendar-alt"></i>
+            <div>
+              <div class="ll-card-detail-label">Created</div>
+              <div class="ll-card-detail-value">{{ location.created_at|date:"M d, Y" }}</div>
+            </div>
+          </div>
+          <div class="ll-card-detail">
+            <i class="fas fa-fingerprint"></i>
+            <div>
+              <div class="ll-card-detail-label">Location ID</div>
+              <div class="ll-card-detail-value">#{{ location.id }}</div>
+            </div>
+          </div>
+          {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+          <div class="ll-card-actions">
+            <button class="ll-card-btn edit" onclick="llOpenEditModal({{ location.id }}, '{{ location.name|escapejs }}', '{{ location.address|escapejs }}')">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="ll-card-btn delete" onclick="llOpenDeleteModal({{ location.id }}, '{{ location.name|escapejs }}')">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="ll-empty" style="grid-column:1/-1;">
+        <div class="ll-empty-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="ll-empty-title">No locations found</div>
+        <p class="ll-empty-text">Add your first location to start organizing your inventory</p>
+        {% if user.is_superuser or user.custom_profile.is_admin|default:False %}
+        <button class="ll-empty-btn" onclick="llOpenAddModal()"><i class="fas fa-plus-circle"></i> Add First Location</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Map View -->
+  <div id="llMapView" class="ll-map-container">
+    <div class="ll-map-wrap">
+      <div class="ll-map-header">
+        <div class="ll-map-title"><i class="fas fa-map"></i> Location Map View</div>
+      </div>
+      <div class="floor-map-container">
+        <div id="floorMap"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- Location Details Modal -->
-<div id="locationModal" class="location-modal animate__animated">
-    <div class="modal-content animate__animated animate__fadeInUp">
-        <div class="modal-header">
-            <h3 id="modalLocationName"></h3>
-            <i class="fas fa-times close-modal"></i>
-        </div>
-        <div class="modal-body">
-            <div style="display: flex; align-items: start; margin-bottom: 1.5rem;">
-                <i class="fas fa-map-marker-alt" style="color: var(--text-muted); margin-right: 0.8rem; margin-top: 0.3rem; font-size: 1.2rem;"></i>
-                <div>
-                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem;">Address</div>
-                    <div id="modalLocationAddress" style="color: var(--text-secondary);"></div>
-                </div>
-            </div>
-            <div id="modalActionButtons" style="display: flex; gap: 0.8rem; margin-top: 2rem;">
-                <!-- Action buttons will be added dynamically -->
-            </div>
-        </div>
+<!-- ─── Add Location Modal ─── -->
+<div class="ll-modal-overlay" id="llAddModal">
+  <div class="ll-modal">
+    <div class="ll-modal-header">
+      <h3><i class="fas fa-plus-circle"></i> Add New Location</h3>
+      <button class="ll-modal-close" onclick="llCloseModal('llAddModal')"><i class="fas fa-times"></i></button>
     </div>
+    <form method="post" action="{% url 'location_create_stream' stream %}">
+      {% csrf_token %}
+      <div class="ll-modal-body">
+        <div class="ll-form-group">
+          <label>Location Name <span class="req">*</span></label>
+          <input type="text" name="name" required placeholder="e.g. 3rd Floor Bay" autofocus>
+        </div>
+        <div class="ll-form-group">
+          <label>Address <span style="color:var(--ll-text-muted);font-size:.72rem;font-weight:400;">(Optional)</span></label>
+          <textarea name="address" rows="3" placeholder="e.g. Building A, 3rd Floor, West Wing"></textarea>
+        </div>
+      </div>
+      <div class="ll-modal-footer">
+        <button type="button" class="ll-modal-btn cancel" onclick="llCloseModal('llAddModal')"><i class="fas fa-times"></i> Cancel</button>
+        <button type="submit" class="ll-modal-btn save"><i class="fas fa-plus"></i> Add Location</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── Edit Location Modal ─── -->
+<div class="ll-modal-overlay" id="llEditModal">
+  <div class="ll-modal">
+    <div class="ll-modal-header">
+      <h3><i class="fas fa-pen-to-square"></i> Edit Location</h3>
+      <button class="ll-modal-close" onclick="llCloseModal('llEditModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" id="llEditForm" action="">
+      {% csrf_token %}
+      <div class="ll-modal-body">
+        <div class="ll-form-group">
+          <label>Location Name <span class="req">*</span></label>
+          <input type="text" name="name" id="llEditName" required placeholder="Location name">
+        </div>
+        <div class="ll-form-group">
+          <label>Address <span style="color:var(--ll-text-muted);font-size:.72rem;font-weight:400;">(Optional)</span></label>
+          <textarea name="address" id="llEditAddress" rows="3" placeholder="Address details"></textarea>
+        </div>
+      </div>
+      <div class="ll-modal-footer">
+        <button type="button" class="ll-modal-btn cancel" onclick="llCloseModal('llEditModal')"><i class="fas fa-times"></i> Cancel</button>
+        <button type="submit" class="ll-modal-btn save"><i class="fas fa-save"></i> Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── Delete Confirmation Modal ─── -->
+<div class="ll-modal-overlay" id="llDeleteModal">
+  <div class="ll-modal">
+    <div class="ll-modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+      <h3><i class="fas fa-exclamation-triangle"></i> Delete Location</h3>
+      <button class="ll-modal-close" onclick="llCloseModal('llDeleteModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" id="llDeleteForm" action="">
+      {% csrf_token %}
+      <div class="ll-modal-body" style="text-align:center; padding:2rem 1.75rem;">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--ll-danger-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--ll-danger);font-size:1.5rem;">
+          <i class="fas fa-trash-alt"></i>
+        </div>
+        <h4 style="font-size:1.1rem;font-weight:600;color:var(--ll-text);margin-bottom:.5rem;">Are you sure?</h4>
+        <p style="font-size:.88rem;color:var(--ll-text-secondary);margin-bottom:.25rem;">
+          You are about to delete <strong id="llDeleteName"></strong>. This action cannot be undone.
+        </p>
+        <p style="font-size:.78rem;color:var(--ll-text-muted);">All products assigned to this location will need to be reassigned.</p>
+      </div>
+      <div class="ll-modal-footer" style="justify-content:center;">
+        <button type="button" class="ll-modal-btn cancel" onclick="llCloseModal('llDeleteModal')"><i class="fas fa-arrow-left"></i> Keep It</button>
+        <button type="submit" class="ll-modal-btn danger"><i class="fas fa-trash-alt"></i> Yes, Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ─── Location Details Modal (for map clicks) ─── -->
+<div id="locationModal" class="ll-modal-overlay">
+  <div class="ll-modal">
+    <div class="ll-modal-header">
+      <h3 id="modalLocationName"><i class="fas fa-map-pin"></i> <span></span></h3>
+      <button class="ll-modal-close" onclick="closeLocationModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ll-modal-body">
+      <div style="display:flex;align-items:start;margin-bottom:1.5rem;">
+        <i class="fas fa-map-marker-alt" style="color:var(--ll-text-muted);margin-right:.8rem;margin-top:.3rem;font-size:1.2rem;"></i>
+        <div>
+          <div style="font-weight:600;color:var(--ll-text);margin-bottom:.3rem;">Address</div>
+          <div id="modalLocationAddress" style="color:var(--ll-text-secondary);"></div>
+        </div>
+      </div>
+      <div id="modalActionButtons" style="display:flex;gap:.8rem;margin-top:2rem;"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-// Pass stream from Django to JavaScript
-const currentStream = '{{ stream }}';
+(function() {
+'use strict';
 
-// Prevent right-click
-document.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
+var currentStream = '{{ stream }}';
+var _buPrefix = (function(){ var p=window.location.pathname; var i=p.indexOf('/stream/'); if(i>0) return p.substring(0,i); return ''; })();
+
+/* ─── Compute Stats ─── */
+(function computeStats() {
+  var rows = document.querySelectorAll('.ll-row');
+  var withAddr = 0, noAddr = 0, recent = 0;
+  var now = new Date();
+  var thisMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  rows.forEach(function(r) {
+    if (r.getAttribute('data-address')) withAddr++;
+    else noAddr++;
+    var d = r.getAttribute('data-date') || '';
+    if (d.startsWith(thisMonth)) recent++;
+  });
+  var el;
+  el = document.getElementById('llStatWithAddr'); if (el) el.textContent = withAddr;
+  el = document.getElementById('llStatNoAddr'); if (el) el.textContent = noAddr;
+  el = document.getElementById('llStatRecent'); if (el) el.textContent = recent;
+})();
+
+/* ─── Toast auto‑close ─── */
+var toasts = document.querySelectorAll('.ll-toast');
+toasts.forEach(function(t) {
+  setTimeout(function() { t.style.opacity = '0'; t.style.transform = 'translateX(100px)'; t.style.transition = '.4s ease'; setTimeout(function(){ t.remove(); }, 400); }, 5000);
 });
 
-// Initialize empty location data object
-let locationData = {};
+/* ─── View Toggle ─── */
+var viewTable = document.getElementById('llViewTable');
+var viewCard = document.getElementById('llViewCard');
+var viewMap = document.getElementById('llViewMap');
+var tableView = document.getElementById('llTableView');
+var cardView = document.getElementById('llCardView');
+var mapView = document.getElementById('llMapView');
 
-// Function to populate the location data from DOM elements
+function setView(mode) {
+  tableView.style.display = mode === 'table' ? '' : 'none';
+  cardView.style.display = mode === 'card' ? 'block' : 'none';
+  mapView.style.display = mode === 'map' ? 'block' : 'none';
+  viewTable.classList.toggle('active', mode === 'table');
+  viewCard.classList.toggle('active', mode === 'card');
+  viewMap.classList.toggle('active', mode === 'map');
+  if (mode === 'map') initMap();
+}
+viewTable.addEventListener('click', function() { setView('table'); });
+viewCard.addEventListener('click', function() { setView('card'); });
+viewMap.addEventListener('click', function() { setView('map'); });
+
+/* ─── Search ─── */
+var searchInput = document.getElementById('llSearch');
+var resultsCount = document.getElementById('llResultsCount');
+searchInput.addEventListener('input', function() {
+  var term = this.value.toLowerCase().trim();
+  var visibleRows = 0;
+  document.querySelectorAll('.ll-row').forEach(function(row) {
+    var name = row.getAttribute('data-name') || '';
+    var addr = row.getAttribute('data-address') || '';
+    var match = name.includes(term) || addr.includes(term);
+    row.style.display = match ? '' : 'none';
+    if (match) visibleRows++;
+  });
+  document.querySelectorAll('.ll-card').forEach(function(card) {
+    var name = card.getAttribute('data-name') || '';
+    var addr = card.getAttribute('data-address') || '';
+    var match = name.includes(term) || addr.includes(term);
+    card.style.display = match ? '' : 'none';
+  });
+  resultsCount.textContent = visibleRows + ' location' + (visibleRows !== 1 ? 's' : '') + (term ? ' found' : '');
+});
+
+/* ─── Sorting ─── */
+document.querySelectorAll('.ll-table th .sortable').forEach(function(sortable) {
+  sortable.addEventListener('click', function() {
+    var key = this.getAttribute('data-sort');
+    var icon = this.querySelector('.ll-sort-icon');
+    var isAsc = icon.classList.contains('fa-sort-up');
+    // Reset all
+    document.querySelectorAll('.ll-sort-icon').forEach(function(i) { i.className = 'fas fa-sort ll-sort-icon'; });
+    if (isAsc) {
+      icon.className = 'fas fa-sort-down ll-sort-icon';
+      performSort(key, false);
+    } else {
+      icon.className = 'fas fa-sort-up ll-sort-icon';
+      performSort(key, true);
+    }
+  });
+});
+
+function performSort(key, asc) {
+  var body = document.getElementById('llTableBody');
+  var rows = Array.from(body.querySelectorAll('.ll-row'));
+  rows.sort(function(a, b) {
+    var va, vb;
+    if (key === 'name') {
+      va = a.getAttribute('data-name') || '';
+      vb = b.getAttribute('data-name') || '';
+    } else if (key === 'address') {
+      va = a.getAttribute('data-address') || '';
+      vb = b.getAttribute('data-address') || '';
+    } else if (key === 'date') {
+      va = a.getAttribute('data-date') || '';
+      vb = b.getAttribute('data-date') || '';
+    }
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  rows.forEach(function(r) { body.appendChild(r); });
+}
+
+/* ─── Modals ─── */
+window.llOpenAddModal = function() {
+  document.getElementById('llAddModal').classList.add('show');
+};
+
+window.llOpenEditModal = function(id, name, address) {
+  document.getElementById('llEditName').value = name;
+  document.getElementById('llEditAddress').value = address;
+  document.getElementById('llEditForm').action = _buPrefix + '/stream/' + currentStream + '/location/' + id + '/edit/';
+  document.getElementById('llEditModal').classList.add('show');
+};
+
+window.llOpenDeleteModal = function(id, name) {
+  document.getElementById('llDeleteName').textContent = name;
+  document.getElementById('llDeleteForm').action = _buPrefix + '/stream/' + currentStream + '/location/' + id + '/delete/';
+  document.getElementById('llDeleteModal').classList.add('show');
+};
+
+window.llCloseModal = function(id) {
+  document.getElementById(id).classList.remove('show');
+};
+
+// Close on backdrop click
+document.querySelectorAll('.ll-modal-overlay').forEach(function(overlay) {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.ll-modal-overlay.show').forEach(function(m) { m.classList.remove('show'); });
+  }
+});
+
+/* ─── Map ─── */
+var mapInitialized = false;
+var locationData = {};
+
+function initMap() {
+  if (mapInitialized) return;
+  mapInitialized = true;
+  populateLocationData();
+}
+
 function populateLocationData() {
     locationData = {};
-    
-    const locationRows = document.querySelectorAll('.location-row');
-    
-    locationRows.forEach(row => {
-        const locationId = row.getAttribute('data-location-id') || `loc${Object.keys(locationData).length + 1}`;
-        const locationName = row.querySelector('.location-name').textContent.trim();
-        const addressElement = row.querySelector('.location-address span');
-        const address = addressElement ? addressElement.textContent.trim() : 'No address specified';
-        
-        const type = getLocationType(locationName);
-        const coords = getRandomCoordinates();
-        
-        locationData[locationId] = {
-            id: locationId,
-            name: locationName,
-            address: address,
-            type: type,
-            coords: coords
-        };
+    var rows = document.querySelectorAll('.ll-row');
+    rows.forEach(function(row) {
+        var locationId = row.getAttribute('data-location-id') || ('loc' + (Object.keys(locationData).length + 1));
+        var nameEl = row.querySelector('.ll-name-text');
+        var locationName = nameEl ? nameEl.textContent.trim() : '';
+        var addrEl = row.querySelector('.ll-address-cell');
+        var address = addrEl ? addrEl.textContent.trim() : 'No address specified';
+        var type = getLocationType(locationName);
+        var coords = getRandomCoordinates();
+        locationData[locationId] = { id: locationId, name: locationName, address: address, type: type, coords: coords };
     });
-    
-    if (Object.keys(locationData).length === 0) {
-        const locationCards = document.querySelectorAll('.location-card');
-        
-        locationCards.forEach(card => {
-            const locationId = card.getAttribute('data-location-id') || `loc${Object.keys(locationData).length + 1}`;
-            const locationName = card.querySelector('.card-header h3').textContent.trim();
-            const addressElement = card.querySelector('.card-info-value');
-            const address = addressElement ? addressElement.textContent.trim() : 'No address specified';
-            
-            const type = getLocationType(locationName);
-            const coords = getRandomCoordinates();
-            
-            locationData[locationId] = {
-                id: locationId,
-                name: locationName,
-                address: address,
-                type: type,
-                coords: coords
-            };
-        });
-    }
-    
     if (Object.keys(locationData).length === 0) {
         locationData = {
-            'loc1': { id: 'loc1', name: '2nd Floor Bay', address: 'Building A, 2nd Floor, West Wing', type: 'bay', coords: [35, 30] },
-            'loc2': { id: 'loc2', name: '3rd Floor Bay', address: 'Building A, 3rd Floor, East Wing', type: 'bay', coords: [25, 45] },
-            'loc3': { id: 'loc3', name: '3rd Floor Full System', address: 'Building A, 3rd Floor, North Wing', type: 'system', coords: [65, 25] },
-            'loc4': { id: 'loc4', name: '8th Floor Desktop Room', address: 'Building B, 8th Floor, Room 801', type: 'desktop', coords: [45, 55] },
-            'loc5': { id: 'loc5', name: '11th Floor Desktop Room', address: 'Building B, 11th Floor, Room 1105', type: 'desktop', coords: [70, 40] }
+            'loc1': { id:'loc1', name:'2nd Floor Bay', address:'Building A, 2nd Floor, West Wing', type:'bay', coords:[35,30] },
+            'loc2': { id:'loc2', name:'3rd Floor Bay', address:'Building A, 3rd Floor, East Wing', type:'bay', coords:[25,45] },
+            'loc3': { id:'loc3', name:'3rd Floor Full System', address:'Building A, 3rd Floor, North Wing', type:'system', coords:[65,25] },
+            'loc4': { id:'loc4', name:'8th Floor Desktop Room', address:'Building B, 8th Floor, Room 801', type:'desktop', coords:[45,55] },
+            'loc5': { id:'loc5', name:'11th Floor Desktop Room', address:'Building B, 11th Floor, Room 1105', type:'desktop', coords:[70,40] }
         };
     }
 }
 
-// Initialize interactive features
-document.addEventListener('DOMContentLoaded', function() {
-    // Toast notifications auto-close
-    const toasts = document.querySelectorAll('.toast');
-    toasts.forEach(toast => {
-        setTimeout(() => {
-            toast.classList.add('animate__fadeOut');
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 500);
-        }, 5000);
-        
-        const closeBtn = toast.querySelector('.toast-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                toast.classList.add('animate__fadeOut');
-                setTimeout(() => {
-                    toast.style.display = 'none';
-                }, 500);
-            });
-        }
-    });
+function getLocationType(name) {
+    name = (name || '').toLowerCase();
+    if (name.includes('bay')) return 'bay';
+    if (name.includes('desktop')) return 'desktop';
+    if (name.includes('full system') || name.includes('system')) return 'system';
+    return 'bay';
+}
 
-    // Toggle between table and card view
-    const toggleViewBtn = document.getElementById('toggleView');
-    const toggleMapViewBtn = document.getElementById('toggleMapView');
-    const tableView = document.getElementById('tableView');
-    const cardView = document.getElementById('cardView');
-    const mapView = document.getElementById('mapView');
-    const viewIcon = toggleViewBtn.querySelector('i');
-    
-    toggleViewBtn.addEventListener('click', function() {
-        // Hide map view when switching between table/card
-        mapView.style.display = 'none';
-        
-        // Remove active class from map toggle button
-        if (toggleMapViewBtn) {
-            toggleMapViewBtn.classList.remove('active');
-            const mapIcon = toggleMapViewBtn.querySelector('i');
-            if (mapIcon) {
-                mapIcon.className = 'fas fa-map';
-            }
-        }
-        
-        if (tableView.style.display !== 'none' && tableView.style.display !== '') {
-            tableView.style.display = 'none';
-            cardView.style.display = 'block';
-            viewIcon.className = 'fas fa-list';
-            toggleViewBtn.classList.add('active');
-        } else {
-            tableView.style.display = 'block';
-            cardView.style.display = 'none';
-            viewIcon.className = 'fas fa-th-large';
-            toggleViewBtn.classList.remove('active');
-        }
-        
-        const searchTerm = document.getElementById('locationSearch').value.toLowerCase().trim();
-        if (searchTerm) {
-            filterLocations(searchTerm);
-        }
-    });
-
-    // Note: Map toggle is handled by floor_map.js
-    // We need to ensure locationData is populated before floor_map.js initializes the map
-    // Populate location data on page load so it's ready when map is toggled
-    populateLocationData();
-    
-    // Set up floor selection buttons
-    document.querySelectorAll('.floor-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const floor = parseInt(this.getAttribute('data-floor'));
-            activeFloor = floor;
-            renderFloorMarkers(floor);
-        });
-    });
-    
-    // Set up modal close button
-    const closeModalBtn = document.querySelector('.close-modal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', closeLocationModal);
-    }
-    
-    const locationModal = document.getElementById('locationModal');
-    if (locationModal) {
-        locationModal.addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeLocationModal();
-            }
-        });
-    }
-    
-    // Search functionality
-    const searchInput = document.getElementById('locationSearch');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        filterLocations(searchTerm);
-    });
-
-    function filterLocations(searchTerm) {
-        let visibleTableRowCount = 0;
-        let visibleCardCount = 0;
-        
-        const tableRows = document.querySelectorAll('.location-row');
-        tableRows.forEach(row => {
-            const locationName = row.getAttribute('data-name').toLowerCase();
-            const addressElement = row.querySelector('.location-address span');
-            const addressText = addressElement ? addressElement.textContent.toLowerCase() : '';
-            
-            if (locationName.includes(searchTerm) || addressText.includes(searchTerm)) {
-                row.style.display = '';
-                visibleTableRowCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-        
-        const cards = document.querySelectorAll('.location-card');
-        cards.forEach(card => {
-            const locationName = card.getAttribute('data-name').toLowerCase();
-            const addressElement = card.querySelector('.card-info-value');
-            const addressText = addressElement ? addressElement.textContent.trim().toLowerCase() : '';
-            
-            if (locationName.includes(searchTerm) || addressText.includes(searchTerm)) {
-                card.style.display = '';
-                visibleCardCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        // Handle empty state in table view
-        const tableBody = document.querySelector('.location-items');
-        if (tableBody) {
-            let emptyState = tableBody.querySelector('.empty-search-state');
-            
-            if (visibleTableRowCount === 0 && searchTerm !== '') {
-                if (!emptyState) {
-                    emptyState = document.createElement('tr');
-                    emptyState.className = 'empty-search-state';
-                    emptyState.innerHTML = `<td colspan="3">
-                        <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-search"></i></div>
-                            <div class="empty-state-title">No results found</div>
-                            <p class="empty-state-text">No locations found matching "${searchTerm}"</p>
-                        </div>
-                    </td>`;
-                    tableBody.appendChild(emptyState);
-                } else {
-                    emptyState.style.display = '';
-                    const titleEl = emptyState.querySelector('.empty-state-text');
-                    if (titleEl) {
-                        titleEl.textContent = `No locations found matching "${searchTerm}"`;
-                    }
-                }
-            } else if (emptyState) {
-                emptyState.style.display = 'none';
-            }
-        }
-        
-        // Handle empty state in card view
-        const cardContainer = document.querySelector('.location-cards-grid');
-        if (cardContainer) {
-            let emptyState = cardContainer.querySelector('.empty-search-state');
-            
-            if (visibleCardCount === 0 && searchTerm !== '') {
-                if (!emptyState) {
-                    emptyState = document.createElement('div');
-                    emptyState.className = 'empty-search-state empty-state';
-                    emptyState.style.gridColumn = '1 / -1';
-                    emptyState.innerHTML = `
-                        <div class="empty-state-icon"><i class="fas fa-search"></i></div>
-                        <div class="empty-state-title">No results found</div>
-                        <p class="empty-state-text">No locations found matching "${searchTerm}"</p>
-                    `;
-                    cardContainer.appendChild(emptyState);
-                } else {
-                    emptyState.style.display = '';
-                    const titleEl = emptyState.querySelector('.empty-state-text');
-                    if (titleEl) {
-                        titleEl.textContent = `No locations found matching "${searchTerm}"`;
-                    }
-                }
-            } else if (emptyState) {
-                emptyState.style.display = 'none';
-            }
-        }
-    }
-    
-    // Add hover effects to table rows
-    const rows = document.querySelectorAll('.location-row');
-    rows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'var(--bg-subtle)';
-        });
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-    });
-    
-    // Add sorting functionality
-    const sortIcons = document.querySelectorAll('.sortable .fa-sort, .sortable .fa-sort-up, .sortable .fa-sort-down');
-    sortIcons.forEach((icon, index) => {
-        icon.parentElement.addEventListener('click', function() {
-            const sortIcon = this.querySelector('.fa-sort, .fa-sort-up, .fa-sort-down');
-            const isNameColumn = index === 0;
-            const isAscending = sortIcon.classList.contains('fa-sort-up');
-            const isDescending = sortIcon.classList.contains('fa-sort-down');
-            
-            // Reset all icons
-            document.querySelectorAll('.sortable .fa-sort, .sortable .fa-sort-up, .sortable .fa-sort-down').forEach(i => {
-                i.className = 'fas fa-sort';
-            });
-            
-            if (!isAscending && !isDescending) {
-                sortIcon.className = 'fas fa-sort-up';
-                sortLocations(isNameColumn, true);
-            } else if (isAscending) {
-                sortIcon.className = 'fas fa-sort-down';
-                sortLocations(isNameColumn, false);
-            } else {
-                sortIcon.className = 'fas fa-sort';
-                sortLocations(null, null);
-            }
-        });
-    });
-    
-    function sortLocations(byName, ascending) {
-        const tableBody = document.querySelector('.location-items');
-        const rows = Array.from(tableBody.querySelectorAll('.location-row'));
-        
-        if (byName === null) {
-            rows.sort((a, b) => {
-                const indexA = parseInt(a.getAttribute('data-original-index') || 0);
-                const indexB = parseInt(b.getAttribute('data-original-index') || 0);
-                return indexA - indexB;
-            });
-        } else {
-            rows.forEach((row, index) => {
-                if (!row.hasAttribute('data-original-index')) {
-                    row.setAttribute('data-original-index', index);
-                }
-            });
-            
-            rows.sort((a, b) => {
-                let valueA, valueB;
-                
-                if (byName) {
-                    valueA = a.querySelector('.location-name').textContent.toLowerCase();
-                    valueB = b.querySelector('.location-name').textContent.toLowerCase();
-                } else {
-                    const addrA = a.querySelector('.location-address span');
-                    const addrB = b.querySelector('.location-address span');
-                    valueA = addrA ? addrA.textContent.toLowerCase() : '';
-                    valueB = addrB ? addrB.textContent.toLowerCase() : '';
-                }
-                
-                if (ascending) {
-                    return valueA.localeCompare(valueB);
-                } else {
-                    return valueB.localeCompare(valueA);
-                }
-            });
-        }
-        
-        rows.forEach(row => tableBody.appendChild(row));
-        sortCards(byName, ascending);
-    }
-    
-    function sortCards(byName, ascending) {
-        const cardContainer = document.querySelector('.location-cards-grid');
-        if (!cardContainer) return;
-        
-        const cards = Array.from(cardContainer.querySelectorAll('.location-card'));
-        
-        if (byName === null) {
-            cards.sort((a, b) => {
-                const indexA = parseInt(a.getAttribute('data-original-index') || 0);
-                const indexB = parseInt(b.getAttribute('data-original-index') || 0);
-                return indexA - indexB;
-            });
-        } else {
-            cards.forEach((card, index) => {
-                if (!card.hasAttribute('data-original-index')) {
-                    card.setAttribute('data-original-index', index);
-                }
-            });
-            
-            cards.sort((a, b) => {
-                const valueA = a.querySelector('.card-header h3').textContent.toLowerCase();
-                const valueB = b.querySelector('.card-header h3').textContent.toLowerCase();
-                
-                if (ascending) {
-                    return valueA.localeCompare(valueB);
-                } else {
-                    return valueB.localeCompare(valueA);
-                }
-            });
-        }
-        
-        cards.forEach(card => cardContainer.appendChild(card));
-    }
-    
-    // Helper function: Extract floor number from location name
-    function getFloorFromName(name) {
-        name = name.toLowerCase();
-        
-        const floorPatterns = [
-            { pattern: /\b(\d+)(st|nd|rd|th)\s+floor\b/i, group: 1 },
-            { pattern: /\bfloor\s+(\d+)\b/i, group: 1 },
-            { pattern: /\bf(\d+)\b/i, group: 1 },
-            { pattern: /\b(\d+)f\b/i, group: 1 }
-        ];
-        
-        for (const {pattern, group} of floorPatterns) {
-            const match = name.match(pattern);
-            if (match && match[group]) {
-                return parseInt(match[group]);
-            }
-        }
-        
-        if (name.includes("ground floor") || name.includes("g floor")) return 0;
-        if (name.includes("1st floor") || name.includes("first floor")) return 1;
-        if (name.includes("2nd floor") || name.includes("second floor")) return 2;
-        if (name.includes("3rd floor") || name.includes("third floor")) return 3;
-        if (name.includes("4th floor") || name.includes("fourth floor")) return 4;
-        if (name.includes("5th floor") || name.includes("fifth floor")) return 5;
-        
-        return 1;
-    }
-    
-    // Helper function: Determine location type based on name
-    function getLocationType(name) {
-        name = name.toLowerCase();
-        if (name.includes("bay")) return "bay";
-        if (name.includes("desktop")) return "desktop";
-        if (name.includes("full system")) return "system";
-        return "bay";
-    }
-    
-    // Helper function: Generate random coordinates for demo
-    function getRandomCoordinates() {
-        return [
-            20 + Math.random() * 60,
-            20 + Math.random() * 60
-        ];
-    }
-});
+function getRandomCoordinates() {
+    return [20 + Math.random() * 60, 20 + Math.random() * 60];
+}
 
 function closeLocationModal() {
-    const modal = document.getElementById('locationModal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
+    var modal = document.getElementById('locationModal');
+    if (modal) modal.classList.remove('show');
 }
+window.closeLocationModal = closeLocationModal;
+
+// Expose necessary data for floor_map.js
+window.locationData = locationData;
+window.currentStream = currentStream;
+window.populateLocationData = populateLocationData;
+
+})();
 </script>
 
+<!-- ═══════════ ONBOARDING TOUR ═══════════ -->
+<style>
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10010;display:none;pointer-events:none;transition:opacity .3s}.tour-backdrop.active{opacity:1}
+.tour-highlight{position:fixed;z-index:10011;border-radius:12px;box-shadow:0 0 0 4000px rgba(0,0,0,.5),0 0 0 3px #0066cc,0 0 20px rgba(0,102,204,.4);pointer-events:none;transition:all .35s ease;display:none}
+.tour-tooltip{position:fixed;z-index:10012;width:370px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:0;display:none;opacity:0;transform:translateY(10px);font-family:'Inter','Segoe UI',sans-serif}.tour-tooltip.visible{opacity:1;transform:translateY(0);transition:all .3s ease}
+.tour-tooltip-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:1rem 1.25rem;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:.75rem}
+.tour-tooltip-icon{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem}
+.tour-tooltip-title{color:#fff;font-size:1rem;font-weight:700;flex:1}.tour-tooltip-step{color:rgba(255,255,255,.8);font-size:.75rem;font-weight:500}
+.tour-tooltip-body{padding:1.25rem}.tour-tooltip-desc{font-size:.9rem;color:#334155;line-height:1.6}
+.tour-tooltip-footer{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem 1.25rem;gap:.5rem}
+.tour-progress-dots{display:flex;gap:6px;align-items:center}.tour-progress-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:all .3s}.tour-progress-dot.active{background:#0066cc;transform:scale(1.3)}.tour-progress-dot.completed{background:#0d9488}
+.tour-btn{padding:.55rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:.4rem;transition:all .2s}
+.tour-btn-next{background:linear-gradient(135deg,#0066cc,#0052a3);color:#fff}.tour-btn-next:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,102,204,.4)}
+.tour-btn-prev{background:#f1f5f9;color:#475569}.tour-btn-prev:hover{background:#e2e8f0}
+.tour-btn-skip{background:transparent;color:#94a3b8;font-weight:500}.tour-btn-skip:hover{color:#64748b}
+.tour-welcome-modal{position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .3s}.tour-welcome-modal.active{opacity:1;pointer-events:auto}
+.tour-welcome-card{background:#fff;border-radius:20px;overflow:hidden;width:440px;max-width:92vw;box-shadow:0 25px 60px rgba(0,0,0,.3);transform:scale(.9);transition:transform .3s ease}.tour-welcome-modal.active .tour-welcome-card{transform:scale(1)}
+.tour-welcome-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:2rem;text-align:center;color:#fff}.tour-welcome-header i{font-size:2.5rem;margin-bottom:.75rem;display:block}
+.tour-welcome-header h2{margin:0;font-size:1.5rem;font-weight:700}.tour-welcome-header p{margin:.5rem 0 0;opacity:.9;font-size:.95rem}
+.tour-welcome-body{padding:1.5rem 2rem 2rem}
+.tour-welcome-features{list-style:none;padding:0;margin:0 0 1.5rem}.tour-welcome-features li{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-size:.9rem;color:#334155}
+.tour-welcome-features li i{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;background:rgba(0,102,204,.1);color:#0066cc}
+.tour-welcome-actions{display:flex;gap:.75rem;justify-content:flex-end}
+.tour-confetti-container{position:fixed;inset:0;z-index:10025;pointer-events:none;overflow:hidden}
+.tour-confetti{position:absolute;width:8px;height:8px;animation:confettiFall 3s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+
+<div class="tour-backdrop" id="tourBackdrop"></div>
+<div class="tour-highlight" id="tourHighlight"></div>
+<div class="tour-tooltip" id="tourTooltip">
+    <div class="tour-tooltip-header">
+        <div class="tour-tooltip-icon" id="tourStepIcon"></div>
+        <div class="tour-tooltip-title" id="tourStepTitle"></div>
+        <div class="tour-tooltip-step" id="tourStepLabel"></div>
+    </div>
+    <div class="tour-tooltip-body"><div class="tour-tooltip-desc" id="tourStepDesc"></div></div>
+    <div class="tour-tooltip-footer">
+        <div class="tour-progress-dots" id="tourProgressDots"></div>
+        <div style="display:flex;gap:.5rem">
+            <button class="tour-btn tour-btn-skip" id="tourSkipBtn">Skip</button>
+            <button class="tour-btn tour-btn-prev" id="tourPrevBtn" style="display:none"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="tour-btn tour-btn-next" id="tourNextBtn">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourWelcomeModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header">
+            <i class="fas fa-map-marker-alt"></i>
+            <h2>Location Management</h2>
+            <p>Let's explore how to organize your locations</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-map-pin"></i> Manage physical inventory locations</li>
+                <li><i class="fas fa-search"></i> Search and filter locations</li>
+                <li><i class="fas fa-map"></i> View locations on an interactive map</li>
+                <li><i class="fas fa-sort"></i> Sort by name, address, or date</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-skip" id="tourWelcomeSkip">Skip Tour</button>
+                <button class="tour-btn tour-btn-next" id="tourWelcomeStart"><i class="fas fa-play"></i> Start Tour</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourCompleteModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header" style="background:linear-gradient(135deg,#059669 0%,#0d9488 100%)">
+            <i class="fas fa-check-circle"></i>
+            <h2>Tour Complete!</h2>
+            <p>You're all set to manage locations</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-plus-circle" style="background:rgba(5,150,105,.1);color:#059669"></i> Add locations with the header button</li>
+                <li><i class="fas fa-map" style="background:rgba(5,150,105,.1);color:#059669"></i> Switch to map view for spatial layout</li>
+                <li><i class="fas fa-question-circle" style="background:rgba(0,102,204,.1);color:#0066cc"></i> Click <strong>?</strong> to replay this tour</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-next" id="tourCompleteDone" style="background:linear-gradient(135deg,#059669,#0d9488)"><i class="fas fa-thumbs-up"></i> Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-confetti-container" id="tourConfetti"></div>
+
+<script>
+(function() {
+    'use strict';
+    var TOUR_KEY = 'location_list';
+    var _tourBuPrefix = (function(){ var p=window.location.pathname; var i=p.indexOf('/stream/'); if(i>0) return p.substring(0,i); return ''; })();
+    var TOUR_STEPS = [
+        { target: '.ll-header', icon: 'fas fa-map-marker-alt', title: 'Location Management', desc: 'Welcome to Location Management! Organize physical inventory locations for your stream from here.', position: 'bottom', padding: 8 },
+        { target: '.ll-stats', icon: 'fas fa-chart-pie', title: 'Location Statistics', desc: 'These cards summarize your locations: <strong>total count</strong>, with/without address, and <strong>recently added</strong> this month.', position: 'bottom', padding: 8 },
+        { target: '.ll-toolbar', icon: 'fas fa-search', title: 'Search & View Modes', desc: 'Search locations by name or address. Switch between <strong>table</strong>, <strong>card</strong>, and <strong>map</strong> views using the toggle buttons.', position: 'bottom', padding: 8 },
+        { target: '#llViewMap', icon: 'fas fa-map', title: 'Map View', desc: 'Click the map icon to see your locations on an interactive floor map with color-coded markers.', position: 'left', padding: 4 },
+        { target: '#llTableView', icon: 'fas fa-sort', title: 'Sortable Table', desc: 'Click any column header to sort locations by name, address, or creation date. In-line actions let you edit or delete.', position: 'bottom', padding: 8 },
+        { target: '.ll-header-btn.primary', icon: 'fas fa-plus-circle', title: 'Add Locations', desc: 'Admins can add new locations with a name and optional address through this button.', position: 'bottom', padding: 4, optional: true }
+    ];
+
+    var currentStep = 0, activeSteps = [], tourActive = false;
+    var backdrop = document.getElementById('tourBackdrop');
+    var highlight = document.getElementById('tourHighlight');
+    var tooltip = document.getElementById('tourTooltip');
+    var stepIcon = document.getElementById('tourStepIcon');
+    var stepTitle = document.getElementById('tourStepTitle');
+    var stepLabel = document.getElementById('tourStepLabel');
+    var stepDesc = document.getElementById('tourStepDesc');
+    var progressDots = document.getElementById('tourProgressDots');
+    var nextBtn = document.getElementById('tourNextBtn');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var skipBtn = document.getElementById('tourSkipBtn');
+    var welcomeModal = document.getElementById('tourWelcomeModal');
+    var completeModal = document.getElementById('tourCompleteModal');
+    var confettiEl = document.getElementById('tourConfetti');
+
+    var CSRF_TOKEN = '{{ csrf_token }}';
+    var LS_KEY = 'tour_done_' + TOUR_KEY;
+    function markComplete() {
+        try { localStorage.setItem(LS_KEY, '1'); } catch(e) {}
+        fetch(_tourBuPrefix + '/api/onboarding/complete/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({ tour_key: TOUR_KEY })
+        }).catch(function(){});
+    }
+    function filterSteps() { activeSteps = TOUR_STEPS.filter(function(s) { return !!document.querySelector(s.target); }); }
+    function buildDots() {
+        var h = '';
+        for (var i = 0; i < activeSteps.length; i++) {
+            var c = i < currentStep ? 'completed' : (i === currentStep ? 'active' : '');
+            h += '<div class="tour-progress-dot ' + c + '"></div>';
+        }
+        progressDots.innerHTML = h;
+    }
+    function positionTooltip(el, pos) {
+        var r = el.getBoundingClientRect(), tw = 370, th = tooltip.offsetHeight || 220, m = 16, t, l;
+        if (pos === 'right') { t = r.top + r.height/2 - th/2; l = r.right + m; if (l + tw > window.innerWidth) l = r.left - tw - m; }
+        else if (pos === 'left') { t = r.top + r.height/2 - th/2; l = r.left - tw - m; if (l < 0) l = r.right + m; }
+        else if (pos === 'top') { t = r.top - th - m; l = r.left + r.width/2 - tw/2; if (t < 0) t = r.bottom + m; }
+        else { t = r.bottom + m; l = r.left + r.width/2 - tw/2; if (t + th > window.innerHeight) t = r.top - th - m; }
+        if (l < 8) l = 8; if (l + tw > window.innerWidth - 8) l = window.innerWidth - tw - 8;
+        if (t < 8) t = 8; if (t + th > window.innerHeight - 8) t = window.innerHeight - th - 8;
+        tooltip.style.top = t + 'px'; tooltip.style.left = l + 'px';
+    }
+    function showStep(idx) {
+        currentStep = idx;
+        var step = activeSteps[idx], el = document.querySelector(step.target);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() {
+            var r = el.getBoundingClientRect(), pad = step.padding || 0;
+            highlight.style.display = 'block';
+            highlight.style.top = (r.top - pad) + 'px'; highlight.style.left = (r.left - pad) + 'px';
+            highlight.style.width = (r.width + pad*2) + 'px'; highlight.style.height = (r.height + pad*2) + 'px';
+            stepIcon.innerHTML = '<i class="' + step.icon + '"></i>';
+            stepTitle.textContent = step.title;
+            stepLabel.textContent = 'Step ' + (idx+1) + ' of ' + activeSteps.length;
+            stepDesc.innerHTML = step.desc;
+            buildDots();
+            prevBtn.style.display = idx > 0 ? 'inline-flex' : 'none';
+            nextBtn.innerHTML = idx === activeSteps.length - 1 ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+            tooltip.style.display = 'block'; tooltip.classList.remove('visible');
+            positionTooltip(el, step.position);
+            requestAnimationFrame(function() { tooltip.classList.add('visible'); });
+        }, 350);
+    }
+    function startTour() {
+        welcomeModal.classList.remove('active');
+        filterSteps(); if (!activeSteps.length) return;
+        tourActive = true; currentStep = 0;
+        backdrop.style.display = 'block'; backdrop.style.pointerEvents = 'auto'; backdrop.classList.add('active');
+        showStep(0);
+    }
+    function endTour(completed) {
+        tourActive = false; backdrop.classList.remove('active');
+        highlight.style.display = 'none'; tooltip.style.display = 'none'; tooltip.classList.remove('visible');
+        backdrop.style.display = 'none'; backdrop.style.pointerEvents = 'none';
+        if (completed) { markComplete(); fireConfetti(); completeModal.classList.add('active'); }
+    }
+    function fireConfetti() {
+        var colors = ['#0066cc','#0d9488','#0891b2','#059669','#FFD200','#dc3545','#0B5FFF'];
+        for (var i = 0; i < 80; i++) {
+            var p = document.createElement('div'); p.className = 'tour-confetti';
+            p.style.left = Math.random()*100+'%'; p.style.top = '-10px';
+            p.style.width = (Math.random()*8+5)+'px'; p.style.height = (Math.random()*8+5)+'px';
+            p.style.background = colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1)+'s';
+            p.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+            confettiEl.appendChild(p);
+        }
+        setTimeout(function() { confettiEl.innerHTML = ''; }, 5000);
+    }
+
+    nextBtn.addEventListener('click', function() { if (currentStep < activeSteps.length - 1) showStep(currentStep+1); else endTour(true); });
+    prevBtn.addEventListener('click', function() { if (currentStep > 0) showStep(currentStep-1); });
+    skipBtn.addEventListener('click', function() { markComplete(); endTour(false); });
+    document.getElementById('tourWelcomeStart').addEventListener('click', startTour);
+    document.getElementById('tourWelcomeSkip').addEventListener('click', function() { welcomeModal.classList.remove('active'); markComplete(); });
+    document.getElementById('tourCompleteDone').addEventListener('click', function() { completeModal.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (tourActive) { markComplete(); endTour(false); }
+            else if (welcomeModal.classList.contains('active')) { welcomeModal.classList.remove('active'); markComplete(); }
+            else if (completeModal.classList.contains('active')) { completeModal.classList.remove('active'); }
+        }
+    });
+    window.addEventListener('resize', function() { if (tourActive && activeSteps[currentStep]) showStep(currentStep); });
+
+    var restartBtn = document.getElementById('restartTourBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function() {
+            try { localStorage.removeItem(LS_KEY); } catch(e) {}
+            fetch(_tourBuPrefix + '/api/onboarding/reset/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify({ tour_key: TOUR_KEY })
+            }).then(function(){ welcomeModal.classList.add('active'); })
+              .catch(function(){ welcomeModal.classList.add('active'); });
+        });
+    }
+
+    {% if show_onboarding_tour %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var alreadyDone = false;
+        try { alreadyDone = localStorage.getItem(LS_KEY) === '1'; } catch(e) {}
+        if (!alreadyDone) {
+            setTimeout(function() { welcomeModal.classList.add('active'); }, 1200);
+        }
+    });
+    {% endif %}
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}OCR Result: {{ result.original_filename }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .score-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+    .score-card { background: #fff; border-radius: 14px; padding: 1.25rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-top: 4px solid; }
+    .score-card.purple { border-color: var(--primary); }
+    .score-card.green { border-color: var(--success); }
+    .score-card.amber { border-color: var(--warning); }
+    .score-card .sc-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; }
+    .score-card .sc-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    .extracted-text { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.7; max-height: 500px; overflow-y: auto; color: #334155; }
+
+    .fields-grid { display: grid; gap: 0.75rem; }
+    .field-item { display: flex; justify-content: space-between; padding: 0.65rem 1rem; background: #f8fafc; border-radius: 8px; border-left: 3px solid var(--primary); }
+    .field-item .fl { font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: capitalize; }
+    .field-item .fv { font-size: 0.85rem; color: #1e293b; font-weight: 500; }
+
+    .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-completed { background: #d1fae5; color: #065f46; }
+    .badge-failed { background: #fecaca; color: #991b1b; }
+    .badge-processing { background: #dbeafe; color: #1e40af; }
+
+    .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 1.25rem; color: #991b1b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-file-alt"></i> OCR Result</h1>
+            <div class="subtitle">{{ result.original_filename }} — Processed {{ result.processed_at|date:"M d, Y H:i" }}</div>
+        </div>
+        <a href="{% url 'ai_ocr_hub' stream=stream %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="score-row">
+        <div class="score-card purple">
+            <div class="sc-value">{{ result.document_type|default:"Unknown" }}</div>
+            <div class="sc-label">Document Type</div>
+        </div>
+        <div class="score-card green">
+            <div class="sc-value">{{ result.classification_confidence|floatformat:0 }}%</div>
+            <div class="sc-label">Classification Confidence</div>
+        </div>
+        <div class="score-card amber">
+            <div class="sc-value">{{ result.ocr_confidence|floatformat:0 }}%</div>
+            <div class="sc-label">OCR Confidence</div>
+        </div>
+        <div class="score-card purple">
+            <div class="sc-value"><span class="badge badge-{{ result.status }}">{{ result.status|upper }}</span></div>
+            <div class="sc-label">Status</div>
+        </div>
+    </div>
+
+    {% if result.status == 'failed' %}
+    <div class="error-box">
+        <strong><i class="fas fa-exclamation-circle"></i> Processing Failed</strong><br>
+        {{ result.processing_errors|default:"An unknown error occurred during processing." }}
+    </div>
+    {% endif %}
+
+    <div class="two-col">
+        <!-- Extracted Fields -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-tags"></i> Extracted Fields</div>
+            {% if result.extracted_fields %}
+            <div class="fields-grid">
+                {% for key, value in result.extracted_fields.items %}
+                <div class="field-item">
+                    <span class="fl">{{ key }}</span>
+                    <span class="fv">{{ value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #94a3b8; text-align: center; padding: 1rem;">No fields were extracted from this document.</p>
+            {% endif %}
+        </div>
+
+        <!-- File Info -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-info-circle"></i> File Information</div>
+            <div class="fields-grid">
+                <div class="field-item">
+                    <span class="fl">Filename</span>
+                    <span class="fv">{{ result.original_filename }}</span>
+                </div>
+                <div class="field-item">
+                    <span class="fl">File Type</span>
+                    <span class="fv">{{ result.file_type|upper }}</span>
+                </div>
+                <div class="field-item">
+                    <span class="fl">Processed At</span>
+                    <span class="fv">{{ result.processed_at|date:"M d, Y H:i:s" }}</span>
+                </div>
+                <div class="field-item">
+                    <span class="fl">Processed By</span>
+                    <span class="fv">{{ result.processed_by.get_full_name|default:result.processed_by.username }}</span>
+                </div>
+                {% if result.linked_document %}
+                <div class="field-item">
+                    <span class="fl">Linked Document</span>
+                    <span class="fv">{{ result.linked_document }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Extracted Text -->
+    {% if result.extracted_text %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-align-left"></i> Extracted Text</div>
+        <div class="extracted-text">{{ result.extracted_text }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

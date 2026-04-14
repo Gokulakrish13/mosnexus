@@ -1,0 +1,1676 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Book a System - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-light: #e6f2ff;
+        --primary-dark: #0047ab;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --bg-light: #f8fafc;
+        --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .booking-hub {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Header */
+    .hub-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hub-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .hub-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #fff !important;
+    }
+
+    .hub-header p {
+        opacity: 0.9;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .header-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+    }
+
+    .header-btn-primary {
+        background: white;
+        color: var(--primary);
+    }
+
+    .header-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .header-btn-secondary {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .header-btn-secondary:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    /* Quick Stats */
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+    .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .stat-content p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Main Content Grid */
+    .hub-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+        .hub-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Card Styles */
+    .hub-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .card-header h2 i {
+        color: var(--primary);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Quick Book Form */
+    .quick-book-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Booking Type Tabs */
+    .booking-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        background: var(--bg-light);
+        padding: 0.375rem;
+        border-radius: 10px;
+    }
+
+    .booking-tab {
+        flex: 1;
+        padding: 0.625rem 1rem;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        color: var(--text-secondary);
+    }
+
+    .booking-tab.active {
+        background: white;
+        color: var(--primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .booking-tab:hover:not(.active) {
+        color: var(--text-primary);
+    }
+
+    /* Submit Button */
+    .btn-book {
+        padding: 0.875rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-book:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+    }
+
+    .btn-book:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Availability Preview */
+    .availability-preview {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+        display: none;
+    }
+
+    .availability-preview.show {
+        display: block;
+    }
+
+    .availability-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .availability-header h4 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .availability-days {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+    }
+
+    .avail-day {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .avail-day.available {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .avail-day.booked {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    .avail-day.partial {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .avail-day span:first-child {
+        font-size: 0.6rem;
+        opacity: 0.8;
+    }
+
+    /* Week Preview */
+    .week-preview-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .week-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .week-nav-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: var(--bg-light);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+    }
+
+    .week-nav-btn:hover:not(:disabled) {
+        background: var(--primary);
+        color: white;
+    }
+
+    .week-nav-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .week-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: center;
+        flex: 1;
+    }
+
+    .week-label small {
+        display: block;
+        font-weight: 400;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    .week-preview {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .week-day {
+        flex: 0 0 auto;
+        width: 70px;
+        padding: 0.75rem 0.5rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .week-day {
+        cursor: pointer;
+    }
+
+    .week-day:hover:not(.past) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .week-day.today {
+        border-color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    .week-day.selected {
+        border-color: var(--success);
+        background: var(--success-light);
+    }
+
+    .week-day.selected.range {
+        border-color: var(--success);
+        background: linear-gradient(135deg, var(--success-light) 0%, #d1fae5 100%);
+    }
+
+    .week-day.past {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .week-day .day-status.past {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+    }
+
+    .week-day .day-name {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+
+    .week-day .day-date {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0.25rem 0;
+    }
+
+    .week-day .day-status {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+    }
+
+    .week-day .day-status.available {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .week-day .day-status.limited {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .week-day .day-status.full {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    /* My Bookings Section */
+    .bookings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 380px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .bookings-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .bookings-list::-webkit-scrollbar-track {
+        background: var(--bg-light);
+        border-radius: 3px;
+    }
+
+    .bookings-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+
+    .bookings-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    .booking-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+        transition: all 0.2s;
+    }
+
+    .booking-item:hover {
+        background: var(--primary-light);
+    }
+
+    .booking-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .booking-icon.confirmed {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .booking-icon.recurring {
+        background: var(--purple-light);
+        color: var(--purple);
+    }
+
+    .booking-icon.waitlist {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .booking-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .booking-info h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .booking-info p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    .booking-badge {
+        padding: 0.25rem 0.625rem;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .booking-badge.active {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .booking-badge.pending {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .booking-badge.waitlist {
+        background: var(--purple-light);
+        color: var(--purple);
+    }
+
+    .booking-badge.not-allocated {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .booking-icon.not-allocated {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    /* View All Link */
+    .view-all-link {
+        display: block;
+        text-align: center;
+        padding: 0.75rem;
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-decoration: none;
+        border-top: 1px solid var(--border);
+        transition: all 0.2s;
+    }
+
+    .view-all-link:hover {
+        background: var(--primary-light);
+    }
+
+    /* Recurring Options (hidden by default) */
+    .recurring-options {
+        display: none;
+        padding: 1rem;
+        background: var(--purple-light);
+        border-radius: 10px;
+        margin-top: 0.5rem;
+    }
+
+    .recurring-options.show {
+        display: block;
+    }
+
+    .days-selector {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+    }
+
+    .day-checkbox {
+        display: none;
+    }
+
+    .day-label {
+        padding: 0.5rem 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .day-checkbox:checked + .day-label {
+        background: var(--purple);
+        border-color: var(--purple);
+        color: white;
+    }
+
+    /* Toast Messages */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.warning { background: var(--warning); }
+    .toast.info { background: var(--primary); }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .modal-header.warning { background: var(--warning-light); }
+    .modal-header.success { background: var(--success-light); }
+
+    .modal-body {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .modal-btn-cancel {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+    }
+
+    .modal-btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .modal-btn-waitlist {
+        background: var(--purple);
+        color: white;
+    }
+
+    /* Loading State */
+    .loading {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .booking-hub {
+            padding: 1rem;
+        }
+
+        .hub-header {
+            padding: 1.5rem;
+        }
+
+        .hub-header h1 {
+            font-size: 1.375rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .quick-stats {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .header-actions {
+            flex-direction: column;
+        }
+
+        .header-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="booking-hub">
+    <!-- Header -->
+    <div class="hub-header">
+        <h1><i class="fas fa-calendar-plus"></i> Book a System</h1>
+        <p>Quick book, schedule recurring reservations, or join the waitlist — all in one place</p>
+        <div class="header-actions">
+            <a href="{% url 'my_bookings' stream=stream %}" class="header-btn header-btn-primary">
+                <i class="fas fa-list"></i> My Bookings
+            </a>
+            <a href="{% url 'system_allocation_stream' stream=stream %}" class="header-btn header-btn-secondary">
+                <i class="fas fa-th-large"></i> Full Calendar View
+            </a>
+            <a href="{% url 'recurring_reservations_list' stream=stream %}" class="header-btn header-btn-secondary">
+                <i class="fas fa-redo"></i> Manage Recurring
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ available_today }}</h3>
+                <p>Available Today</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_systems }}</h3>
+                <p>Total Systems</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ user_allocations.count }}</h3>
+                <p>Your Active Bookings</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ user_waitlist.count }}</h3>
+                <p>In Waitlist</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="hub-grid">
+        <!-- Left: Quick Book Form -->
+        <div class="hub-card" id="bookingFormCard">
+            <div class="card-header">
+                <h2><i class="fas fa-bolt"></i> Quick Book</h2>
+            </div>
+            <div class="card-body">
+                <!-- Booking Type Tabs -->
+                <div class="booking-tabs">
+                    <button class="booking-tab active" data-type="single" onclick="setBookingType('single')">
+                        <i class="fas fa-calendar-day"></i> One-Time
+                    </button>
+                    <button class="booking-tab" data-type="recurring" onclick="setBookingType('recurring')">
+                        <i class="fas fa-redo"></i> Recurring
+                    </button>
+                    <button class="booking-tab" data-type="waitlist" onclick="setBookingType('waitlist')">
+                        <i class="fas fa-clock"></i> Waitlist
+                    </button>
+                </div>
+
+                <form id="quickBookForm" class="quick-book-form" onsubmit="submitBooking(event)">
+                    <div class="form-group full-width">
+                        <label>Select System</label>
+                        <select name="system_id" id="systemSelect" required onchange="checkAvailability()">
+                            <option value="">Choose a system...</option>
+                            {% for system in systems %}
+                                <option value="{{ system.id }}">{{ system.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label id="startDateLabel">Start Date</label>
+                            <input type="date" name="start_date" id="startDate" required 
+                                   value="{{ today|date:'Y-m-d' }}" onchange="checkAvailability()">
+                        </div>
+                        <div class="form-group" id="endDateInline">
+                            <label id="endDateLabel">End Date</label>
+                            <input type="date" name="end_date" id="endDate" onchange="checkAvailability()">
+                        </div>
+                    </div>
+                    <div class="form-group" id="endDateOwnRow" style="display:none;">
+                        <label id="endDateLabelRow">Recurrence End</label>
+                        <input type="date" id="endDateRow" onchange="document.getElementById('endDate').value=this.value; checkAvailability();">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Time</label>
+                            <input type="time" name="start_time" id="startTime" value="09:00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Time</label>
+                            <input type="time" name="end_time" id="endTime" value="17:00" required>
+                        </div>
+                    </div>
+
+                    <!-- Recurring Options -->
+                    <div class="recurring-options" id="recurringOptions">
+                        <div class="form-group">
+                            <label>Recurrence Pattern</label>
+                            <select name="recurrence_type" id="recurrenceType">
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="bi_weekly">Bi-Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="daysOfWeekGroup">
+                            <label>Days of Week</label>
+                            <div class="days-selector">
+                                <input type="checkbox" name="days_of_week" value="0" id="day0" class="day-checkbox" checked>
+                                <label for="day0" class="day-label">Mon</label>
+                                <input type="checkbox" name="days_of_week" value="1" id="day1" class="day-checkbox">
+                                <label for="day1" class="day-label">Tue</label>
+                                <input type="checkbox" name="days_of_week" value="2" id="day2" class="day-checkbox">
+                                <label for="day2" class="day-label">Wed</label>
+                                <input type="checkbox" name="days_of_week" value="3" id="day3" class="day-checkbox">
+                                <label for="day3" class="day-label">Thu</label>
+                                <input type="checkbox" name="days_of_week" value="4" id="day4" class="day-checkbox">
+                                <label for="day4" class="day-label">Fri</label>
+                                <input type="checkbox" name="days_of_week" value="5" id="day5" class="day-checkbox">
+                                <label for="day5" class="day-label">Sat</label>
+                                <input type="checkbox" name="days_of_week" value="6" id="day6" class="day-checkbox">
+                                <label for="day6" class="day-label">Sun</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Waitlist Options -->
+                    <div class="recurring-options" id="waitlistOptions">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="is_flexible" id="isFlexible"> 
+                                I'm flexible with dates (±3 days)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Reason - shown for all booking types -->
+                    <div class="form-group full-width">
+                        <label>Reason (optional)</label>
+                        <textarea name="reason" rows="2" placeholder="e.g. Needed for regression testing of SW v3.2 build, patient study validation, demo for customer visit on April 10th, etc." style="resize:vertical;min-height:52px;"></textarea>
+                    </div>
+
+                    <!-- Availability Preview -->
+                    <div class="availability-preview" id="availabilityPreview">
+                        <div class="availability-header">
+                            <h4><i class="fas fa-info-circle"></i> Availability</h4>
+                            <span id="availabilitySummary"></span>
+                        </div>
+                        <div class="availability-days" id="availabilityDays"></div>
+                    </div>
+
+                    <button type="submit" class="btn-book" id="submitBtn">
+                        <i class="fas fa-check"></i>
+                        <span id="submitBtnText">Book Now</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Week Overview -->
+            <div class="hub-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-week"></i> Week Overview</h2>
+                </div>
+                <div class="card-body">
+                    <div class="week-preview-container">
+                        <div class="week-nav">
+                            <button class="week-nav-btn" id="prevWeekBtn" title="Previous Week">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="week-label" id="weekLabel">
+                                This Week
+                                <small id="weekDateRange"></small>
+                            </div>
+                            <button class="week-nav-btn" id="nextWeekBtn" title="Next Week">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="week-preview" id="weekPreview">
+                            {% for day in upcoming_days %}
+                            <div class="week-day {% if day.is_today %}today{% endif %}" data-date="{{ day.date|date:'Y-m-d' }}" onclick="selectWeekDay(this, '{{ day.date|date:'Y-m-d' }}')">
+                                <div class="day-name">{{ day.day_name }}</div>
+                                <div class="day-date">{{ day.date.day }}</div>
+                                <div class="day-status {% if day.available == total_systems %}available{% elif day.available > 0 %}limited{% else %}full{% endif %}">
+                                    {% if day.available == total_systems %}
+                                        All Free
+                                    {% elif day.available > 0 %}
+                                        {{ day.available }} left
+                                    {% else %}
+                                        Full
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Bookings -->
+            <div class="hub-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bookmark"></i> Your Bookings</h2>
+                </div>
+                <div class="card-body" style="padding: 0.75rem;">
+                    <div class="bookings-list">
+                        {% if user_allocations %}
+                            {% for alloc in user_allocations %}
+                            <div class="booking-item">
+                                <div class="booking-icon confirmed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="booking-info">
+                                    <h4>{{ alloc.system_type }}</h4>
+                                    <p>{{ alloc.start_date|date:"M d" }} • {{ alloc.start_date|time:"H:i" }}-{{ alloc.end_date|time:"H:i" }}</p>
+                                </div>
+                                <span class="booking-badge active">Active</span>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if user_recurring %}
+                            {% for rec in user_recurring %}
+                            <div class="booking-item">
+                                <div class="booking-icon recurring">
+                                    <i class="fas fa-redo"></i>
+                                </div>
+                                <div class="booking-info">
+                                    <h4>{{ rec.system.name }}</h4>
+                                    <p>{{ rec.get_recurrence_type_display }} • {{ rec.start_time|time:"H:i" }}-{{ rec.end_time|time:"H:i" }}</p>
+                                </div>
+                                <span class="booking-badge {% if rec.status == 'active' %}active{% else %}pending{% endif %}">{{ rec.status }}</span>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if user_waitlist %}
+                            {% for wait in user_waitlist %}
+                            <div class="booking-item">
+                                <div class="booking-icon {% if wait.status == 'not_allocated' %}not-allocated{% else %}waitlist{% endif %}">
+                                    <i class="fas {% if wait.status == 'not_allocated' %}fa-ban{% else %}fa-clock{% endif %}"></i>
+                                </div>
+                                <div class="booking-info">
+                                    <h4>{{ wait.system.name }}</h4>
+                                    <p>{{ wait.desired_date|date:"M d" }} • #{{ wait.queue_position }} in queue</p>
+                                </div>
+                                <span class="booking-badge {% if wait.status == 'not_allocated' %}not-allocated{% else %}waitlist{% endif %}">{{ wait.get_status_display }}</span>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if not user_allocations and not user_recurring and not user_waitlist %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No active bookings</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'my_bookings' stream=stream %}" class="view-all-link">
+                    <i class="fas fa-arrow-right"></i> View All Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Conflict Modal -->
+<div class="modal-overlay" id="conflictModal">
+    <div class="modal">
+        <div class="modal-header warning">
+            <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: var(--warning);"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 1rem;">System Already Booked</h3>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="conflictMessage"></p>
+            </div>
+        </div>
+        <div class="modal-body" id="conflictBody">
+            <!-- Conflict details -->
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="modal-btn modal-btn-waitlist" onclick="addToWaitlist()">
+                <i class="fas fa-clock"></i> Join Waitlist
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+let currentBookingType = 'single';
+let pendingBookingData = null;
+let currentWeekOffset = 0;
+const totalSystems = {{ total_systems }};
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Week Navigation
+function initWeekNav() {
+    const prevBtn = document.getElementById('prevWeekBtn');
+    const nextBtn = document.getElementById('nextWeekBtn');
+    
+    prevBtn.addEventListener('click', () => navigateWeek(-1));
+    nextBtn.addEventListener('click', () => navigateWeek(1));
+    
+    updateWeekLabel();
+}
+
+function navigateWeek(direction) {
+    currentWeekOffset += direction;
+    
+    // Limit to -4 weeks in past and +12 weeks in future
+    if (currentWeekOffset < -4) currentWeekOffset = -4;
+    if (currentWeekOffset > 12) currentWeekOffset = 12;
+    
+    // Update buttons state
+    document.getElementById('prevWeekBtn').disabled = currentWeekOffset <= -4;
+    document.getElementById('nextWeekBtn').disabled = currentWeekOffset >= 12;
+    
+    loadWeekData(currentWeekOffset);
+    updateWeekLabel();
+}
+
+function updateWeekLabel() {
+    const label = document.getElementById('weekLabel');
+    const dateRange = document.getElementById('weekDateRange');
+    
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + (currentWeekOffset * 7));
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    
+    const formatDate = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    if (currentWeekOffset === 0) {
+        label.innerHTML = 'This Week<small id="weekDateRange">' + formatDate(startOfWeek) + ' - ' + formatDate(endOfWeek) + '</small>';
+    } else if (currentWeekOffset === 1) {
+        label.innerHTML = 'Next Week<small id="weekDateRange">' + formatDate(startOfWeek) + ' - ' + formatDate(endOfWeek) + '</small>';
+    } else if (currentWeekOffset === -1) {
+        label.innerHTML = 'Last Week<small id="weekDateRange">' + formatDate(startOfWeek) + ' - ' + formatDate(endOfWeek) + '</small>';
+    } else if (currentWeekOffset > 0) {
+        label.innerHTML = 'In ' + currentWeekOffset + ' Weeks<small id="weekDateRange">' + formatDate(startOfWeek) + ' - ' + formatDate(endOfWeek) + '</small>';
+    } else {
+        label.innerHTML = Math.abs(currentWeekOffset) + ' Weeks Ago<small id="weekDateRange">' + formatDate(startOfWeek) + ' - ' + formatDate(endOfWeek) + '</small>';
+    }
+}
+
+function loadWeekData(weekOffset) {
+    const container = document.getElementById('weekPreview');
+    container.innerHTML = '<div style="text-align: center; padding: 1rem; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+    
+    fetch(`{% url 'check_system_availability' stream=stream %}?week_offset=${weekOffset}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.days) {
+                renderWeekDays(data.days);
+            } else {
+                container.innerHTML = '<div style="text-align: center; padding: 1rem; color: var(--danger);">Failed to load</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading week:', error);
+            container.innerHTML = '<div style="text-align: center; padding: 1rem; color: var(--danger);">Error loading data</div>';
+        });
+}
+
+function renderWeekDays(days) {
+    const container = document.getElementById('weekPreview');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    container.innerHTML = days.map(day => {
+        const dayDate = new Date(day.date);
+        const isToday = dayDate.getTime() === today.getTime();
+        const isPast = dayDate < today;
+        
+        let statusClass = 'available';
+        let statusText = 'All Free';
+        
+        if (day.available === 0) {
+            statusClass = 'full';
+            statusText = 'Full';
+        } else if (day.available < totalSystems) {
+            statusClass = 'limited';
+            statusText = day.available + ' left';
+        }
+        
+        if (isPast) {
+            statusClass = 'past';
+        }
+        
+        const clickHandler = isPast ? '' : `onclick="selectWeekDay(this, '${day.date}')"`;
+        
+        return `
+            <div class="week-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}" data-date="${day.date}" ${clickHandler}>
+                <div class="day-name">${day.day_name}</div>
+                <div class="day-date">${dayDate.getDate()}</div>
+                <div class="day-status ${statusClass}">${statusText}</div>
+            </div>
+        `;
+    }).join('');
+    
+    // Re-apply selection highlighting if dates are selected
+    updateWeekDaySelection();
+}
+
+// Week day selection tracking
+let selectedStartDate = null;
+let selectedEndDate = null;
+let isSelectingRange = false;
+
+function selectWeekDay(element, dateStr) {
+    // Don't select past dates
+    const clickedDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (clickedDate < today) {
+        showToast('Cannot select past dates', 'warning');
+        return;
+    }
+    
+    // If no start date or clicking while both dates selected, start fresh
+    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+        selectedStartDate = dateStr;
+        selectedEndDate = null;
+        isSelectingRange = true;
+        
+        // Set start date in form
+        document.getElementById('startDate').value = dateStr;
+        document.getElementById('endDate').value = '';
+        
+        showToast('Start date selected. Click another day for end date, or same day for single-day booking.', 'info');
+    } 
+    // If clicking the same date as start, make it a single-day booking
+    else if (selectedStartDate === dateStr) {
+        selectedEndDate = dateStr;
+        isSelectingRange = false;
+        
+        document.getElementById('endDate').value = dateStr;
+        showToast('Single day booking selected', 'success');
+    }
+    // Selecting end date
+    else {
+        const startDate = new Date(selectedStartDate);
+        
+        // If clicked date is before start, swap them
+        if (clickedDate < startDate) {
+            selectedEndDate = selectedStartDate;
+            selectedStartDate = dateStr;
+            document.getElementById('startDate').value = dateStr;
+            document.getElementById('endDate').value = selectedEndDate;
+        } else {
+            selectedEndDate = dateStr;
+            document.getElementById('endDate').value = dateStr;
+        }
+        
+        isSelectingRange = false;
+        showToast('Date range selected', 'success');
+    }
+    
+    updateWeekDaySelection();
+    
+    // Scroll to form
+    document.getElementById('bookingFormCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateWeekDaySelection() {
+    const weekDays = document.querySelectorAll('.week-day');
+    
+    weekDays.forEach(day => {
+        const dayDate = day.dataset.date;
+        day.classList.remove('selected', 'range');
+        
+        if (!dayDate) return;
+        
+        if (selectedStartDate && selectedEndDate) {
+            const start = new Date(selectedStartDate);
+            const end = new Date(selectedEndDate);
+            const current = new Date(dayDate);
+            
+            if (dayDate === selectedStartDate || dayDate === selectedEndDate) {
+                day.classList.add('selected');
+            } else if (current > start && current < end) {
+                day.classList.add('selected', 'range');
+            }
+        } else if (selectedStartDate && dayDate === selectedStartDate) {
+            day.classList.add('selected');
+        }
+    });
+}
+
+// Clear selection when form dates change manually
+function onDateInputChange() {
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    
+    selectedStartDate = startInput.value || null;
+    selectedEndDate = endInput.value || null;
+    
+    updateWeekDaySelection();
+}
+
+// Initialize week navigation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initWeekNav();
+    
+    // Listen for manual date input changes
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    
+    if (startInput) startInput.addEventListener('change', onDateInputChange);
+    if (endInput) endInput.addEventListener('change', onDateInputChange);
+});
+
+function setBookingType(type) {
+    currentBookingType = type;
+    
+    // Update tabs
+    document.querySelectorAll('.booking-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.type === type);
+    });
+    
+    // Show/hide options
+    document.getElementById('recurringOptions').classList.toggle('show', type === 'recurring');
+    document.getElementById('waitlistOptions').classList.toggle('show', type === 'waitlist');
+    
+    // Update button text
+    const btnText = document.getElementById('submitBtnText');
+    const startLabel = document.getElementById('startDateLabel');
+    const endDateInline = document.getElementById('endDateInline');
+    const endDateOwnRow = document.getElementById('endDateOwnRow');
+    if (type === 'single') {
+        btnText.textContent = 'Book Now';
+        startLabel.textContent = 'Start Date';
+        endDateInline.style.display = 'flex';
+        document.getElementById('endDateLabel').textContent = 'End Date';
+        endDateOwnRow.style.display = 'none';
+    } else if (type === 'recurring') {
+        btnText.textContent = 'Create Recurring';
+        startLabel.textContent = 'Recurrence Start';
+        // Hide inline end date, show own-row end date
+        endDateInline.style.display = 'none';
+        endDateOwnRow.style.display = 'flex';
+        // Pre-fill end date 60 days from start if empty
+        const endDateInput = document.getElementById('endDate');
+        const endDateRowInput = document.getElementById('endDateRow');
+        if (!endDateInput.value) {
+            const startVal = document.getElementById('startDate').value;
+            if (startVal) {
+                const d = new Date(startVal);
+                d.setDate(d.getDate() + 60);
+                const val = d.toISOString().split('T')[0];
+                endDateInput.value = val;
+                endDateRowInput.value = val;
+            }
+        } else {
+            endDateRowInput.value = endDateInput.value;
+        }
+    } else {
+        btnText.textContent = 'Join Waitlist';
+        startLabel.textContent = 'Desired Date';
+        endDateInline.style.display = 'none';
+        endDateOwnRow.style.display = 'none';
+    }
+}
+
+function checkAvailability() {
+    const systemId = document.getElementById('systemSelect').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value || startDate;
+    
+    if (!systemId || !startDate) {
+        document.getElementById('availabilityPreview').classList.remove('show');
+        return;
+    }
+    
+    fetch(`{% url 'check_system_availability' stream=stream %}?system_id=${systemId}&start_date=${startDate}&end_date=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayAvailability(data);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function displayAvailability(data) {
+    const preview = document.getElementById('availabilityPreview');
+    const summary = document.getElementById('availabilitySummary');
+    const days = document.getElementById('availabilityDays');
+    
+    summary.textContent = `${data.available_days}/${data.total_days} available`;
+    summary.style.color = data.available_days === data.total_days ? 'var(--success)' : 
+                          data.available_days > 0 ? 'var(--warning)' : 'var(--danger)';
+    
+    days.innerHTML = data.availability.slice(0, 14).map(day => `
+        <div class="avail-day ${day.is_available ? 'available' : 'booked'}" title="${day.display_date}">
+            <span>${day.day_name.substring(0,2)}</span>
+            <span>${new Date(day.date).getDate()}</span>
+        </div>
+    `).join('');
+    
+    preview.classList.add('show');
+}
+
+function submitBooking(e) {
+    e.preventDefault();
+    
+    const form = document.getElementById('quickBookForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Get form data
+    const data = {
+        system_id: form.system_id.value,
+        booking_type: currentBookingType,
+        start_date: form.start_date.value,
+        end_date: form.end_date?.value || form.start_date.value,
+        start_time: form.start_time.value,
+        end_time: form.end_time.value,
+    };
+    
+    if (currentBookingType === 'recurring') {
+        data.recurrence_type = form.recurrence_type.value;
+        data.days_of_week = Array.from(form.querySelectorAll('input[name="days_of_week"]:checked')).map(cb => cb.value);
+    }
+    
+    // Always send reason
+    data.reason = form.reason?.value || '';
+    
+    if (currentBookingType === 'waitlist') {
+        data.is_flexible = form.is_flexible?.checked || false;
+    }
+    
+    // Disable button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+    
+    fetch('{% url "quick_book_system" stream=stream %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> <span id="submitBtnText">' + 
+            (currentBookingType === 'single' ? 'Book Now' : currentBookingType === 'recurring' ? 'Create Recurring' : 'Join Waitlist') + '</span>';
+        
+        if (result.success) {
+            showToast(result.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else if (result.has_conflict) {
+            // Show conflict modal with waitlist option
+            pendingBookingData = data;
+            showConflictModal(result);
+        } else {
+            showToast(result.error || 'Booking failed', 'error');
+        }
+    })
+    .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> <span id="submitBtnText">Book Now</span>';
+        showToast('Network error: ' + error.message, 'error');
+    });
+}
+
+function showConflictModal(result) {
+    document.getElementById('conflictMessage').textContent = result.conflict_message;
+    
+    let bodyHtml = '<p style="margin: 0 0 1rem 0; color: var(--text-secondary);">Current bookings:</p>';
+    if (result.conflicts) {
+        bodyHtml += '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+        result.conflicts.forEach(c => {
+            bodyHtml += `<div style="padding: 0.75rem; background: var(--danger-light); border-radius: 8px; font-size: 0.875rem;">
+                <strong>${escapeHtml(c.user)}</strong><br>
+                <span style="color: var(--text-secondary);">${new Date(c.start).toLocaleString()} - ${new Date(c.end).toLocaleTimeString()}</span>
+            </div>`;
+        });
+        bodyHtml += '</div>';
+    }
+    
+    bodyHtml += `<div style="margin-top: 1rem; padding: 1rem; background: var(--purple-light); border-radius: 8px;">
+        <strong style="color: var(--purple);"><i class="fas fa-info-circle"></i> Join the Waitlist</strong>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+            You'll be notified when this slot becomes available. If someone cancels, you'll automatically get the booking.
+        </p>
+    </div>`;
+    
+    document.getElementById('conflictBody').innerHTML = bodyHtml;
+    document.getElementById('conflictModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('conflictModal').classList.remove('active');
+    pendingBookingData = null;
+}
+
+function addToWaitlist() {
+    if (!pendingBookingData) return;
+    
+    pendingBookingData.booking_type = 'waitlist';
+    
+    fetch('{% url "quick_book_system" stream=stream %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(pendingBookingData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        closeModal();
+        if (result.success) {
+            showToast(result.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(result.error || 'Failed to join waitlist', 'error');
+        }
+    })
+    .catch(error => {
+        closeModal();
+        showToast('Network error', 'error');
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').min = today;
+    document.getElementById('endDate').min = today;
+});
+</script>
+{% endblock %}

@@ -1,2629 +1,1613 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Allocation Tree - {{ selected_stream }}</title>
-    {% load static %}
-    {% load product_filters %}
-    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
-    <link rel="stylesheet" href="/static/products/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        body, html {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            font-size: 1rem;
-            color: #222;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
-            padding-top: 45px;
-            overflow: hidden !important;
-            max-width: 100vw;
-            height: 100vh;
-        }
-        
-        body {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-        }
-    .top-bar {
-        color: #222;
-        font-size: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.9rem 2.5rem;
-        background: #fff;
-        border-bottom: 1px solid #e0e3e7;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        box-sizing: border-box;
-        z-index: 1000;
-    }
-    
-    .logo-section {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .logo-section img {
-        height: 32px;
-        width: auto;
-        margin-right: 1rem;
-    }
-    
-    /* Navigation Links */
-    .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        flex: 1;
-    }
-    
-    .nav-links a, .nav-links button {
-        color: #005fa3;
-        font-weight: 600;
-        text-decoration: none;
-        font-size: 1.08rem;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-        position: relative;
-    }
-    
-    .nav-links a:hover {
-        color: #003d7a;
-        transform: translateY(-1px);
-    }
-    
-    .nav-links a::after {
-        content: '';
-        position: absolute;
-        bottom: -4px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: #005fa3;
-        transition: width 0.3s ease;
-    }
-    
-    .nav-links a:hover::after {
-        width: 100%;
-    }
-    
-    /* Hamburger Menu */
-    .hamburger {
-        display: none;
-        flex-direction: column;
-        cursor: pointer;
-        gap: 4px;
-        padding: 8px;
-        z-index: 1002;
-    }
-    
-    .hamburger span {
-        width: 25px;
-        height: 3px;
-        background: #005fa3;
-        border-radius: 2px;
-        transition: all 0.3s ease;
-    }
-    
-    .hamburger.active span:nth-child(1) {
-        transform: rotate(45deg) translate(7px, 7px);
-    }
-    
-    .hamburger.active span:nth-child(2) {
-        opacity: 0;
-    }
-    
-    .hamburger.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(7px, -7px);
-    }
-    
-    /* Mobile Menu */
-    .mobile-menu {
-        display: none;
-        position: fixed;
-        top: 66px;
-        left: 0;
-        width: 100%;
-        background: #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 999;
-        max-height: calc(100vh - 66px);
-        overflow-y: auto;
-    }
-    
-    .mobile-menu.active {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .mobile-menu a {
-        display: block;
-        padding: 1rem 2rem;
-        color: #005fa3;
-        font-weight: 600;
-        text-decoration: none;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background 0.2s ease;
-    }
-    
-    .mobile-menu a:hover {
-        background: #f4f6f8;
-    }
-    
-    .mobile-user-info {
-        display: none;
-        padding: 1rem 2rem;
-        background: #f8f9fa;
-        border-bottom: 1px solid #e0e3e7;
-    }
-    
-    .top-right {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .top-bar .logout-btn {
-        margin-left: 1.2rem;
-        padding: 0.5rem 1rem;
-        background: #dc3545;
-        color: #fff;
-        border-radius: 4px;
-        text-decoration: none;
-        transition: background 0.2s ease;
-    }
-    
-    .top-bar .logout-btn:hover {
-        background: #c82333;
-    }
+{% extends 'products/base.html' %}
+{% load static %}
+{% load product_filters %}
 
-    .hidden {
-        display: none !important;
-    }
-    
-    /* More Dropdown */
-    .more-dropdown {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .more-dropdown-content {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background: #fff;
-        border: 1px solid #e0e3e7;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        min-width: 200px;
-        z-index: 1001;
-        margin-top: 0.5rem;
-    }
-    
-    .more-dropdown-content.active {
-        display: block;
-    }
-    
-    .more-dropdown-content a {
-        display: block;
-        color: #005fa3;
-        font-weight: 600;
-        text-decoration: none;
-        padding: 0.8rem 1.2rem;
-        font-size: 1.08rem;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .more-dropdown-content a:last-child {
-        border-bottom: none;
-    }
-    
-    .more-dropdown-content a:hover {
-        background: #f4f6f8;
-    }
-    
-    /* Allocation Tree Specific Styles */
-    .tree-container {
-        background: #ffffff;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-        margin-bottom: 15px;
-    }
-    
-    .system-card {
-        border: 1px solid #e0e3e7;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        background: #ffffff;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    
-    .system-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: #005fa3;
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-    
-    .system-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        border-color: #005fa3;
-    }
-    
-    .system-card:hover::before {
-        transform: scaleX(1);
-    }
-    
-    .system-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #e0e3e7;
-        margin: -20px -20px 20px -20px;
-        padding: 15px 20px;
-        background: #f8fafc;
-    }
-    
-    .system-name {
-        font-size: 1.4em;
-        font-weight: 700;
-        color: #005fa3;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .system-name i {
-        color: #005fa3;
-        font-size: 1.1em;
-    }
-    
-    .system-status {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.75em;
-        font-weight: 600;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .status-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    
-    .status-active { 
-        background: #28a745;
-        color: white;
-    }
-    .status-not-active { 
-        background: #6c757d;
-        color: white;
-    }
-    .status-issue { 
-        background: #ffc107;
-        color: #222;
-    }
-    .status-used { 
-        background: #005fa3;
-        color: white;
-    }
-    .status-removed { 
-        background: #dc3545;
-        color: white;
-    }
-    
-    .health-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.75em;
-        font-weight: 600;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .health-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    
-    .health-excellent { 
-        background: #28a745;
-        color: white;
-    }
-    .health-good { 
-        background: #20c997;
-        color: white;
-    }
-    .health-warning { 
-        background: #ffc107;
-        color: #222;
-    }
-    .health-critical { 
-        background: #dc3545;
-        color: white;
-        animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.8; }
-    }
-    
-    .tree-section {
-        margin: 20px 0;
-        animation: fadeInUp 0.6s ease-out;
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .tree-section-title {
-        font-size: 1.1em;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 0;
-        border-bottom: 2px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .tree-section-title i {
-        color: #005fa3;
-        font-size: 1.2em;
-    }
-    
-    .tag-container {
-        background: #ffffff;
-        border-left: 4px solid #005fa3;
-        padding: 18px;
-        margin: 15px 0 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    
-    .tag-container:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        border-left-color: #003d6b;
-    }
-    
-    .tag-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    
-    .tag-name {
-        font-weight: 700;
-        color: #005fa3;
-        font-size: 1.1em;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .tag-name i {
-        color: #005fa3;
-    }
-    
-    .tag-actions {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-    
-    .component-list {
-        margin-left: 25px;
-        padding-left: 0;
-    }
-    
-    .component-type {
-        font-weight: 700;
-        color: #005fa3;
-        margin-top: 18px;
-        margin-bottom: 12px;
-        font-size: 0.85em;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: #ffffff;
-        border-radius: 8px;
-        border-left: 4px solid #005fa3;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        position: relative;
-    }
-    
-    .component-type::before {
-        content: '';
-        position: absolute;
-        left: -29px;
-        top: 50%;
-        width: 20px;
-        height: 2px;
-        background: #cbd5e0;
-    }
-    
-    .component-type i {
-        color: #005fa3;
-        font-size: 1.2em;
-    }
-    
-    .component-items-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 15px;
-        margin: 15px 0 15px 25px;
-        position: relative;
-    }
-    
-    .component-item {
-        display: flex;
-        flex-direction: column;
-        padding: 12px;
-        background: #ffffff;
-        border-radius: 8px;
-        border: 2px solid #e0e3e7;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-        position: relative;
-        min-height: 100px;
-    }
-    
-    .component-item::before {
-        content: '';
-        position: absolute;
-        left: -28px;
-        top: 50%;
-        width: 20px;
-        height: 2px;
-        background: #cbd5e0;
-    }
-    
-    .component-item::after {
-        content: '';
-        position: absolute;
-        left: -28px;
-        top: -15px;
-        width: 2px;
-        height: calc(100% + 15px);
-        background: #cbd5e0;
-    }
-    
-    .component-item:first-child::after {
-        top: 50%;
-        height: calc(50% + 15px);
-    }
-    
-    .component-item:last-child::after {
-        height: calc(50%);
-    }
-    
-    .component-item:hover {
-        border-color: #005fa3;
-        box-shadow: 0 4px 12px rgba(0, 95, 163, 0.15);
-        transform: translateY(-3px);
-    }
-    
-    .component-icon {
-        font-size: 1.5em;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #e7f3ff;
-        border-radius: 8px;
-        color: #005fa3;
-        transition: all 0.3s ease;
-        margin-bottom: 10px;
-        align-self: center;
-    }
-    
-    .component-item:hover .component-icon {
-        transform: scale(1.1) rotate(5deg);
-        background: #005fa3;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 95, 163, 0.3);
-    }
-    
-    .component-details {
-        flex: 1;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .component-name {
-        font-weight: 700;
-        color: #2d3748;
-        font-size: 0.9em;
-        margin-bottom: 6px;
-        line-height: 1.3;
-    }
-    
-    .component-meta {
-        font-size: 0.75em;
-        color: #718096;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        align-items: center;
-    }
-    
-    .component-meta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-    
-    .component-actions {
-        display: flex;
-        gap: 6px;
-        justify-content: center;
-        align-items: center;
-        margin-top: auto;
-        padding-top: 8px;
-        border-top: 1px solid #e0e3e7;
-    }
-    
-    .btn-tree {
-        padding: 10px 16px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.85em;
-        font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        text-transform: none;
-        letter-spacing: 0.3px;
-        min-height: 36px;
-        white-space: nowrap;
-    }
-    
-    .btn-tree:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-    
-    .btn-tree:active {
-        transform: translateY(0);
-    }
-    
-    .btn-primary-tree {
-        background: #005fa3;
-        color: white;
-    }
-    
-    .btn-primary-tree:hover {
-        background: #004578;
-    }
-    
-    .btn-success-tree {
-        background: #28a745;
-        color: white;
-    }
-    
-    .btn-success-tree:hover {
-        background: #218838;
-    }
-    
-    .btn-danger-tree {
-        background: #dc3545;
-        color: white;
-    }
-    
-    .btn-danger-tree:hover {
-        background: #c82333;
-    }
-    
-    .btn-icon {
-        padding: 6px 8px;
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        color: #dc3545;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8em;
-        min-width: 32px;
-        min-height: 32px;
-    }
-    
-    .btn-icon:hover {
-        background: #dc3545;
-        border-color: #dc3545;
-        color: white;
-        transform: scale(1.1);
-    }
-    
-    .no-tags-message {
-        text-align: center;
-        padding: 50px;
-        color: #6c757d;
-        font-style: normal;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 2px dashed #dee2e6;
-    }
-    
-    .no-tags-message i {
-        display: block;
-        margin-bottom: 15px;
-        color: #cbd5e0;
-    }
-    
-    .no-items-message {
-        padding: 30px;
-        color: #6c757d;
-        font-style: normal;
-        text-align: center;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 2px dashed #dee2e6;
-    }
-    
-    .allocation-info {
-        background: #fff3cd;
-        padding: 20px;
-        border-radius: 8px;
-        margin-top: 20px;
-        border-left: 4px solid #ffc107;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    
-    .allocation-item {
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .allocation-item:hover {
-        padding-left: 10px;
-        border-left: 3px solid #f59e0b;
-    }
-    
-    .allocation-item:last-child {
-        border-bottom: none;
-    }
-    
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(45, 55, 72, 0.7);
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease;
-    }
-    
-    /* More nav modal - instant display */
-    #moreNavModal {
-        animation: none !important;
-        transition: none !important;
-        background: none !important;
-        backdrop-filter: none !important;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .modal-content {
-        background: white;
-        margin: 3% auto;
-        padding: 40px;
-        border-radius: 24px;
-        width: 85%;
-        max-width: 900px;
-        max-height: 85vh;
-        overflow-y: auto;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    /* More nav content - instant, no animation */
-    #moreNavModal .modal-content {
-        animation: none !important;
-        transition: none !important;
-        margin: 0;
-    }
-    
-    .modal-content::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .modal-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .modal-content::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-    }
-    
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
-    }
-    
-    .modal-header h2 {
-        color: #005fa3;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    
-    .close-btn {
-        font-size: 32px;
-        font-weight: bold;
-        color: #cbd5e0;
-        cursor: pointer;
-        border: none;
-        background: none;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-    }
-    
-    .close-btn:hover {
-        background: #f8fafc;
-        color: #005fa3;
-        transform: rotate(90deg);
-    }
-    
-    .item-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 12px;
-        margin-top: 20px;
-    }
-    
-    .item-checkbox {
-        display: flex;
-        align-items: center;
-        padding: 15px 18px;
-        background: #f7fafc;
-        border: 2px solid transparent;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-    }
-    
-    .item-checkbox:hover {
-        background: #f8fafc;
-        border-color: #005fa3;
-        transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    .item-checkbox input[type="checkbox"] {
-        margin-right: 12px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        accent-color: #005fa3;
-    }
-    
-    .item-checkbox.tagged {
-        background: #e7f3ff;
-        border: 2px solid #28a745;
-        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
-    }
-    
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding: 20px 25px;
-        background: #ffffff;
-        border-radius: 8px;
-        color: #222;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        border: 1px solid #e0e3e7;
-    }
-    
-    .page-title {
-        font-size: 1.6em;
-        font-weight: 700;
-        margin: 0;
-        color: #005fa3;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 60px 40px;
-        background: #ffffff;
-        border-radius: 8px;
-        margin-top: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        border: 1px solid #e0e3e7;
-    }
-    
-    .empty-state i {
-        font-size: 4em;
-        color: #6c757d;
-        margin-bottom: 20px;
-    }
-    
-    .empty-state h3 {
-        color: #2d3748;
-        margin-bottom: 15px;
-        font-size: 1.8em;
-        font-weight: 700;
-    }
-    
-    .empty-state p {
-        color: #718096;
-        font-size: 1.1em;
-        line-height: 1.6;
-    }
-    
-    /* Custom form inputs */
-    input[type="text"],
-    textarea {
-        transition: all 0.3s ease;
-    }
-    
-    input[type="text"]:focus,
-    textarea:focus {
-        outline: none;
-        border-color: #005fa3 !important;
-        box-shadow: 0 0 0 2px rgba(0, 95, 163, 0.1);
-    }
-    
-    label {
-        color: #4a5568;
-    }
-    
-    /* Smooth scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #f1f5f9;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #005fa3;
-        border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #004578;
-    }
-    
-    /* Container styling */
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-        width: 100%;
-        box-sizing: border-box;
-        overflow-x: hidden;
-    }
-    
-    .mt-4 {
-        margin-top: 1.5rem;
-        overflow-x: hidden;
-    }
-    
-    /* System Overview Grid */
-    .systems-overview-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-    
-    .system-overview-card {
-        background: #ffffff;
-        border: 2px solid #e0e3e7;
-        border-radius: 10px;
-        padding: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        text-align: center;
-        position: relative;
-    }
-    
-    .system-overview-card:hover {
-        transform: translateY(-5px);
-        border-color: #005fa3;
-        box-shadow: 0 8px 24px rgba(0, 95, 163, 0.15);
-    }
-    
-    .system-overview-card.active {
-        border-color: #005fa3;
-        background: #e7f3ff;
-        box-shadow: 0 4px 16px rgba(0, 95, 163, 0.2);
-    }
-    
-    .system-overview-icon {
-        font-size: 2.5em;
-        color: #005fa3;
-        margin-bottom: 12px;
-    }
-    
-    .system-overview-name {
-        font-size: 1.15em;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 10px;
-    }
-    
-    .system-overview-stats {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e0e3e7;
-    }
-    
-    .system-overview-stat {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .system-overview-stat-value {
-        font-size: 1.3em;
-        font-weight: 700;
-        color: #005fa3;
-    }
-    
-    .system-overview-stat-label {
-        font-size: 0.75em;
-        color: #718096;
-        margin-top: 3px;
-    }
-    
-    .system-details-section {
-        display: none;
-        animation: slideDown 0.3s ease;
-    }
-    
-    .system-details-section.active {
-        display: block;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .back-to-overview {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: #005fa3;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-    }
-    
-    .back-to-overview:hover {
-        background: #004578;
-        transform: translateX(-5px);
-    }
+{% block title %}System Allocation Tree – {{ selected_stream }}{% endblock %}
 
-/* More Navigation Popup - Instant Display */
-#moreNavModal {
-    animation: none !important;
-    transition: none !important;
-    background: none !important;
-    backdrop-filter: none !important;
+{% block content %}
+<style>
+/* ================================================================
+   ALLOCATION TREE — Corporate Design System
+   Consistent with location_list, product_list, sub_level_list
+   ================================================================ */
+
+/* ─── Design Tokens ─── */
+:root {
+  --at-primary: #0066cc;
+  --at-primary-dark: #004d99;
+  --at-primary-light: #e0f0ff;
+  --at-accent: #0891b2;
+  --at-accent-dark: #0d9488;
+  --at-gradient: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+  --at-success: #10b981;
+  --at-success-light: #d1fae5;
+  --at-success-dark: #059669;
+  --at-warning: #f59e0b;
+  --at-warning-light: #fef3c7;
+  --at-warning-dark: #d97706;
+  --at-danger: #ef4444;
+  --at-danger-light: #fee2e2;
+  --at-danger-dark: #dc2626;
+  --at-info: #06b6d4;
+  --at-info-light: #cffafe;
+  --at-purple: #0B5FFF;
+  --at-purple-light: #eef4ff;
+  --at-text: #0f172a;
+  --at-text-secondary: #475569;
+  --at-text-muted: #94a3b8;
+  --at-border: #e2e8f0;
+  --at-border-medium: #cbd5e1;
+  --at-bg: #f8fafc;
+  --at-surface: #ffffff;
+  --at-shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --at-shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --at-shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05);
+  --at-shadow-lg: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.04);
+  --at-shadow-xl: 0 20px 25px -5px rgba(0,0,0,.08), 0 8px 10px -6px rgba(0,0,0,.04);
+  --at-radius-sm: 6px;
+  --at-radius: 10px;
+  --at-radius-lg: 14px;
+  --at-radius-xl: 20px;
+  --at-transition: .2s cubic-bezier(.4,0,.2,1);
 }
 
-#moreNavModal .modal-content {
-    animation: none !important;
-    transition: none !important;
+/* ─── Animations ─── */
+@keyframes atFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes atSlideUp { from{opacity:0;transform:translateY(24px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes atSlideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes atPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes atShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes atScaleIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+@keyframes atCheckPop { 0%{transform:scale(0)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+
+/* ─── Reset / Page ─── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+
+.at-page {
+  padding-top: 1.25rem;
+  max-width: 1900px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 3rem;
+  min-height: calc(100vh - 106px);
+  font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  color: var(--at-text);
+  -webkit-font-smoothing: antialiased;
 }
 
-.more-nav-content {
-    transition: none !important;
-    animation: none !important;
-    will-change: auto !important;
+/* ─── Breadcrumbs ─── */
+.at-breadcrumb {
+  display:flex; align-items:center; gap:.5rem;
+  margin-bottom:1rem; font-size:.85rem; color:var(--at-text-muted);
+  animation:atFadeIn .4s ease both;
+}
+.at-breadcrumb a { color:var(--at-text-secondary); text-decoration:none; transition:color var(--at-transition); }
+.at-breadcrumb a:hover { color:var(--at-primary); }
+.at-breadcrumb .sep { font-size:.7rem; opacity:.5; }
+.at-breadcrumb .bc-current { color:var(--at-primary); font-weight:600; }
+
+/* ─── Gradient Card Header ─── */
+.at-header {
+  background:var(--at-gradient);
+  border-radius:var(--at-radius-xl);
+  padding:2rem 2.5rem;
+  color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1.5rem;
+  box-shadow:var(--at-shadow-lg);
+  position:relative; overflow:hidden;
+  min-height:100px;
+  animation:atFadeIn .5s ease both;
+}
+.at-header::before {
+  content:''; position:absolute; top:-50%; right:-10%;
+  width:300px; height:300px;
+  background:rgba(255,255,255,.05); border-radius:50%; pointer-events:none;
+}
+.at-header::after {
+  content:''; position:absolute; bottom:-40%; left:20%;
+  width:200px; height:200px;
+  background:rgba(255,255,255,.03); border-radius:50%; pointer-events:none;
+}
+.at-header-left { display:flex; align-items:center; gap:1rem; position:relative; z-index:2; }
+.at-header-icon {
+  width:52px; height:52px;
+  background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+  border-radius:var(--at-radius-lg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; flex-shrink:0;
+}
+.at-header-left h1 { font-size:1.65rem; font-weight:700; margin:0; color:#fff !important; }
+.at-header-left .subtitle { font-size:.88rem; opacity:.85; margin-top:.15rem; }
+.at-header-right { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; position:relative; z-index:2; }
+.at-header-btn {
+  background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25); color:#fff;
+  padding:.55rem 1.15rem; border-radius:var(--at-radius);
+  font-size:.88rem; font-weight:500; cursor:pointer;
+  text-decoration:none; display:inline-flex; align-items:center; gap:.45rem;
+  transition:all var(--at-transition); font-family:inherit;
+}
+.at-header-btn:hover { background:rgba(255,255,255,.28); color:#fff; text-decoration:none; }
+.at-header-btn.primary {
+  background:#fff; color:var(--at-primary); font-weight:700;
+  border:none; box-shadow:var(--at-shadow-md);
+}
+.at-header-btn.primary:hover { background:#f0f4ff; transform:translateY(-2px); box-shadow:var(--at-shadow-lg); }
+
+/* ─── Stats Row ─── */
+.at-stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;
+  margin-bottom:1.75rem;
+  animation:atFadeIn .6s ease both;
+}
+.at-stat-card {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius);
+  padding:1.15rem 1.25rem;
+  display:flex; align-items:center; gap:1rem;
+  transition:all var(--at-transition);
+  box-shadow:var(--at-shadow-xs);
+  position:relative; overflow:hidden;
+}
+.at-stat-card:hover { transform:translateY(-2px); box-shadow:var(--at-shadow-md); }
+.at-stat-card::before {
+  content:''; position:absolute; left:0; top:0;
+  width:4px; height:100%; border-radius:0 3px 3px 0;
+}
+.at-stat-card.blue::before { background:var(--at-primary); }
+.at-stat-card.green::before { background:var(--at-success); }
+.at-stat-card.purple::before { background:var(--at-purple); }
+.at-stat-card.teal::before { background:var(--at-accent); }
+.at-stat-card.warning::before { background:var(--at-warning); }
+.at-stat-card.danger::before { background:var(--at-danger); }
+.at-stat-icon {
+  width:44px; height:44px; border-radius:var(--at-radius);
+  display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0;
+}
+.at-stat-card.blue .at-stat-icon { background:var(--at-primary-light); color:var(--at-primary); }
+.at-stat-card.green .at-stat-icon { background:var(--at-success-light); color:var(--at-success-dark); }
+.at-stat-card.purple .at-stat-icon { background:var(--at-purple-light); color:var(--at-purple); }
+.at-stat-card.teal .at-stat-icon { background:var(--at-info-light); color:var(--at-accent); }
+.at-stat-card.warning .at-stat-icon { background:var(--at-warning-light); color:var(--at-warning-dark); }
+.at-stat-card.danger .at-stat-icon { background:var(--at-danger-light); color:var(--at-danger-dark); }
+.at-stat-info { flex:1; min-width:0; }
+.at-stat-value { font-size:1.45rem; font-weight:700; line-height:1.2; color:var(--at-text); }
+.at-stat-label { font-size:.78rem; color:var(--at-text-muted); margin-top:2px; }
+
+/* ─── Search & Toolbar ─── */
+.at-toolbar {
+  display:flex; justify-content:space-between; align-items:center;
+  gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;
+  animation:atFadeIn .5s ease both;
+}
+.at-search-box {
+  position:relative; flex:1; max-width:420px; min-width:200px;
+}
+.at-search-box i {
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  color:var(--at-text-muted); font-size:.9rem; z-index:2;
+}
+.at-search-box input.at-search-input {
+  width:100%; padding:.7rem 1rem .7rem 2.6rem !important;
+  border:1px solid var(--at-border); border-radius:var(--at-radius);
+  font-size:.9rem; background:var(--at-surface);
+  transition:all var(--at-transition); font-family:inherit;
+  color:var(--at-text);
+}
+.at-search-box input.at-search-input:focus {
+  outline:none; border-color:var(--at-primary);
+  box-shadow:0 0 0 3px rgba(0,102,204,.12);
+}
+.at-toolbar-right { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+.at-view-btn {
+  width:38px; height:38px; border:1px solid var(--at-border);
+  border-radius:var(--at-radius-sm); background:var(--at-surface);
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all var(--at-transition);
+  color:var(--at-text-secondary); font-size:.9rem;
+}
+.at-view-btn:hover { border-color:var(--at-primary); color:var(--at-primary); background:var(--at-primary-light); }
+.at-view-btn.active { background:var(--at-primary); color:#fff; border-color:var(--at-primary); }
+
+/* ─── System Overview Grid ─── */
+.at-overview-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:1.25rem;
+  animation:atFadeIn .6s ease both;
+}
+.at-sys-card {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius-lg);
+  padding:1.5rem;
+  cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--at-shadow-sm);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.at-sys-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:4px;
+  background:var(--at-gradient); opacity:0;
+  transition:opacity var(--at-transition);
+}
+.at-sys-card:hover {
+  transform:translateY(-4px);
+  box-shadow:var(--at-shadow-lg);
+  border-color:var(--at-primary);
+}
+.at-sys-card:hover::before { opacity:1; }
+.at-sys-top { display:flex; align-items:flex-start; gap:1rem; margin-bottom:1rem; }
+.at-sys-icon {
+  width:48px; height:48px;
+  background:var(--at-primary-light);
+  border-radius:var(--at-radius);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.25rem; color:var(--at-primary); flex-shrink:0;
+  transition:all var(--at-transition);
+}
+.at-sys-card:hover .at-sys-icon { background:var(--at-primary); color:#fff; }
+.at-sys-info { flex:1; min-width:0; }
+.at-sys-name { font-size:1.1rem; font-weight:700; color:var(--at-text); margin-bottom:.25rem; }
+.at-sys-desc { font-size:.82rem; color:var(--at-text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.at-sys-badges { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+.at-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px;
+  font-size:.72rem; font-weight:600; letter-spacing:.02em;
+  white-space:nowrap;
+}
+.at-badge-active { background:var(--at-success-light); color:var(--at-success-dark); }
+.at-badge-not-active { background:#f1f5f9; color:#64748b; }
+.at-badge-issue { background:var(--at-warning-light); color:var(--at-warning-dark); }
+.at-badge-used { background:var(--at-primary-light); color:var(--at-primary-dark); }
+.at-badge-removed { background:var(--at-danger-light); color:var(--at-danger-dark); }
+.at-badge-excellent { background:var(--at-success-light); color:var(--at-success-dark); }
+.at-badge-good { background:#d1fae5; color:#047857; }
+.at-badge-warning { background:var(--at-warning-light); color:var(--at-warning-dark); }
+.at-badge-critical { background:var(--at-danger-light); color:var(--at-danger-dark); }
+.at-sys-metrics {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:.75rem; padding-top:1rem; border-top:1px solid var(--at-border);
+  margin-top:auto;
+}
+.at-sys-metric { text-align:center; }
+.at-sys-metric-val { font-size:1.2rem; font-weight:700; color:var(--at-primary); line-height:1; }
+.at-sys-metric-lbl { font-size:.7rem; color:var(--at-text-muted); margin-top:3px; text-transform:uppercase; letter-spacing:.04em; }
+
+/* ─── System Detail View ─── */
+.at-detail-section {
+  display:none;
+  animation:atSlideUp .4s ease both;
+}
+.at-detail-section.active { display:block; }
+
+.at-back-btn {
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.55rem 1.15rem;
+  background:var(--at-surface); border:1px solid var(--at-border);
+  border-radius:var(--at-radius); color:var(--at-text-secondary);
+  font-size:.88rem; font-weight:500; cursor:pointer;
+  transition:all var(--at-transition); margin-bottom:1.25rem; font-family:inherit;
+}
+.at-back-btn:hover {
+  background:var(--at-primary-light); color:var(--at-primary);
+  border-color:var(--at-primary); transform:translateX(-4px);
 }
 
-#moreNavModal .close-btn {
-    transition: none !important;
+/* ─── System Detail Card ─── */
+.at-sys-detail-card {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius-lg);
+  overflow:hidden;
+  box-shadow:var(--at-shadow-sm);
+  margin-bottom:1.5rem;
+}
+.at-sys-detail-header {
+  background:var(--at-gradient);
+  padding:1.5rem 2rem;
+  color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:1rem;
+  position:relative; overflow:hidden;
+}
+.at-sys-detail-header::before {
+  content:''; position:absolute; top:-30%; right:-5%;
+  width:200px; height:200px;
+  background:rgba(255,255,255,.06); border-radius:50%; pointer-events:none;
+}
+.at-sys-detail-left { display:flex; align-items:center; gap:1rem; position:relative; z-index:2; }
+.at-sys-detail-icon {
+  width:48px; height:48px;
+  background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+  border-radius:var(--at-radius); display:flex; align-items:center;
+  justify-content:center; font-size:1.3rem; flex-shrink:0;
+}
+.at-sys-detail-name { font-size:1.4rem; font-weight:700; }
+.at-sys-detail-desc { font-size:.85rem; opacity:.85; margin-top:.2rem; }
+.at-sys-detail-badges { display:flex; gap:.5rem; flex-wrap:wrap; position:relative; z-index:2; }
+.at-badge-header {
+  background:rgba(255,255,255,.18); backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.25); color:#fff;
+  padding:5px 14px; border-radius:20px;
+  font-size:.78rem; font-weight:600;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.at-sys-detail-body { padding:1.5rem 2rem; }
+
+/* ─── Tags Section ─── */
+.at-section-title {
+  font-size:1.05rem; font-weight:700; color:var(--at-text);
+  display:flex; align-items:center; gap:.6rem; flex-wrap:nowrap;
+  padding-bottom:.75rem; margin-bottom:1rem;
+  border-bottom:2px solid var(--at-border);
+}
+.at-section-title i { color:var(--at-primary); font-size:1.1em; }
+.at-section-title .at-section-count {
+  background:var(--at-primary-light); color:var(--at-primary);
+  padding:2px 10px; border-radius:12px; font-size:.78rem; font-weight:600;
+}
+.at-section-title .at-section-actions { margin-left:auto; display:flex; gap:.5rem; flex-shrink:0; }
+.at-section-title .at-section-actions .at-btn { white-space:nowrap; flex-shrink:0; }
+
+/* ─── Tag Card ─── */
+.at-tag-card {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-left:4px solid var(--at-primary);
+  border-radius:0 var(--at-radius) var(--at-radius) 0;
+  padding:1.25rem 1.5rem;
+  margin-bottom:1rem;
+  transition:all var(--at-transition);
+  box-shadow:var(--at-shadow-xs);
+}
+.at-tag-card:hover {
+  box-shadow:var(--at-shadow-md);
+  border-left-color:var(--at-primary-dark);
+}
+.at-tag-header {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:1rem; margin-bottom:1rem; padding-bottom:.75rem;
+  border-bottom:1px solid var(--at-border);
+}
+.at-tag-title {
+  font-size:1rem; font-weight:700; color:var(--at-primary);
+  display:flex; align-items:center; gap:.5rem;
+}
+.at-tag-title .at-tag-count {
+  font-weight:400; color:var(--at-text-muted); font-size:.85rem;
+}
+.at-tag-desc { font-size:.82rem; color:var(--at-text-muted); margin-top:.25rem; }
+.at-tag-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+
+/* ─── Buttons ─── */
+.at-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+  padding:.5rem 1rem; border-radius:var(--at-radius-sm);
+  font-size:.82rem; font-weight:600; cursor:pointer; border:none;
+  transition:all var(--at-transition); font-family:inherit;
+  white-space:nowrap; text-decoration:none;
+}
+.at-btn:hover { transform:translateY(-1px); }
+.at-btn-primary { background:var(--at-primary); color:#fff; }
+.at-btn-primary:hover { background:var(--at-primary-dark); box-shadow:var(--at-shadow-md); }
+.at-btn-success { background:var(--at-success); color:#fff; }
+.at-btn-success:hover { background:var(--at-success-dark); box-shadow:var(--at-shadow-md); }
+.at-btn-danger { background:var(--at-danger); color:#fff; }
+.at-btn-danger:hover { background:var(--at-danger-dark); box-shadow:var(--at-shadow-md); }
+.at-btn-warning { background:var(--at-warning); color:#fff; }
+.at-btn-warning:hover { background:var(--at-warning-dark); box-shadow:var(--at-shadow-md); }
+.at-btn-outline {
+  background:transparent; border:1px solid var(--at-border);
+  color:var(--at-text-secondary);
+}
+.at-btn-outline:hover { border-color:var(--at-primary); color:var(--at-primary); background:var(--at-primary-light); }
+.at-btn-ghost {
+  background:transparent; color:var(--at-text-secondary);
+  padding:.4rem .6rem;
+}
+.at-btn-ghost:hover { background:#f1f5f9; color:var(--at-primary); }
+.at-btn-sm { padding:.35rem .7rem; font-size:.78rem; }
+.at-btn-icon {
+  width:32px; height:32px; padding:0; border-radius:var(--at-radius-sm);
+  background:var(--at-surface); border:1px solid var(--at-border);
+  color:var(--at-text-muted); cursor:pointer; transition:all var(--at-transition);
+  display:inline-flex; align-items:center; justify-content:center; font-size:.8rem;
+}
+.at-btn-icon:hover { background:var(--at-danger-light); color:var(--at-danger); border-color:var(--at-danger); }
+.at-btn-icon.edit:hover { background:var(--at-warning-light); color:var(--at-warning-dark); border-color:var(--at-warning); }
+
+/* ─── Component Type Section ─── */
+.at-component-section { margin-bottom:1.25rem; }
+.at-component-type {
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.82rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--at-text-secondary);
+  padding:.5rem .75rem;
+  background:var(--at-bg);
+  border-radius:var(--at-radius-sm);
+  border-left:3px solid var(--at-primary);
+  margin-bottom:.75rem;
+}
+.at-component-type i { color:var(--at-primary); font-size:1rem; }
+.at-component-type .at-type-count {
+  margin-left:auto; background:var(--at-primary-light);
+  color:var(--at-primary); padding:2px 8px; border-radius:10px;
+  font-size:.72rem; font-weight:600;
 }
 
-#moreNavModal a {
-    display: block;
-    transition: background 0.08s ease;
+/* ─── Component Item Grid ─── */
+.at-items-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:.75rem;
+  margin-bottom:.5rem;
+}
+.at-item-card {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius);
+  padding:1rem;
+  display:flex; flex-direction:column;
+  transition:all var(--at-transition);
+  cursor:pointer; position:relative;
+}
+.at-item-card:hover {
+  border-color:var(--at-primary);
+  box-shadow:var(--at-shadow-md);
+  transform:translateY(-2px);
+}
+.at-item-top { display:flex; align-items:flex-start; gap:.75rem; margin-bottom:.6rem; }
+.at-item-icon {
+  width:38px; height:38px; border-radius:var(--at-radius-sm);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+  transition:all var(--at-transition);
+}
+.at-item-icon.product { background:var(--at-primary-light); color:var(--at-primary); }
+.at-item-icon.sublevel { background:var(--at-info-light); color:var(--at-accent); }
+.at-item-icon.tool { background:var(--at-warning-light); color:var(--at-warning-dark); }
+.at-item-icon.project { background:var(--at-purple-light); color:var(--at-purple); }
+.at-item-card:hover .at-item-icon.product { background:var(--at-primary); color:#fff; }
+.at-item-card:hover .at-item-icon.sublevel { background:var(--at-accent); color:#fff; }
+.at-item-card:hover .at-item-icon.tool { background:var(--at-warning); color:#fff; }
+.at-item-card:hover .at-item-icon.project { background:var(--at-purple); color:#fff; }
+.at-item-info { flex:1; min-width:0; }
+.at-item-name {
+  font-size:.88rem; font-weight:600; color:var(--at-text);
+  margin-bottom:.3rem; line-height:1.3;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.at-item-meta {
+  display:flex; flex-wrap:wrap; gap:.3rem .7rem;
+  font-size:.75rem; color:var(--at-text-muted);
+}
+.at-item-meta span { display:inline-flex; align-items:center; gap:3px; }
+.at-item-meta i { font-size:.7rem; }
+.at-item-remove {
+  position:absolute; top:.6rem; right:.6rem;
+  width:26px; height:26px; border-radius:50%;
+  background:transparent; border:none; cursor:pointer; color:var(--at-text-muted);
+  display:flex; align-items:center; justify-content:center; font-size:.72rem;
+  transition:all var(--at-transition); opacity:0;
+}
+.at-item-card:hover .at-item-remove { opacity:1; }
+.at-item-remove:hover { background:var(--at-danger-light); color:var(--at-danger); }
+
+/* ─── Empty State ─── */
+.at-empty {
+  text-align:center; padding:3rem 2rem;
+  color:var(--at-text-muted);
+}
+.at-empty > i { font-size:2.5rem; opacity:.3; margin-bottom:.75rem; display:block; }
+.at-empty h3 { font-size:1.2rem; font-weight:600; color:var(--at-text-secondary); margin-bottom:.4rem; }
+.at-empty p { font-size:.88rem; max-width:400px; margin:0 auto; line-height:1.5; }
+.at-no-items {
+  text-align:center; padding:1.5rem;
+  background:var(--at-bg); border:2px dashed var(--at-border);
+  border-radius:var(--at-radius); color:var(--at-text-muted);
+  font-size:.85rem;
+}
+.at-no-items i { margin-right:.3rem; }
+
+/* ─── Collapsible Panels ─── */
+.at-panel {
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius);
+  margin-bottom:1rem; overflow:hidden;
+  box-shadow:var(--at-shadow-xs);
+}
+.at-panel-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1rem 1.25rem; cursor:pointer;
+  transition:background var(--at-transition);
+}
+.at-panel-header:hover { background:var(--at-bg); }
+.at-panel-title {
+  font-size:.92rem; font-weight:600; color:var(--at-text);
+  display:flex; align-items:center; gap:.5rem;
+}
+.at-panel-title i { color:var(--at-primary); }
+.at-panel-toggle {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--at-bg); border:1px solid var(--at-border);
+  display:flex; align-items:center; justify-content:center;
+  transition:all var(--at-transition); font-size:.75rem;
+  color:var(--at-text-secondary); cursor:pointer;
+}
+.at-panel-toggle.open { transform:rotate(180deg); background:var(--at-primary-light); color:var(--at-primary); border-color:var(--at-primary); }
+.at-panel-body { display:none; padding:0 1.25rem 1.25rem; }
+.at-panel-body.open { display:block; animation:atSlideDown .3s ease both; }
+
+/* ─── Allocation List ─── */
+.at-alloc-item {
+  display:flex; align-items:center; gap:.75rem;
+  padding:.75rem 0; border-bottom:1px solid var(--at-border);
+  transition:all var(--at-transition);
+}
+.at-alloc-item:last-child { border-bottom:none; }
+.at-alloc-item:hover { padding-left:.5rem; }
+.at-alloc-avatar {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--at-primary-light); color:var(--at-primary);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.8rem; font-weight:700; flex-shrink:0;
+}
+.at-alloc-info { flex:1; }
+.at-alloc-user { font-size:.88rem; font-weight:600; color:var(--at-text); }
+.at-alloc-date { font-size:.78rem; color:var(--at-text-muted); margin-top:2px; display:flex; align-items:center; gap:.3rem; }
+
+/* ─── History Table ─── */
+.at-history-table {
+  width:100%; border-collapse:collapse;
+  font-size:.82rem;
+}
+.at-history-table thead th {
+  padding:.65rem .85rem; text-align:left;
+  background:var(--at-bg); color:var(--at-text-secondary);
+  font-weight:600; font-size:.75rem; text-transform:uppercase;
+  letter-spacing:.04em; border-bottom:2px solid var(--at-border);
+  position:sticky; top:0;
+}
+.at-history-table tbody td {
+  padding:.6rem .85rem; border-bottom:1px solid var(--at-border);
+  color:var(--at-text-secondary); vertical-align:middle;
+}
+.at-history-table tbody tr:hover { background:var(--at-bg); }
+.at-action-badge {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:2px 8px; border-radius:4px;
+  font-size:.72rem; font-weight:600;
+}
+.at-action-badge.created { background:var(--at-success-light); color:var(--at-success-dark); }
+.at-action-badge.updated { background:var(--at-warning-light); color:var(--at-warning-dark); }
+.at-action-badge.deleted { background:var(--at-danger-light); color:var(--at-danger-dark); }
+.at-action-badge.item_added { background:var(--at-primary-light); color:var(--at-primary); }
+.at-action-badge.item_removed { background:#f1f5f9; color:#64748b; }
+.at-user-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--at-primary-light); color:var(--at-primary);
+  padding:2px 8px; border-radius:4px; font-weight:600; font-size:.78rem;
+}
+.at-type-chip {
+  display:inline-flex; padding:1px 6px; border-radius:3px;
+  background:#f1f5f9; color:#64748b; font-size:.72rem; font-weight:500;
 }
 
-#moreNavModal a:hover {
-    background: #f0f4f8 !important;
+/* ─── Modal ─── */
+.at-modal-overlay {
+  display:none; position:fixed; z-index:2000;
+  top:0; left:0; width:100%; height:100%;
+  background:rgba(15,23,42,.5); backdrop-filter:blur(4px);
+  animation:atFadeIn .2s ease;
+}
+.at-modal-overlay.open { display:flex; align-items:center; justify-content:center; }
+.at-modal {
+  background:var(--at-surface);
+  border-radius:var(--at-radius-xl);
+  width:92%; max-width:720px;
+  max-height:85vh; overflow-y:auto;
+  box-shadow:var(--at-shadow-xl);
+  animation:atScaleIn .3s cubic-bezier(.4,0,.2,1);
+}
+.at-modal::-webkit-scrollbar { width:6px; }
+.at-modal::-webkit-scrollbar-track { background:transparent; }
+.at-modal::-webkit-scrollbar-thumb { background:var(--at-border-medium); border-radius:10px; }
+.at-modal-head {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.5rem 2rem; border-bottom:1px solid var(--at-border);
+  position:sticky; top:0; background:var(--at-surface); z-index:1;
+}
+.at-modal-title {
+  font-size:1.15rem; font-weight:700; color:var(--at-text);
+  display:flex; align-items:center; gap:.5rem;
+}
+.at-modal-title i { color:var(--at-primary); }
+.at-modal-close {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--at-bg); border:1px solid var(--at-border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--at-text-muted); font-size:1.1rem;
+  transition:all var(--at-transition);
+}
+.at-modal-close:hover { background:var(--at-danger-light); color:var(--at-danger); border-color:var(--at-danger); transform:rotate(90deg); }
+.at-modal-body { padding:1.5rem 2rem; }
+.at-modal-foot {
+  display:flex; justify-content:flex-end; gap:.5rem;
+  padding:1rem 2rem 1.5rem; border-top:1px solid var(--at-border);
+  position:sticky; bottom:0; background:var(--at-surface);
 }
 
-#moreNavModal a:hover {
-    background: #f0f4f8 !important;
+/* ─── Form ─── */
+.at-form-group { margin-bottom:1.25rem; }
+.at-form-label {
+  display:block; font-size:.82rem; font-weight:600;
+  color:var(--at-text-secondary); margin-bottom:.4rem;
+}
+.at-form-label .required { color:var(--at-danger); }
+.at-form-input,
+.at-form-textarea {
+  width:100%; padding:.65rem .85rem;
+  border:1px solid var(--at-border); border-radius:var(--at-radius-sm);
+  font-size:.88rem; font-family:inherit; color:var(--at-text);
+  background:var(--at-surface);
+  transition:all var(--at-transition);
+}
+.at-form-input:focus,
+.at-form-textarea:focus {
+  outline:none; border-color:var(--at-primary);
+  box-shadow:0 0 0 3px rgba(0,102,204,.1);
+}
+.at-form-input[readonly] { background:var(--at-bg); color:var(--at-text-muted); cursor:default; }
+.at-form-hint { font-size:.75rem; color:var(--at-text-muted); margin-top:.3rem; }
+
+/* ─── Item Type Tabs ─── */
+.at-type-tabs {
+  display:flex; gap:.4rem; flex-wrap:wrap;
+  padding:.5rem; background:var(--at-bg);
+  border-radius:var(--at-radius); margin-bottom:1.25rem;
+}
+.at-type-tab {
+  flex:1; min-width:130px;
+  display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+  padding:.55rem .85rem;
+  border-radius:var(--at-radius-sm);
+  font-size:.82rem; font-weight:600; cursor:pointer;
+  border:1px solid transparent; background:transparent;
+  color:var(--at-text-secondary);
+  transition:all var(--at-transition); font-family:inherit;
+}
+.at-type-tab:hover { background:var(--at-surface); color:var(--at-primary); }
+.at-type-tab.active {
+  background:var(--at-primary); color:#fff; border-color:var(--at-primary);
+  box-shadow:var(--at-shadow-sm);
 }
 
-/* Comprehensive Responsive Design */
-
-/* At 1400px - start reducing spacing */
-@media (max-width: 1400px) {
-    .nav-links {
-        gap: 1rem;
-    }
-    
-    .nav-links a, .nav-links button {
-        font-size: 0.95rem;
-    }
-    
-    .tree-container {
-        padding: 12px;
-    }
-    
-    .system-card {
-        padding: 16px;
-    }
+/* ─── Manage Items Grid ─── */
+.at-manage-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:.6rem;
 }
-
-/* Responsive Design - Progressive collapse via JavaScript */
-
-/* Show hamburger when any items are hidden */
-.has-overflow .hamburger {
-    display: flex !important;
+.at-manage-item {
+  display:flex; align-items:center; gap:.75rem;
+  padding:.7rem 1rem;
+  border:1px solid var(--at-border); border-radius:var(--at-radius-sm);
+  cursor:pointer; transition:all var(--at-transition);
+  background:var(--at-surface);
 }
-
-/* Items hidden by overflow detection */
-.nav-links > .nav-hidden {
-    display: none !important;
+.at-manage-item:hover { border-color:var(--at-primary); background:var(--at-primary-light); }
+.at-manage-item.tagged {
+  border-color:var(--at-success); background:var(--at-success-light);
 }
-
-/* Mobile menu items - only show those that are hidden in nav */
-.mobile-menu .mobile-nav-item {
-    display: none;
+.at-manage-item input[type="checkbox"] {
+  width:18px; height:18px; cursor:pointer;
+  accent-color:var(--at-primary); flex-shrink:0;
 }
+.at-manage-item-info { flex:1; min-width:0; font-size:.85rem; color:var(--at-text); }
+.at-manage-item-info small { display:block; font-size:.75rem; color:var(--at-text-muted); margin-top:1px; }
 
-.mobile-menu .mobile-nav-item.mobile-visible {
-    display: block;
+/* ─── Toast ─── */
+.at-toast-container {
+  position:fixed; top:80px; right:1.5rem;
+  z-index:9999; display:flex; flex-direction:column; gap:.5rem;
 }
-
-/* Always show user info in mobile menu when hamburger is active */
-.has-overflow .mobile-user-info {
-    display: block;
+.at-toast {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.75rem 1.15rem;
+  background:var(--at-surface);
+  border:1px solid var(--at-border);
+  border-radius:var(--at-radius);
+  box-shadow:var(--at-shadow-lg);
+  font-size:.85rem; color:var(--at-text);
+  animation:atSlideDown .3s ease both;
+  min-width:280px; max-width:420px;
 }
-
-/* Smaller screens */
-@media (max-width: 768px) {
-    .logo-section img {
-        height: 28px;
-    }
-    
-    .top-bar {
-        padding: 0.7rem 1rem;
-    }
-    
-    .tree-container {
-        padding: 10px;
-        margin-bottom: 12px;
-    }
-    
-    .system-card {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .system-header h2 {
-        font-size: 1.2rem;
-    }
-    
-    .tag-container {
-        margin-left: 10px;
-        padding: 12px;
-        margin-bottom: 12px;
-    }
-    
-    .btn-tree {
-        font-size: 0.8em;
-        padding: 8px 12px;
-    }
-    
-    .component-list {
-        margin-left: 10px;
-    }
-    
-    .component-item {
-        padding: 12px;
-    }
-    
-    .component-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    
-    .component-actions {
-        flex-direction: row;
-        justify-content: center;
-        width: 100%;
-    }
-    
-    .modal-content {
-        width: 95%;
-        max-width: 95%;
-        padding: 20px;
-        margin: 10% auto;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.3rem;
-    }
-    
-    .form-group label {
-        font-size: 0.9rem;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-    
-    .tree-section-title {
-        font-size: 1rem;
-    }
-    
-    .allocation-info {
-        padding: 15px;
-    }
+.at-toast.success { border-left:4px solid var(--at-success); }
+.at-toast.error { border-left:4px solid var(--at-danger); }
+.at-toast.info { border-left:4px solid var(--at-primary); }
+.at-toast i.toast-icon { font-size:1rem; }
+.at-toast.success i.toast-icon { color:var(--at-success); }
+.at-toast.error i.toast-icon { color:var(--at-danger); }
+.at-toast.info i.toast-icon { color:var(--at-primary); }
+.at-toast .toast-msg { flex:1; }
+.at-toast .toast-close {
+  background:none; border:none; cursor:pointer; color:var(--at-text-muted);
+  padding:2px; font-size:.8rem; transition:color var(--at-transition);
 }
+.at-toast .toast-close:hover { color:var(--at-text); }
 
-/* Small Mobile Devices */
-@media (max-width: 480px) {
-    .logo-section img {
-        height: 24px;
-    }
-    
-    .mobile-menu a {
-        padding: 0.8rem 1rem;
-        font-size: 0.95rem;
-    }
-    
-    .component-list {
-        margin-left: 10px;
-    }
-    
-    .component-item {
-        padding: 12px;
-    }
-    
-    .component-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    
-    .component-actions {
-        flex-direction: row;
-        justify-content: center;
-        width: 100%;
-    }
-    
-    .modal-content {
-        width: 95%;
-        max-width: 95%;
-        padding: 20px;
-        margin: 10% auto;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.3rem;
-    }
-    
-    .form-group label {
-        font-size: 0.9rem;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-    
-    .more-nav-content {
-        right: 10px !important;
-        top: 60px !important;
-        max-width: 200px !important;
-        min-width: 180px !important;
-    }
-    
-    .tree-section-title {
-        font-size: 1rem;
-    }
-    
-    .allocation-info {
-        padding: 15px;
-    }
+/* ─── Responsive ─── */
+@media(max-width:1024px) {
+  .at-page { padding-left:1.25rem; padding-right:1.25rem; }
+  .at-overview-grid { grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+  .at-header { padding:1.5rem 1.75rem; flex-direction:column; align-items:flex-start; gap:1rem; }
+  .at-stats { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
 }
-
-/* Small Mobile Devices */
-@media (max-width: 480px) {
-    body {
-        padding-top: 70px;
-    }
-    
-    .top-bar {
-        padding: 0.5rem;
-    }
-    
-    .top-left img {
-        height: 24px;
-    }
-    
-    .top-left a,
-    .top-left button {
-        font-size: 0.85rem;
-        padding: 0.4rem 0;
-    }
-    
-    .top-right {
-        font-size: 0.75rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .logout-btn {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.8rem;
-    }
-    
-    .tree-container {
-        padding: 8px;
-    }
-    
-    .system-card {
-        padding: 12px;
-    }
-    
-    .system-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .tag-container {
-        margin-left: 5px;
-        padding: 10px;
-    }
-    
-    .tag-name {
-        font-size: 1rem;
-    }
-    
-    .component-list {
-        margin-left: 5px;
-    }
-    
-    .component-item {
-        padding: 10px;
-    }
-    
-    .component-name {
-        font-size: 0.9rem;
-    }
-    
-    .btn-tree {
-        font-size: 0.75em;
-        padding: 6px 10px;
-        gap: 4px;
-    }
-    
-    .btn-icon {
-        min-width: 28px;
-        min-height: 28px;
-        font-size: 0.75em;
-    }
-    
-    .modal-content {
-        width: 98%;
-        padding: 15px;
-        margin: 5% auto;
-    }
-    
-    .modal-header {
-        padding: 12px;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .modal-body {
-        padding: 12px;
-    }
-    
-    .form-group {
-        margin-bottom: 12px;
-    }
-    
-    .form-group label {
-        font-size: 0.85rem;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 0.85rem;
-        padding: 6px;
-    }
-    
-    .modal-actions {
-        gap: 8px;
-        flex-direction: column;
-    }
-    
-    .modal-actions .btn {
-        width: 100%;
-    }
-    
-    .more-nav-content {
-        right: 5px !important;
-        top: 55px !important;
-        max-width: 95vw !important;
-        min-width: 160px !important;
-    }
-    
-    .tree-section-title {
-        font-size: 0.95rem;
-    }
-    
-    .component-type {
-        font-size: 0.8em;
-    }
-    
-    .no-tags-message,
-    .no-items-message {
-        padding: 30px 15px;
-        font-size: 0.9rem;
-    }
-    
-    .allocation-info {
-        padding: 12px;
-    }
-    
-    .allocation-item {
-        padding: 10px 0;
-        font-size: 0.9rem;
-    }
+@media(max-width:768px) {
+  .at-page { padding-left:1rem; padding-right:1rem; }
+  .at-header { padding:1.25rem; border-radius:var(--at-radius-lg); }
+  .at-header-left h1 { font-size:1.25rem; }
+  .at-overview-grid { grid-template-columns:1fr; }
+  .at-items-grid { grid-template-columns:1fr; }
+  .at-manage-grid { grid-template-columns:1fr; }
+  .at-modal { width:96%; max-width:96%; border-radius:var(--at-radius-lg); }
+  .at-modal-head, .at-modal-body, .at-modal-foot { padding-left:1.25rem; padding-right:1.25rem; }
+  .at-tag-header { flex-direction:column; }
+  .at-type-tabs { flex-direction:column; }
 }
-
-/* Touch-Friendly Improvements for All Mobile Devices */
-@media (max-width: 768px) {
-    /* Minimum touch target sizes */
-    button,
-    a,
-    .btn,
-    .btn-tree,
-    .btn-icon {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* Better spacing for touch */
-    .tag-actions button,
-    .component-actions button {
-        margin: 4px 0;
-    }
-    
-    /* Larger form inputs for mobile */
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-        min-height: 44px;
-        font-size: 16px; /* Prevents zoom on iOS */
-    }
-    
-    /* Hamburger menu would go here if implemented */
+@media(max-width:480px) {
+  .at-stats { grid-template-columns:1fr 1fr; }
+  .at-sys-metrics { grid-template-columns:1fr 1fr 1fr; gap:.5rem; }
+  .at-stat-card { padding:.85rem 1rem; }
 }
 </style>
-</head>
-<body>
-{% with stream=stream|default:selected_stream|default:' ' %}
-<div class="top-bar">
-    <div class="logo-section">
-        <img src="/static/products/philips.png" alt="Philips Logo">
-        <div class="hamburger" id="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </div>
-    
-    <!-- Desktop Navigation -->
-    <div class="nav-links">
-        <a href="/dashboard/" data-nav-id="home">Home</a>
-        <a href="{% url 'category_list_stream' stream %}" data-nav-id="categories">{{ stream }} Categories</a>
-        <a href="{% url 'product_list_stream' stream %}" data-nav-id="products">{{ stream }} Products</a>
-        {% if user|is_admin %}
-        <a href="{% url 'sub_level_list_stream' stream %}" data-nav-id="sublevel">{{ stream }} Sub-Level Data</a>
-        <a href="{% url 'sub_level_tool_list_stream' stream %}" data-nav-id="subleveltools">{{ stream }} Sub-Level Tools</a>
-        {% endif %}
-        <a href="{% url 'location_list_stream' stream %}" data-nav-id="location">{{ stream }} Location</a>
-        <a href="{% url 'system_allocation_stream' stream %}" data-nav-id="allocation">{{ stream }} System Allocation</a>
-        <a href="{% url 'allocation_tree_stream' stream %}" data-nav-id="tree" onclick="window.location.reload(); return false;">{{ stream }} Allocation Tree</a>
-    </div>
-    
-    <div class="top-right">
-        {% if user.is_authenticated %}
-            &nbsp;<strong>{{ user.username }}</strong> | Last login: <strong>{{ user.last_login|date:'Y-m-d H:i:s' }}</strong>
-            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Mobile Menu - Only shows items that overflow from nav -->
-<div class="mobile-menu" id="mobileMenu">
-    {% if user.is_authenticated %}
-    <div class="mobile-user-info">
-        <strong>{{ user.username }}</strong><br>
-        <small>Last login: {{ user.last_login|date:'Y-m-d H:i:s' }}</small>
+{% with stream=stream|default:selected_stream|default:' ' %}
+<div class="at-page">
+
+  <!-- Toast container -->
+  <div class="at-toast-container" id="toastContainer"></div>
+
+  <!-- Gradient Card Header -->
+  <div class="at-header">
+    <div class="at-header-left">
+      <div class="at-header-icon"><i class="fas fa-sitemap"></i></div>
+      <div>
+        <h1>System Allocation Tree</h1>
+        <div class="subtitle">Manage systems, tags, and component allocations for {{ selected_stream }} stream</div>
+      </div>
     </div>
+    <div class="at-header-right">
+      <span class="at-header-btn"><i class="fas fa-stream"></i> {{ selected_stream }} Stream</span>
+      <a href="{% url 'system_allocation_stream' stream %}" class="at-header-btn primary"><i class="fas fa-calendar-alt"></i> System Allocation</a>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="at-stats">
+    <div class="at-stat-card blue">
+      <div class="at-stat-icon"><i class="fas fa-server"></i></div>
+      <div class="at-stat-info">
+        <div class="at-stat-value" id="statTotalSystems">{{ systems_data|length }}</div>
+        <div class="at-stat-label">Total Systems</div>
+      </div>
+    </div>
+    <div class="at-stat-card green">
+      <div class="at-stat-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="at-stat-info">
+        <div class="at-stat-value" id="statActiveSystems">0</div>
+        <div class="at-stat-label">Active Systems</div>
+      </div>
+    </div>
+    <div class="at-stat-card purple">
+      <div class="at-stat-icon"><i class="fas fa-tags"></i></div>
+      <div class="at-stat-info">
+        <div class="at-stat-value" id="statTotalTags">0</div>
+        <div class="at-stat-label">Total Tags</div>
+      </div>
+    </div>
+    <div class="at-stat-card teal">
+      <div class="at-stat-icon"><i class="fas fa-cubes"></i></div>
+      <div class="at-stat-info">
+        <div class="at-stat-value" id="statTotalComponents">0</div>
+        <div class="at-stat-label">Tagged Components</div>
+      </div>
+    </div>
+    <div class="at-stat-card warning">
+      <div class="at-stat-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="at-stat-info">
+        <div class="at-stat-value" id="statAvgUtil">0%</div>
+        <div class="at-stat-label">Avg Utilization</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="at-toolbar">
+    <div class="at-search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" class="at-search-input" id="systemSearch" placeholder="Search systems by name or description…">
+    </div>
+    <div class="at-toolbar-right">
+      <button class="at-view-btn active" data-view="grid" title="Grid View"><i class="fas fa-th-large"></i></button>
+      <button class="at-view-btn" data-view="list" title="List View"><i class="fas fa-list"></i></button>
+    </div>
+  </div>
+
+  <!-- Systems Overview Grid -->
+  <div id="systems-overview" class="at-overview-grid">
+    {% if systems_data %}
+      {% for system_data in systems_data %}
+      <div class="at-sys-card"
+           data-system-id="system-{{ system_data.system.id }}"
+           data-system-name="{{ system_data.system.name|lower }}"
+           data-system-desc="{{ system_data.system.description|lower|default:'' }}"
+           data-status="{{ system_data.system.status|lower }}"
+           onclick="showSystemDetails('system-{{ system_data.system.id }}')">
+        <div class="at-sys-top">
+          <div class="at-sys-icon"><i class="fas fa-server"></i></div>
+          <div class="at-sys-info">
+            <div class="at-sys-name">{{ system_data.system.name }}</div>
+            {% if system_data.system.description %}
+            <div class="at-sys-desc">{{ system_data.system.description|truncatewords:20 }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="at-sys-badges">
+          <span class="at-badge at-badge-{{ system_data.system.status|lower }}">
+            <i class="fas fa-circle" style="font-size:.45rem"></i> {{ system_data.system.get_status_display }}
+          </span>
+          <span class="at-badge at-badge-{{ system_data.system.health|lower }}">
+            <i class="fas fa-heartbeat" style="font-size:.65rem"></i> {{ system_data.system.get_health_display }}
+          </span>
+        </div>
+        <div class="at-sys-metrics">
+          <div class="at-sys-metric">
+            <div class="at-sys-metric-val">{{ system_data.tags|length }}</div>
+            <div class="at-sys-metric-lbl">Tags</div>
+          </div>
+          <div class="at-sys-metric">
+            <div class="at-sys-metric-val">{{ system_data.system.utilization_percentage }}%</div>
+            <div class="at-sys-metric-lbl">Utilized</div>
+          </div>
+          <div class="at-sys-metric">
+            <div class="at-sys-metric-val">{{ system_data.recent_allocations|length }}</div>
+            <div class="at-sys-metric-lbl">Recent</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="at-empty" style="grid-column:1/-1">
+        <i class="fas fa-server"></i>
+        <h3>No Systems Found</h3>
+        <p>No systems configured for the {{ selected_stream }} stream. Add systems via System Allocation first.</p>
+        <a href="{% url 'system_allocation_stream' stream=selected_stream %}" class="at-btn at-btn-primary" style="margin-top:1rem"><i class="fas fa-plus"></i> Go to System Allocation</a>
+      </div>
     {% endif %}
-    <a href="/dashboard/" class="mobile-nav-item" data-nav-id="home">Home</a>
-    <a href="{% url 'category_list_stream' stream %}" class="mobile-nav-item" data-nav-id="categories">{{ stream }} Categories</a>
-    <a href="{% url 'product_list_stream' stream %}" class="mobile-nav-item" data-nav-id="products">{{ stream }} Products</a>
-    {% if user|is_admin %}
-    <a href="{% url 'sub_level_list_stream' stream %}" class="mobile-nav-item" data-nav-id="sublevel">{{ stream }} Sub-Level Data</a>
-    <a href="{% url 'sub_level_tool_list_stream' stream %}" class="mobile-nav-item" data-nav-id="subleveltools">{{ stream }} Sub-Level Tools</a>
-    {% endif %}
-    <a href="{% url 'location_list_stream' stream %}" class="mobile-nav-item" data-nav-id="location">{{ stream }} Location</a>
-    <a href="{% url 'system_allocation_stream' stream %}" class="mobile-nav-item" data-nav-id="allocation">{{ stream }} System Allocation</a>
-    <a href="{% url 'allocation_tree_stream' stream %}" class="mobile-nav-item" data-nav-id="tree" onclick="window.location.reload(); return false;">{{ stream }} Allocation Tree</a>
-    {% if user.is_authenticated %}
-    <a href="{% url 'logout' %}" class="mobile-nav-item mobile-visible" style="color:#dc3545;">Logout</a>
-    {% endif %}
+  </div>
+
+  <!-- System Detail Sections -->
+  {% if systems_data %}
+    {% for system_data in systems_data %}
+    <div id="system-{{ system_data.system.id }}" class="at-detail-section">
+
+      <button class="at-back-btn" onclick="backToOverview()">
+        <i class="fas fa-arrow-left"></i> Back to Systems Overview
+      </button>
+
+      <!-- System Info Card -->
+      <div class="at-sys-detail-card">
+        <div class="at-sys-detail-header">
+          <div class="at-sys-detail-left">
+            <div class="at-sys-detail-icon"><i class="fas fa-server"></i></div>
+            <div>
+              <div class="at-sys-detail-name">{{ system_data.system.name }}</div>
+              {% if system_data.system.description %}
+              <div class="at-sys-detail-desc">{{ system_data.system.description }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="at-sys-detail-badges">
+            <span class="at-badge-header"><i class="fas fa-circle" style="font-size:.45rem"></i> {{ system_data.system.get_status_display }}</span>
+            <span class="at-badge-header"><i class="fas fa-heartbeat"></i> {{ system_data.system.get_health_display }}</span>
+            <span class="at-badge-header"><i class="fas fa-chart-line"></i> {{ system_data.system.utilization_percentage }}% Utilized</span>
+          </div>
+        </div>
+
+        <div class="at-sys-detail-body">
+          <!-- Tags Section Title -->
+          <div class="at-section-title">
+            <i class="fas fa-tags"></i> System Configuration
+            {% if system_data.tags %}
+            <span class="at-section-count">{{ system_data.tags|length }} tag{{ system_data.tags|length|pluralize }}</span>
+            {% endif %}
+            <div class="at-section-actions">
+              {% if not system_data.tags %}
+              <button class="at-btn at-btn-success at-btn-sm" onclick="openCreateTagModal('{{ system_data.system.id }}', '{{ system_data.system.name|escapejs }}', null, '', '')">
+                <i class="fas fa-plus"></i> Create Tag
+              </button>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if system_data.tags %}
+            {% for tag in system_data.tags %}
+            <div class="at-tag-card">
+              <div class="at-tag-header">
+                <div>
+                  <div class="at-tag-title">
+                    <i class="fas fa-tag"></i> {{ tag.tag_name }}
+                    <span class="at-tag-count">({{ tag.get_all_components_count }} items)</span>
+                  </div>
+                  {% if tag.description %}
+                  <div class="at-tag-desc">{{ tag.description }}</div>
+                  {% endif %}
+                </div>
+                <div class="at-tag-actions">
+                  <button class="at-btn at-btn-outline at-btn-sm" onclick="openCreateTagModal('{{ system_data.system.id }}', '{{ system_data.system.name|escapejs }}', '{{ tag.id }}', '{{ tag.tag_name|escapejs }}', '{{ tag.description|escapejs }}')">
+                    <i class="fas fa-pen"></i> Edit
+                  </button>
+                  <button class="at-btn at-btn-primary at-btn-sm" onclick="openManageItemsModal('{{ tag.id }}', '{{ tag.tag_name|escapejs }}')">
+                    <i class="fas fa-cog"></i> Manage Items
+                  </button>
+                  <button class="at-btn at-btn-danger at-btn-sm" onclick="deleteTag('{{ tag.id }}', '{{ tag.tag_name|escapejs }}')">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Products -->
+              {% if tag.products.all %}
+              <div class="at-component-section">
+                <div class="at-component-type">
+                  <i class="fas fa-box"></i> Products
+                  <span class="at-type-count">{{ tag.products.count }}</span>
+                </div>
+                <div class="at-items-grid">
+                  {% for product in tag.products.all %}
+                  <div class="at-item-card" onclick="window.location.href='{% url 'product_detail_stream' stream=selected_stream pk=product.id %}'">
+                    <button class="at-item-remove" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'product', {{ product.id }})" title="Remove from tag">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <div class="at-item-top">
+                      <div class="at-item-icon product"><i class="fas fa-cube"></i></div>
+                      <div class="at-item-info">
+                        <div class="at-item-name">{{ product.name }}</div>
+                        <div class="at-item-meta">
+                          <span><i class="fas fa-barcode"></i> {{ product.serial_number }}</span>
+                          <span><i class="fas fa-folder"></i> {{ product.category.name|default:"N/A" }}</span>
+                          <span><i class="fas fa-info-circle"></i> {{ product.get_status_display }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Sub-Levels -->
+              {% if tag.sublevels.all %}
+              <div class="at-component-section">
+                <div class="at-component-type">
+                  <i class="fas fa-layer-group"></i> Sub-Level Components
+                  <span class="at-type-count">{{ tag.sublevels.count }}</span>
+                </div>
+                <div class="at-items-grid">
+                  {% for sublevel in tag.sublevels.all %}
+                  <div class="at-item-card" onclick="window.location.href='{% url 'sub_level_list_stream' stream=selected_stream %}'">
+                    <button class="at-item-remove" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'sublevel', {{ sublevel.id }})" title="Remove from tag">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <div class="at-item-top">
+                      <div class="at-item-icon sublevel"><i class="fas fa-microchip"></i></div>
+                      <div class="at-item-info">
+                        <div class="at-item-name">{{ sublevel.name }}</div>
+                        <div class="at-item-meta">
+                          <span><i class="fas fa-boxes-stacked"></i> Stock: {{ sublevel.in_stock }}</span>
+                          <span><i class="fas fa-cogs"></i> In Use: {{ sublevel.in_use }}</span>
+                          <span><i class="fas fa-recycle"></i> Scraped: {{ sublevel.scraped }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Sub-Level Tools -->
+              {% if tag.sublevel_tools.all %}
+              <div class="at-component-section">
+                <div class="at-component-type">
+                  <i class="fas fa-tools"></i> Sub-Level Tools
+                  <span class="at-type-count">{{ tag.sublevel_tools.count }}</span>
+                </div>
+                <div class="at-items-grid">
+                  {% for tool in tag.sublevel_tools.all %}
+                  <div class="at-item-card" onclick="window.location.href='{% url 'sub_level_tool_list_stream' stream=selected_stream %}'">
+                    <button class="at-item-remove" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'sublevel_tool', {{ tool.id }})" title="Remove from tag">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <div class="at-item-top">
+                      <div class="at-item-icon tool"><i class="fas fa-wrench"></i></div>
+                      <div class="at-item-info">
+                        <div class="at-item-name">{{ tool.name }}</div>
+                        <div class="at-item-meta">
+                          <span><i class="fas fa-boxes-stacked"></i> Stock: {{ tool.in_stock }}</span>
+                          <span><i class="fas fa-cogs"></i> In Use: {{ tool.in_use }}</span>
+                          <span><i class="fas fa-recycle"></i> Scraped: {{ tool.scraped }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Projects -->
+              {% if tag.projects.all %}
+              <div class="at-component-section">
+                <div class="at-component-type">
+                  <i class="fas fa-project-diagram"></i> Projects
+                  <span class="at-type-count">{{ tag.projects.count }}</span>
+                </div>
+                <div class="at-items-grid">
+                  {% for project in tag.projects.all %}
+                  <div class="at-item-card" onclick="window.location.href='{% url 'project_status' %}'">
+                    <button class="at-item-remove" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'project', {{ project.id }})" title="Remove from tag">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <div class="at-item-top">
+                      <div class="at-item-icon project"><i class="fas fa-tasks"></i></div>
+                      <div class="at-item-info">
+                        <div class="at-item-name">{{ project.name }}</div>
+                        <div class="at-item-meta">
+                          <span><i class="fas fa-info-circle"></i> {{ project.get_status_display }}</span>
+                          <span><i class="fas fa-chart-line"></i> {{ project.progress_percentage }}% Complete</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if not tag.products.all and not tag.sublevels.all and not tag.sublevel_tools.all and not tag.projects.all %}
+              <div class="at-no-items">
+                <i class="fas fa-info-circle"></i> No items tagged yet. Click <strong>Manage Items</strong> to add products or components.
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="at-empty" style="padding:2rem 1.5rem;">
+              <i class="fas fa-tags"></i>
+              <h3>No Tags Created</h3>
+              <p>Create a tag to start organizing products and components for this system.</p>
+              <button class="at-btn at-btn-success" style="margin-top:1rem" onclick="openCreateTagModal('{{ system_data.system.id }}', '{{ system_data.system.name|escapejs }}', null, '', '')">
+                <i class="fas fa-plus" style="font-size:.78rem"></i> Create First Tag
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Allocations Panel -->
+      {% if system_data.recent_allocations %}
+      <div class="at-panel">
+        <div class="at-panel-header" onclick="togglePanel('alloc-{{ system_data.system.id }}')">
+          <div class="at-panel-title">
+            <i class="fas fa-history"></i> Recent Allocations
+            <span class="at-badge at-badge-used" style="margin-left:.4rem">{{ system_data.recent_allocations|length }}</span>
+          </div>
+          <div class="at-panel-toggle" id="allocToggle-{{ system_data.system.id }}"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="at-panel-body" id="alloc-{{ system_data.system.id }}">
+          {% for allocation in system_data.recent_allocations %}
+          <div class="at-alloc-item">
+            <div class="at-alloc-avatar">{{ allocation.user.username|first|upper }}</div>
+            <div class="at-alloc-info">
+              <div class="at-alloc-user">
+                {{ allocation.user.username }}
+                {% if allocation.blocked_for_participant %}
+                  <span style="font-weight:400;color:var(--at-text-muted);font-size:.82rem">for {{ allocation.blocked_for_participant.name }}</span>
+                {% endif %}
+              </div>
+              <div class="at-alloc-date">
+                <i class="fas fa-calendar-alt"></i>
+                {{ allocation.start_date|date:"M d, Y H:i" }} &mdash; {{ allocation.end_date|date:"M d, Y H:i" }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Modification History Panel -->
+      <div class="at-panel">
+        <div class="at-panel-header" onclick="toggleHistoryPanel({{ system_data.system.id }})">
+          <div class="at-panel-title">
+            <i class="fas fa-clock-rotate-left"></i> Modification History
+          </div>
+          <div class="at-panel-toggle" id="historyToggle-{{ system_data.system.id }}"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="at-panel-body" id="history-{{ system_data.system.id }}">
+          <div id="historyContent-{{ system_data.system.id }}" style="text-align:center;padding:1.5rem;color:var(--at-text-muted);">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.2rem;opacity:.5"></i>
+            <p style="margin-top:.5rem;font-size:.85rem;">Loading history…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    {% endfor %}
+  {% endif %}
+
 </div>
 {% endwith %}
 
-<div class="container mt-4">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">
-                <i class="fas fa-sitemap"></i> System Allocation Tree
-            </h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">View systems with their tagged products and components</p>
-        </div>
-        <div>
-            <span class="status-badge" style="background: white; color: #005fa3; font-size: 1em;">
-                {{ selected_stream }} Stream
-            </span>
-        </div>
+<!-- Create/Edit Tag Modal -->
+<div id="createTagModal" class="at-modal-overlay">
+  <div class="at-modal">
+    <div class="at-modal-head">
+      <div class="at-modal-title"><i class="fas fa-tag"></i> <span id="tagModalTitle">Create System Tag</span></div>
+      <button class="at-modal-close" onclick="closeModal('createTagModal')">&times;</button>
     </div>
-    
-    <!-- Systems Overview Grid -->
-    <div id="systems-overview" class="systems-overview-grid">
-        {% if systems_data %}
-            {% for system_data in systems_data %}
-            <div class="system-overview-card" onclick="showSystemDetails('system-{{ system_data.system.id }}')">
-                <div class="system-overview-icon">
-                    <i class="fas fa-server"></i>
-                </div>
-                <div class="system-overview-name">{{ system_data.system.name }}</div>
-                {% if system_data.system.description %}
-                <div style="color: #666; font-size: 0.85em; margin-top: 8px;">
-                    {{ system_data.system.description|truncatewords:15 }}
-                </div>
-                {% endif %}
-                <div class="system-overview-stats">
-                    <div class="system-overview-stat">
-                        <div class="system-overview-stat-value">{{ system_data.tags|length }}</div>
-                        <div class="system-overview-stat-label">Tags</div>
-                    </div>
-                    <div class="system-overview-stat">
-                        <div class="system-overview-stat-value">{{ system_data.system.utilization_percentage }}%</div>
-                        <div class="system-overview-stat-label">Utilized</div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <span class="status-badge status-{{ system_data.system.status|lower }}" style="font-size: 0.8em;">
-                        {{ system_data.system.get_status_display }}
-                    </span>
-                    <span class="health-badge health-{{ system_data.system.health|lower }}" style="font-size: 0.8em; margin-left: 5px;">
-                        {{ system_data.system.get_health_display }}
-                    </span>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state" style="grid-column: 1 / -1;">
-                <i class="fas fa-server"></i>
-                <h3>No Systems Found</h3>
-                <p>There are no systems configured for the {{ selected_stream }} stream.</p>
-            </div>
-        {% endif %}
-    </div>
-    
-    <!-- System Details Sections (Hidden by default) -->
-    {% if systems_data %}
-        {% for system_data in systems_data %}
-        <div id="system-{{ system_data.system.id }}" class="system-details-section">
-            <button class="back-to-overview" onclick="backToOverview()">
-                <i class="fas fa-arrow-left"></i> Back to Systems Overview
-            </button>
-            <div class="system-card">
-            <div class="system-header">
-                <div>
-                    <div class="system-name">
-                        <i class="fas fa-server"></i> {{ system_data.system.name }}
-                    </div>
-                    {% if system_data.system.description %}
-                    <div style="color: #666; margin-top: 5px; font-size: 0.9em;">
-                        {{ system_data.system.description }}
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="system-status">
-                    <span class="status-badge status-{{ system_data.system.status|lower }}">
-                        {{ system_data.system.get_status_display }}
-                    </span>
-                    <span class="health-badge health-{{ system_data.system.health|lower }}">
-                        <i class="fas fa-heartbeat"></i> {{ system_data.system.get_health_display }}
-                    </span>
-                    <span class="status-badge" style="background: #2196f3; color: white;">
-                        <i class="fas fa-chart-line"></i> {{ system_data.system.utilization_percentage }}% Utilized
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Tags Section -->
-            <div class="tree-section">
-                <div class="tree-section-title">
-                    <i class="fas fa-tags"></i> System Configuration
-                    {% if not system_data.tags %}
-                    <button class="btn-tree btn-success-tree" onclick="openCreateTagModal('{{ system_data.system.id }}', '{{ system_data.system.name|escapejs }}', null, '', '')">
-                        <i class="fas fa-plus"></i> Create Tag
-                    </button>
-                    {% endif %}
-                </div>
-                
-                {% if system_data.tags %}
-                    {% for tag in system_data.tags %}
-                    <div class="tag-container">
-                        <div class="tag-header">
-                            <div>
-                                <div class="tag-name">
-                                    <i class="fas fa-tag"></i> {{ tag.tag_name }}
-                                    <span style="color: #999; font-weight: normal; font-size: 0.9em;">
-                                        ({{ tag.get_all_components_count }} items)
-                                    </span>
-                                </div>
-                                {% if tag.description %}
-                                <div style="color: #666; margin-top: 5px; font-size: 0.9em;">
-                                    {{ tag.description }}
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="tag-actions">
-                                <button class="btn-tree" style="background: #28a745; color: white;" onclick="openCreateTagModal('{{ system_data.system.id }}', '{{ system_data.system.name|escapejs }}', '{{ tag.id }}', '{{ tag.tag_name|escapejs }}', '{{ tag.description|escapejs }}')">
-                                    <i class="fas fa-edit"></i> Edit Tag
-                                </button>
-                                <button class="btn-tree btn-primary-tree" onclick="openManageItemsModal('{{ tag.id }}', '{{ tag.tag_name|escapejs }}')">
-                                    <i class="fas fa-cog"></i> Manage Items
-                                </button>
-                                <button class="btn-tree btn-danger-tree" onclick="deleteTag('{{ tag.id }}', '{{ tag.tag_name|escapejs }}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="component-list">
-                            <!-- Products -->
-                            {% if tag.products.all %}
-                            <div class="component-type">
-                                <i class="fas fa-box"></i> Products ({{ tag.products.count }})
-                            </div>
-                            <div class="component-items-grid">
-                            {% for product in tag.products.all %}
-                            <div class="component-item" style="cursor: pointer;" onclick="window.location.href='{% url 'product_detail_stream' stream=selected_stream pk=product.id %}'; event.stopPropagation();">
-                                <i class="fas fa-cube component-icon"></i>
-                                <div class="component-details">
-                                    <div class="component-name">{{ product.name }}</div>
-                                    <div class="component-meta">
-                                        <span><i class="fas fa-barcode"></i> {{ product.serial_number }}</span>
-                                        <span><i class="fas fa-tag"></i> {{ product.category.name|default:"N/A" }}</span>
-                                        <span><i class="fas fa-info-circle"></i> {{ product.get_status_display }}</span>
-                                    </div>
-                                </div>
-                                <div class="component-actions">
-                                    <button class="btn-icon" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'product', {{ product.id }})" title="Remove">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- SubLevels -->
-                            {% if tag.sublevels.all %}
-                            <div class="component-type">
-                                <i class="fas fa-layer-group"></i> Sub-Level Components ({{ tag.sublevels.count }})
-                            </div>
-                            <div class="component-items-grid">
-                            {% for sublevel in tag.sublevels.all %}
-                            <div class="component-item" style="cursor: pointer;" onclick="window.location.href='{% url 'sub_level_list_stream' stream=selected_stream %}'; event.stopPropagation();">
-                                <i class="fas fa-microchip component-icon"></i>
-                                <div class="component-details">
-                                    <div class="component-name">{{ sublevel.name }}</div>
-                                    <div class="component-meta">
-                                        <span><i class="fas fa-boxes"></i> Stock: {{ sublevel.in_stock }}</span>
-                                        <span><i class="fas fa-cogs"></i> In Use: {{ sublevel.in_use }}</span>
-                                        <span><i class="fas fa-trash"></i> Scraped: {{ sublevel.scraped }}</span>
-                                    </div>
-                                </div>
-                                <div class="component-actions">
-                                    <button class="btn-icon" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'sublevel', {{ sublevel.id }})" title="Remove">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- SubLevel Tools -->
-                            {% if tag.sublevel_tools.all %}
-                            <div class="component-type">
-                                <i class="fas fa-tools"></i> Sub-Level Tools ({{ tag.sublevel_tools.count }})
-                            </div>
-                            <div class="component-items-grid">
-                            {% for tool in tag.sublevel_tools.all %}
-                            <div class="component-item" style="cursor: pointer;" onclick="window.location.href='{% url 'sub_level_tool_list_stream' stream=selected_stream %}'; event.stopPropagation();">
-                                <i class="fas fa-wrench component-icon"></i>
-                                <div class="component-details">
-                                    <div class="component-name">{{ tool.name }}</div>
-                                    <div class="component-meta">
-                                        <span><i class="fas fa-boxes"></i> Stock: {{ tool.in_stock }}</span>
-                                        <span><i class="fas fa-cogs"></i> In Use: {{ tool.in_use }}</span>
-                                        <span><i class="fas fa-trash"></i> Scraped: {{ tool.scraped }}</span>
-                                    </div>
-                                </div>
-                                <div class="component-actions">
-                                    <button class="btn-icon" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'sublevel_tool', {{ tool.id }})" title="Remove">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- Projects -->
-                            {% if tag.projects.all %}
-                            <div class="component-type">
-                                <i class="fas fa-project-diagram"></i> Projects ({{ tag.projects.count }})
-                            </div>
-                            <div class="component-items-grid">
-                            {% for project in tag.projects.all %}
-                            <div class="component-item" style="cursor: pointer;" onclick="window.location.href='{% url 'project_status' %}'; event.stopPropagation();">
-                                <i class="fas fa-tasks component-icon"></i>
-                                <div class="component-details">
-                                    <div class="component-name">{{ project.name }}</div>
-                                    <div class="component-meta">
-                                        <span><i class="fas fa-info-circle"></i> {{ project.get_status_display }}</span>
-                                        <span><i class="fas fa-chart-line"></i> {{ project.progress_percentage }}% Complete</span>
-                                    </div>
-                                </div>
-                                <div class="component-actions">
-                                    <button class="btn-icon" onclick="event.stopPropagation(); removeItem({{ tag.id }}, 'project', {{ project.id }})" title="Remove">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            </div>
-                            {% endif %}
-                            
-                            {% if not tag.products.all and not tag.sublevels.all and not tag.sublevel_tools.all and not tag.projects.all %}
-                            <div class="no-items-message">
-                                <i class="fas fa-info-circle"></i> No items tagged yet. Click "Manage Items" to add products or components.
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="no-tags-message">
-                        <i class="fas fa-tags" style="font-size: 3em; color: #e0e0e0; margin-bottom: 15px;"></i>
-                        <p>No tags created for this system yet.</p>
-                        <p style="font-size: 0.9em;">Create a tag to start organizing products and components for this system.</p>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Recent Allocations -->
-            {% if system_data.recent_allocations %}
-            <div class="tree-section">
-                <div class="tree-section-title" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>
-                        <i class="fas fa-history"></i> Recent Allocations (Last 15 Days)
-                    </span>
-                    <button onclick="toggleRecentAllocations({{ system_data.system.id }})" class="btn-tree btn-secondary-tree" style="font-size: 0.8em; padding: 0.3rem 0.8rem;">
-                        <i class="fas fa-chevron-down" id="allocIcon-{{ system_data.system.id }}"></i> 
-                        <span id="allocText-{{ system_data.system.id }}">Show</span>
-                    </button>
-                </div>
-                <div id="allocPanel-{{ system_data.system.id }}" class="allocation-info" style="display: none; margin-top: 10px;">
-                    {% for allocation in system_data.recent_allocations %}
-                    <div class="allocation-item">
-                        <strong>{{ allocation.user.username }}</strong>
-                        {% if allocation.blocked_for_participant %}
-                            (for {{ allocation.blocked_for_participant.name }})
-                        {% endif %}
-                        <br>
-                        <small style="color: #666;">
-                            <i class="fas fa-calendar"></i> {{ allocation.start_date|date:"M d, Y H:i" }} 
-                            - {{ allocation.end_date|date:"M d, Y H:i" }}
-                        </small>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            </div>
-            
-            <!-- System Modification History - Separate Container -->
-            <div class="container mt-4" style="margin-bottom: 50px;">
-                <div class="system-card">
-                    <div class="tree-section-title" style="display: flex; justify-content: space-between; align-items: center; padding: 0; margin-bottom: 10px;">
-                        <span style="font-size: 1.1em; font-weight: 600; color: #333;">
-                            <i class="fas fa-clock-rotate-left" style="color: #2196f3;"></i> Modification History
-                        </span>
-                        <button onclick="toggleSystemHistory({{ system_data.system.id }})" class="btn-tree btn-secondary-tree" style="font-size: 0.8em; padding: 0.3rem 0.8rem;">
-                            <i class="fas fa-chevron-down" id="historyIcon-{{ system_data.system.id }}"></i> 
-                            <span id="historyText-{{ system_data.system.id }}">Show</span>
-                        </button>
-                    </div>
-                    <div id="historyPanel-{{ system_data.system.id }}" style="display: none; margin-top: 10px;">
-                        <div id="historyContent-{{ system_data.system.id }}" style="text-align: center; padding: 1rem; color: #666;">
-                            <i class="fas fa-spinner fa-spin"></i> Loading history...
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <form id="createTagForm">
+      {% csrf_token %}
+      <input type="hidden" id="tagId" name="tag_id">
+      <input type="hidden" id="tagSystemId" name="system_id">
+      <div class="at-modal-body">
+        <div class="at-form-group">
+          <label class="at-form-label">System</label>
+          <input type="text" id="tagSystemName" class="at-form-input" readonly>
         </div>
-        {% endfor %}
-    {% endif %}
-</div>
-
-<!-- Hidden empty state moved to overview grid -->
-<div style="display:none;">
-    {% if not systems_data %}
-        <div class="empty-state">
-            <i class="fas fa-server"></i>
-            <h3>No Systems Found</h3>
-            <p>There are no systems configured for the {{ selected_stream }} stream.</p>
-            <p>Go to System Allocation to add systems first.</p>
-            <a href="{% url 'system_allocation_stream' stream=selected_stream %}" class="btn-tree btn-primary-tree" style="margin-top: 20px; display: inline-block; text-decoration: none;">
-                <i class="fas fa-plus"></i> Go to System Allocation
-            </a>
+        <div class="at-form-group">
+          <label class="at-form-label">Tag Name <span class="required">*</span></label>
+          <input type="text" name="tag_name" id="tagName" class="at-form-input" required placeholder="e.g. Main Configuration, Test Setup…">
+          <div class="at-form-hint">A descriptive name for this system tag</div>
         </div>
-    {% endif %}
-</div>
-
-<script>
-// Track which systems have loaded history
-const loadedHistory = {};
-
-function toggleSystemHistory(systemId) {
-    const panel = document.getElementById('historyPanel-' + systemId);
-    const icon = document.getElementById('historyIcon-' + systemId);
-    const text = document.getElementById('historyText-' + systemId);
-    
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
-        text.textContent = 'Hide';
-        
-        // Load history if not already loaded
-        if (!loadedHistory[systemId]) {
-            loadSystemHistory(systemId);
-        }
-    } else {
-        panel.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
-        text.textContent = 'Show';
-    }
-}
-
-function toggleRecentAllocations(systemId) {
-    const panel = document.getElementById('allocPanel-' + systemId);
-    const icon = document.getElementById('allocIcon-' + systemId);
-    const text = document.getElementById('allocText-' + systemId);
-    
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
-        text.textContent = 'Hide';
-    } else {
-        panel.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
-        text.textContent = 'Show';
-    }
-}
-
-function loadSystemHistory(systemId) {
-    const contentDiv = document.getElementById('historyContent-' + systemId);
-    
-    fetch(`/stream/{{ stream }}/allocation-tree/history/${systemId}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.history.length > 0) {
-                let html = `
-                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e0e3e7; border-radius: 8px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                            <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                                <tr>
-                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Date</th>
-                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">User</th>
-                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Action</th>
-                                    <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #e0e3e7; color: #005fa3;">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
-                data.history.forEach((entry, index) => {
-                    const bgColor = index % 2 === 0 ? '#fff' : '#fafbfc';
-                    let actionBadge = '';
-                    
-                    switch(entry.action) {
-                        case 'created':
-                            actionBadge = '<span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-plus-circle"></i> Created</span>';
-                            break;
-                        case 'updated':
-                            actionBadge = '<span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-edit"></i> Updated</span>';
-                            break;
-                        case 'deleted':
-                            actionBadge = '<span style="background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-trash"></i> Deleted</span>';
-                            break;
-                        case 'item_added':
-                            actionBadge = '<span style="background: #cce5ff; color: #004085; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-link"></i> Added</span>';
-                            break;
-                        case 'item_removed':
-                            actionBadge = '<span style="background: #e2e3e5; color: #383d41; padding: 2px 8px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-unlink"></i> Removed</span>';
-                            break;
-                    }
-                    
-                    const details = entry.item_name 
-                        ? `<span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">${entry.item_type}</span> ${entry.item_name}`
-                        : entry.description;
-                    
-                    html += `
-                        <tr style="border-bottom: 1px solid #f0f0f0; background: ${bgColor};">
-                            <td style="padding: 8px 12px; white-space: nowrap;">
-                                <span style="color: #666;">${entry.date}</span><br>
-                                <small style="color: #999;">${entry.time}</small>
-                            </td>
-                            <td style="padding: 8px 12px;">
-                                <span style="background: #e7f3ff; color: #005fa3; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.85em;">
-                                    ${entry.user}
-                                </span>
-                            </td>
-                            <td style="padding: 8px 12px;">${actionBadge}</td>
-                            <td style="padding: 8px 12px; color: #555;">${details}</td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table></div>';
-                contentDiv.innerHTML = html;
-            } else {
-                contentDiv.innerHTML = `
-                    <div style="text-align: center; padding: 1.5rem; color: #666; background: #f8f9fa; border-radius: 8px;">
-                        <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                        <p style="margin: 0;">No modification history for this system yet.</p>
-                    </div>
-                `;
-            }
-            loadedHistory[systemId] = true;
-        })
-        .catch(error => {
-            console.error('Error loading history:', error);
-            contentDiv.innerHTML = `
-                <div style="text-align: center; padding: 1rem; color: #dc3545;">
-                    <i class="fas fa-exclamation-circle"></i> Failed to load history
-                </div>
-            `;
-        });
-}
-</script>
-
-<!-- Create Tag Modal -->
-<div id="createTagModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-tag"></i> <span id="tagModalTitle">Create System Tag</span></h2>
-            <button class="close-btn" onclick="closeModal('createTagModal')">&times;</button>
+        <div class="at-form-group">
+          <label class="at-form-label">Description</label>
+          <textarea name="description" id="tagDescription" class="at-form-textarea" rows="3" placeholder="Optional description for this tag…"></textarea>
         </div>
-        <form id="createTagForm">
-            {% csrf_token %}
-            <input type="hidden" id="tagId" name="tag_id">
-            <input type="hidden" id="tagSystemId" name="system_id">
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">System:</label>
-                <input type="text" id="tagSystemName" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f5f5f5;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Tag Name: *</label>
-                <input type="text" name="tag_name" id="tagName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                <small style="color: #666;">Example: "Main Configuration", "Test Setup", etc.</small>
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description:</label>
-                <textarea name="description" id="tagDescription" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-            </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-top: 20px;">
-                <button type="button" class="btn-tree" style="background: #6c757d; color: white;" onclick="closeModal('createTagModal')">Cancel</button>
-                <button type="submit" class="btn-tree btn-success-tree"><i class="fas fa-check"></i> <span id="tagSubmitBtn">Create Tag</span></button>
-            </div>
-        </form>
-    </div>
+      </div>
+      <div class="at-modal-foot">
+        <button type="button" class="at-btn at-btn-outline" onclick="closeModal('createTagModal')">Cancel</button>
+        <button type="submit" class="at-btn at-btn-success"><i class="fas fa-check"></i> <span id="tagSubmitBtn">Create Tag</span></button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Manage Items Modal -->
-<div id="manageItemsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-cog"></i> Manage Tag Items</h2>
-            <button class="close-btn" onclick="closeModal('manageItemsModal')">&times;</button>
-        </div>
-        <input type="hidden" id="currentTagId">
-        <input type="hidden" id="currentSystemId">
-        <input type="hidden" id="currentItemType">
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select Item Type:</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 20px;">
-                <button class="btn-tree btn-primary-tree" onclick="loadItems('product')">
-                    <i class="fas fa-box"></i> Products
-                </button>
-                <button class="btn-tree btn-primary-tree" onclick="loadItems('sublevel')">
-                    <i class="fas fa-layer-group"></i> Sub-Levels
-                </button>
-                <button class="btn-tree btn-primary-tree" onclick="loadItems('sublevel_tool')">
-                    <i class="fas fa-tools"></i> Sub-Level Tools
-                </button>
-                <button class="btn-tree btn-primary-tree" onclick="loadItems('project')">
-                    <i class="fas fa-project-diagram"></i> Projects
-                </button>
-            </div>
-        </div>
-        <div id="itemsContainer">
-            <p style="text-align: center; color: #999; padding: 40px;">Select an item type to begin</p>
-        </div>
-        <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e3e7;">
-            <button type="button" class="btn-tree" style="background: #6c757d; color: white;" onclick="closeModal('manageItemsModal')">Close</button>
-            <button type="button" class="btn-tree btn-success-tree" onclick="updateSystemView()"><i class="fas fa-sync-alt"></i> Update</button>
-        </div>
+<div id="manageItemsModal" class="at-modal-overlay">
+  <div class="at-modal" style="max-width:880px">
+    <div class="at-modal-head">
+      <div class="at-modal-title"><i class="fas fa-cog"></i> Manage Tag Items</div>
+      <button class="at-modal-close" onclick="closeModal('manageItemsModal')">&times;</button>
     </div>
+    <input type="hidden" id="currentTagId">
+    <input type="hidden" id="currentSystemId">
+    <input type="hidden" id="currentItemType">
+    <div class="at-modal-body">
+      <div class="at-type-tabs">
+        <button class="at-type-tab" onclick="loadItems('product')" data-type="product">
+          <i class="fas fa-box"></i> Products
+        </button>
+        <button class="at-type-tab" onclick="loadItems('sublevel')" data-type="sublevel">
+          <i class="fas fa-layer-group"></i> Sub-Levels
+        </button>
+        <button class="at-type-tab" onclick="loadItems('sublevel_tool')" data-type="sublevel_tool">
+          <i class="fas fa-tools"></i> Sub-Level Tools
+        </button>
+        <button class="at-type-tab" onclick="loadItems('project')" data-type="project">
+          <i class="fas fa-project-diagram"></i> Projects
+        </button>
+      </div>
+      <div id="itemsContainer">
+        <div class="at-empty" style="padding:2rem">
+          <i class="fas fa-hand-pointer"></i>
+          <p>Select an item type above to browse and manage items</p>
+        </div>
+      </div>
+    </div>
+    <div class="at-modal-foot">
+      <button type="button" class="at-btn at-btn-outline" onclick="closeModal('manageItemsModal')">Close</button>
+      <button type="button" class="at-btn at-btn-success" onclick="updateSystemView()"><i class="fas fa-sync-alt"></i> Apply &amp; Refresh</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// Hamburger Menu Toggle
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobileMenu');
+/* ─── Globals ─── */
+const stream = '{{ selected_stream }}';
+const csrfToken = '{{ csrf_token }}';
+const _buPrefix = (function(){ var p=window.location.pathname; var i=p.indexOf('/stream/'); if(i>0) return p.substring(0,i); return ''; })();
+const loadedHistory = {};
 
-if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        hamburger.classList.toggle('active');
-        mobileMenu.classList.toggle('active');
-    });
-    
-    // Close mobile menu when clicking a link
-    const mobileLinks = mobileMenu.querySelectorAll('a');
-    mobileLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-        });
-    });
-    
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-        }
-    });
+/* ─── Toast System ─── */
+function showToast(msg, type='info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle' };
+  const toast = document.createElement('div');
+  toast.className = 'at-toast ' + type;
+  toast.innerHTML = '<i class="fas ' + (icons[type]||icons.info) + ' toast-icon"></i><span class="toast-msg">' + escapeHtml(msg) + '</span><button class="toast-close" onclick="this.closest(\'.at-toast\').remove()"><i class="fas fa-times"></i></button>';
+  container.appendChild(toast);
+  setTimeout(() => { if(toast.parentNode) toast.remove(); }, 4500);
 }
 
-// ====== PROGRESSIVE COLLAPSE NAVIGATION ======
-// Only hides items that don't fit - keeps visible items in navbar
-(function() {
-    const topBar = document.querySelector('.top-bar');
-    const navLinks = document.querySelector('.nav-links');
-    const logoSection = document.querySelector('.logo-section');
-    const topRight = document.querySelector('.top-right');
-    const mobileMenuEl = document.getElementById('mobileMenu');
-    
-    if (!topBar || !navLinks || !logoSection) return;
-    
-    // Get all nav items (links only, not dropdowns)
-    const navItems = Array.from(navLinks.querySelectorAll(':scope > a[data-nav-id]'));
-    const mobileItems = mobileMenuEl ? Array.from(mobileMenuEl.querySelectorAll('.mobile-nav-item[data-nav-id]')) : [];
-    
-    function checkNavOverflow() {
-        // First, show all items to measure
-        navItems.forEach(item => item.classList.remove('nav-hidden'));
-        mobileItems.forEach(item => item.classList.remove('mobile-visible'));
-        topBar.classList.remove('has-overflow');
-        
-        // Calculate available width
-        const topBarWidth = topBar.offsetWidth;
-        const logoWidth = logoSection.offsetWidth;
-        const topRightWidth = topRight ? topRight.offsetWidth : 0;
-        const hamburgerWidth = 50; // Reserve space for hamburger when it appears
-        const padding = 80; // Extra padding/margin buffer
-        
-        let availableWidth = topBarWidth - logoWidth - topRightWidth - padding;
-        
-        // Measure each item and hide from the end if they don't fit
-        let totalWidth = 0;
-        const gap = 24; // 1.5rem gap between items
-        let hasHiddenItems = false;
-        
-        // First pass: calculate total width needed
-        const itemWidths = navItems.map(item => {
-            return item.offsetWidth;
-        });
-        
-        // If we need to hide items, account for hamburger space
-        let tempTotal = itemWidths.reduce((sum, w, i) => sum + w + (i > 0 ? gap : 0), 0);
-        if (tempTotal > availableWidth) {
-            availableWidth -= hamburgerWidth;
-        }
-        
-        // Second pass: determine which items to hide (from the end)
-        totalWidth = 0;
-        let lastVisibleIndex = -1;
-        
-        for (let i = 0; i < navItems.length; i++) {
-            const itemWidth = itemWidths[i] + (i > 0 ? gap : 0);
-            if (totalWidth + itemWidth <= availableWidth) {
-                totalWidth += itemWidth;
-                lastVisibleIndex = i;
-            } else {
-                break;
-            }
-        }
-        
-        // Hide items that don't fit and show them in mobile menu
-        navItems.forEach((item, index) => {
-            const navId = item.getAttribute('data-nav-id');
-            const mobileItem = mobileItems.find(m => m.getAttribute('data-nav-id') === navId);
-            
-            if (index > lastVisibleIndex) {
-                // This item doesn't fit - hide in nav, show in mobile
-                item.classList.add('nav-hidden');
-                if (mobileItem) mobileItem.classList.add('mobile-visible');
-                hasHiddenItems = true;
-            } else {
-                // This item fits - show in nav, hide in mobile
-                item.classList.remove('nav-hidden');
-                if (mobileItem) mobileItem.classList.remove('mobile-visible');
-            }
-        });
-        
-        // Show/hide hamburger based on whether any items are hidden
-        if (hasHiddenItems) {
-            topBar.classList.add('has-overflow');
-        } else {
-            topBar.classList.remove('has-overflow');
-            // Close mobile menu if no items are hidden
-            if (hamburger && mobileMenu) {
-                hamburger.classList.remove('active');
-                mobileMenu.classList.remove('active');
-            }
-        }
-    }
-    
-    // Check on load
-    checkNavOverflow();
-    
-    // Check on window resize with debounce
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(checkNavOverflow, 50);
-    });
-    
-    // Also check when fonts are loaded
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(checkNavOverflow);
-    }
-    
-    // Recheck after short delay for any late rendering
-    setTimeout(checkNavOverflow, 300);
-    setTimeout(checkNavOverflow, 1000);
+/* ─── Stats Calculation ─── */
+(function computeStats() {
+  let active = 0, tags = 0, components = 0, utilSum = 0, count = 0;
+  {% for sd in systems_data %}
+    count++;
+    utilSum += {{ sd.system.utilization_percentage }};
+    {% if sd.system.status == 'active' %}active++;{% endif %}
+    {% for tag in sd.tags %}
+      tags++;
+      components += {{ tag.get_all_components_count }};
+    {% endfor %}
+  {% endfor %}
+  document.getElementById('statActiveSystems').textContent = active;
+  document.getElementById('statTotalTags').textContent = tags;
+  document.getElementById('statTotalComponents').textContent = components;
+  document.getElementById('statAvgUtil').textContent = count ? Math.round(utilSum/count) + '%' : '0%';
 })();
 
-const stream = '{{ selected_stream }}';
+/* ─── Search ─── */
+document.getElementById('systemSearch').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.at-sys-card').forEach(card => {
+    const name = card.dataset.systemName || '';
+    const desc = card.dataset.systemDesc || '';
+    card.style.display = (!q || name.includes(q) || desc.includes(q)) ? '' : 'none';
+  });
+});
 
-function showSystemDetails(systemId) {
-    // Hide overview grid
-    document.getElementById('systems-overview').style.display = 'none';
-    
-    // Hide all system details
-    document.querySelectorAll('.system-details-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show selected system details
-    const systemSection = document.getElementById(systemId);
-    if (systemSection) {
-        systemSection.classList.add('active');
+/* ─── View Toggle ─── */
+document.querySelectorAll('.at-view-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.at-view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const grid = document.getElementById('systems-overview');
+    if (this.dataset.view === 'list') {
+      grid.style.gridTemplateColumns = '1fr';
+    } else {
+      grid.style.gridTemplateColumns = '';
     }
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+/* ─── System Navigation ─── */
+function showSystemDetails(systemId) {
+  document.getElementById('systems-overview').style.display = 'none';
+  document.querySelector('.at-toolbar').style.display = 'none';
+  document.querySelectorAll('.at-detail-section').forEach(s => s.classList.remove('active'));
+  const section = document.getElementById(systemId);
+  if (section) section.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function backToOverview() {
-    // Hide all system details
-    document.querySelectorAll('.system-details-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show overview grid
-    document.getElementById('systems-overview').style.display = 'grid';
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelectorAll('.at-detail-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('systems-overview').style.display = 'grid';
+  document.querySelector('.at-toolbar').style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* ─── Panel Toggle ─── */
+function togglePanel(panelId) {
+  const body = document.getElementById(panelId);
+  const toggleBtn = document.getElementById(panelId.replace('alloc-','allocToggle-'));
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  if (toggleBtn) toggleBtn.classList.toggle('open');
+}
+
+function toggleHistoryPanel(systemId) {
+  const body = document.getElementById('history-' + systemId);
+  const toggleBtn = document.getElementById('historyToggle-' + systemId);
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  if (toggleBtn) toggleBtn.classList.toggle('open');
+  if (!isOpen && !loadedHistory[systemId]) {
+    loadSystemHistory(systemId);
+  }
+}
+
+/* ─── History Loader ─── */
+function loadSystemHistory(systemId) {
+  const contentDiv = document.getElementById('historyContent-' + systemId);
+  fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/history/' + systemId + '/')
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.history.length > 0) {
+        let html = '<div style="max-height:350px;overflow-y:auto;border-radius:var(--at-radius-sm);border:1px solid var(--at-border)">';
+        html += '<table class="at-history-table"><thead><tr><th>Date/Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody>';
+        const actionLabels = { created:'Created', updated:'Updated', deleted:'Deleted', item_added:'Added', item_removed:'Removed' };
+        const actionIcons = { created:'fa-plus-circle', updated:'fa-pen', deleted:'fa-trash-alt', item_added:'fa-link', item_removed:'fa-unlink' };
+        data.history.forEach(e => {
+          const actionClass = e.action || '';
+          const details = e.item_name
+            ? '<span class="at-type-chip">' + e.item_type + '</span> ' + e.item_name
+            : (e.description || '—');
+          html += '<tr>';
+          html += '<td style="white-space:nowrap"><div style="font-weight:500">' + e.date + '</div><div style="font-size:.72rem;color:var(--at-text-muted)">' + e.time + '</div></td>';
+          html += '<td><span class="at-user-chip">' + e.user + '</span></td>';
+          html += '<td><span class="at-action-badge ' + actionClass + '"><i class="fas ' + (actionIcons[e.action]||'fa-circle') + '"></i> ' + (actionLabels[e.action]||e.action) + '</span></td>';
+          html += '<td>' + details + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        contentDiv.innerHTML = html;
+      } else {
+        contentDiv.innerHTML = '<div class="at-no-items"><i class="fas fa-inbox"></i> No modification history for this system yet.</div>';
+      }
+      loadedHistory[systemId] = true;
+    })
+    .catch(err => {
+      console.error('Error loading history:', err);
+      contentDiv.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--at-danger)"><i class="fas fa-exclamation-triangle"></i> Failed to load history</div>';
+    });
+}
+
+/* ─── Modal Management ─── */
 function openCreateTagModal(systemId, systemName, tagId, tagName, tagDescription) {
-    document.getElementById('tagSystemId').value = systemId;
-    document.getElementById('tagSystemName').value = systemName;
-    
-    if (tagId) {
-        // Edit mode
-        document.getElementById('tagId').value = tagId;
-        document.getElementById('tagName').value = tagName || '';
-        document.getElementById('tagDescription').value = tagDescription || '';
-        document.getElementById('tagModalTitle').textContent = 'Edit System Tag';
-        document.getElementById('tagSubmitBtn').textContent = 'Update Tag';
-    } else {
-        // Create mode
-        document.getElementById('tagId').value = '';
-        document.getElementById('tagName').value = '';
-        document.getElementById('tagDescription').value = '';
-        document.getElementById('tagModalTitle').textContent = 'Create System Tag';
-        document.getElementById('tagSubmitBtn').textContent = 'Create Tag';
-    }
-    
-    document.getElementById('createTagModal').style.display = 'block';
+  document.getElementById('tagSystemId').value = systemId;
+  document.getElementById('tagSystemName').value = systemName;
+  if (tagId) {
+    document.getElementById('tagId').value = tagId;
+    document.getElementById('tagName').value = tagName || '';
+    document.getElementById('tagDescription').value = tagDescription || '';
+    document.getElementById('tagModalTitle').textContent = 'Edit System Tag';
+    document.getElementById('tagSubmitBtn').textContent = 'Update Tag';
+  } else {
+    document.getElementById('tagId').value = '';
+    document.getElementById('tagName').value = '';
+    document.getElementById('tagDescription').value = '';
+    document.getElementById('tagModalTitle').textContent = 'Create System Tag';
+    document.getElementById('tagSubmitBtn').textContent = 'Create Tag';
+  }
+  document.getElementById('createTagModal').classList.add('open');
 }
 
 function openManageItemsModal(tagId, tagName) {
-    document.getElementById('currentTagId').value = tagId;
-    // Find which system this tag belongs to
-    const systemSection = document.querySelector('.system-details-section.active');
-    if (systemSection) {
-        document.getElementById('currentSystemId').value = systemSection.id.replace('system-', '');
-    }
-    document.getElementById('manageItemsModal').style.display = 'block';
-    document.getElementById('itemsContainer').innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select an item type to begin</p>';
+  document.getElementById('currentTagId').value = tagId;
+  const systemSection = document.querySelector('.at-detail-section.active');
+  if (systemSection) {
+    document.getElementById('currentSystemId').value = systemSection.id.replace('system-', '');
+  }
+  document.getElementById('manageItemsModal').classList.add('open');
+  document.getElementById('itemsContainer').innerHTML = '<div class="at-empty" style="padding:2rem"><i class="fas fa-hand-pointer"></i><p>Select an item type above to browse and manage items</p></div>';
+  // Reset tab active state
+  document.querySelectorAll('.at-type-tab').forEach(t => t.classList.remove('active'));
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+  document.getElementById(modalId).classList.remove('open');
 }
 
+/* ─── Create/Edit Tag ─── */
 document.getElementById('createTagForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    
-    try {
-        const response = await fetch(`/stream/${stream}/allocation-tree/create-tag/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('Error: ' + data.error);
-        }
-    } catch (error) {
-        alert('Error creating tag: ' + error.message);
+  e.preventDefault();
+  const formData = new FormData(this);
+  try {
+    const response = await fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/create-tag/', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-CSRFToken': csrfToken }
+    });
+    const data = await response.json();
+    if (data.success) {
+      const sysId = document.getElementById('tagSystemId').value;
+      if (sysId) localStorage.setItem('activeSystemId', 'system-' + sysId);
+      showToast(data.message, 'success');
+      closeModal('createTagModal');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast('Error: ' + data.error, 'error');
     }
-});
-
-async function deleteTag(tagId, tagName) {
-    if (!confirm(`Are you sure you want to delete the tag "${tagName}"? All item associations will be removed.`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/stream/${stream}/allocation-tree/delete-tag/${tagId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('Error: ' + data.error);
-        }
-    } catch (error) {
-        alert('Error deleting tag: ' + error.message);
-    }
-}
-
-async function loadItems(itemType) {
-    document.getElementById('currentItemType').value = itemType;
-    const tagId = document.getElementById('currentTagId').value;
-    const container = document.getElementById('itemsContainer');
-    container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
-    
-    try {
-        const response = await fetch(`/stream/${stream}/allocation-tree/get-items/?tag_id=${tagId}&item_type=${itemType}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            if (data.items.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No items available</p>';
-                return;
-            }
-            
-            let html = '<div class="item-grid">';
-            data.items.forEach(item => {
-                const isTagged = item.is_tagged;
-                const checkboxClass = isTagged ? 'item-checkbox tagged' : 'item-checkbox';
-                const checked = isTagged ? 'checked' : '';
-                
-                let itemInfo = '';
-                if (itemType === 'product') {
-                    itemInfo = `${item.name} (SN: ${item.serial_number})`;
-                } else if (itemType === 'project') {
-                    itemInfo = `${item.name}`;
-                } else {
-                    itemInfo = `${item.name} (Stock: ${item.in_stock}, Use: ${item.in_use})`;
-                }
-                
-                html += `
-                    <label class="${checkboxClass}">
-                        <input type="checkbox" ${checked} onchange="toggleItem(${tagId}, '${itemType}', ${item.id}, this.checked, event)">
-                        <span>${itemInfo}</span>
-                    </label>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `<p style="text-align: center; color: #f44336; padding: 40px;">Error: ${data.error}</p>`;
-        }
-    } catch (error) {
-        container.innerHTML = `<p style="text-align: center; color: #f44336; padding: 40px;">Error loading items: ${error.message}</p>`;
-    }
-}
-
-async function updateSystemView() {
-    const systemId = document.getElementById('currentSystemId').value;
-    if (!systemId) {
-        alert('Unable to determine current system');
-        return;
-    }
-    
-    // Store the system ID to reopen after reload
-    localStorage.setItem('activeSystemId', `system-${systemId}`);
-    
-    // Close modal
-    closeModal('manageItemsModal');
-    
-    // Show loading indicator
-    const systemSection = document.getElementById(`system-${systemId}`);
-    if (systemSection) {
-        const originalContent = systemSection.innerHTML;
-        systemSection.innerHTML = '<div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-spin" style="font-size: 3em; color: #005fa3;"></i><p style="margin-top: 20px; color: #666;">Updating view...</p></div>';
-        
-        // Reload the page to get fresh data
-        setTimeout(() => {
-            location.reload();
-        }, 500);
-    }
-}
-
-async function toggleItem(tagId, itemType, itemId, isChecked, event) {
-    const action = isChecked ? 'add' : 'remove';
-    const formData = new FormData();
-    formData.append('action', action);
-    formData.append('item_type', itemType);
-    formData.append('item_id', itemId);
-    
-    try {
-        const response = await fetch(`/stream/${stream}/allocation-tree/manage-items/${tagId}/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-        
-        const data = await response.json();
-        if (!data.success) {
-            alert('Error: ' + data.error);
-            // Revert checkbox
-            if (event && event.target) {
-                event.target.checked = !isChecked;
-            }
-        }
-    } catch (error) {
-        alert('Error: ' + error.message);
-        if (event && event.target) {
-            event.target.checked = !isChecked;
-        }
-    }
-}
-
-async function removeItem(tagId, itemType, itemId) {
-    if (!confirm('Remove this item from the tag?')) {
-        return;
-    }
-    
-    // Store current system ID before reload
-    const systemSection = document.querySelector('.system-details-section.active');
-    if (systemSection) {
-        localStorage.setItem('activeSystemId', systemSection.id);
-    }
-    
-    const formData = new FormData();
-    formData.append('action', 'remove');
-    formData.append('item_type', itemType);
-    formData.append('item_id', itemId);
-    
-    try {
-        const response = await fetch(`/stream/${stream}/allocation-tree/manage-items/${tagId}/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + data.error);
-        }
-    } catch (error) {
-        alert('Error: ' + error.message);
-    }
-}
-
-// Restore active system view after page reload
-window.addEventListener('DOMContentLoaded', function() {
-    const activeSystemId = localStorage.getItem('activeSystemId');
-    if (activeSystemId) {
-        localStorage.removeItem('activeSystemId');
-        const systemSection = document.getElementById(activeSystemId);
-        if (systemSection) {
-            // Hide overview grid
-            document.getElementById('systems-overview').style.display = 'none';
-            
-            // Hide all system details
-            document.querySelectorAll('.system-details-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show the active system
-            systemSection.classList.add('active');
-            
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'instant' });
-        }
-    }
-});
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-}
-
-// Inactivity logout logic
-let inactivityTimeout, countdownInterval;
-let countdownModal;
-let countdown = 60;
-
-function resetInactivityTimer() {
-  clearTimeout(inactivityTimeout);
-  clearInterval(countdownInterval);
-  if (countdownModal) countdownModal.style.display = 'none';
-  countdown = 60;
-  inactivityTimeout = setTimeout(showCountdown, 10 * 60 * 1000);
-}
-
-function showCountdown() {
-  if (!countdownModal) {
-    countdownModal = document.createElement('div');
-    countdownModal.id = 'countdown-modal';
-    countdownModal.style.position = 'fixed';
-    countdownModal.style.top = '0';
-    countdownModal.style.left = '0';
-    countdownModal.style.width = '100vw';
-    countdownModal.style.height = '100vh';
-    countdownModal.style.background = 'rgba(0,0,0,0.35)';
-    countdownModal.style.display = 'flex';
-    countdownModal.style.alignItems = 'center';
-    countdownModal.style.justifyContent = 'center';
-    countdownModal.style.zIndex = '99999';
-    countdownModal.innerHTML = `<div style="background:#fff;padding:2.5rem 3rem;border-radius:16px;box-shadow:0 4px 32px #007bff;text-align:center;">
-      <h2 style='color:#dc3545;font-size:2rem;margin-bottom:1rem;'>Session Expiring</h2>
-      <div style='font-size:1.5rem;color:#007bff;font-weight:700;'>Logging out in <span id='countdown-timer'>60</span> seconds...</div>
-    </div>`;
-    document.body.appendChild(countdownModal);
-  } else {
-    countdownModal.style.display = 'flex';
+  } catch (error) {
+    showToast('Error creating tag: ' + error.message, 'error');
   }
-  document.getElementById('countdown-timer').textContent = countdown;
-  countdownInterval = setInterval(() => {
-    countdown--;
-    document.getElementById('countdown-timer').textContent = countdown;
-    if (countdown <= 0) {
-      clearInterval(countdownInterval);
-      window.location.href = "{% url 'logout' %}";
-    }
-  }, 1000);
-}
-
-['mousemove', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
-  document.addEventListener(evt, resetInactivityTimer, true);
 });
 
-resetInactivityTimer();
-</script>
+/* ─── Delete Tag ─── */
+async function deleteTag(tagId, tagName) {
+  if (!confirm('Are you sure you want to delete the tag "' + tagName + '"? All item associations will be removed.')) return;
+  _saveActiveSystem();
+  try {
+    const response = await fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/delete-tag/' + tagId + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrfToken }
+    });
+    const data = await response.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      showToast('Error: ' + data.error, 'error');
+    }
+  } catch (error) {
+    showToast('Error deleting tag: ' + error.message, 'error');
+  }
+}
 
-<style>
-#countdown-modal {
-  animation: fadeIn 0.3s;
+/* ─── Load Items ─── */
+async function loadItems(itemType) {
+  document.getElementById('currentItemType').value = itemType;
+  const tagId = document.getElementById('currentTagId').value;
+  const container = document.getElementById('itemsContainer');
+
+  // Activate tab
+  document.querySelectorAll('.at-type-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === itemType);
+  });
+
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--at-text-muted)"><i class="fas fa-spinner fa-spin" style="font-size:1.2rem"></i><p style="margin-top:.5rem;font-size:.85rem">Loading items…</p></div>';
+
+  try {
+    const response = await fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/get-items/?tag_id=' + tagId + '&item_type=' + itemType);
+    const data = await response.json();
+    if (data.success) {
+      if (data.items.length === 0) {
+        container.innerHTML = '<div class="at-no-items"><i class="fas fa-inbox"></i> No items available for this type</div>';
+        return;
+      }
+      let html = '<div class="at-manage-grid">';
+      data.items.forEach(item => {
+        const tagged = item.is_tagged;
+        const cls = tagged ? 'at-manage-item tagged' : 'at-manage-item';
+        const checked = tagged ? 'checked' : '';
+        let info = '', sub = '';
+        if (itemType === 'product') {
+          info = item.name;
+          sub = 'SN: ' + item.serial_number;
+        } else if (itemType === 'project') {
+          info = item.name;
+          sub = item.status || '';
+        } else {
+          info = item.name;
+          sub = 'Stock: ' + item.in_stock + ' · In Use: ' + item.in_use;
+        }
+        html += '<label class="' + cls + '">';
+        html += '<input type="checkbox" ' + checked + ' onchange="toggleItem(' + tagId + ',\'' + itemType + '\',' + item.id + ',this.checked,event)">';
+        html += '<div class="at-manage-item-info">' + info + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+        html += '</label>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--at-danger)">Error: ' + escapeHtml(data.error) + '</div>';
+    }
+  } catch (error) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--at-danger)">Error loading items: ' + escapeHtml(error.message) + '</div>';
+  }
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+
+/* ─── Toggle Item ─── */
+async function toggleItem(tagId, itemType, itemId, isChecked, event) {
+  const action = isChecked ? 'add' : 'remove';
+  const formData = new FormData();
+  formData.append('action', action);
+  formData.append('item_type', itemType);
+  formData.append('item_id', itemId);
+  try {
+    const response = await fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/manage-items/' + tagId + '/', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-CSRFToken': csrfToken }
+    });
+    const data = await response.json();
+    if (data.success) {
+      const label = event.target.closest('.at-manage-item');
+      if (label) {
+        label.classList.toggle('tagged', isChecked);
+      }
+      showToast('Item ' + (isChecked ? 'added to' : 'removed from') + ' tag', 'success');
+    } else {
+      showToast('Error: ' + data.error, 'error');
+      if (event && event.target) event.target.checked = !isChecked;
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+    if (event && event.target) event.target.checked = !isChecked;
+  }
 }
-</style>
-</body>
-</html>
+
+/* ─── Update System View ─── */
+function updateSystemView() {
+  const systemId = document.getElementById('currentSystemId').value;
+  if (!systemId) { showToast('Unable to determine current system', 'error'); return; }
+  localStorage.setItem('activeSystemId', 'system-' + systemId);
+  closeModal('manageItemsModal');
+  showToast('Refreshing view…', 'info');
+  setTimeout(() => location.reload(), 600);
+}
+
+/* ─── Remove Item ─── */
+async function removeItem(tagId, itemType, itemId) {
+  if (!confirm('Remove this item from the tag?')) return;
+  const systemSection = document.querySelector('.at-detail-section.active');
+  if (systemSection) localStorage.setItem('activeSystemId', systemSection.id);
+  const formData = new FormData();
+  formData.append('action', 'remove');
+  formData.append('item_type', itemType);
+  formData.append('item_id', itemId);
+  try {
+    const response = await fetch(_buPrefix + '/stream/' + stream + '/allocation-tree/manage-items/' + tagId + '/', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-CSRFToken': csrfToken }
+    });
+    const data = await response.json();
+    if (data.success) {
+      showToast('Item removed successfully', 'success');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      showToast('Error: ' + data.error, 'error');
+    }
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+/* ─── Helper: save whichever system section is currently active ─── */
+function _saveActiveSystem() {
+  const sec = document.querySelector('.at-detail-section.active');
+  if (sec) localStorage.setItem('activeSystemId', sec.id);
+}
+
+/* ─── Persist active system on browser refresh / F5 ─── */
+window.addEventListener('beforeunload', _saveActiveSystem);
+
+/* ─── Restore view after reload ─── */
+window.addEventListener('DOMContentLoaded', function() {
+  const activeSystemId = localStorage.getItem('activeSystemId');
+  if (activeSystemId) {
+    localStorage.removeItem('activeSystemId');
+    const section = document.getElementById(activeSystemId);
+    if (section) {
+      document.getElementById('systems-overview').style.display = 'none';
+      document.querySelector('.at-toolbar').style.display = 'none';
+      document.querySelectorAll('.at-detail-section').forEach(s => s.classList.remove('active'));
+      section.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }
+});
+
+/* ─── Close modal on backdrop click ─── */
+document.querySelectorAll('.at-modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+/* ─── Keyboard: Escape to close modals ─── */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.at-modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+/* Inactivity logout is now handled centrally by InactivityLogoutMiddleware */
+</script>
+{% endblock %}

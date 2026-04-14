@@ -10,7 +10,8 @@
     <!-- External Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js" integrity="sha512-CryKbMe7sjSCDPl18jtJI5DR5jtkUWxPXWaLCst6QjH8wxDexfRJic2WRmRXmstr2Y8SxDDWuBO6CQC6IE4KTA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.394.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -390,6 +391,7 @@
 
         /* Table Section */
         .table-section {
+            margin-top: 2rem;
             margin-bottom: 2rem;
         }
 
@@ -554,23 +556,6 @@
             }
         }
 
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #0f172a;
-                --bg-secondary: #1e293b;
-                --bg-tertiary: #334155;
-                --bg-card: #1e293b;
-                
-                --text-primary: #f8fafc;
-                --text-secondary: #cbd5e1;
-                --text-muted: #64748b;
-                
-                --border-color: #334155;
-                --border-hover: #475569;
-            }
-        }
-
         /* Utility Classes */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -582,6 +567,31 @@
 </head>
 
 <body>
+<!-- Page Navigation Toolbar (Breadcrumbs) -->
+{% if user.is_authenticated and page_nav_breadcrumbs %}
+<div class="pnav-bar" id="pnavBarUsage">
+    <a href="{% url 'page_nav_action' %}?action=back" class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}" title="Go Back"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'page_nav_action' %}?action=forward" class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}" title="Go Forward"><i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home"><i class="fas fa-home"></i></a>
+    <span class="pnav-sep"></span>
+    <div class="pnav-crumbs">
+        {% for crumb in page_nav_breadcrumbs %}{% if crumb.active %}<span class="pnav-crumb pnav-active">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</span>{% else %}<a href="{{ crumb.url }}" class="pnav-crumb">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</a><span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>{% endif %}{% endfor %}
+    </div>
+</div>
+<style>
+    .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+    .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+    .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+    .pnav-disabled{opacity:.3;pointer-events:none}
+    .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+    .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+    .pnav-crumbs::-webkit-scrollbar{display:none}
+    .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+    .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+    .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+    .pnav-chevron{color:#94a3b8;font-size:.6rem;display:inline-flex;align-items:center;flex-shrink:0}
+</style>
+{% endif %}
     <div class="dashboard-container">
         <!-- Header -->
         <header class="header">
@@ -609,7 +619,7 @@
                             <i data-lucide="maximize-2" style="width: 16px; height: 16px;"></i>
                         </button>
                         
-                        <a href="/dashboard/" class="btn btn-primary">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
                             <i data-lucide="home" style="width: 16px; height: 16px;"></i>
                             Dashboard
                         </a>
@@ -629,6 +639,17 @@
                 </div>
                 
                 <div class="filter-grid">
+                    {% if user_is_app_admin %}
+                    <div class="form-group">
+                        <label for="bu-filter" class="form-label">Business Unit</label>
+                        <select id="bu-filter" class="form-control" onchange="updateCharts()">
+                            <option value="all" {% if selected_bu_slug == 'all' %}selected{% endif %}>All BUs</option>
+                            {% for bu in all_bus %}
+                            <option value="{{ bu.slug }}" {% if selected_bu_slug == bu.slug %}selected{% endif %}>{{ bu }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
                     <div class="form-group">
                         <label for="date-range" class="form-label">Time Period</label>
                         <select id="date-range" class="form-control" onchange="handleDateRangeChange()">
@@ -779,7 +800,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="chart-container">
+                        <div class="chart-container" data-chart="dailyUsageChart">
                             <canvas id="dailyUsageChart"></canvas>
                         </div>
                     </div>
@@ -795,7 +816,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="chart-container small">
+                            <div class="chart-container small" data-chart="pageViewsChart">
                                 <canvas id="pageViewsChart"></canvas>
                             </div>
                         </div>
@@ -810,7 +831,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="chart-container small">
+                            <div class="chart-container small" data-chart="hourlyActivityChart">
                                 <canvas id="hourlyActivityChart"></canvas>
                             </div>
                         </div>
@@ -818,8 +839,95 @@
                 </div>
             </section>
 
+            <!-- BU Breakdown Section -->
+            {% if user_is_app_admin %}
+            <section class="bu-breakdown-section" id="bu-breakdown-section">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3 class="table-title">
+                            <i data-lucide="building-2" style="width: 20px; height: 20px; vertical-align: middle;"></i>
+                            Business Unit Breakdown
+                        </h3>
+                        <div class="header-actions" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div class="view-toggle" id="bu-view-toggle">
+                                <button class="toggle-btn active" data-view="table" onclick="switchBuView('table')">
+                                    <i data-lucide="table" style="width: 14px; height: 14px;"></i> Table
+                                </button>
+                                <button class="toggle-btn" data-view="chart" onclick="switchBuView('chart')">
+                                    <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i> Chart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div class="table-container" id="bu-table-view">
+                        <table class="data-table" id="bu-breakdown-table">
+                            <thead>
+                                <tr>
+                                    <th>Business Unit</th>
+                                    <th>Total Users</th>
+                                    <th>Active Users</th>
+                                    <th>Page Views</th>
+                                    <th>New Users</th>
+                                    <th>Avg Session</th>
+                                    <th>Views Trend</th>
+                                    <th>Activity Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bu-breakdown-body">
+                                {% for item in bu_breakdown %}
+                                <tr>
+                                    <td class="font-medium">{{ item.bu_name }}</td>
+                                    <td>{{ item.total_users }}</td>
+                                    <td>{{ item.active_users }}</td>
+                                    <td>{{ item.total_views }}</td>
+                                    <td>{{ item.new_users }}</td>
+                                    <td>{{ item.avg_session_time }}</td>
+                                    <td>
+                                        <span class="stat-change {% if item.views_change >= 0 %}positive{% else %}negative{% endif %}" style="font-size: 0.8rem;">
+                                            <i data-lucide="{% if item.views_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 12px; height: 12px;"></i>
+                                            {% if item.views_change >= 0 %}+{% endif %}{{ item.views_change }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="stat-change {% if item.active_change >= 0 %}positive{% else %}negative{% endif %}" style="font-size: 0.8rem;">
+                                            <i data-lucide="{% if item.active_change >= 0 %}trending-up{% else %}trending-down{% endif %}" style="width: 12px; height: 12px;"></i>
+                                            {% if item.active_change >= 0 %}+{% endif %}{{ item.active_change }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="8" class="text-center text-muted">No BU data available</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Chart View (hidden by default) -->
+                    <div id="bu-chart-view" style="display: none; padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="chart-container small" data-chart="buViewsChart">
+                                <canvas id="buViewsChart"></canvas>
+                            </div>
+                            <div class="chart-container small" data-chart="buUsersChart">
+                                <canvas id="buUsersChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <style>
+                .bu-breakdown-section { margin-top: 2rem; margin-bottom: 2rem; }
+                .view-toggle { display: inline-flex; background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 2px; gap: 2px; }
+                .toggle-btn { display: inline-flex; align-items: center; gap: 4px; padding: 0.35rem 0.75rem; border: none; border-radius: calc(var(--radius-md) - 2px); background: transparent; color: var(--text-secondary); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: var(--transition); }
+                .toggle-btn.active { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+                .toggle-btn:hover:not(.active) { background: var(--border-color); color: var(--text-primary); }
+            </style>
+            {% endif %}
+
             <!-- Data Table Section -->
-            <section class="table-section">
+            <section class="table-section" style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                 <div class="table-card">
                     <div class="table-header">
                         <h3 class="table-title">Top Active Users</h3>
@@ -875,6 +983,12 @@
         let currentChartTypes = {
             dailyUsageChart: 'line'
         };
+
+        // Compute BU URL prefix from current page path (e.g. '/bu/DXR-Automation/')
+        const _buPrefix = (function() {
+            const m = window.location.pathname.match(/^\/bu\/[^/]+\//);
+            return m ? m[0] : '/';
+        })();
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
@@ -1063,9 +1177,14 @@
             const metricType = document.getElementById('metric-type').value;
             
             // Build the API URL
-            let url = `/usage-tracking-data/?range=${dateRange}`;
+            let url = `${_buPrefix}usage-tracking-data/?range=${dateRange}`;
             if (dateRange === 'custom') {
                 url += `&start=${startDate}&end=${endDate}`;
+            }
+            // Add BU filter parameter
+            const buSelect = document.getElementById('bu-filter');
+            if (buSelect) {
+                url += `&bu=${buSelect.value}`;
             }
             
             fetch(url)
@@ -1089,6 +1208,11 @@
                         updateStatCardsWithRealData(data.stats);
                     } else {
                         console.error('No stats data in response!');
+                    }
+
+                    // Update BU breakdown
+                    if (data.bu_breakdown) {
+                        updateBuBreakdown(data.bu_breakdown);
                     }
                     
                     hideLoadingState();
@@ -1509,13 +1633,27 @@
             );
         }
 
+        function ensureCanvas(canvasId) {
+            let el = document.getElementById(canvasId);
+            if (el) return el;
+            // Canvas was replaced by empty-state or table – find its container and recreate
+            const container = document.querySelector(`[data-chart="${canvasId}"]`);
+            if (container) {
+                container.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+                return document.getElementById(canvasId);
+            }
+            return null;
+        }
+
         function updateDailyUsageChart(data, metricType) {
             if (typeof Chart === 'undefined') {
                 createDataTable('dailyUsageChart', data, 'Daily Usage');
                 return;
             }
             
-            const ctx = document.getElementById('dailyUsageChart').getContext('2d');
+            const canvasEl = ensureCanvas('dailyUsageChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             
             if (charts.dailyUsageChart) {
                 charts.dailyUsageChart.destroy();
@@ -1671,7 +1809,9 @@
                 return;
             }
             
-            const ctx = document.getElementById(canvasId).getContext('2d');
+            const canvasEl = ensureCanvas(canvasId);
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             
             if (charts[canvasId]) {
                 charts[canvasId].destroy();
@@ -1855,7 +1995,9 @@
                 return;
             }
             
-            const ctx = document.getElementById('pageViewsChart').getContext('2d');
+            const canvasEl = ensureCanvas('pageViewsChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             
             if (charts.pageViewsChart) {
                 charts.pageViewsChart.destroy();
@@ -1911,7 +2053,9 @@
                 return;
             }
             
-            const ctx = document.getElementById('hourlyActivityChart').getContext('2d');
+            const canvasEl = ensureCanvas('hourlyActivityChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             
             if (charts.hourlyActivityChart) {
                 charts.hourlyActivityChart.destroy();
@@ -2160,6 +2304,123 @@
                     }
                 }, 300);
             }, 3000);
+        }
+
+        /* ── BU Breakdown toggle & charts ─────────────────────── */
+        function switchBuView(view) {
+            const tableView = document.getElementById('bu-table-view');
+            const chartView = document.getElementById('bu-chart-view');
+            if (!tableView || !chartView) return;
+
+            document.querySelectorAll('#bu-view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`#bu-view-toggle .toggle-btn[data-view="${view}"]`)?.classList.add('active');
+
+            if (view === 'chart') {
+                tableView.style.display = 'none';
+                chartView.style.display = 'block';
+                renderBuCharts();
+            } else {
+                tableView.style.display = 'block';
+                chartView.style.display = 'none';
+            }
+        }
+
+        // Keep latest breakdown data for chart rendering
+        let _buBreakdownData = JSON.parse('{{ bu_breakdown_json|escapejs }}');
+
+        function renderBuCharts() {
+            if (typeof Chart === 'undefined' || !_buBreakdownData || !_buBreakdownData.length) return;
+
+            const labels = _buBreakdownData.map(b => b.bu_name);
+            const viewsData = _buBreakdownData.map(b => b.total_views);
+            const activeData = _buBreakdownData.map(b => b.active_users);
+            const totalData = _buBreakdownData.map(b => b.total_users);
+            const palette = ['#0066cc','#00a8cc','#00c851','#ffbb33','#ff4444','#6c757d','#9c27b0','#ff9800','#17a2b8','#28a745'];
+
+            // --- Page Views chart ---
+            const viewsCanvas = ensureCanvas('buViewsChart');
+            if (viewsCanvas) {
+                if (charts.buViewsChart) charts.buViewsChart.destroy();
+                charts.buViewsChart = new Chart(viewsCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Page Views',
+                            data: viewsData,
+                            backgroundColor: palette.slice(0, labels.length),
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Page Views by BU', font: { size: 14, weight: 600 } }
+                        },
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            // --- Users chart ---
+            const usersCanvas = ensureCanvas('buUsersChart');
+            if (usersCanvas) {
+                if (charts.buUsersChart) charts.buUsersChart.destroy();
+                charts.buUsersChart = new Chart(usersCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Total Users', data: totalData, backgroundColor: 'rgba(0,102,204,0.7)', borderRadius: 6 },
+                            { label: 'Active Users', data: activeData, backgroundColor: 'rgba(0,200,81,0.7)', borderRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } },
+                            title: { display: true, text: 'Users by BU', font: { size: 14, weight: 600 } }
+                        },
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+        }
+
+        function updateBuBreakdown(data) {
+            if (!data || !data.length) return;
+            _buBreakdownData = data;
+
+            // Re-render table body
+            const tbody = document.getElementById('bu-breakdown-body');
+            if (tbody) {
+                tbody.innerHTML = data.map(item => {
+                    const vc = item.views_change || 0;
+                    const ac = item.active_change || 0;
+                    return `<tr>
+                        <td class="font-medium">${item.bu_name}</td>
+                        <td>${item.total_users}</td>
+                        <td>${item.active_users}</td>
+                        <td>${item.total_views}</td>
+                        <td>${item.new_users}</td>
+                        <td>${item.avg_session_time}</td>
+                        <td><span class="stat-change ${vc >= 0 ? 'positive' : 'negative'}" style="font-size:.8rem">
+                            <i data-lucide="${vc >= 0 ? 'trending-up' : 'trending-down'}" style="width:12px;height:12px"></i>
+                            ${vc >= 0 ? '+' : ''}${vc}%</span></td>
+                        <td><span class="stat-change ${ac >= 0 ? 'positive' : 'negative'}" style="font-size:.8rem">
+                            <i data-lucide="${ac >= 0 ? 'trending-up' : 'trending-down'}" style="width:12px;height:12px"></i>
+                            ${ac >= 0 ? '+' : ''}${ac}%</span></td>
+                    </tr>`;
+                }).join('');
+                lucide.createIcons();
+            }
+
+            // If chart view is visible, re-render
+            const chartView = document.getElementById('bu-chart-view');
+            if (chartView && chartView.style.display !== 'none') {
+                renderBuCharts();
+            }
         }
     </script>
 </body>

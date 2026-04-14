@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Access Control — {{ BU_TITLE|default:'NexusOps' }}</title>
+    {% load static %}
+    {% load product_filters %}
+    <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  DESIGN TOKENS
+ * ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+    --philips-blue: #0B5FFF;
+    --philips-blue-dark: #0047AB;
+    --philips-teal: #00C4B4;
+    --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #EEF2F7;
+    --bg-tertiary: #E2E8F0;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-tertiary: #94A3B8;
+    --border-color: rgba(148,163,184,0.2);
+    --border-hover: rgba(11,95,255,0.3);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+    --transition-fast: 150ms cubic-bezier(.4,0,.2,1);
+    --transition-base: 250ms cubic-bezier(.4,0,.2,1);
+    /* Role colours */
+    --clr-user: #3b82f6;
+    --clr-lab: #f59e0b;
+    --clr-admin: #0B5FFF;
+    --clr-sa: #ef4444;
+    --clr-aa: #0B5FFF;
+    --success: #10b981; --danger: #ef4444;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  RESET & GLOBAL
+ * ═══════════════════════════════════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+    font-family:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg-primary); color:var(--text-primary);
+    min-height:100vh; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  PAGE HEADER
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-page-header {
+    background: var(--gradient-primary);
+    color: #fff;
+    padding: 2.5rem 0 2rem;
+    position: relative; overflow: hidden;
+}
+.fac-page-header::before {
+    content:''; position:absolute; inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events:none;
+}
+.fac-header-inner {
+    max-width: 1440px; margin: 0 auto; padding: 0 2rem;
+    position: relative; z-index: 1;
+}
+.fac-back-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.82rem; font-weight: 500; color: rgba(255,255,255,0.75);
+    margin-bottom: 1rem; transition: var(--transition-fast);
+}
+.fac-back-link:hover { color: #fff; }
+.fac-header-row {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+}
+.fac-header-title { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.5px; }
+.fac-header-subtitle { font-size: 0.88rem; font-weight: 400; color: rgba(255,255,255,0.8); margin-top: 0.25rem; }
+.fac-header-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+    padding: 0.4rem 0.9rem; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.2);
+}
+.fac-header-badge i { font-size: 0.65rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  STAT CARDS
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-stats {
+    max-width: 1440px; margin: -1.5rem auto 0; padding: 0 2rem;
+    position: relative; z-index: 2;
+}
+.fac-stats-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem;
+}
+.fac-stat-card {
+    background: var(--surface); border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.15rem; box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column; gap: 0.25rem;
+    transition: var(--transition-base);
+}
+.fac-stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.fac-stat-label {
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-tertiary);
+    display: flex; align-items: center; gap: 0.35rem;
+}
+.fac-stat-label .dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.fac-stat-value {
+    font-size: 1.45rem; font-weight: 800; letter-spacing: -0.5px;
+}
+.fac-stat-sub { font-size: 0.68rem; color: var(--text-tertiary); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  TOOLBAR (Search + Module filter chips)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-toolbar {
+    max-width: 1440px; margin: 1.5rem auto 0; padding: 0 2rem;
+}
+.fac-toolbar-inner {
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+    padding: 0.85rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.fac-search {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--bg-secondary); border-radius: var(--radius-sm);
+    padding: 0.45rem 0.85rem; flex: 0 1 280px; min-width: 180px;
+    border: 1.5px solid transparent; transition: var(--transition-fast);
+}
+.fac-search:focus-within { border-color: var(--philips-blue); background: var(--surface); }
+.fac-search i { color: var(--text-tertiary); font-size: 0.82rem; }
+.fac-search input {
+    border: none; background: transparent; outline: none;
+    font-size: 0.82rem; color: var(--text-primary); width: 100%;
+    font-family: inherit;
+}
+.fac-search input::placeholder { color: var(--text-tertiary); }
+.fac-divider { width: 1px; height: 24px; background: var(--border-color); flex-shrink: 0; }
+.fac-chip-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; flex: 1; }
+.fac-chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.3rem 0.7rem; border-radius: 50px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer;
+    border: 1.5px solid var(--border-color); background: var(--surface);
+    color: var(--text-secondary); transition: var(--transition-fast);
+    white-space: nowrap;
+}
+.fac-chip:hover { border-color: var(--philips-blue); color: var(--philips-blue); }
+.fac-chip.active {
+    background: var(--philips-blue); color: #fff;
+    border-color: var(--philips-blue);
+}
+.fac-chip .count {
+    background: rgba(0,0,0,0.12); padding: 0 5px; border-radius: 8px;
+    font-size: 0.62rem; line-height: 1.5;
+}
+.fac-chip.active .count { background: rgba(255,255,255,0.25); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  MODULE SECTIONS (Accordion Cards)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-matrix {
+    max-width: 1440px; margin: 1.25rem auto 3rem; padding: 0 2rem;
+    display: flex; flex-direction: column; gap: 1rem;
+}
+.fac-module {
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+    overflow: hidden; transition: box-shadow var(--transition-base);
+}
+.fac-module:hover { box-shadow: var(--shadow-md); }
+.fac-module.hidden { display: none; }
+.fac-module-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.85rem 1.25rem; cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: var(--transition-fast);
+    user-select: none;
+}
+.fac-module-header:hover { background: var(--bg-secondary); }
+.fac-module.open .fac-module-header { border-bottom-color: var(--border-color); }
+.fac-module-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+    background: rgba(11,95,255,0.08); color: var(--philips-blue);
+}
+.fac-module-label { font-size: 0.92rem; font-weight: 700; flex: 1; }
+.fac-module-badge {
+    font-size: 0.65rem; font-weight: 700; padding: 2px 8px;
+    border-radius: 50px; background: var(--bg-tertiary); color: var(--text-secondary);
+}
+.fac-module-chevron {
+    font-size: 0.7rem; color: var(--text-tertiary);
+    transition: transform var(--transition-base);
+}
+.fac-module.open .fac-module-chevron { transform: rotate(180deg); }
+
+/* Bulk-toggle row inside the header */
+.fac-module-bulk {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-left: auto; margin-right: 0.75rem;
+}
+.fac-module-bulk .bulk-lbl {
+    font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.3px; color: var(--text-tertiary);
+}
+
+/* Module body */
+.fac-module-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(.4,0,.2,1);
+}
+.fac-module.open .fac-module-body { max-height: 4000px; }
+
+/* Column header row */
+.fac-col-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 80px) 40px;
+    padding: 0.5rem 1.25rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky; top: 0; z-index: 5;
+}
+.fac-col-header span {
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-tertiary);
+    text-align: center;
+}
+.fac-col-header span:first-child { text-align: left; }
+
+/* Feature row */
+.fac-row {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 80px) 40px;
+    padding: 0.65rem 1.25rem;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-fast);
+}
+.fac-row:last-child { border-bottom: none; }
+.fac-row:hover { background: var(--bg-secondary); }
+.fac-row.search-hidden { display: none; }
+
+.fac-feat-info { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
+.fac-feat-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; flex-shrink: 0;
+    background: var(--bg-secondary); color: var(--text-secondary);
+}
+.fac-feat-text { min-width: 0; }
+.fac-feat-name {
+    font-size: 0.82rem; font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fac-feat-desc {
+    font-size: 0.7rem; color: var(--text-tertiary); line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Cell (center the toggle) */
+.fac-cell { display: flex; justify-content: center; align-items: center; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  TOGGLE SWITCH
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-toggle {
+    position: relative; width: 38px; height: 21px; cursor: pointer;
+}
+.fac-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.fac-toggle .slider {
+    position: absolute; inset: 0; border-radius: 50px;
+    background: var(--bg-tertiary); border: 1.5px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+.fac-toggle .slider::after {
+    content: ''; position: absolute;
+    width: 15px; height: 15px; border-radius: 50%;
+    top: 50%; left: 2px; transform: translateY(-50%);
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: all var(--transition-fast);
+}
+.fac-toggle input:checked + .slider {
+    background: var(--success); border-color: var(--success);
+}
+.fac-toggle input:checked + .slider::after {
+    left: calc(100% - 17px);
+}
+.fac-toggle.locked {
+    cursor: not-allowed; opacity: 0.55;
+}
+.fac-toggle.locked .slider {
+    background: var(--clr-aa); border-color: var(--clr-aa);
+}
+.fac-toggle.locked .slider::after { left: calc(100% - 17px); }
+
+/* Bulk toggle in header */
+.fac-bulk-toggle {
+    position: relative; width: 28px; height: 16px; cursor: pointer;
+}
+.fac-bulk-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.fac-bulk-toggle .slider {
+    position: absolute; inset: 0; border-radius: 50px;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+.fac-bulk-toggle .slider::after {
+    content: ''; position: absolute;
+    width: 11px; height: 11px; border-radius: 50%;
+    top: 50%; left: 1.5px; transform: translateY(-50%);
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: all var(--transition-fast);
+}
+.fac-bulk-toggle input:checked + .slider {
+    background: var(--success); border-color: var(--success);
+}
+.fac-bulk-toggle input:checked + .slider::after { left: calc(100% - 13px); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  EMPTY / NO RESULTS
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-no-results {
+    display: none; text-align: center; padding: 3rem 1rem;
+    color: var(--text-tertiary);
+}
+.fac-no-results.visible { display: block; }
+.fac-no-results i { font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 0.7rem; }
+.fac-no-results p { font-size: 0.88rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  RESPONSIVE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+    .fac-stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+    .fac-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .fac-col-header, .fac-row { grid-template-columns: 1fr repeat(5, 60px) 36px; }
+    .fac-module-bulk { display: none; }
+    .fac-header-row { flex-direction: column; align-items: flex-start; }
+    .fac-action-bar { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+    .fac-stats-grid { grid-template-columns: 1fr 1fr; }
+    .fac-col-header, .fac-row { grid-template-columns: 1fr repeat(5, 48px) 30px; }
+    .fac-header-inner, .fac-stats, .fac-toolbar, .fac-matrix { padding: 0 1rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  ACTION BAR
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-action-bar {
+    max-width: 1440px; margin: 1rem auto 0; padding: 0 2rem;
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+.fac-action-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.42rem 0.85rem; border-radius: var(--radius-sm);
+    font-size: 0.74rem; font-weight: 600; cursor: pointer;
+    border: 1.5px solid var(--border-color); background: var(--surface);
+    color: var(--text-secondary); transition: var(--transition-fast);
+    white-space: nowrap; font-family: inherit;
+}
+.fac-action-btn:hover { border-color: var(--philips-blue); color: var(--philips-blue); background: rgba(11,95,255,0.04); }
+.fac-action-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.04); }
+.fac-action-btn.primary { background: var(--philips-blue); color: #fff; border-color: var(--philips-blue); }
+.fac-action-btn.primary:hover { background: var(--philips-blue-dark); border-color: var(--philips-blue-dark); }
+.fac-action-spacer { flex: 1; }
+.fac-action-sep { width: 1px; height: 22px; background: var(--border-color); flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  URL COUNT BADGE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-url-count {
+    display: inline-flex; align-items: center; gap: 0.2rem;
+    font-size: 0.58rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 50px;
+    background: rgba(11,95,255,0.08); color: var(--philips-blue);
+    margin-left: 0.35rem; flex-shrink: 0; white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  MODAL
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-modal-overlay {
+    position: fixed; inset: 0; z-index: 99998;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    animation: facFadeIn 0.2s ease;
+}
+.fac-modal-overlay.open { display: flex; }
+@keyframes facFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fac-modal {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl); max-width: 560px; width: 92%;
+    max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;
+    animation: facSlideUp 0.25s ease;
+}
+@keyframes facSlideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+.fac-modal-header {
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.fac-modal-title { font-size: 1.05rem; font-weight: 800; }
+.fac-modal-close {
+    width: 30px; height: 30px; border-radius: 8px; border: none;
+    background: var(--bg-secondary); color: var(--text-secondary);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; transition: var(--transition-fast);
+}
+.fac-modal-close:hover { background: var(--danger); color: #fff; }
+.fac-modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+.fac-modal-footer {
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);
+    display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem;
+}
+.fac-modal-footer .fac-action-btn { padding: 0.5rem 1.2rem; font-size: 0.8rem; }
+.fac-form-group { margin-bottom: 1rem; }
+.fac-form-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.35rem; }
+.fac-form-select, .fac-form-file {
+    width: 100%; padding: 0.55rem 0.85rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-color); background: var(--surface);
+    font-size: 0.82rem; font-family: inherit; color: var(--text-primary); transition: var(--transition-fast);
+}
+.fac-form-select:focus, .fac-form-file:focus { border-color: var(--philips-blue); outline: none; }
+.fac-form-hint { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.25rem; }
+.fac-confirm-warn {
+    background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius-sm); padding: 1rem 1.15rem;
+    display: flex; align-items: flex-start; gap: 0.75rem;
+}
+.fac-confirm-warn i { color: var(--danger); font-size: 1.2rem; margin-top: 0.15rem; }
+.fac-confirm-warn-text h4 { font-size: 0.88rem; font-weight: 700; color: var(--danger); margin-bottom: 0.25rem; }
+.fac-confirm-warn-text p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+.fac-role-arrow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.75rem; margin: 1rem 0; font-size: 0.85rem; color: var(--text-tertiary);
+}
+.fac-role-arrow i { font-size: 1.1rem; color: var(--philips-blue); }
+.fac-history-list { list-style: none; }
+.fac-history-item {
+    padding: 0.65rem 0; border-bottom: 1px solid var(--border-color);
+    display: flex; flex-direction: column; gap: 0.15rem;
+}
+.fac-history-item:last-child { border-bottom: none; }
+.fac-history-title { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.fac-history-meta { font-size: 0.7rem; color: var(--text-tertiary); display: flex; gap: 0.75rem; align-items: center; }
+.fac-history-severity {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+}
+.fac-history-severity.info { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.fac-history-severity.warning { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.fac-history-severity.critical { background: rgba(239,68,68,0.12); color: #ef4444; }
+.fac-history-empty { text-align: center; padding: 2rem; color: var(--text-tertiary); font-size: 0.85rem; }
+.fac-history-loading { text-align: center; padding: 2rem; color: var(--text-tertiary); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SEARCH HIGHLIGHT
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-highlight { background: rgba(245,195,0,0.35); border-radius: 2px; padding: 0 1px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  FEATURE COUNT IN MODULE HEADER
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-module-count-detail {
+    font-size: 0.72rem; font-weight: 500; color: var(--text-tertiary);
+    margin-left: 0.15rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  ROW-LEVEL BULK TOGGLE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-row-bulk {
+    display: flex; align-items: center; justify-content: center;
+}
+.fac-row-bulk-btn {
+    width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border-color);
+    background: var(--surface); color: var(--text-tertiary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem; transition: var(--transition-fast);
+}
+.fac-row-bulk-btn:hover { border-color: var(--philips-blue); color: var(--philips-blue); background: rgba(11,95,255,0.04); }
+.fac-row-bulk-btn.all-on { border-color: var(--success); color: var(--success); }
+.fac-row-bulk-btn.all-off { border-color: var(--danger); color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  UNDO BAR
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-undo-bar {
+    position: fixed; top: 1.2rem; right: 1.5rem;
+    z-index: 99997; display: flex; align-items: center; gap: 0.75rem;
+    background: var(--text-primary); color: var(--surface); padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-xl);
+    font-size: 0.82rem; font-weight: 600;
+    animation: facSlideDown 0.25s ease;
+}
+@keyframes facSlideDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
+.fac-undo-bar button {
+    background: var(--philips-blue); color: #fff; border: none;
+    padding: 0.35rem 0.85rem; border-radius: var(--radius-sm);
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: var(--transition-fast);
+}
+.fac-undo-bar button:hover { background: var(--philips-blue-dark); }
+.fac-undo-timer {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: var(--philips-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 800; animation: facUndoSpin 5s linear;
+}
+@keyframes facUndoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  COMPARE MODAL TABLE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-compare-stats {
+    display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.fac-compare-stat {
+    flex: 1; min-width: 100px; text-align: center; padding: 0.65rem;
+    border-radius: var(--radius-sm); border: 1px solid var(--border-color);
+}
+.fac-compare-stat .num { font-size: 1.35rem; font-weight: 800; }
+.fac-compare-stat .lbl { font-size: 0.65rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; }
+.fac-compare-table {
+    width: 100%; border-collapse: collapse; font-size: 0.78rem;
+}
+.fac-compare-table th {
+    text-align: left; padding: 0.5rem 0.75rem; font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-tertiary); border-bottom: 2px solid var(--border-color);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+}
+.fac-compare-table td {
+    padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border-color);
+}
+.fac-compare-table tr.diff { background: rgba(245,158,11,0.06); }
+.fac-compare-table tr.diff td:first-child { border-left: 3px solid #f59e0b; }
+.fac-compare-check { color: var(--success); font-weight: 700; }
+.fac-compare-cross { color: var(--danger); font-weight: 700; }
+.fac-compare-filter {
+    display: flex; gap: 0.4rem; margin-bottom: 0.75rem;
+}
+.fac-compare-filter button {
+    padding: 0.3rem 0.7rem; border-radius: 50px; border: 1.5px solid var(--border-color);
+    background: var(--surface); color: var(--text-secondary); font-size: 0.72rem;
+    font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition-fast);
+}
+.fac-compare-filter button.active { background: var(--philips-blue); color: #fff; border-color: var(--philips-blue); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SUMMARY REPORT TABLE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-summary-table {
+    width: 100%; border-collapse: collapse; font-size: 0.75rem;
+}
+.fac-summary-table th {
+    text-align: center; padding: 0.5rem 0.5rem; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;
+    color: var(--text-tertiary); border-bottom: 2px solid var(--border-color);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+}
+.fac-summary-table th:first-child { text-align: left; }
+.fac-summary-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); text-align: center; }
+.fac-summary-table td:first-child { text-align: left; font-weight: 600; }
+.fac-summary-mod-row td { background: var(--bg-secondary); font-weight: 700 !important; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); }
+.fac-summary-icon { display: inline-block; width: 18px; text-align: center; margin-right: 4px; color: var(--text-tertiary); font-size: 0.7rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  DEPENDENCY WARNING TOOLTIP
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.fac-dep-warn {
+    position: fixed; z-index: 99999; background: #1e1e2a; color: #fff;
+    padding: 0.65rem 1rem; border-radius: var(--radius-sm);
+    font-size: 0.75rem; font-weight: 600; max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    animation: facFadeIn 0.15s ease;
+    pointer-events: none;
+}
+.fac-dep-warn i { color: #f59e0b; margin-right: 0.35rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  PRINT STYLES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@media print {
+    body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .fac-page-header { background: #0B5FFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 1rem 0 0.75rem; }
+    .fac-page-header::before { display: none; }
+    .fac-back-link, .fac-action-bar, .fac-toolbar,
+    .fac-undo-bar, .fac-modal-overlay,
+    .fac-module-bulk, .fac-no-results, .fac-header-badge { display: none !important; }
+    .fac-stats { margin-top: 0.5rem; }
+    .fac-stat-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    .fac-module { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    .fac-module-body { max-height: none !important; overflow: visible !important; }
+    .fac-module.open .fac-module-body { max-height: none !important; }
+    .fac-module-chevron { display: none; }
+    .fac-row { break-inside: avoid; }
+    .fac-toggle .slider { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .fac-matrix { margin-bottom: 0; }
+    .fac-col-header { position: static; }
+    @page { margin: 1cm; size: landscape; }
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="fac-page-header">
+    <div class="fac-header-inner">
+        <a href="{% url 'dashboard' %}" class="fac-back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <div class="fac-header-row">
+            <div>
+                <div class="fac-header-title">
+                    <i class="fas fa-shield-alt" style="margin-right:0.3rem;"></i>
+                    Feature Access Control
+                </div>
+                <div class="fac-header-subtitle">
+                    Manage which features each role can access across the entire application.
+                    Changes take effect immediately.
+                </div>
+            </div>
+            <div class="fac-header-badge">
+                <i class="fas fa-lock"></i> Application Admin Only
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STAT CARDS
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="fac-stats">
+    <div class="fac-stats-grid">
+        <div class="fac-stat-card">
+            <div class="fac-stat-label"><span class="dot" style="background:var(--philips-blue);"></span> Total Features</div>
+            <div class="fac-stat-value">{{ total_features }}</div>
+            <div class="fac-stat-sub">across {{ modules_data|length }} modules</div>
+        </div>
+        {% for r_code, r_label in roles %}
+        <div class="fac-stat-card">
+            <div class="fac-stat-label">
+                <span class="dot" style="background:var(--clr-{% if r_code == 'user' %}user{% elif r_code == 'lab_incharge' %}lab{% elif r_code == 'admin' %}admin{% elif r_code == 'super_admin' %}sa{% else %}aa{% endif %});"></span>
+                {{ r_label }}
+            </div>
+            <div class="fac-stat-value" id="stat-{{ r_code }}">{{ role_stats|get_item:r_code|default:"0" }}</div>
+            <div class="fac-stat-sub">of {{ total_features }} enabled</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     TOOLBAR
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="fac-toolbar">
+    <div class="fac-toolbar-inner">
+        <div class="fac-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="facSearch" placeholder="Search features…" autocomplete="off">
+        </div>
+        <div class="fac-divider"></div>
+        <div class="fac-chip-bar" id="facChipBar">
+            <button class="fac-chip active" data-module="all">
+                <i class="fas fa-layer-group"></i> All
+                <span class="count">{{ total_features }}</span>
+            </button>
+            {% for mod in modules_data %}
+            <button class="fac-chip" data-module="{{ mod.code }}">
+                {{ mod.label }}
+                <span class="count">{{ mod.count }}</span>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ACTION BAR
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="fac-action-bar">
+    <button class="fac-action-btn" onclick="expandAll()" title="Expand all modules">
+        <i class="fas fa-expand-alt"></i> Expand All
+    </button>
+    <button class="fac-action-btn" onclick="collapseAll()" title="Collapse all modules">
+        <i class="fas fa-compress-alt"></i> Collapse All
+    </button>
+    <div class="fac-action-sep"></div>
+    <button class="fac-action-btn" onclick="exportConfig()" title="Download config as JSON">
+        <i class="fas fa-download"></i> Export Config
+    </button>
+    <button class="fac-action-btn" onclick="openModal('importModal')" title="Import from JSON">
+        <i class="fas fa-upload"></i> Import Config
+    </button>
+    <div class="fac-action-sep"></div>
+    <button class="fac-action-btn" onclick="openModal('copyRoleModal')" title="Copy permissions between roles">
+        <i class="fas fa-copy"></i> Copy Role
+    </button>
+    <button class="fac-action-btn danger" onclick="openModal('resetModal')" title="Reset to defaults">
+        <i class="fas fa-undo-alt"></i> Reset Defaults
+    </button>
+    <div class="fac-action-sep"></div>
+    <button class="fac-action-btn" onclick="openModal('compareModal')" title="Compare two roles side-by-side">
+        <i class="fas fa-columns"></i> Compare Roles
+    </button>
+    <button class="fac-action-btn" onclick="openModal('summaryModal'); loadSummary()" title="Full access matrix report">
+        <i class="fas fa-table"></i> Summary Report
+    </button>
+    <button class="fac-action-btn" onclick="window.print()" title="Print current view">
+        <i class="fas fa-print"></i> Print
+    </button>
+    <div class="fac-action-spacer"></div>
+    <button class="fac-action-btn" onclick="openModal('historyModal'); loadHistory()" title="Change history">
+        <i class="fas fa-history"></i> History
+    </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     FEATURE MATRIX
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="fac-matrix" id="facMatrix">
+    {% for mod in modules_data %}
+    <div class="fac-module open" data-module="{{ mod.code }}" id="mod-{{ mod.code }}">
+        <!-- Module Header -->
+        <div class="fac-module-header" onclick="toggleModule('{{ mod.code }}')">
+            <div class="fac-module-icon"><i class="fas fa-folder-open"></i></div>
+            <span class="fac-module-label">{{ mod.label }} <span class="fac-module-count-detail">· {{ mod.count }} feature{{ mod.count|pluralize }}</span></span>
+            <span class="fac-module-badge">{{ mod.count }}</span>
+
+            <!-- Bulk toggles (per role, per module) -->
+            <div class="fac-module-bulk" onclick="event.stopPropagation()">
+                {% for r_code, r_label in roles %}
+                {% if r_code != 'app_admin' %}
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+                    <span class="bulk-lbl" style="color:var(--clr-{% if r_code == 'user' %}user{% elif r_code == 'lab_incharge' %}lab{% elif r_code == 'admin' %}admin{% else %}sa{% endif %});">
+                        {% if r_code == 'user' %}RU{% elif r_code == 'lab_incharge' %}LI{% elif r_code == 'admin' %}AD{% else %}SA{% endif %}
+                    </span>
+                    <label class="fac-bulk-toggle" title="Toggle all {{ mod.label }} for {{ r_label }}">
+                        <input type="checkbox" data-bulk-module="{{ mod.code }}" data-bulk-role="{{ r_code }}"
+                               onchange="bulkToggle('{{ mod.code }}','{{ r_code }}',this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            <i class="fas fa-chevron-down fac-module-chevron"></i>
+        </div>
+
+        <!-- Module Body -->
+        <div class="fac-module-body">
+            <!-- Column headers -->
+            <div class="fac-col-header">
+                <span>Feature</span>
+                {% for r_code, r_label in roles %}
+                <span style="color:var(--clr-{% if r_code == 'user' %}user{% elif r_code == 'lab_incharge' %}lab{% elif r_code == 'admin' %}admin{% elif r_code == 'super_admin' %}sa{% else %}aa{% endif %});">
+                    {{ r_label }}
+                </span>
+                {% endfor %}
+                <span title="Toggle all roles for this row" style="font-size:0.55rem;">ALL</span>
+            </div>
+
+            <!-- Feature rows -->
+            {% for item in mod.features %}
+            <div class="fac-row" data-feat-name="{{ item.feature.name|lower }}" data-feat-code="{{ item.feature.code }}">
+                <div class="fac-feat-info">
+                    <div class="fac-feat-icon"><i class="{{ item.feature.icon }}"></i></div>
+                    <div class="fac-feat-text">
+                        <div class="fac-feat-name">
+                            {{ item.feature.name }}
+                            <span class="fac-url-count" title="{{ item.url_count }} URL endpoints covered">
+                                <i class="fas fa-link"></i> {{ item.url_count }}
+                            </span>
+                        </div>
+                        <div class="fac-feat-desc" title="{{ item.feature.description }}">{{ item.feature.description }}</div>
+                    </div>
+                </div>
+                {% for r_code, r_label in roles %}
+                <div class="fac-cell">
+                    {% if r_code == 'app_admin' %}
+                    <label class="fac-toggle locked" title="App Admin always has access">
+                        <input type="checkbox" checked disabled>
+                        <span class="slider"></span>
+                    </label>
+                    {% else %}
+                    <label class="fac-toggle" title="{{ r_label }}">
+                        <input type="checkbox"
+                               data-feature-id="{{ item.feature.id }}"
+                               data-role="{{ r_code }}"
+                               {% if item.access|get_item:r_code %}checked{% endif %}
+                               onchange="toggleAccess({{ item.feature.id }},'{{ r_code }}',this.checked, this)">
+                        <span class="slider"></span>
+                    </label>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div class="fac-row-bulk">
+                    <button class="fac-row-bulk-btn" title="Toggle all roles for {{ item.feature.name }}"
+                            onclick="toggleRow({{ item.feature.id }}, this)">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="fac-no-results" id="facNoResults">
+        <i class="fas fa-search-minus"></i>
+        <p>No features match your search.</p>
+    </div>
+</div>
+
+<!-- ── Import Modal ──────────────────────────────────────────────── -->
+<div class="fac-modal-overlay" id="importModal">
+    <div class="fac-modal">
+        <div class="fac-modal-header">
+            <i class="fas fa-file-import"></i> Import Configuration
+            <button class="fac-modal-close" onclick="closeModal('importModal')">&times;</button>
+        </div>
+        <div class="fac-modal-body">
+            <p style="margin-bottom:12px;">Upload a previously-exported JSON file to restore feature access settings.</p>
+            <div class="fac-form-group">
+                <label class="fac-form-label" for="importFile">Configuration File</label>
+                <input type="file" class="fac-form-file" id="importFile" accept=".json">
+                <span class="fac-form-hint">Only .json files exported from this page are accepted.</span>
+            </div>
+            <div class="fac-confirm-warning" style="margin-top:14px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Importing will <strong>overwrite</strong> all current permissions for the roles present in the file.
+                Consider exporting the current config first as a backup.
+            </div>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-btn fac-btn-secondary" onclick="closeModal('importModal')">Cancel</button>
+            <button class="fac-btn fac-btn-primary" onclick="importConfig()"><i class="fas fa-upload"></i> Import &amp; Apply</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Reset Confirmation Modal ─────────────────────────────────── -->
+<div class="fac-modal-overlay" id="resetModal">
+    <div class="fac-modal">
+        <div class="fac-modal-header" style="background:var(--fac-danger,#dc3545);color:#fff;">
+            <i class="fas fa-undo-alt"></i> Reset to Defaults
+            <button class="fac-modal-close" onclick="closeModal('resetModal')" style="color:#fff;">&times;</button>
+        </div>
+        <div class="fac-modal-body">
+            <div class="fac-confirm-warning" style="border-color:var(--fac-danger,#dc3545);background:#fff5f5;">
+                <i class="fas fa-radiation-alt" style="color:var(--fac-danger,#dc3545);"></i>
+                <strong>This action cannot be undone.</strong> All feature access permissions for every role
+                will be reset to the factory defaults defined in the seed configuration.
+            </div>
+            <p style="margin-top:14px;">
+                <a href="javascript:void(0)" onclick="closeModal('resetModal');exportConfig();" style="color:var(--philips-blue);">
+                    <i class="fas fa-download"></i> Export current config first
+                </a>
+            </p>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-btn fac-btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
+            <button class="fac-btn" style="background:var(--fac-danger,#dc3545);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:600;" onclick="resetDefaults()">
+                <i class="fas fa-undo-alt"></i> Yes, Reset Everything
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Copy Role Modal ──────────────────────────────────────────── -->
+<div class="fac-modal-overlay" id="copyRoleModal">
+    <div class="fac-modal">
+        <div class="fac-modal-header">
+            <i class="fas fa-copy"></i> Copy Role Permissions
+            <button class="fac-modal-close" onclick="closeModal('copyRoleModal')">&times;</button>
+        </div>
+        <div class="fac-modal-body">
+            <p style="margin-bottom:14px;">Copy all feature permissions from one role to another.</p>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div class="fac-form-group" style="flex:1;min-width:140px;">
+                    <label class="fac-form-label" for="copyFrom">Source Role</label>
+                    <select class="fac-form-select" id="copyFrom">
+                        <option value="">— Select —</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="lab_incharge">Lab In-Charge</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+                <div class="fac-role-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                <div class="fac-form-group" style="flex:1;min-width:140px;">
+                    <label class="fac-form-label" for="copyTo">Target Role</label>
+                    <select class="fac-form-select" id="copyTo">
+                        <option value="">— Select —</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="lab_incharge">Lab In-Charge</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fac-confirm-warning" style="margin-top:14px;">
+                <i class="fas fa-info-circle"></i>
+                The target role's permissions will be <strong>overwritten</strong> to match the source role exactly.
+            </div>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-btn fac-btn-secondary" onclick="closeModal('copyRoleModal')">Cancel</button>
+            <button class="fac-btn fac-btn-primary" onclick="copyRole()"><i class="fas fa-copy"></i> Copy Permissions</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── History Modal ────────────────────────────────────────────── -->
+<div class="fac-modal-overlay" id="historyModal">
+    <div class="fac-modal" style="max-width:640px;">
+        <div class="fac-modal-header">
+            <i class="fas fa-history"></i> Permission Change History
+            <button class="fac-modal-close" onclick="closeModal('historyModal')">&times;</button>
+        </div>
+        <div class="fac-modal-body" style="max-height:420px;overflow-y:auto;">
+            <div id="historyList" class="fac-history-list">
+                <p style="text-align:center;color:#888;padding:30px 0;"><i class="fas fa-spinner fa-spin"></i> Loading…</p>
+            </div>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-btn fac-btn-secondary" onclick="closeModal('historyModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Compare Roles Modal ────────────────────────────────────────── -->
+<div class="fac-modal-overlay" id="compareModal">
+    <div class="fac-modal" style="max-width:720px;">
+        <div class="fac-modal-header">
+            <span class="fac-modal-title"><i class="fas fa-columns"></i> Role Comparison</span>
+            <button class="fac-modal-close" onclick="closeModal('compareModal')">&times;</button>
+        </div>
+        <div class="fac-modal-body">
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:1rem;">
+                <div class="fac-form-group" style="flex:1;min-width:140px;margin-bottom:0;">
+                    <label class="fac-form-label" for="compareA">Role A</label>
+                    <select class="fac-form-select" id="compareA">
+                        <option value="">— Select —</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="lab_incharge">Lab In-Charge</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+                <div style="font-size:1.1rem;color:var(--text-tertiary);padding-bottom:6px;"><i class="fas fa-exchange-alt"></i></div>
+                <div class="fac-form-group" style="flex:1;min-width:140px;margin-bottom:0;">
+                    <label class="fac-form-label" for="compareB">Role B</label>
+                    <select class="fac-form-select" id="compareB">
+                        <option value="">— Select —</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="lab_incharge">Lab In-Charge</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+                <button class="fac-action-btn primary" onclick="runCompare()" style="margin-bottom:0;height:36px;">
+                    <i class="fas fa-search"></i> Compare
+                </button>
+            </div>
+            <div id="compareResults"></div>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-action-btn" onclick="closeModal('compareModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Summary Report Modal ─────────────────────────────────────── -->
+<div class="fac-modal-overlay" id="summaryModal">
+    <div class="fac-modal" style="max-width:860px;">
+        <div class="fac-modal-header">
+            <span class="fac-modal-title"><i class="fas fa-table"></i> Access Summary Report</span>
+            <button class="fac-modal-close" onclick="closeModal('summaryModal')">&times;</button>
+        </div>
+        <div class="fac-modal-body" style="max-height:520px;overflow-y:auto;">
+            <div id="summaryContent">
+                <p style="text-align:center;color:#888;padding:30px 0;"><i class="fas fa-spinner fa-spin"></i> Loading…</p>
+            </div>
+        </div>
+        <div class="fac-modal-footer">
+            <button class="fac-action-btn" onclick="printSummary()" title="Print this report">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+            <button class="fac-action-btn" onclick="closeModal('summaryModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container (removed — undo bar is used instead) -->
+
+<script>
+(function() {
+    'use strict';
+
+    /* ── BU Prefix ─────────────────────────────────────────────────────── */
+    var _buPrefix = '';
+    (function() {
+        var m = window.location.pathname.match(/^(\/bu\/[^/]+)/);
+        if (m) _buPrefix = m[1];
+    })();
+
+    /* ── CSRF ──────────────────────────────────────────────────────────── */
+    function getCookie(n) {
+        var v = null;
+        document.cookie.split(';').forEach(function(c) {
+            c = c.trim();
+            if (c.indexOf(n + '=') === 0) v = decodeURIComponent(c.substring(n.length + 1));
+        });
+        return v;
+    }
+    var csrf = getCookie('csrftoken');
+
+    /* ── Helpers ───────────────────────────────────────────────────────── */
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s || '';
+        return d.innerHTML;
+    }
+    var ROLE_LABELS = {user:'User', lab_incharge:'Lab Incharge', admin:'Admin', super_admin:'Super Admin', app_admin:'App Admin'};
+
+    /* ── Toast (disabled — undo bar handles feedback) ────────────────── */
+    function toast(msg, type) { /* no-op */ }
+
+    /* ── Module Accordion ──────────────────────────────────────────────── */
+    window.toggleModule = function(code) {
+        document.getElementById('mod-' + code).classList.toggle('open');
+    };
+
+    /* ── Expand All / Collapse All ─────────────────────────────────────── */
+    window.expandAll = function() {
+        document.querySelectorAll('.fac-module').forEach(function(m) { m.classList.add('open'); });
+    };
+    window.collapseAll = function() {
+        document.querySelectorAll('.fac-module').forEach(function(m) { m.classList.remove('open'); });
+    };
+
+    /* ── Modal helpers ─────────────────────────────────────────────────── */
+    window.openModal = function(id) {
+        document.getElementById(id).classList.add('open');
+    };
+    window.closeModal = function(id) {
+        document.getElementById(id).classList.remove('open');
+    };
+    document.querySelectorAll('.fac-modal-overlay').forEach(function(ov) {
+        ov.addEventListener('click', function(e) {
+            if (e.target === ov) ov.classList.remove('open');
+        });
+    });
+
+    /* ── Module Filter Chips ───────────────────────────────────────────── */
+    document.getElementById('facChipBar').addEventListener('click', function(e) {
+        var chip = e.target.closest('.fac-chip');
+        if (!chip) return;
+        document.querySelectorAll('.fac-chip').forEach(function(c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+        var mod = chip.dataset.module;
+        document.querySelectorAll('.fac-module').forEach(function(m) {
+            m.classList.toggle('hidden', mod !== 'all' && m.dataset.module !== mod);
+        });
+        updateNoResults();
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 4: SEARCH WITH HIGHLIGHT
+     * ══════════════════════════════════════════════════════════════════════ */
+    var searchInput = document.getElementById('facSearch');
+    /* Store original name HTML for each row */
+    var _origNames = {};
+    document.querySelectorAll('.fac-row').forEach(function(row) {
+        var nameEl = row.querySelector('.fac-feat-name');
+        if (nameEl) {
+            var code = row.dataset.featCode || '';
+            /* Save only the text node (exclude the url-count badge) */
+            var textNodes = [];
+            nameEl.childNodes.forEach(function(n) {
+                if (n.nodeType === 3 && n.textContent.trim()) textNodes.push(n.textContent.trim());
+            });
+            _origNames[code] = textNodes.join(' ');
+        }
+    });
+
+    searchInput.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        document.querySelectorAll('.fac-row').forEach(function(row) {
+            var name = row.dataset.featName || '';
+            var code = (row.dataset.featCode || '').toLowerCase();
+            var match = q === '' || name.indexOf(q) !== -1 || code.indexOf(q) !== -1;
+            row.classList.toggle('search-hidden', !match);
+
+            /* Highlight matching text in feature name */
+            var nameEl = row.querySelector('.fac-feat-name');
+            if (nameEl) {
+                var origText = _origNames[row.dataset.featCode] || '';
+                var badge = nameEl.querySelector('.fac-url-count');
+                var badgeHtml = badge ? badge.outerHTML : '';
+                if (q && match && origText.toLowerCase().indexOf(q) !== -1) {
+                    var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    nameEl.innerHTML = origText.replace(re, '<span class="fac-highlight">$1</span>') + ' ' + badgeHtml;
+                } else {
+                    nameEl.innerHTML = escHtml(origText) + ' ' + badgeHtml;
+                }
+            }
+        });
+        document.querySelectorAll('.fac-module').forEach(function(mod) {
+            var activeChip = document.querySelector('.fac-chip.active');
+            if (activeChip && activeChip.dataset.module !== 'all' && mod.dataset.module !== activeChip.dataset.module) return;
+            var rows = mod.querySelectorAll('.fac-row:not(.search-hidden)');
+            mod.classList.toggle('hidden', rows.length === 0);
+        });
+        updateNoResults();
+    });
+
+    function updateNoResults() {
+        var visible = document.querySelectorAll('.fac-module:not(.hidden)').length;
+        document.getElementById('facNoResults').classList.toggle('visible', visible === 0);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 2: DEPENDENCY WARNINGS
+     *  When disabling a "View" feature, warn if its "Manage" sibling is on.
+     * ══════════════════════════════════════════════════════════════════════ */
+    var _depWarnEl = null;
+    function showDepWarn(msg, anchorEl) {
+        hideDepWarn();
+        _depWarnEl = document.createElement('div');
+        _depWarnEl.className = 'fac-dep-warn';
+        _depWarnEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + msg;
+        document.body.appendChild(_depWarnEl);
+        var r = anchorEl.getBoundingClientRect();
+        _depWarnEl.style.top = (r.top - _depWarnEl.offsetHeight - 8) + 'px';
+        _depWarnEl.style.left = Math.max(8, r.left - 20) + 'px';
+        setTimeout(hideDepWarn, 4000);
+    }
+    function hideDepWarn() {
+        if (_depWarnEl) { _depWarnEl.remove(); _depWarnEl = null; }
+    }
+
+    function checkDependency(featureId, role, enabled, checkbox) {
+        if (enabled) return false; /* only warn when disabling */
+        var row = checkbox.closest('.fac-row');
+        if (!row) return false;
+        var code = row.dataset.featCode || '';
+        /* If this is a "View" feature, check if the matching "Manage" feature is enabled */
+        if (code.indexOf('_view') === -1 && code.indexOf('view_') === -1) return false;
+        /* Find manage counterpart */
+        var manageCode = code.replace(/view/i, 'manage');
+        var manageRow = document.querySelector('.fac-row[data-feat-code="' + manageCode + '"]');
+        if (!manageRow) return false;
+        var manageCb = manageRow.querySelector('input[data-role="' + role + '"]');
+        if (manageCb && manageCb.checked) {
+            var featName = row.dataset.featName || code;
+            showDepWarn('The "Manage" permission depends on this "View" access. Consider disabling Manage first.', checkbox);
+        }
+        return false; /* don't block, just warn */
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 9: UNDO LAST CHANGE
+     * ══════════════════════════════════════════════════════════════════════ */
+    var _undoStack = [];
+    var _undoBarEl = null;
+    var _undoTimer = null;
+
+    function pushUndo(featureId, role, prevVal, checkbox) {
+        clearUndo();
+        _undoStack.push({featureId: featureId, role: role, prevVal: prevVal, checkbox: checkbox});
+        showUndoBar(role, prevVal);
+    }
+    function showUndoBar(role, prevVal) {
+        _undoBarEl = document.createElement('div');
+        _undoBarEl.className = 'fac-undo-bar';
+        var label = ROLE_LABELS[role] || role;
+        _undoBarEl.innerHTML =
+            '<span>' + (prevVal ? 'Disabled' : 'Enabled') + ' for ' + escHtml(label) + '</span>' +
+            '<button onclick="performUndo()"><i class="fas fa-undo"></i> Undo</button>' +
+            '<div class="fac-undo-timer">5</div>';
+        document.body.appendChild(_undoBarEl);
+        var counter = 5;
+        var timerEl = _undoBarEl.querySelector('.fac-undo-timer');
+        _undoTimer = setInterval(function() {
+            counter--;
+            if (timerEl) timerEl.textContent = counter;
+            if (counter <= 0) clearUndo();
+        }, 1000);
+    }
+    function clearUndo() {
+        if (_undoTimer) { clearInterval(_undoTimer); _undoTimer = null; }
+        if (_undoBarEl) { _undoBarEl.remove(); _undoBarEl = null; }
+        _undoStack = [];
+    }
+    window.performUndo = function() {
+        if (!_undoStack.length) return;
+        var last = _undoStack.pop();
+        last.checkbox.checked = last.prevVal;
+        /* Fire the toggle to revert on server */
+        var fd = new FormData();
+        fd.append('feature_id', last.featureId);
+        fd.append('role', last.role);
+        fd.append('enabled', last.prevVal);
+        fd.append('csrfmiddlewaretoken', csrf);
+        fetch(_buPrefix + '/api/feature-access/toggle/', {
+            method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+        }).then(function(r) {
+            if (!r.ok) throw new Error(r.status);
+            toast('Undone!', 'success');
+            updateStatCard(last.role, last.prevVal ? 1 : -1);
+            syncBulkToggle(last.checkbox.closest('.fac-module'), last.role);
+        }).catch(function() { toast('Undo failed.', 'error'); });
+        clearUndo();
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  SINGLE TOGGLE (with dependency warn + undo)
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.toggleAccess = function(featureId, role, enabled, checkbox) {
+        checkDependency(featureId, role, enabled, checkbox);
+        var prevVal = !enabled;
+        var fd = new FormData();
+        fd.append('feature_id', featureId);
+        fd.append('role', role);
+        fd.append('enabled', enabled);
+        fd.append('csrfmiddlewaretoken', csrf);
+
+        fetch(_buPrefix + '/api/feature-access/toggle/', {
+            method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            toast((enabled ? 'Enabled' : 'Disabled') + ' for ' + (ROLE_LABELS[role] || role), 'success');
+            updateStatCard(role, enabled ? 1 : -1);
+            syncBulkToggle(checkbox.closest('.fac-module'), role);
+            updateRowBulkBtn(checkbox.closest('.fac-row'));
+            pushUndo(featureId, role, prevVal, checkbox);
+        })
+        .catch(function(err) {
+            checkbox.checked = !enabled;
+            toast('Failed to update. Please try again.', 'error');
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  BULK TOGGLE (module-level)
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.bulkToggle = function(module, role, enabled) {
+        var fd = new FormData();
+        fd.append('module', module);
+        fd.append('role', role);
+        fd.append('enabled', enabled);
+        fd.append('csrfmiddlewaretoken', csrf);
+
+        var moduleEl = document.getElementById('mod-' + module);
+        var checkboxes = moduleEl.querySelectorAll('input[data-role="' + role + '"]');
+        var prevStates = [];
+        checkboxes.forEach(function(cb) { prevStates.push(cb.checked); cb.checked = enabled; });
+
+        fetch(_buPrefix + '/api/feature-access/bulk-toggle/', {
+            method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            toast((enabled ? 'Enabled' : 'Disabled') + ' all ' + data.count + ' features for ' + (ROLE_LABELS[role] || role), 'success');
+            refreshStatCards();
+            moduleEl.querySelectorAll('.fac-row').forEach(function(row) { updateRowBulkBtn(row); });
+        })
+        .catch(function(err) {
+            checkboxes.forEach(function(cb, i) { cb.checked = prevStates[i]; });
+            toast('Bulk update failed. Please try again.', 'error');
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 7: ROW-LEVEL BULK TOGGLE
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.toggleRow = function(featureId, btn) {
+        var row = btn.closest('.fac-row');
+        if (!row) return;
+        var editable = row.querySelectorAll('input[data-role]:not(:disabled)');
+        /* If all on → turn all off, else turn all on */
+        var allOn = true;
+        editable.forEach(function(cb) { if (!cb.checked) allOn = false; });
+        var newVal = !allOn;
+
+        editable.forEach(function(cb) {
+            if (cb.checked !== newVal) {
+                cb.checked = newVal;
+                var role = cb.dataset.role;
+                var fd = new FormData();
+                fd.append('feature_id', featureId);
+                fd.append('role', role);
+                fd.append('enabled', newVal);
+                fd.append('csrfmiddlewaretoken', csrf);
+                fetch(_buPrefix + '/api/feature-access/toggle/', {
+                    method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+                }).catch(function() { cb.checked = !newVal; });
+            }
+        });
+        toast((newVal ? 'Enabled' : 'Disabled') + ' all roles for this feature.', 'success');
+        setTimeout(function() { refreshStatCards(); }, 600);
+        updateRowBulkBtn(row);
+        /* Sync module-level bulk toggles */
+        var mod = row.closest('.fac-module');
+        ['user','lab_incharge','admin','super_admin'].forEach(function(r) { syncBulkToggle(mod, r); });
+    };
+
+    function updateRowBulkBtn(row) {
+        if (!row) return;
+        var btn = row.querySelector('.fac-row-bulk-btn');
+        if (!btn) return;
+        var editable = row.querySelectorAll('input[data-role]:not(:disabled)');
+        var allOn = true, allOff = true;
+        editable.forEach(function(cb) { if(!cb.checked) allOn = false; if(cb.checked) allOff = false; });
+        btn.classList.toggle('all-on', allOn);
+        btn.classList.toggle('all-off', allOff);
+    }
+
+    /* ── Sync bulk toggle checkbox state ───────────────────────────────── */
+    function syncBulkToggle(moduleEl, role) {
+        if (!moduleEl) return;
+        var all = moduleEl.querySelectorAll('input[data-role="' + role + '"]');
+        var checkedCount = 0;
+        all.forEach(function(cb) { if (cb.checked) checkedCount++; });
+        var bulkCb = moduleEl.querySelector('input[data-bulk-role="' + role + '"]');
+        if (bulkCb) bulkCb.checked = (checkedCount === all.length);
+    }
+
+    /* ── Stat card updates ─────────────────────────────────────────────── */
+    function updateStatCard(role, delta) {
+        var el = document.getElementById('stat-' + role);
+        if (el) el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+    }
+
+    function refreshStatCards() {
+        var roles = ['user', 'lab_incharge', 'admin', 'super_admin'];
+        roles.forEach(function(role) {
+            var count = document.querySelectorAll('input[data-role="' + role + '"]:checked').length;
+            var el = document.getElementById('stat-' + role);
+            if (el) el.textContent = count;
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  EXPORT CONFIG
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.exportConfig = function() {
+        window.location.href = _buPrefix + '/api/feature-access/export/';
+        toast('Downloading configuration…', 'success');
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  IMPORT CONFIG
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.importConfig = function() {
+        var fileInput = document.getElementById('importFile');
+        if (!fileInput.files.length) {
+            toast('Please select a JSON file first.', 'error');
+            return;
+        }
+        var fd = new FormData();
+        fd.append('file', fileInput.files[0]);
+        fd.append('csrfmiddlewaretoken', csrf);
+
+        fetch(_buPrefix + '/api/feature-access/import/', {
+            method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            toast('Imported! ' + data.updated + ' permissions updated, ' + data.skipped + ' skipped.', 'success');
+            closeModal('importModal');
+            setTimeout(function() { location.reload(); }, 1200);
+        })
+        .catch(function(err) {
+            toast('Import failed. Check the file format.', 'error');
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  RESET DEFAULTS
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.resetDefaults = function() {
+        fetch(_buPrefix + '/api/feature-access/reset/', {
+            method: 'POST', headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/json'}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            toast('Reset complete! ' + data.updated + ' permissions restored to defaults.', 'success');
+            closeModal('resetModal');
+            setTimeout(function() { location.reload(); }, 1200);
+        })
+        .catch(function(err) {
+            toast('Reset failed. Please try again.', 'error');
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  COPY ROLE
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.copyRole = function() {
+        var from = document.getElementById('copyFrom').value;
+        var to = document.getElementById('copyTo').value;
+        if (!from || !to) { toast('Please select both source and target roles.', 'error'); return; }
+        if (from === to) { toast('Source and target roles must be different.', 'error'); return; }
+
+        var fd = new FormData();
+        fd.append('source_role', from);
+        fd.append('target_role', to);
+        fd.append('csrfmiddlewaretoken', csrf);
+
+        fetch(_buPrefix + '/api/feature-access/copy-role/', {
+            method: 'POST', body: fd, headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            toast('Copied permissions from ' + (ROLE_LABELS[from]||from) + ' to ' + (ROLE_LABELS[to]||to) + '.', 'success');
+            closeModal('copyRoleModal');
+            setTimeout(function() { location.reload(); }, 1200);
+        })
+        .catch(function(err) {
+            toast('Copy failed. Please try again.', 'error');
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  PERMISSION HISTORY
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.loadHistory = function() {
+        var container = document.getElementById('historyList');
+        container.innerHTML = '<p style="text-align:center;color:#888;padding:30px 0;"><i class="fas fa-spinner fa-spin"></i> Loading…</p>';
+
+        fetch(_buPrefix + '/api/feature-access/history/', {
+            headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            if (!data.entries || data.entries.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#888;padding:30px 0;"><i class="fas fa-info-circle"></i> No permission changes recorded yet.</p>';
+                return;
+            }
+            var html = '';
+            data.entries.forEach(function(e) {
+                var sevClass = (e.severity === 'critical') ? 'critical' : (e.severity === 'warning' ? 'warning' : 'info');
+                html += '<div class="fac-history-item">';
+                html += '<div class="fac-history-title">' + escHtml(e.title) + '</div>';
+                html += '<div class="fac-history-meta">';
+                html += '<span><i class="fas fa-user"></i> ' + escHtml(e.user) + '</span>';
+                html += '<span><i class="fas fa-clock"></i> ' + escHtml(e.timestamp) + '</span>';
+                html += '<span class="fac-history-severity ' + sevClass + '">' + escHtml(e.severity) + '</span>';
+                html += '</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        })
+        .catch(function(err) {
+            container.innerHTML = '<p style="text-align:center;color:var(--danger);padding:30px 0;"><i class="fas fa-exclamation-circle"></i> Failed to load history.</p>';
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 1: ROLE COMPARISON VIEW
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.runCompare = function() {
+        var a = document.getElementById('compareA').value;
+        var b = document.getElementById('compareB').value;
+        if (!a || !b) { toast('Select both roles to compare.', 'error'); return; }
+        if (a === b) { toast('Select two different roles.', 'error'); return; }
+        var container = document.getElementById('compareResults');
+        container.innerHTML = '<p style="text-align:center;color:#888;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Comparing…</p>';
+
+        fetch(_buPrefix + '/api/feature-access/compare/?role_a=' + a + '&role_b=' + b, {
+            headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            var lA = ROLE_LABELS[a] || a;
+            var lB = ROLE_LABELS[b] || b;
+            var html = '';
+            /* Stats */
+            html += '<div class="fac-compare-stats">';
+            html += '<div class="fac-compare-stat"><div class="num" style="color:var(--success);">' + data.same + '</div><div class="lbl">Same</div></div>';
+            html += '<div class="fac-compare-stat"><div class="num" style="color:#f59e0b;">' + data.diff + '</div><div class="lbl">Different</div></div>';
+            html += '<div class="fac-compare-stat"><div class="num">' + data.features.length + '</div><div class="lbl">Total</div></div>';
+            html += '</div>';
+            /* Filter buttons */
+            html += '<div class="fac-compare-filter" id="compareFilter">';
+            html += '<button class="active" onclick="filterCompare(\'all\',this)">All</button>';
+            html += '<button onclick="filterCompare(\'diff\',this)">Differences Only</button>';
+            html += '<button onclick="filterCompare(\'same\',this)">Same Only</button>';
+            html += '</div>';
+            /* Table */
+            html += '<div style="max-height:340px;overflow-y:auto;">';
+            html += '<table class="fac-compare-table">';
+            html += '<thead><tr><th>Feature</th><th>Module</th><th>' + escHtml(lA) + '</th><th>' + escHtml(lB) + '</th></tr></thead>';
+            html += '<tbody>';
+            data.features.forEach(function(f) {
+                var cls = f.different ? 'diff' : 'same';
+                html += '<tr class="' + cls + '" data-compare-type="' + cls + '">';
+                html += '<td><i class="' + escHtml(f.icon) + '" style="margin-right:6px;color:var(--text-tertiary);font-size:0.72rem;"></i>' + escHtml(f.name) + '</td>';
+                html += '<td style="font-size:0.7rem;color:var(--text-tertiary);">' + escHtml(f.module) + '</td>';
+                html += '<td class="' + (f.role_a ? 'fac-compare-check' : 'fac-compare-cross') + '">' + (f.role_a ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>') + '</td>';
+                html += '<td class="' + (f.role_b ? 'fac-compare-check' : 'fac-compare-cross') + '">' + (f.role_b ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>') + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        })
+        .catch(function() {
+            container.innerHTML = '<p style="text-align:center;color:var(--danger);padding:20px;"><i class="fas fa-exclamation-circle"></i> Comparison failed.</p>';
+        });
+    };
+
+    window.filterCompare = function(type, btn) {
+        btn.closest('.fac-compare-filter').querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelectorAll('.fac-compare-table tbody tr').forEach(function(tr) {
+            var t = tr.dataset.compareType;
+            tr.style.display = (type === 'all' || t === type) ? '' : 'none';
+        });
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  FEATURE 10: ACCESS SUMMARY REPORT
+     * ══════════════════════════════════════════════════════════════════════ */
+    window.loadSummary = function() {
+        var container = document.getElementById('summaryContent');
+        container.innerHTML = '<p style="text-align:center;color:#888;padding:30px 0;"><i class="fas fa-spinner fa-spin"></i> Loading…</p>';
+
+        fetch(_buPrefix + '/api/feature-access/summary/', {
+            headers: {'X-CSRFToken': csrf}
+        })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+            var html = '<table class="fac-summary-table">';
+            html += '<thead><tr><th style="min-width:200px;">Feature</th>';
+            data.roles.forEach(function(r) { html += '<th>' + escHtml(ROLE_LABELS[r] || r) + '</th>'; });
+            html += '</tr></thead><tbody>';
+            var lastMod = '';
+            data.features.forEach(function(f) {
+                if (f.module !== lastMod) {
+                    lastMod = f.module;
+                    html += '<tr class="fac-summary-mod-row"><td colspan="' + (data.roles.length + 1) + '">' + escHtml(f.module) + '</td></tr>';
+                }
+                html += '<tr>';
+                html += '<td><span class="fac-summary-icon"><i class="' + escHtml(f.icon) + '"></i></span>' + escHtml(f.name) + '</td>';
+                data.roles.forEach(function(r) {
+                    var v = f[r];
+                    html += '<td class="' + (v ? 'fac-compare-check' : 'fac-compare-cross') + '">' + (v ? '\u2714' : '\u2718') + '</td>';
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(function() {
+            container.innerHTML = '<p style="text-align:center;color:var(--danger);padding:30px 0;"><i class="fas fa-exclamation-circle"></i> Failed to load summary.</p>';
+        });
+    };
+
+    window.printSummary = function() {
+        var content = document.getElementById('summaryContent').innerHTML;
+        var win = window.open('', '_blank');
+        win.document.write('<!DOCTYPE html><html><head><title>FAC Summary Report</title>');
+        win.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}');
+        win.document.write('table{width:100%;border-collapse:collapse;font-size:12px;}');
+        win.document.write('th,td{padding:6px 8px;border:1px solid #ddd;text-align:center;}');
+        win.document.write('th{background:#f5f5f5;font-weight:700;text-transform:uppercase;font-size:11px;}');
+        win.document.write('td:first-child{text-align:left;}');
+        win.document.write('.fac-compare-check{color:#10b981;font-size:15px;}.fac-compare-cross{color:#ef4444;font-size:15px;}');
+        win.document.write('.fac-summary-mod-row td{background:#eef2f7;font-weight:700;font-size:11px;text-transform:uppercase;}');
+        win.document.write('.fac-summary-icon{display:inline-block;width:16px;text-align:center;margin-right:4px;color:#94a3b8;font-size:11px;}');
+        win.document.write('h1{font-size:18px;margin-bottom:4px;}p{font-size:12px;color:#666;margin-bottom:16px;}');
+        win.document.write('@media print{@page{margin:1cm;size:landscape;}}');
+        win.document.write('</' + 'style></' + 'head><body>');
+        win.document.write('<h1>Feature Access Control \u2014 Summary Report</' + 'h1>');
+        win.document.write('<p>Generated: ' + new Date().toLocaleString() + '</' + 'p>');
+        win.document.write(content);
+        win.document.write('</' + 'body></' + 'html>');
+        win.document.close();
+        win.print();
+    };
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  KEYBOARD SHORTCUTS
+     * ══════════════════════════════════════════════════════════════════════ */
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+        if (e.key === 'Escape') {
+            var modals = document.querySelectorAll('.fac-modal-overlay.open');
+            if (modals.length) {
+                modals[modals.length - 1].classList.remove('open');
+            }
+        }
+        /* Ctrl+Z → undo last change */
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && _undoStack.length) {
+            e.preventDefault();
+            performUndo();
+        }
+        /* Ctrl+P → print */
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            window.print();
+        }
+    });
+
+    /* ══════════════════════════════════════════════════════════════════════
+     *  INITIALIZE
+     * ══════════════════════════════════════════════════════════════════════ */
+    document.querySelectorAll('.fac-module').forEach(function(mod) {
+        ['user', 'lab_incharge', 'admin', 'super_admin'].forEach(function(role) {
+            syncBulkToggle(mod, role);
+        });
+    });
+    /* Init row-level bulk button states */
+    document.querySelectorAll('.fac-row').forEach(function(row) { updateRowBulkBtn(row); });
+
+})();
+</script>
+</body>
+</html>

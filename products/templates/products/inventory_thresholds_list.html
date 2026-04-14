@@ -1,0 +1,174 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Inventory Thresholds - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0B5FFF;
+        --primary-dark: #0747A6;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-container { max-width: 1500px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #0747A6 100%);
+        color: white; padding: 2rem; border-radius: 20px;
+        margin-bottom: 2rem; display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 1rem;
+        box-shadow: 0 10px 40px rgba(11, 95, 255, 0.3);
+    }
+
+    .header-content h1 {
+        font-size: 1.75rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+
+    .header-content h1 i {
+        background: rgba(255,255,255,0.2); padding: 0.6rem; border-radius: 12px;
+    }
+
+    .header-content .subtitle { opacity: 0.9; margin-top: 0.4rem; font-size: 0.95rem; }
+
+    .header-actions .btn {
+        padding: 0.6rem 1.15rem; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3); color: white;
+        background: rgba(255,255,255,0.1); cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+
+    .header-actions .btn:hover { background: rgba(255,255,255,0.25); }
+
+    .data-table-container {
+        background: white; border-radius: 16px;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color); overflow: hidden;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table thead th {
+        background: var(--bg-light); padding: 0.85rem 1rem;
+        font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
+        border-bottom: 2px solid var(--border-color); white-space: nowrap;
+    }
+
+    .data-table tbody tr { transition: background 0.15s; border-bottom: 1px solid #f1f5f9; }
+    .data-table tbody tr:hover { background: #f8fafd; }
+    .data-table td { padding: 0.75rem 1rem; font-size: 0.88rem; vertical-align: middle; }
+
+    .badge {
+        padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.72rem;
+        font-weight: 700; text-transform: uppercase;
+    }
+
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-inactive { background: #f1f5f9; color: #64748b; }
+
+    .btn-sm {
+        padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.78rem;
+        font-weight: 600; border: none; cursor: pointer; text-decoration: none;
+    }
+
+    .btn-edit { background: #dbeafe; color: #1e40af; }
+    .btn-delete { background: #fde2e2; color: #c53030; }
+
+    .empty-state { text-align: center; padding: 4rem; color: var(--text-secondary); }
+    .empty-state i { font-size: 3rem; opacity: 0.3; }
+
+    .alert-msg { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-weight: 500; }
+    .alert-msg-success { background: #dcfce7; color: #166534; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% for message in messages %}
+    <div class="alert-msg alert-msg-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-sliders-h"></i> Inventory Thresholds</h1>
+            <p class="subtitle">Configure stock level rules and automatic alert triggers for {{ stream }}</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'inventory_threshold_create' stream=stream %}" class="btn">
+                <i class="fas fa-plus"></i> New Threshold
+            </a>
+            <a href="{% url 'inventory_alerts_list' stream=stream %}" class="btn">
+                <i class="fas fa-bell"></i> Alerts
+            </a>
+        </div>
+    </div>
+
+    <div class="data-table-container">
+        {% if thresholds %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Applies To</th>
+                    <th>Target</th>
+                    <th>Min Qty</th>
+                    <th>Critical Qty</th>
+                    <th>Max Qty</th>
+                    <th>Reorder Point</th>
+                    <th>Status</th>
+                    <th>Last Checked</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in thresholds %}
+                <tr>
+                    <td style="font-weight:600;">{{ t.name }}</td>
+                    <td><span class="badge badge-active">{{ t.get_applies_to_display }}</span></td>
+                    <td>
+                        {% if t.sublevel %}{{ t.sublevel }}
+                        {% elif t.sublevel_tool %}{{ t.sublevel_tool }}
+                        {% elif t.category %}{{ t.category.name }}
+                        {% else %}Global{% endif %}
+                    </td>
+                    <td style="font-weight:600;">{{ t.minimum_quantity }}</td>
+                    <td style="font-weight:600;color:#ef4444;">{{ t.critical_quantity }}</td>
+                    <td>{{ t.maximum_quantity|default:"-" }}</td>
+                    <td>{{ t.reorder_point|default:"-" }}</td>
+                    <td>
+                        <span class="badge {% if t.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if t.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td style="font-size:0.8rem;color:var(--text-secondary);">
+                        {{ t.last_checked|date:"M d, H:i"|default:"Never" }}
+                    </td>
+                    <td>
+                        <a href="{% url 'inventory_threshold_edit' stream=stream pk=t.pk %}" class="btn-sm btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <form method="post" action="{% url 'inventory_threshold_delete' stream=stream pk=t.pk %}" style="display:inline;" onsubmit="return confirm('Delete this threshold?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-sm btn-delete"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-sliders-h"></i>
+            <h3>No Thresholds Configured</h3>
+            <p>Set up inventory thresholds to get automatic stock level alerts.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

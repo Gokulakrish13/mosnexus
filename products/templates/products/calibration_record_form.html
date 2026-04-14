@@ -1,0 +1,640 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if record %}Edit{% else %}Record{% endif %} Calibration - {{ schedule.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --indigo: #0B5FFF;
+        --indigo-dark: #0044CC;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--success-green) 0%, #059669 50%, #047857 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .breadcrumb a {
+        color: white;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+
+    .breadcrumb a:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 500px;
+        line-height: 1.5;
+    }
+
+    .schedule-info {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .schedule-info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        background: rgba(255,255,255,0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--bg-light);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-header i {
+        color: var(--success-green);
+        font-size: 1.25rem;
+    }
+
+    .form-header h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--success-green);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 640px) {
+        .form-group.full-width {
+            grid-column: span 1;
+        }
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-group label .required {
+        color: var(--danger-red);
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--success-green);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+        background: white;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .result-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .result-option {
+        position: relative;
+    }
+
+    .result-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .result-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .result-option input:checked + label {
+        border-color: var(--success-green);
+        background: var(--success-green-light);
+    }
+
+    .result-option.fail input:checked + label {
+        border-color: var(--danger-red);
+        background: var(--danger-red-light);
+    }
+
+    .result-option.conditional input:checked + label {
+        border-color: var(--warning-orange);
+        background: var(--warning-orange-light);
+    }
+
+    .result-option label i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-option.pass label i { color: var(--success-green); }
+    .result-option.fail label i { color: var(--danger-red); }
+    .result-option.conditional label i { color: var(--warning-orange); }
+
+    .result-option label span {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .file-upload {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        background: var(--bg-light);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .file-upload:hover {
+        border-color: var(--success-green);
+        background: var(--success-green-light);
+    }
+
+    .file-upload .upload-icon {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .file-upload .upload-icon i {
+        font-size: 1.75rem;
+        color: var(--success-green);
+    }
+
+    .file-upload .upload-text {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .file-upload .upload-text span {
+        color: var(--success-green);
+    }
+
+    .file-upload .upload-hint {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .file-upload .file-name {
+        font-size: 0.9rem;
+        color: var(--success-green);
+        font-weight: 600;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    .file-upload.has-file .file-name {
+        display: block;
+    }
+
+    .file-upload input {
+        display: none;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: var(--text-primary);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .errorlist li {
+        color: var(--danger-red);
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+        .result-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="{% url 'calibration_dashboard' stream %}">Calibration</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <a href="{% url 'calibration_schedule_list' stream %}">Schedules</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <a href="{% url 'calibration_schedule_detail' stream schedule.pk %}">{{ schedule.title }}</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <span>Record Calibration</span>
+            </div>
+            <h1><i class="fas fa-clipboard-check"></i> Record Calibration</h1>
+            <p class="subtitle">Record the results of a calibration performed for this schedule</p>
+            
+            <div class="schedule-info">
+                <div class="schedule-info-item">
+                    <i class="fas fa-server"></i>
+                    <span>{{ schedule.get_equipment_name }}</span>
+                </div>
+                <div class="schedule-info-item">
+                    <i class="fas fa-tag"></i>
+                    <span>{{ schedule.get_calibration_type_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="form-header">
+            <i class="fas fa-file-medical-alt"></i>
+            <h2>Calibration Record Details</h2>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data" class="form-body">
+            {% csrf_token %}
+            {% if form_error %}
+            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+            </div>
+            {% endif %}
+            
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-calendar-check"></i> Calibration Information</span>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_calibration_date">Calibration Date <span class="required">*</span></label>
+                        <input type="date" name="calibration_date" id="id_calibration_date" class="form-control" value="{{ form.calibration_date.value|default_if_none:'' }}" required>
+                        {% if form.calibration_date.errors %}{{ form.calibration_date.errors }}{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_performed_by">Performed By <span class="required">*</span></label>
+                        <input type="text" name="performed_by" id="id_performed_by" class="form-control" value="{{ form.performed_by.value|default_if_none:'' }}" placeholder="Name of person or company" required>
+                        {% if form.performed_by.errors %}{{ form.performed_by.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-check-double"></i> Calibration Result</span>
+                
+                <div class="result-options">
+                    <div class="result-option pass">
+                        <input type="radio" name="result" id="result_pass" value="pass" {% if form.result.value == 'pass' %}checked{% endif %}>
+                        <label for="result_pass">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Pass</span>
+                        </label>
+                    </div>
+                    <div class="result-option conditional">
+                        <input type="radio" name="result" id="result_conditional" value="conditional" {% if form.result.value == 'conditional' %}checked{% endif %}>
+                        <label for="result_conditional">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Conditional</span>
+                        </label>
+                    </div>
+                    <div class="result-option fail">
+                        <input type="radio" name="result" id="result_fail" value="fail" {% if form.result.value == 'fail' %}checked{% endif %}>
+                        <label for="result_fail">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Fail</span>
+                        </label>
+                    </div>
+                </div>
+                {% if form.result.errors %}{{ form.result.errors }}{% endif %}
+            </div>
+
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-clipboard"></i> Details</span>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="id_findings">Findings & Observations</label>
+                        <textarea name="findings" id="id_findings" class="form-control" placeholder="Describe calibration findings, measurements taken, any deviations observed...">{{ form.findings.value|default_if_none:'' }}</textarea>
+                        {% if form.findings.errors %}{{ form.findings.errors }}{% endif %}
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="id_corrective_actions">Corrective Actions (if any)</label>
+                        <textarea name="corrective_actions" id="id_corrective_actions" class="form-control" placeholder="Describe any adjustments or corrections made during calibration...">{{ form.corrective_actions.value|default_if_none:'' }}</textarea>
+                        {% if form.corrective_actions.errors %}{{ form.corrective_actions.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-calendar-alt"></i> Next Calibration</span>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_next_calibration_date">Next Calibration Due</label>
+                        <input type="date" name="next_calibration_date" id="id_next_calibration_date" class="form-control" value="{{ form.next_calibration_date.value|default_if_none:'' }}">
+                        <p class="help-text">Leave blank to auto-calculate based on schedule interval</p>
+                        {% if form.next_calibration_date.errors %}{{ form.next_calibration_date.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-file-upload"></i> Certificate Upload</span>
+                
+                <label class="file-upload" for="id_certificate" id="file-upload-label">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <p class="upload-text"><span>Click to upload</span> or drag and drop</p>
+                    <p class="upload-hint">Supported formats: PDF, JPG, PNG (Max 10MB)</p>
+                    <p class="file-name" id="file-name-display"></p>
+                    <input type="file" name="certificate" id="id_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                </label>
+                {% if form.certificate.errors %}{{ form.certificate.errors }}{% endif %}
+            </div>
+
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-sticky-note"></i> Additional Notes</span>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="id_notes">Notes</label>
+                        <textarea name="notes" id="id_notes" class="form-control" placeholder="Any additional notes or comments...">{{ form.notes.value|default_if_none:'' }}</textarea>
+                        {% if form.notes.errors %}{{ form.notes.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'calibration_schedule_detail' stream schedule.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// File upload label update
+document.getElementById('id_certificate').addEventListener('change', function() {
+    const fileName = this.files[0]?.name;
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const uploadLabel = document.getElementById('file-upload-label');
+    
+    if (fileName) {
+        fileNameDisplay.textContent = '✓ ' + fileName;
+        uploadLabel.classList.add('has-file');
+    } else {
+        fileNameDisplay.textContent = '';
+        uploadLabel.classList.remove('has-file');
+    }
+});
+</script>
+{% endblock %}

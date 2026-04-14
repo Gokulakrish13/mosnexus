@@ -1,0 +1,219 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Forecast Details | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    .score-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+    .score-card { background: #fff; border-radius: 14px; padding: 1.25rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+    .score-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .score-card.green::before { background: var(--success); }
+    .score-card.amber::before { background: var(--warning); }
+    .score-card.red::before { background: var(--danger); }
+    .score-card.blue::before { background: var(--info); }
+    .score-card.purple::before { background: var(--primary); }
+    .score-card .sc-value { font-size: 1.8rem; font-weight: 800; }
+    .score-card .sc-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .chart-container { position: relative; width: 100%; height: 350px; }
+
+    .summary-box { background: #f8fafc; border-radius: 10px; padding: 1.25rem; border-left: 4px solid var(--primary); font-size: 0.9rem; line-height: 1.7; color: #334155; }
+
+    .warning-list { display: flex; flex-direction: column; gap: 0.65rem; }
+    .warning-item { display: flex; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 10px; background: #fffbeb; border-left: 4px solid var(--warning); }
+    .warning-item i { color: var(--warning); margin-top: 0.15rem; }
+    .warning-item .wt { font-weight: 700; font-size: 0.85rem; }
+    .warning-item .wd { font-size: 0.8rem; color: #64748b; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    .empty-state { text-align: center; padding: 2rem; color: #94a3b8; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-chart-line"></i> Inventory Forecast</h1>
+            <div class="subtitle">{{ stream_obj.name }} — {{ forecast.forecast_days }}-day forecast · Generated {{ forecast.generated_at|date:"M d, Y H:i" }}</div>
+        </div>
+        <a href="{% url 'ai_inventory_forecast' stream=stream %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="score-row">
+        <div class="score-card blue">
+            <div class="sc-value" style="color: var(--info);">{{ forecast.current_count }}</div>
+            <div class="sc-label">Current Inventory</div>
+        </div>
+        <div class="score-card {% if forecast.trend_direction == 'increasing' %}green{% elif forecast.trend_direction == 'decreasing' %}red{% else %}blue{% endif %}">
+            <div class="sc-value" style="color: {% if forecast.trend_direction == 'increasing' %}var(--success){% elif forecast.trend_direction == 'decreasing' %}var(--danger){% else %}var(--info){% endif %};">
+                {{ forecast.predicted_end_count }}
+            </div>
+            <div class="sc-label">Predicted End Count</div>
+        </div>
+        <div class="score-card purple">
+            <div class="sc-value" style="color: var(--primary);">{{ forecast.forecast_method }}</div>
+            <div class="sc-label">Best Model</div>
+        </div>
+        <div class="score-card {% if forecast.trend_direction == 'increasing' %}green{% elif forecast.trend_direction == 'decreasing' %}red{% else %}blue{% endif %}">
+            <div class="sc-value" style="color: {% if forecast.trend_direction == 'increasing' %}var(--success){% elif forecast.trend_direction == 'decreasing' %}var(--danger){% else %}var(--info){% endif %};">
+                {% if forecast.trend_direction == 'increasing' %}<i class="fas fa-arrow-up"></i>{% elif forecast.trend_direction == 'decreasing' %}<i class="fas fa-arrow-down"></i>{% else %}<i class="fas fa-minus"></i>{% endif %}
+                {{ forecast.trend_change_rate|floatformat:1 }}%
+            </div>
+            <div class="sc-label">Trend</div>
+        </div>
+    </div>
+
+    <!-- Forecast Chart -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-chart-area"></i> Forecast Visualization</div>
+        <div class="chart-container">
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <!-- Summary -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-brain"></i> AI Summary</div>
+            <div class="summary-box">{{ forecast.summary|default:"No summary available." }}</div>
+        </div>
+
+        <!-- Threshold Warnings -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Threshold Warnings</div>
+            {% if forecast_data.threshold_warnings %}
+            <div class="warning-list">
+                {% for w in forecast_data.threshold_warnings %}
+                <div class="warning-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <div class="wt">{{ w.level|default:"Warning" }} Level Breach</div>
+                        <div class="wd">{{ w.message|default:"Inventory may breach threshold level." }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                <p>No threshold warnings — inventory levels look healthy.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ forecast_data|json_script:"forecast-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fd = JSON.parse(document.getElementById('forecast-data').textContent);
+    const historic = fd.historical || {};
+    const forecast = fd.forecast || {};
+
+    // Build datasets
+    const histDates = historic.dates || [];
+    const histValues = historic.values || [];
+    const fcDates = forecast.dates || [];
+    const fcValues = forecast.values || [];
+    const fcUpper = forecast.upper_bound || [];
+    const fcLower = forecast.lower_bound || [];
+
+    // Combine for full x-axis
+    const allDates = [...histDates, ...fcDates];
+
+    // Historical dataset (pad forecast area with null)
+    const histData = [...histValues, ...new Array(fcDates.length).fill(null)];
+    // Forecast dataset (pad historical area with null, connect last point)
+    const fcData = [...new Array(histDates.length - 1).fill(null), histValues[histValues.length - 1], ...fcValues];
+    const upperData = [...new Array(histDates.length - 1).fill(null), histValues[histValues.length - 1], ...fcUpper];
+    const lowerData = [...new Array(histDates.length - 1).fill(null), histValues[histValues.length - 1], ...fcLower];
+
+    new Chart(document.getElementById('forecastChart'), {
+        type: 'line',
+        data: {
+            labels: allDates,
+            datasets: [
+                {
+                    label: 'Historical',
+                    data: histData,
+                    borderColor: '#0B5FFF',
+                    backgroundColor: 'rgba(11,95,255,0.08)',
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 1,
+                    borderWidth: 2,
+                },
+                {
+                    label: 'Forecast',
+                    data: fcData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16,185,129,0.08)',
+                    fill: false,
+                    borderDash: [6, 3],
+                    tension: 0.3,
+                    pointRadius: 1,
+                    borderWidth: 2,
+                },
+                {
+                    label: 'Upper Bound',
+                    data: upperData,
+                    borderColor: 'rgba(16,185,129,0.2)',
+                    backgroundColor: 'rgba(16,185,129,0.05)',
+                    fill: '+1',
+                    pointRadius: 0,
+                    borderWidth: 1,
+                    borderDash: [2, 2],
+                },
+                {
+                    label: 'Lower Bound',
+                    data: lowerData,
+                    borderColor: 'rgba(16,185,129,0.2)',
+                    backgroundColor: 'rgba(16,185,129,0.05)',
+                    fill: false,
+                    pointRadius: 0,
+                    borderWidth: 1,
+                    borderDash: [2, 2],
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    ticks: { maxTicksLimit: 15, font: { size: 10 } }
+                },
+                y: { beginAtZero: true, title: { display: true, text: 'Inventory Count' } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

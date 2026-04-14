@@ -1,0 +1,130 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}AI Calibration Reports — {{ stream }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --primary-dark: #5a67d8; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; }
+
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header h1 i { font-size: 1.4rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.9rem; margin-top: 0.25rem; }
+    .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-white { background: #fff; color: #0B5FFF; }
+    .btn-white:hover { background: #f1f5ff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .schedule-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    .schedule-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; transition: all 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .schedule-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(11,95,255,0.15); transform: translateY(-2px); }
+    .schedule-card .sc-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .schedule-card .sc-meta { font-size: 0.8rem; color: #64748b; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+    .schedule-card .sc-meta span { display: flex; align-items: center; gap: 0.35rem; }
+    .schedule-card .sc-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-pass { background: #d1fae5; color: #065f46; }
+    .badge-fail { background: #fecaca; color: #991b1b; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+
+    .past-reports-table { width: 100%; border-collapse: collapse; }
+    .past-reports-table th, .past-reports-table td { padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; }
+    .past-reports-table th { font-weight: 600; color: #64748b; background: #f8fafc; }
+    .past-reports-table tr:hover { background: #f1f5f9; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-robot"></i> AI Calibration Reports</h1>
+            <div class="subtitle">Auto-generate statistical analysis reports for calibration schedules — {{ stream_obj.name }}</div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'feature_hub' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+        </div>
+    </div>
+
+    <!-- Select a schedule to generate report -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-list-check"></i> Calibration Schedules</div>
+        {% if schedules %}
+        <div class="schedule-grid">
+            {% for sch in schedules %}
+            <a href="{% url 'ai_calibration_report_generate' stream=stream schedule_id=sch.pk %}" class="schedule-card">
+                <div class="sc-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    {{ sch.title|truncatechars:40 }}
+                </div>
+                <div class="sc-meta">
+                    <span><i class="fas fa-tag"></i> {{ sch.calibration_type }}</span>
+                    <span><i class="fas fa-calendar"></i> Next: {{ sch.next_calibration_date|default:"N/A" }}</span>
+                    <span><i class="fas fa-signal"></i> {{ sch.status }}</span>
+                    <span><i class="fas fa-file-alt"></i> {{ sch.records.count }} records</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            No calibration schedules found for this stream.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Past reports -->
+    {% if past_reports %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Past Reports</div>
+        <div style="overflow-x: auto;">
+        <table class="past-reports-table">
+            <thead>
+                <tr>
+                    <th>Schedule</th>
+                    <th>Compliance Score</th>
+                    <th>Pass Rate</th>
+                    <th>Anomalies</th>
+                    <th>Generated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in past_reports %}
+                <tr>
+                    <td><strong>{{ r.calibration_schedule.title|truncatechars:35 }}</strong></td>
+                    <td>
+                        <span class="sc-badge {% if r.compliance_score >= 90 %}badge-pass{% elif r.compliance_score >= 70 %}badge-pending{% else %}badge-fail{% endif %}">
+                            {{ r.compliance_score }}%
+                        </span>
+                    </td>
+                    <td>{{ r.pass_rate }}%</td>
+                    <td>{{ r.anomaly_count }}</td>
+                    <td>{{ r.generated_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'ai_calibration_report_view' stream=stream pk=r.pk %}" class="btn btn-primary" style="padding:0.3rem 0.75rem;font-size:0.75rem;"><i class="fas fa-eye"></i> View</a>
+                        <a href="{% url 'ai_calibration_report_pdf' stream=stream pk=r.pk %}" class="btn btn-outline" style="padding:0.3rem 0.75rem;font-size:0.75rem;color:#0B5FFF;border-color:#0B5FFF;"><i class="fas fa-file-pdf"></i> PDF</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

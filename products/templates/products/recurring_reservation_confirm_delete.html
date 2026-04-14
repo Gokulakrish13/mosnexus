@@ -1,0 +1,196 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Delete Recurring Reservation - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem 1rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .delete-header {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .delete-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .delete-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .delete-body {
+        padding: 2rem;
+    }
+
+    .warning-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .warning-message p {
+        color: #991b1b;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .item-details {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .item-details h3 {
+        font-size: 1.125rem;
+        color: #1e293b;
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        color: #64748b;
+    }
+
+    .detail-value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    .btn-delete {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #b91c1c;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 640px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="delete-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h1>Delete Recurring Reservation</h1>
+        </div>
+        <div class="delete-body">
+            <div class="warning-message">
+                <p><strong>Warning:</strong> You are about to permanently delete this recurring reservation. This action cannot be undone. All associated reservation instances will also be deleted.</p>
+            </div>
+
+            <div class="item-details">
+                <h3>{{ recurring.title }}</h3>
+                <div class="detail-row">
+                    <span class="detail-label">System:</span>
+                    <span class="detail-value">{{ recurring.system.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Recurrence:</span>
+                    <span class="detail-value">{{ recurring.get_recurrence_type_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time Slot:</span>
+                    <span class="detail-value">{{ recurring.start_time|time:"H:i" }} - {{ recurring.end_time|time:"H:i" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Created By:</span>
+                    <span class="detail-value">{{ recurring.created_by.username }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Instances Created:</span>
+                    <span class="detail-value">{{ recurring.occurrences_created }}</span>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <a href="{% url 'recurring_reservations_list' stream=stream %}" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-delete">
+                        <i class="fas fa-trash"></i> Delete Permanently
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

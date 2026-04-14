@@ -1,0 +1,314 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.pk }} — {{ ticket.title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Shell ── */
+    .td-page { max-width: 1060px; margin: 0 auto; padding: 1.5rem 1.75rem; }
+
+    /* ── Header Banner ── */
+    .td-hero {
+        background: linear-gradient(135deg, #003366 0%, #0066cc 50%, #00a8cc 100%);
+        border-radius: 18px; padding: 1.5rem 2rem; color: #fff;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.5rem; position: relative; overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,51,102,0.22);
+    }
+    .td-hero::before { content:''; position:absolute; top:-60%; right:-10%; width:320px; height:320px; background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%); border-radius:50%; }
+    .td-hero-left { position: relative; z-index: 1; }
+    .td-hero-left .td-back { display: inline-flex; align-items: center; gap: 0.35rem; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.65rem; transition: color 0.15s; }
+    .td-hero-left .td-back:hover { color: #fff; }
+    .td-hero-title { display: flex; align-items: center; gap: 0.65rem; }
+    .td-hero-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.25); }
+    .td-hero-icon.bug { background: rgba(239,68,68,0.25); }
+    .td-hero-icon.feature { background: rgba(245,158,11,0.25); }
+    .td-hero-icon.enhancement { background: rgba(139,92,246,0.25); }
+    .td-hero-icon.question { background: rgba(59,130,246,0.25); }
+    .td-hero-title h1 { font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.35; }
+    .td-hero-title .td-num { font-size: 0.78rem; opacity: 0.7; font-weight: 600; }
+    .td-hero-badges { display: flex; gap: 0.45rem; margin-top: 0.65rem; flex-wrap: wrap; }
+    .td-hero-badges .hbadge { padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+    .hbadge-open { background: rgba(59,130,246,0.2); color: #bfdbfe; }
+    .hbadge-in_progress { background: rgba(245,158,11,0.2); color: #fde68a; }
+    .hbadge-resolved { background: rgba(16,185,129,0.2); color: #a7f3d0; }
+    .hbadge-closed { background: rgba(148,163,184,0.2); color: #cbd5e1; }
+    .hbadge-low { background: rgba(16,185,129,0.15); color: #a7f3d0; }
+    .hbadge-medium { background: rgba(59,130,246,0.15); color: #bfdbfe; }
+    .hbadge-high { background: rgba(245,158,11,0.15); color: #fde68a; }
+    .hbadge-critical { background: rgba(239,68,68,0.2); color: #fecaca; }
+    .hbadge-cat { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+
+    /* ── Two-Column Layout ── */
+    .td-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; align-items: start; }
+
+    /* ── Main Panel ── */
+    .td-main {}
+
+    /* ── Description Card ── */
+    .td-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 1.25rem; }
+    .td-card-head { padding: 0.85rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; font-weight: 700; color: #1e293b; }
+    .td-card-head i { color: #0066cc; font-size: 0.85rem; }
+    .td-card-body { padding: 1.15rem 1.25rem; }
+    .td-desc { font-size: 0.88rem; line-height: 1.75; color: #334155; white-space: pre-wrap; }
+
+    /* ── Conversation Card ── */
+    .td-convo { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .td-convo-head { padding: 0.85rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+    .td-convo-head .left { display: flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; font-weight: 700; color: #1e293b; }
+    .td-convo-head .left i { color: #0066cc; }
+    .reply-count { background: #e0f2fe; color: #0369a1; font-size: 0.68rem; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 20px; }
+    .td-convo-body { padding: 0.75rem 1.25rem; max-height: 480px; overflow-y: auto; }
+
+    /* ── Individual Reply ── */
+    .reply-item { display: flex; gap: 0.65rem; padding: 0.75rem 0; }
+    .reply-item:not(:last-child) { border-bottom: 1px solid #f8fafc; }
+    .reply-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+    .reply-avatar.admin { background: linear-gradient(135deg,#0066cc,#00a8cc); }
+    .reply-avatar.user { background: linear-gradient(135deg,#0B5FFF,#a78bfa); }
+    .reply-body { flex: 1; min-width: 0; }
+    .reply-header { font-size: 0.76rem; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+    .reply-header strong { font-weight: 700; color: #1e293b; }
+    .reply-header .time { color: #94a3b8; font-size: 0.72rem; }
+    .reply-header .admin-tag { background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; font-size: 0.6rem; font-weight: 700; padding: 1px 7px; border-radius: 10px; }
+    .reply-msg { font-size: 0.85rem; color: #334155; line-height: 1.65; background: #f8fafc; padding: 0.65rem 0.9rem; border-radius: 4px 12px 12px 12px; border: 1px solid #e2e8f0; }
+    .reply-msg.admin-reply { background: linear-gradient(135deg, rgba(0,102,204,0.04), rgba(0,168,204,0.04)); border-color: rgba(0,102,204,0.12); }
+
+    .td-empty-convo { text-align: center; color: #94a3b8; font-size: 0.84rem; padding: 2.5rem 1rem; }
+    .td-empty-convo i { font-size: 1.6rem; display: block; margin-bottom: 0.5rem; color: #cbd5e1; }
+
+    /* ── Reply Input ── */
+    .td-convo-foot { padding: 0.75rem 1.25rem; border-top: 1px solid #f1f5f9; display: flex; gap: 0.5rem; background: #fafbfc; }
+    .td-convo-foot textarea { flex: 1; padding: 0.6rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.85rem; font-family: inherit; resize: none; min-height: 44px; max-height: 130px; transition: border 0.2s, box-shadow 0.2s; }
+    .td-convo-foot textarea:focus { border-color: #0066cc; outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.08); }
+    .reply-send { width: 44px; height: 44px; border-radius: 12px; border: none; background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 12px rgba(0,102,204,0.28); transition: all 0.2s; flex-shrink: 0; }
+    .reply-send:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,102,204,0.38); }
+
+    /* ── Sidebar ── */
+    .td-sidebar {}
+    .td-side-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 1rem; }
+    .td-side-card .side-head { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .td-side-card .side-body { padding: 0.85rem 1rem; }
+    .td-meta-row { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0; font-size: 0.82rem; }
+    .td-meta-row:not(:last-child) { border-bottom: 1px solid #f8fafc; }
+    .td-meta-row .label { color: #64748b; font-weight: 500; }
+    .td-meta-row .value { font-weight: 600; color: #1e293b; }
+    .badge { padding: 0.18rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+    .badge-open { background: #dbeafe; color: #1d4ed8; }
+    .badge-in_progress { background: #fef3c7; color: #92400e; }
+    .badge-resolved { background: #d1fae5; color: #065f46; }
+    .badge-closed { background: #f1f5f9; color: #64748b; }
+    .badge-low { background: #f0fdf4; color: #166534; }
+    .badge-medium { background: #dbeafe; color: #1d4ed8; }
+    .badge-high { background: #fef3c7; color: #92400e; }
+    .badge-critical { background: #fee2e2; color: #991b1b; }
+
+    .td-user-chip { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .td-user-chip .mini-av { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; flex-shrink: 0; }
+
+    /* ── Admin Actions Sidebar ── */
+    .td-admin-section { padding: 0.85rem 1rem; }
+    .td-admin-section label { font-weight: 600; font-size: 0.78rem; color: #475569; display: block; margin-bottom: 0.3rem; }
+    .td-admin-section select { width: 100%; padding: 0.45rem 0.65rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.82rem; font-family: inherit; margin-bottom: 0.6rem; transition: border 0.2s; }
+    .td-admin-section select:focus { border-color: #0066cc; outline: none; }
+    .td-admin-btn { width: 100%; padding: 0.5rem; border: none; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; color: #fff; background: linear-gradient(135deg,#0066cc,#00a8cc); box-shadow: 0 2px 8px rgba(0,102,204,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-family: inherit; }
+    .td-admin-btn:hover { box-shadow: 0 4px 16px rgba(0,102,204,0.3); transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+        .td-layout { grid-template-columns: 1fr; }
+        .td-sidebar { order: -1; }
+        .td-hero { padding: 1.25rem 1.5rem; }
+    }
+</style>
+
+<div class="td-page">
+    <!-- Hero Banner -->
+    <div class="td-hero">
+        <div class="td-hero-left">
+            <a href="{% url 'support_ticket_list' %}" class="td-back"><i class="fas fa-arrow-left"></i> Back to Support Center</a>
+            <div class="td-hero-title">
+                <div class="td-hero-icon {{ ticket.category }}"><i class="fas {{ ticket.category_icon }}"></i></div>
+                <div>
+                    <div class="td-num">Ticket #{{ ticket.pk }}</div>
+                    <h1>{{ ticket.title }}</h1>
+                </div>
+            </div>
+            <div class="td-hero-badges">
+                <span class="hbadge hbadge-{{ ticket.status }}" id="statusBadge">{{ ticket.get_status_display }}</span>
+                <span class="hbadge hbadge-{{ ticket.priority }}">{{ ticket.get_priority_display }} Priority</span>
+                <span class="hbadge hbadge-cat">{{ ticket.get_category_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two-Column Layout -->
+    <div class="td-layout">
+        <!-- Main Content -->
+        <div class="td-main">
+            <!-- Description -->
+            <div class="td-card">
+                <div class="td-card-head"><i class="fas fa-align-left"></i> Description</div>
+                <div class="td-card-body">
+                    <div class="td-desc">{{ ticket.description }}</div>
+                </div>
+            </div>
+
+            <!-- Conversation -->
+            <div class="td-convo">
+                <div class="td-convo-head">
+                    <div class="left"><i class="fas fa-comments"></i> Conversation</div>
+                    <span class="reply-count" id="replyCount">{{ replies|length }}</span>
+                </div>
+                <div class="td-convo-body" id="repliesContainer">
+                    {% for r in replies %}
+                    <div class="reply-item">
+                        <div class="reply-avatar {% if r.is_admin_reply %}admin{% else %}user{% endif %}">{{ r.user.username|make_list|first|upper }}</div>
+                        <div class="reply-body">
+                            <div class="reply-header">
+                                <strong>{{ r.user.username }}</strong>
+                                {% if r.is_admin_reply %}<span class="admin-tag">Admin</span>{% endif %}
+                                <span class="time">{{ r.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                            <div class="reply-msg {% if r.is_admin_reply %}admin-reply{% endif %}">{{ r.message }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="td-empty-convo"><i class="fas fa-comment-dots"></i>No replies yet. Start the conversation below.</div>
+                    {% endfor %}
+                </div>
+                <div class="td-convo-foot">
+                    <textarea id="replyInput" placeholder="Type your reply..." rows="1"
+                        onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendReply();}"
+                        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,130)+'px';"></textarea>
+                    <button class="reply-send" onclick="sendReply()" title="Send"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="td-sidebar">
+            <!-- Details Card -->
+            <div class="td-side-card">
+                <div class="side-head">Details</div>
+                <div class="side-body">
+                    <div class="td-meta-row"><span class="label">Status</span><span class="value"><span class="badge badge-{{ ticket.status }}" id="statusBadgeSide">{{ ticket.get_status_display }}</span></span></div>
+                    <div class="td-meta-row"><span class="label">Priority</span><span class="value"><span class="badge badge-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></span></div>
+                    <div class="td-meta-row"><span class="label">Category</span><span class="value">{{ ticket.get_category_display }}</span></div>
+                    <div class="td-meta-row"><span class="label">Created</span><span class="value">{{ ticket.created_at|date:"M d, Y" }}</span></div>
+                </div>
+            </div>
+
+            <!-- People Card -->
+            <div class="td-side-card">
+                <div class="side-head">People</div>
+                <div class="side-body">
+                    <div class="td-meta-row">
+                        <span class="label">Raised by</span>
+                        <span class="value"><span class="td-user-chip"><span class="mini-av">{{ ticket.created_by.username|make_list|first|upper }}</span> {{ ticket.created_by.username }}</span></span>
+                    </div>
+                    <div class="td-meta-row">
+                        <span class="label">Assigned to</span>
+                        <span class="value">{% if ticket.assigned_to %}<span class="td-user-chip"><span class="mini-av">{{ ticket.assigned_to.username|make_list|first|upper }}</span> {{ ticket.assigned_to.username }}</span>{% else %}<span style="color:#94a3b8;font-weight:400;font-size:0.8rem;">Unassigned</span>{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if is_admin %}
+            <!-- Admin Actions Card -->
+            <div class="td-side-card">
+                <div class="side-head"><i class="fas fa-shield-alt" style="color:#0066cc;margin-right:4px;font-size:0.7rem;"></i> Admin Actions</div>
+                <div class="td-admin-section">
+                    <label>Change Status</label>
+                    <select id="statusSelect">
+                        <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>Open</option>
+                        <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                        <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                    <button class="td-admin-btn" onclick="updateStatus()"><i class="fas fa-check"></i> Update Status</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+const TICKET_ID = {{ ticket.pk }};
+const _buPrefix = (function(){ const m=window.location.pathname.match(/^\/bu\/[^/]+\//); return m?m[0]:'/'; })();
+function getCsrf(){ return document.querySelector('[name=csrfmiddlewaretoken]')?.value||'{{ csrf_token }}'; }
+const IS_ADMIN = {{ is_admin|yesno:"true,false" }};
+
+function escapeHtml(s){ if(!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function sendReply(){
+    const input=document.getElementById('replyInput');
+    const text=input.value.trim();
+    if(!text) return;
+    fetch(`${_buPrefix}support/${TICKET_ID}/`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+        body:JSON.stringify({action:'reply',message:text}),
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        if(data.id){appendReply(data);input.value='';input.style.height='auto';}
+        else{alert(data.error||'Failed');}
+    });
+}
+
+function appendReply(r){
+    const emptyEl=document.querySelector('.td-empty-convo');
+    if(emptyEl) emptyEl.remove();
+    const container=document.getElementById('repliesContainer');
+    const div=document.createElement('div');
+    div.className='reply-item';
+    const initial=(r.user||'U').charAt(0).toUpperCase();
+    const adminTag=r.is_admin_reply?'<span class="admin-tag">Admin</span>':'';
+    const adminClass=r.is_admin_reply?'admin':'user';
+    const msgClass=r.is_admin_reply?'admin-reply':'';
+    div.innerHTML=`
+        <div class="reply-avatar ${adminClass}">${escapeHtml(initial)}</div>
+        <div class="reply-body">
+            <div class="reply-header"><strong>${escapeHtml(r.user)}</strong>${adminTag}<span class="time">${escapeHtml(r.created_at)}</span></div>
+            <div class="reply-msg ${msgClass}">${escapeHtml(r.message)}</div>
+        </div>`;
+    container.appendChild(div);
+    // Update count
+    const cnt=document.getElementById('replyCount');
+    cnt.textContent=parseInt(cnt.textContent||'0')+1;
+    div.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function updateStatus(){
+    const status=document.getElementById('statusSelect').value;
+    fetch(`${_buPrefix}support/${TICKET_ID}/`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+        body:JSON.stringify({action:'update_status',status:status}),
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        if(data.status){ location.reload(); }
+        else{ alert(data.error||'Failed'); }
+    });
+}
+
+// Poll for new replies every 10s
+let _lastReplyId=0;
+document.querySelectorAll('.reply-item').forEach(()=>_lastReplyId++);
+setInterval(()=>{
+    fetch(`${_buPrefix}support/${TICKET_ID}/`,{headers:{'Accept':'application/json'}})
+    .then(r=>r.json())
+    .then(data=>{
+        if(data.replies&&data.replies.length>_lastReplyId){
+            const newReplies=data.replies.slice(_lastReplyId);
+            newReplies.forEach(r=>appendReply(r));
+            _lastReplyId=data.replies.length;
+        }
+    })
+    .catch(()=>{});
+},10000);
+</script>
+{% endblock %}

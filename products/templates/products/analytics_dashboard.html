@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard - IGT MoS Inventory</title>
+    <title>Analytics Dashboard - {{ BU_TITLE|default:'NexusOps' }} Inventory</title>
     {% load static %}
     <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
     
-    <!-- Modern CSS Framework and Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
     
     <style>
         :root {
@@ -29,11 +28,11 @@
             --danger-light: #fee2e2;
             --info: #0891b2;
             --info-light: #cffafe;
-            --purple: #7c3aed;
-            --purple-light: #ede9fe;
-            --orange: #ea580c;
+            --purple: #0044CC;
+            --purple-light: #e8f0fe;
+            --orange: #b8860b;
             --orange-light: #ffedd5;
-            --pink: #db2777;
+            --pink: #0044CC;
             --pink-light: #fce7f3;
             --bg-body: #f8fafc;
             --bg-white: #ffffff;
@@ -400,12 +399,12 @@
     </div>
 
     <nav class="top-navbar">
-        <a href="/dashboard/" class="navbar-brand">
+        <a href="{% url 'dashboard' %}" class="navbar-brand">
             <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo">
-            <span class="navbar-title">IGT MoS Inventory</span>
+            <span class="navbar-title">{{ BU_TITLE|default:'NexusOps' }} Inventory</span>
         </a>
         <div class="navbar-actions">
-            <a href="/dashboard/" class="nav-btn nav-btn-ghost"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a href="{% url 'dashboard' %}" class="nav-btn nav-btn-ghost"><i class="fas fa-home"></i><span>Dashboard</span></a>
             <button class="nav-btn nav-btn-ghost" onclick="refreshData()"><i class="fas fa-sync-alt"></i><span>Refresh</span></button>
             <button class="nav-btn nav-btn-primary" onclick="exportDashboard()"><i class="fas fa-download"></i><span>Export</span></button>
         </div>
@@ -414,7 +413,7 @@
     <div class="main-container">
         <div class="breadcrumb-container">
             <nav class="breadcrumb">
-                <a href="/dashboard/"><i class="fas fa-home"></i> Home</a>
+                <a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Home</a>
                 <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
                 <span class="breadcrumb-current">Analytics Dashboard</span>
             </nav>
@@ -486,6 +485,10 @@
             <button class="tab-btn active" data-tab="overview"><i class="fas fa-chart-pie"></i> Overview</button>
             <button class="tab-btn" data-tab="products"><i class="fas fa-box"></i> Products</button>
             <button class="tab-btn" data-tab="systems"><i class="fas fa-server"></i> Systems</button>
+            <button class="tab-btn" data-tab="allocation"><i class="fas fa-calendar-check"></i> Allocation & Reservations</button>
+            <button class="tab-btn" data-tab="calibration"><i class="fas fa-tools"></i> Calibration & Compliance</button>
+            <button class="tab-btn" data-tab="lifecycle"><i class="fas fa-recycle"></i> Lifecycle & Maintenance</button>
+            <button class="tab-btn" data-tab="ai"><i class="fas fa-brain"></i> AI & Intelligence</button>
             <button class="tab-btn" data-tab="activity"><i class="fas fa-clock"></i> Activity</button>
         </div>
 
@@ -538,6 +541,57 @@
                         <div class="stat-value">{{ total_active_users }}</div>
                         <div class="stat-label">Active Users</div>
                         <span class="stat-change positive"><i class="fas fa-user-clock"></i> {{ recent_sessions }} recent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Overview Stats -->
+            <div class="stats-grid fade-in fade-in-delay-2" style="grid-template-columns: repeat(6, 1fr); margin-bottom: 1.5rem;">
+                <div class="stat-card">
+                    <div class="stat-icon warning"><i class="fas fa-wrench"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_maint_events }}</div>
+                        <div class="stat-label">Maintenance Events</div>
+                        <span class="stat-change {% if overdue_maint > 0 %}negative{% else %}positive{% endif %}"><i class="fas fa-{% if overdue_maint > 0 %}exclamation-triangle{% else %}check{% endif %}"></i> {{ overdue_maint }} overdue</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon danger"><i class="fas fa-bell"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_inv_alerts }}</div>
+                        <div class="stat-label">Inventory Alerts</div>
+                        <span class="stat-change {% if critical_inv_alerts > 0 %}negative{% else %}positive{% endif %}"><i class="fas fa-exclamation-circle"></i> {{ critical_inv_alerts }} critical</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_audit_entries }}</div>
+                        <div class="stat-label">Audit Log Entries</div>
+                        <span class="stat-change neutral"><i class="fas fa-clock"></i> {{ recent_audit_entries }} recent</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success"><i class="fas fa-network-wired"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_holistic_systems }}</div>
+                        <div class="stat-label">Holistic Systems</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-recycle"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_lifecycle_records }}</div>
+                        <div class="stat-label">Lifecycle Records</div>
+                        <span class="stat-change neutral"><i class="fas fa-exchange-alt"></i> {{ recent_transitions }} transitions</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-brain"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_ai_cal_reports|add:total_ocr_processed|add:total_nl_queries }}</div>
+                        <div class="stat-label">AI Operations</div>
+                        <span class="stat-change positive"><i class="fas fa-robot"></i> Active</span>
                     </div>
                 </div>
             </div>
@@ -726,6 +780,12 @@
                 <div class="stat-card"><div class="stat-icon info"><i class="fas fa-building"></i></div><div class="stat-content"><div class="stat-value">{{ total_floors }}</div><div class="stat-label">Total Floors</div></div></div>
                 <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-sticky-note"></i></div><div class="stat-content"><div class="stat-value">{{ total_notes }}</div><div class="stat-label">Total Notes</div><span class="stat-change positive"><i class="fas fa-arrow-up"></i> +{{ recent_notes }} this month</span></div></div>
             </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-network-wired"></i></div><div class="stat-content"><div class="stat-value">{{ total_holistic_systems }}</div><div class="stat-label">Holistic Systems</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-laptop"></i></div><div class="stat-content"><div class="stat-value">{{ total_operating_systems }}</div><div class="stat-label">Operating Systems</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-share-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_shared_notes }}</div><div class="stat-label">Shared Notes</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-file-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_doc_versions }}</div><div class="stat-label">Document Versions</div></div></div>
+            </div>
             <div class="charts-row">
                 <div class="chart-card tall">
                     <div class="chart-card-header"><div class="chart-title"><i class="fas fa-heartbeat"></i>System Health Overview</div></div>
@@ -746,6 +806,277 @@
                     <div class="chart-card-body"><div class="chart-container"><canvas id="floorDistChart"></canvas></div></div>
                 </div>
             </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-network-wired"></i>Holistic System Availability</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="holisticStatusChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-title"><i class="fas fa-lightbulb"></i>Systems Overview</div>
+                    </div>
+                    <div class="chart-card-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem;">
+                        <div class="insight-item {% if total_holistic_systems > 0 %}success{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-network-wired"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Holistic Systems</div>
+                                <div class="insight-description">{{ total_holistic_systems }} holistic system(s) registered</div>
+                            </div>
+                        </div>
+                        <div class="insight-item info">
+                            <div class="insight-icon"><i class="fas fa-laptop"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Operating Systems</div>
+                                <div class="insight-description">{{ total_operating_systems }} active OS configurations</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if active_downtime > 0 %}danger{% else %}success{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-power-off"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Downtime Status</div>
+                                <div class="insight-description">{% if active_downtime > 0 %}{{ active_downtime }} active downtime event(s){% else %}No active downtime{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allocation & Reservations Tab -->
+        <div class="tab-content" id="tab-allocation">
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-calendar-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_allocations }}</div><div class="stat-label">Total Allocations</div><span class="stat-change positive"><i class="fas fa-arrow-up"></i> +{{ recent_allocations }} this month</span></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-calendar-check"></i></div><div class="stat-content"><div class="stat-value">{{ active_allocations }}</div><div class="stat-label">Active Allocations</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-redo"></i></div><div class="stat-content"><div class="stat-value">{{ total_reservations }}</div><div class="stat-label">Recurring Reservations</div><span class="stat-change positive"><i class="fas fa-play-circle"></i> {{ active_reservations }} active</span></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-pause-circle"></i></div><div class="stat-content"><div class="stat-value">{{ paused_reservations }}</div><div class="stat-label">Paused Reservations</div></div></div>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-hourglass-half"></i></div><div class="stat-content"><div class="stat-value">{{ total_waitlist }}</div><div class="stat-label">Waitlist Entries</div><span class="stat-change neutral"><i class="fas fa-clock"></i> {{ waiting_entries }} waiting</span></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-check-double"></i></div><div class="stat-content"><div class="stat-value">{{ fulfilled_entries }}</div><div class="stat-label">Fulfilled from Waitlist</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-bolt"></i></div><div class="stat-content"><div class="stat-value">{{ total_conflicts }}</div><div class="stat-label">Reservation Conflicts</div><span class="stat-change {% if pending_conflicts > 0 %}negative{% else %}positive{% endif %}"><i class="fas fa-exclamation-circle"></i> {{ pending_conflicts }} pending</span></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-clock"></i></div><div class="stat-content"><div class="stat-value">{{ expired_entries }}</div><div class="stat-label">Expired Waitlist</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-ban"></i></div><div class="stat-content"><div class="stat-value">{{ not_allocated_entries }}</div><div class="stat-label">Not Allocated</div></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-redo"></i>Reservation Recurrence Types</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="reservationRecurrenceChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-list-ol"></i>Waitlist Status Distribution</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="waitlistStatusChart"></canvas></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calibration & Compliance Tab -->
+        <div class="tab-content" id="tab-calibration">
+            <h5 style="margin: 1.5rem 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-gavel" style="color: var(--primary);"></i> Calibration & Compliance</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-tools"></i></div><div class="stat-content"><div class="stat-value">{{ total_calibrations }}</div><div class="stat-label">Total Calibration Schedules</div><span class="stat-change positive"><i class="fas fa-check"></i> {{ calibrations_completed }} completed</span></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-exclamation-circle"></i></div><div class="stat-content"><div class="stat-value">{{ calibrations_overdue }}</div><div class="stat-label">Overdue Calibrations</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-bell"></i></div><div class="stat-content"><div class="stat-value">{{ calibrations_due }}</div><div class="stat-label">Calibrations Due</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-spinner"></i></div><div class="stat-content"><div class="stat-value">{{ calibrations_in_progress }}</div><div class="stat-label">In Progress</div></div></div>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-clipboard-check"></i></div><div class="stat-content"><div class="stat-value">{{ total_cal_records }}</div><div class="stat-label">Calibration Records</div><span class="stat-change positive"><i class="fas fa-check-circle"></i> {{ cal_pass_rate }} passed</span></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-times-circle"></i></div><div class="stat-content"><div class="stat-value">{{ cal_fail_count }}</div><div class="stat-label">Failed Calibrations</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-certificate"></i></div><div class="stat-content"><div class="stat-value">{{ total_certificates }}</div><div class="stat-label">Certificates</div><span class="stat-change {% if expired_certificates > 0 %}negative{% else %}positive{% endif %}"><i class="fas fa-{% if expired_certificates > 0 %}exclamation-triangle{% else %}check{% endif %}"></i> {{ expired_certificates }} expired</span></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-hourglass-end"></i></div><div class="stat-content"><div class="stat-value">{{ expiring_soon_certificates }}</div><div class="stat-label">Certificates Expiring Soon</div></div></div>
+            </div>
+
+            <!-- Regulatory & Compliance Section -->
+            <h5 style="margin: 1.5rem 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-gavel" style="color: var(--primary);"></i> Regulatory & Compliance</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-balance-scale"></i></div><div class="stat-content"><div class="stat-value">{{ total_requirements }}</div><div class="stat-label">Regulatory Requirements</div><span class="stat-change positive"><i class="fas fa-check-circle"></i> {{ req_compliant }} compliant</span></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-content"><div class="stat-value">{{ req_partial }}</div><div class="stat-label">Partially Compliant</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-ban"></i></div><div class="stat-content"><div class="stat-value">{{ req_non_compliant }}</div><div class="stat-label">Non-Compliant</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-search"></i></div><div class="stat-content"><div class="stat-value">{{ req_under_review }}</div><div class="stat-label">Under Review</div></div></div>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-file-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_comp_docs }}</div><div class="stat-label">Compliance Documents</div><span class="stat-change positive"><i class="fas fa-check"></i> {{ approved_docs }} approved</span></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-file-signature"></i></div><div class="stat-content"><div class="stat-value">{{ pending_review_docs }}</div><div class="stat-label">Pending Review</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-bell"></i></div><div class="stat-content"><div class="stat-value">{{ active_comp_alerts }}</div><div class="stat-label">Active Compliance Alerts</div><span class="stat-change {% if critical_alerts > 0 %}negative{% else %}neutral{% endif %}"><i class="fas fa-exclamation-circle"></i> {{ critical_alerts }} critical</span></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-tasks"></i></div><div class="stat-content"><div class="stat-value">{{ total_checklists }}</div><div class="stat-label">Reg. Checklists</div><span class="stat-change positive"><i class="fas fa-check-double"></i> {{ completed_checklists }} done</span></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-tools"></i>Calibration by Type</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="calibrationTypeChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-pie"></i>Calibration Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="calibrationStatusChart"></canvas></div></div>
+                </div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-gavel"></i>Regulatory Compliance Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="regulatoryStatusChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-title"><i class="fas fa-lightbulb"></i>Compliance Overview</div>
+                    </div>
+                    <div class="chart-card-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem;">
+                        <div class="insight-item {% if calibrations_overdue > 0 %}danger{% else %}success{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-{% if calibrations_overdue > 0 %}exclamation-circle{% else %}check-circle{% endif %}"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Calibration Health</div>
+                                <div class="insight-description">{% if calibrations_overdue > 0 %}{{ calibrations_overdue }} overdue calibration(s) need immediate attention{% else %}All calibrations are on track{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if expired_certificates > 0 %}warning{% else %}success{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-certificate"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Certificate Status</div>
+                                <div class="insight-description">{% if expired_certificates > 0 %}{{ expired_certificates }} expired & {{ expiring_soon_certificates }} expiring soon{% else %}All certificates valid{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if req_non_compliant > 0 %}danger{% elif req_partial > 0 %}warning{% else %}success{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-balance-scale"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Regulatory Compliance</div>
+                                <div class="insight-description">{{ req_compliant }} of {{ total_requirements }} requirements are fully compliant{% if req_non_compliant > 0 %} — {{ req_non_compliant }} non-compliant{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if active_comp_alerts > 0 %}warning{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-bell"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Active Alerts</div>
+                                <div class="insight-description">{{ active_comp_alerts }} active alert(s){% if urgent_alerts > 0 %}, {{ urgent_alerts }} urgent{% endif %}{% if critical_alerts > 0 %}, {{ critical_alerts }} critical{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lifecycle & Maintenance Tab -->
+        <div class="tab-content" id="tab-lifecycle">
+            <h5 style="margin: 0 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-recycle" style="color: var(--primary);"></i> Asset Lifecycle Management</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-recycle"></i></div><div class="stat-content"><div class="stat-value">{{ total_lifecycle_records }}</div><div class="stat-label">Lifecycle Records</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-exchange-alt"></i></div><div class="stat-content"><div class="stat-value">{{ recent_transitions }}</div><div class="stat-label">Recent Transitions (30d)</div></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-dollar-sign"></i></div><div class="stat-content"><div class="stat-value">${{ total_purchase_cost|floatformat:0 }}</div><div class="stat-label">Total Purchase Cost</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-tools"></i></div><div class="stat-content"><div class="stat-value">${{ total_maintenance_cost|floatformat:0 }}</div><div class="stat-label">Total Maintenance Cost</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-shield-alt"></i></div><div class="stat-content"><div class="stat-value">{{ warranty_status_json|length }}</div><div class="stat-label">Warranty Tracked</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-warehouse"></i></div><div class="stat-content"><div class="stat-value">{{ total_inv_thresholds }}</div><div class="stat-label">Active Thresholds</div></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-layer-group"></i>Lifecycle Stage Distribution</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="lifecycleStageChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-heartbeat"></i>Asset Condition</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="lifecycleConditionChart"></canvas></div></div>
+                </div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-shield-alt"></i>Warranty Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="warrantyStatusChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-exclamation-triangle"></i>Inventory Alert Types</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="invAlertTypeChart"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- Maintenance Section -->
+            <h5 style="margin: 1.5rem 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-wrench" style="color: var(--primary);"></i> Maintenance Calendar</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-calendar-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_maint_events }}</div><div class="stat-label">Total Events</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-clock"></i></div><div class="stat-content"><div class="stat-value">{{ scheduled_maint }}</div><div class="stat-label">Scheduled</div></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-spinner"></i></div><div class="stat-content"><div class="stat-value">{{ in_progress_maint }}</div><div class="stat-label">In Progress</div></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-check-circle"></i></div><div class="stat-content"><div class="stat-value">{{ completed_maint }}</div><div class="stat-label">Completed</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-exclamation-circle"></i></div><div class="stat-content"><div class="stat-value">{{ overdue_maint }}</div><div class="stat-label">Overdue</div></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-wrench"></i>Maintenance by Type</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="maintByTypeChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-pie"></i>Maintenance Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="maintStatusChart"></canvas></div></div>
+                </div>
+            </div>
+
+            <!-- Inventory Alerts Section -->
+            <h5 style="margin: 1.5rem 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-bell" style="color: var(--primary);"></i> Inventory Alerts</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-bell"></i></div><div class="stat-content"><div class="stat-value">{{ total_inv_alerts }}</div><div class="stat-label">Total Alerts</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-content"><div class="stat-value">{{ active_inv_alerts }}</div><div class="stat-label">Active Alerts</div></div></div>
+                <div class="stat-card"><div class="stat-icon danger"><i class="fas fa-skull-crossbones"></i></div><div class="stat-content"><div class="stat-value">{{ critical_inv_alerts }}</div><div class="stat-label">Critical Alerts</div></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-check-double"></i></div><div class="stat-content"><div class="stat-value">{{ resolved_inv_alerts }}</div><div class="stat-label">Resolved Alerts</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-sliders-h"></i></div><div class="stat-content"><div class="stat-value">{{ total_inv_thresholds }}</div><div class="stat-label">Active Thresholds</div></div></div>
+            </div>
+        </div>
+
+        <!-- AI & Intelligence Tab -->
+        <div class="tab-content" id="tab-ai">
+            <h5 style="margin: 0 0 1rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-brain" style="color: var(--primary);"></i> AI Features & Intelligence</h5>
+            <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-file-medical-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_ai_cal_reports }}</div><div class="stat-label">AI Calibration Reports</div></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-file-image"></i></div><div class="stat-content"><div class="stat-value">{{ total_ocr_processed }}</div><div class="stat-label">OCR Processed</div><span class="stat-change positive"><i class="fas fa-check"></i> {{ ocr_success }} success</span></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-comments"></i></div><div class="stat-content"><div class="stat-value">{{ total_nl_queries }}</div><div class="stat-label">NL Queries</div><span class="stat-change positive"><i class="fas fa-check-circle"></i> {{ nl_successful }} successful</span></div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-chart-line"></i></div><div class="stat-content"><div class="stat-value">{{ total_forecasts }}</div><div class="stat-label">Inventory Forecasts</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-calendar-check"></i></div><div class="stat-content"><div class="stat-value">{{ total_scheduler_recs }}</div><div class="stat-label">Scheduler Recs</div><span class="stat-change positive"><i class="fas fa-thumbs-up"></i> {{ scheduler_accepted }} accepted</span></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-cogs"></i></div><div class="stat-content"><div class="stat-value">{{ total_model_trainings }}</div><div class="stat-label">Model Trainings</div><span class="stat-change positive"><i class="fas fa-check"></i> {{ successful_trainings }} success</span></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-file-image"></i>OCR Processing Status</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="ocrStatusChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-comments"></i>NL Query Feedback</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="nlFeedbackChart"></canvas></div></div>
+                </div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-title"><i class="fas fa-lightbulb"></i>AI Intelligence Summary</div>
+                    </div>
+                    <div class="chart-card-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem;">
+                        <div class="insight-item {% if total_ocr_processed > 0 %}success{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-file-image"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">OCR Processing</div>
+                                <div class="insight-description">{{ total_ocr_processed }} documents processed, {{ ocr_success }} successful{% if total_ocr_processed > 0 %} ({{ ocr_success|divisibleby:1 }}% success rate){% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if total_nl_queries > 0 %}success{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-comments"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Natural Language Queries</div>
+                                <div class="insight-description">{{ total_nl_queries }} queries processed, {{ nl_successful }} returned successful results</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if total_scheduler_recs > 0 %}success{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Smart Scheduler</div>
+                                <div class="insight-description">{{ total_scheduler_recs }} recommendations made, {{ scheduler_accepted }} accepted by users</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if successful_trainings > 0 %}success{% else %}warning{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-cogs"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Model Training</div>
+                                <div class="insight-description">{{ total_model_trainings }} training sessions, {{ successful_trainings }} successful</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-bar"></i>AI Feature Usage</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="aiFeatureUsageChart"></canvas></div></div>
+                </div>
+            </div>
         </div>
 
         <!-- Activity Tab -->
@@ -756,7 +1087,14 @@
                 <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-user-clock"></i></div><div class="stat-content"><div class="stat-value">{{ recent_sessions }}</div><div class="stat-label">Active Users (30d)</div></div></div>
                 <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-running"></i></div><div class="stat-content"><div class="stat-value">{{ project_status.Running }}</div><div class="stat-label">Running Projects</div></div></div>
             </div>
-            <div class="charts-row">
+            <!-- Audit Log Stats -->
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div class="stat-card"><div class="stat-icon primary"><i class="fas fa-clipboard-list"></i></div><div class="stat-content"><div class="stat-value">{{ total_audit_entries }}</div><div class="stat-label">Total Audit Log Entries</div></div></div>
+                <div class="stat-card"><div class="stat-icon info"><i class="fas fa-history"></i></div><div class="stat-content"><div class="stat-value">{{ recent_audit_entries }}</div><div class="stat-label">Audit Entries (30d)</div></div></div>
+                <div class="stat-card"><div class="stat-icon warning"><i class="fas fa-share-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_shared_notes }}</div><div class="stat-label">Shared Notes</div></div></div>
+                <div class="stat-card"><div class="stat-icon success"><i class="fas fa-file-alt"></i></div><div class="stat-content"><div class="stat-value">{{ total_doc_versions }}</div><div class="stat-label">Document Versions</div></div></div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
                 <div class="chart-card tall">
                     <div class="chart-card-header"><div class="chart-title"><i class="fas fa-tasks"></i>Project Status Distribution</div></div>
                     <div class="chart-card-body"><div class="chart-container"><canvas id="projectDetailChart"></canvas></div></div>
@@ -766,11 +1104,63 @@
                     <div class="sidebar-card-body" id="topContributorsDetailList"></div>
                 </div>
             </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-clipboard-list"></i>Audit Log by Module (30d)</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="auditByModuleChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-bolt"></i>Audit Log by Action (30d)</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="auditByActionChart"></canvas></div></div>
+                </div>
+            </div>
+            <div class="charts-row" style="margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-card-header"><div class="chart-title"><i class="fas fa-chart-bar"></i>Most Visited Pages (30d)</div></div>
+                    <div class="chart-card-body"><div class="chart-container"><canvas id="topPagesChart"></canvas></div></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-title"><i class="fas fa-lightbulb"></i>Activity Summary</div>
+                    </div>
+                    <div class="chart-card-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem;">
+                        <div class="insight-item success">
+                            <div class="insight-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Product Activity</div>
+                                <div class="insight-description">{{ recent_creates }} created and {{ recent_edits }} edited in the last 30 days</div>
+                            </div>
+                        </div>
+                        <div class="insight-item info">
+                            <div class="insight-icon"><i class="fas fa-clipboard-list"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Audit Trail</div>
+                                <div class="insight-description">{{ recent_audit_entries }} audit log entries recorded in the last 30 days</div>
+                            </div>
+                        </div>
+                        <div class="insight-item {% if total_shared_notes > 0 %}success{% else %}info{% endif %}">
+                            <div class="insight-icon"><i class="fas fa-share-alt"></i></div>
+                            <div class="insight-content">
+                                <div class="insight-title">Collaboration</div>
+                                <div class="insight-description">{{ total_shared_notes }} shared notes across the team</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script>
+        // Helper: escape HTML entities to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
         const categoryUsageRaw = JSON.parse('{{ category_usage_json|escapejs }}');
         const categoryLabels = categoryUsageRaw.map(obj => obj.name);
         const categoryCounts = categoryUsageRaw.map(obj => obj.product_count);
@@ -794,8 +1184,31 @@
         const floorDistRaw = JSON.parse('{{ floor_dist_json|escapejs }}');
         const streamProductDist = JSON.parse('{{ stream_product_dist_json|escapejs }}');
 
+        // Allocation, Calibration, Compliance data
+        const calibrationByType = JSON.parse('{{ calibration_by_type_json|escapejs }}');
+        const calibrationStatusData = JSON.parse('{{ calibration_status_json|escapejs }}');
+        const regulatoryStatusData = JSON.parse('{{ regulatory_status_json|escapejs }}');
+        const reservationRecurrenceData = JSON.parse('{{ reservation_recurrence_json|escapejs }}');
+        const waitlistStatusData = JSON.parse('{{ waitlist_status_json|escapejs }}');
+
+        // Lifecycle & Maintenance data
+        const lifecycleStageDist = JSON.parse('{{ lifecycle_stage_dist_json|escapejs }}');
+        const lifecycleConditionDist = JSON.parse('{{ lifecycle_condition_dist_json|escapejs }}');
+        const warrantyStatusData = JSON.parse('{{ warranty_status_json|escapejs }}');
+        const invAlertTypeDist = JSON.parse('{{ inv_alert_type_dist_json|escapejs }}');
+        const maintByType = JSON.parse('{{ maint_by_type_json|escapejs }}');
+        const maintStatusData = JSON.parse('{{ maint_status_json|escapejs }}');
+
+        // Audit & AI data
+        const auditByModule = JSON.parse('{{ audit_by_module_json|escapejs }}');
+        const auditByAction = JSON.parse('{{ audit_by_action_json|escapejs }}');
+        const holisticStatusDist = JSON.parse('{{ holistic_status_dist_json|escapejs }}');
+        const aiOcrStatusDist = JSON.parse('{{ ai_ocr_status_dist_json|escapejs }}');
+        const nlFeedbackDist = JSON.parse('{{ nl_feedback_dist_json|escapejs }}');
+        const topPagesData = JSON.parse('{{ top_pages_json|escapejs }}');
+
         let charts = {};
-        const colors = { primary: '#0066cc', primaryLight: 'rgba(0, 102, 204, 0.1)', success: '#059669', warning: '#d97706', danger: '#dc2626', info: '#0891b2', purple: '#7c3aed', orange: '#ea580c', palette: ['#0066cc', '#059669', '#d97706', '#0891b2', '#7c3aed', '#dc2626', '#0d9488', '#ea580c'] };
+        const colors = { primary: '#0066cc', primaryLight: 'rgba(0, 102, 204, 0.1)', success: '#059669', warning: '#d97706', danger: '#dc2626', info: '#0891b2', purple: '#0044CC', orange: '#b8860b', palette: ['#0066cc', '#059669', '#d97706', '#0891b2', '#0044CC', '#dc2626', '#0d9488', '#b8860b'] };
 
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.font.size = 12;
@@ -835,7 +1248,21 @@
                     document.getElementById('tab-' + tabId).classList.add('active');
                     if (tabId === 'products' && !charts.categoryDetail) initProductsTabCharts();
                     if (tabId === 'systems' && !charts.systemHealthDetail) initSystemsTabCharts();
+                    if (tabId === 'systems' && !charts.holisticStatus) initSystemsTabHolisticChart();
+                    if (tabId === 'allocation' && !charts.reservationRecurrence) initAllocationTabCharts();
+                    if (tabId === 'calibration' && !charts.calibrationType) initCalibrationTabCharts();
+                    if (tabId === 'lifecycle' && !charts.lifecycleStage) initLifecycleTabCharts();
+                    if (tabId === 'ai' && !charts.ocrStatus) initAITabCharts();
                     if (tabId === 'activity' && !charts.projectDetail) initActivityTabCharts();
+                    if (tabId === 'activity' && !charts.auditByModule) initActivityTabAuditCharts();
+                    // Trigger resize on all charts in the active tab so Chart.js recalculates dimensions
+                    setTimeout(() => {
+                        Object.values(charts).forEach(chart => {
+                            if (chart && chart.canvas && chart.canvas.offsetParent !== null) {
+                                chart.resize();
+                            }
+                        });
+                    }, 50);
                 });
             });
         });
@@ -1103,6 +1530,251 @@
             populateTopContributorsDetail();
         }
 
+        function initAllocationTabCharts() {
+            // Reservation Recurrence Types Chart
+            const recLabels = Object.keys(reservationRecurrenceData);
+            const recValues = Object.values(reservationRecurrenceData);
+            charts.reservationRecurrence = new Chart(document.getElementById('reservationRecurrenceChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: recLabels.length > 0 ? recLabels : ['No Data'],
+                    datasets: [{ data: recValues.length > 0 ? recValues : [1], backgroundColor: recValues.length > 0 ? colors.palette.slice(0, recLabels.length) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // Waitlist Status Chart
+            const wlLabels = Object.entries(waitlistStatusData).filter(([k,v]) => v > 0).map(([k]) => k);
+            const wlValues = Object.entries(waitlistStatusData).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const wlColors = { 'Waiting': colors.warning, 'Notified': colors.info, 'Fulfilled': colors.success, 'Expired': '#94a3b8', 'Not Allocated': colors.danger };
+            charts.waitlistStatus = new Chart(document.getElementById('waitlistStatusChart'), {
+                type: 'bar',
+                data: {
+                    labels: wlLabels.length > 0 ? wlLabels : ['No Data'],
+                    datasets: [{ label: 'Entries', data: wlValues.length > 0 ? wlValues : [0], backgroundColor: wlLabels.map(l => wlColors[l] || colors.primary), borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function initCalibrationTabCharts() {
+            // Calibration by Type Chart
+            const calTypeLabels = Object.keys(calibrationByType);
+            const calTypeValues = Object.values(calibrationByType);
+            charts.calibrationType = new Chart(document.getElementById('calibrationTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: calTypeLabels.length > 0 ? calTypeLabels : ['No Data'],
+                    datasets: [{ label: 'Schedules', data: calTypeValues.length > 0 ? calTypeValues : [0], backgroundColor: colors.primary, borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+            });
+
+            // Calibration Status Chart
+            const calStatusLabels = Object.entries(calibrationStatusData).filter(([k,v]) => v > 0).map(([k]) => k);
+            const calStatusValues = Object.entries(calibrationStatusData).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const calStatusColors = { 'Scheduled': colors.info, 'Due': colors.warning, 'Overdue': colors.danger, 'In Progress': colors.purple, 'Completed': colors.success };
+            charts.calibrationStatus = new Chart(document.getElementById('calibrationStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: calStatusLabels.length > 0 ? calStatusLabels : ['No Data'],
+                    datasets: [{ data: calStatusValues.length > 0 ? calStatusValues : [1], backgroundColor: calStatusLabels.length > 0 ? calStatusLabels.map(l => calStatusColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // Regulatory Status Chart
+            const regLabels = Object.entries(regulatoryStatusData).filter(([k,v]) => v > 0).map(([k]) => k);
+            const regValues = Object.entries(regulatoryStatusData).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const regColors = { 'Compliant': colors.success, 'Partially Compliant': colors.warning, 'Non-Compliant': colors.danger, 'Under Review': colors.info };
+            charts.regulatoryStatus = new Chart(document.getElementById('regulatoryStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: regLabels.length > 0 ? regLabels : ['No Data'],
+                    datasets: [{ data: regValues.length > 0 ? regValues : [1], backgroundColor: regLabels.length > 0 ? regLabels.map(l => regColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        function initLifecycleTabCharts() {
+            // Lifecycle Stage Distribution
+            const lsLabels = Object.keys(lifecycleStageDist);
+            const lsValues = Object.values(lifecycleStageDist);
+            charts.lifecycleStage = new Chart(document.getElementById('lifecycleStageChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: lsLabels.length > 0 ? lsLabels : ['No Data'],
+                    datasets: [{ data: lsValues.length > 0 ? lsValues : [1], backgroundColor: lsValues.length > 0 ? colors.palette.slice(0, lsLabels.length) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // Asset Condition Distribution
+            const acLabels = Object.keys(lifecycleConditionDist);
+            const acValues = Object.values(lifecycleConditionDist);
+            const condColors = { 'New': colors.success, 'Good': colors.info, 'Fair': colors.warning, 'Poor': colors.orange, 'Critical': colors.danger, 'Decommissioned': '#94a3b8' };
+            charts.lifecycleCondition = new Chart(document.getElementById('lifecycleConditionChart'), {
+                type: 'bar',
+                data: {
+                    labels: acLabels.length > 0 ? acLabels : ['No Data'],
+                    datasets: [{ label: 'Assets', data: acValues.length > 0 ? acValues : [0], backgroundColor: acLabels.map(l => condColors[l] || colors.primary), borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+            });
+
+            // Warranty Status
+            const wLabels = Object.entries(warrantyStatusData).filter(([k,v]) => v > 0).map(([k]) => k);
+            const wValues = Object.entries(warrantyStatusData).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const warColors = { 'Active': colors.success, 'Expiring Soon': colors.warning, 'Expired': colors.danger };
+            charts.warrantyStatus = new Chart(document.getElementById('warrantyStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: wLabels.length > 0 ? wLabels : ['No Data'],
+                    datasets: [{ data: wValues.length > 0 ? wValues : [1], backgroundColor: wLabels.length > 0 ? wLabels.map(l => warColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // Inventory Alert Types
+            const iaLabels = Object.keys(invAlertTypeDist);
+            const iaValues = Object.values(invAlertTypeDist);
+            charts.invAlertType = new Chart(document.getElementById('invAlertTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: iaLabels.length > 0 ? iaLabels : ['No Alerts'],
+                    datasets: [{ label: 'Alerts', data: iaValues.length > 0 ? iaValues : [0], backgroundColor: colors.danger, borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+            });
+
+            // Maintenance by Type
+            const mtLabels = Object.keys(maintByType);
+            const mtValues = Object.values(maintByType);
+            charts.maintByType = new Chart(document.getElementById('maintByTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: mtLabels.length > 0 ? mtLabels : ['No Events'],
+                    datasets: [{ label: 'Events', data: mtValues.length > 0 ? mtValues : [0], backgroundColor: colors.primary, borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+            });
+
+            // Maintenance Status
+            const msLabels = Object.entries(maintStatusData).filter(([k,v]) => v > 0).map(([k]) => k);
+            const msValues = Object.entries(maintStatusData).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const msColors = { 'Scheduled': colors.info, 'In Progress': colors.purple, 'Completed': colors.success, 'Overdue': colors.danger };
+            charts.maintStatus = new Chart(document.getElementById('maintStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: msLabels.length > 0 ? msLabels : ['No Data'],
+                    datasets: [{ data: msValues.length > 0 ? msValues : [1], backgroundColor: msLabels.length > 0 ? msLabels.map(l => msColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        function initAITabCharts() {
+            // OCR Processing Status
+            const ocrLabels = Object.keys(aiOcrStatusDist);
+            const ocrValues = Object.values(aiOcrStatusDist);
+            const ocrColors = { 'Completed': colors.success, 'Processing': colors.info, 'Failed': colors.danger, 'Pending': colors.warning };
+            charts.ocrStatus = new Chart(document.getElementById('ocrStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ocrLabels.length > 0 ? ocrLabels : ['No Data'],
+                    datasets: [{ data: ocrValues.length > 0 ? ocrValues : [1], backgroundColor: ocrLabels.length > 0 ? ocrLabels.map(l => ocrColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // NL Query Feedback Distribution
+            const nlLabels = Object.entries(nlFeedbackDist).filter(([k,v]) => v > 0).map(([k]) => k);
+            const nlValues = Object.entries(nlFeedbackDist).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const nlColors = { 'Helpful': colors.success, 'Not Helpful': colors.warning, 'Wrong Result': colors.danger, 'No Feedback': '#94a3b8' };
+            charts.nlFeedback = new Chart(document.getElementById('nlFeedbackChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: nlLabels.length > 0 ? nlLabels : ['No Data'],
+                    datasets: [{ data: nlValues.length > 0 ? nlValues : [1], backgroundColor: nlLabels.length > 0 ? nlLabels.map(l => nlColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // AI Feature Usage Bar Chart
+            const aiFeatureLabels = ['Calibration Reports', 'OCR Documents', 'NL Queries', 'Forecasts', 'Scheduler Recs', 'Trainings'];
+            const aiFeatureValues = [
+                parseInt('{{ total_ai_cal_reports|default:0 }}'),
+                parseInt('{{ total_ocr_processed|default:0 }}'),
+                parseInt('{{ total_nl_queries|default:0 }}'),
+                parseInt('{{ total_forecasts|default:0 }}'),
+                parseInt('{{ total_scheduler_recs|default:0 }}'),
+                parseInt('{{ total_model_trainings|default:0 }}')
+            ];
+            charts.aiFeatureUsage = new Chart(document.getElementById('aiFeatureUsageChart'), {
+                type: 'bar',
+                data: {
+                    labels: aiFeatureLabels,
+                    datasets: [{ label: 'Count', data: aiFeatureValues, backgroundColor: colors.palette.slice(0, 6), borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } } } }
+            });
+        }
+
+        function initSystemsTabHolisticChart() {
+            // Holistic System Availability
+            const hsLabels = Object.keys(holisticStatusDist);
+            const hsValues = Object.values(holisticStatusDist);
+            const hsColors = { 'Available': colors.success, 'Partially Available': colors.warning, 'Not Available': colors.danger, 'Under Maintenance': colors.info };
+            charts.holisticStatus = new Chart(document.getElementById('holisticStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: hsLabels.length > 0 ? hsLabels : ['No Data'],
+                    datasets: [{ data: hsValues.length > 0 ? hsValues : [1], backgroundColor: hsLabels.length > 0 ? hsLabels.map(l => hsColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        function initActivityTabAuditCharts() {
+            // Audit by Module chart
+            const amLabels = Object.keys(auditByModule);
+            const amValues = Object.values(auditByModule);
+            charts.auditByModule = new Chart(document.getElementById('auditByModuleChart'), {
+                type: 'bar',
+                data: {
+                    labels: amLabels.length > 0 ? amLabels : ['No Data'],
+                    datasets: [{ label: 'Entries', data: amValues.length > 0 ? amValues : [0], backgroundColor: colors.primary, borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+            });
+
+            // Audit by Action chart
+            const aaLabels = Object.entries(auditByAction).filter(([k,v]) => v > 0).map(([k]) => k);
+            const aaValues = Object.entries(auditByAction).filter(([k,v]) => v > 0).map(([,v]) => v);
+            const aaColors = { 'Create': colors.success, 'Update': colors.info, 'Delete': colors.danger, 'Export': colors.purple, 'Import': colors.orange, 'Login': colors.warning };
+            charts.auditByAction = new Chart(document.getElementById('auditByActionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: aaLabels.length > 0 ? aaLabels : ['No Data'],
+                    datasets: [{ data: aaValues.length > 0 ? aaValues : [1], backgroundColor: aaLabels.length > 0 ? aaLabels.map(l => aaColors[l] || colors.primary) : ['#e2e8f0'], borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } } }
+            });
+
+            // Top Pages Chart
+            const tpLabels = topPagesData.map(p => p.page_name || 'Unknown');
+            const tpValues = topPagesData.map(p => p.visit_count);
+            charts.topPages = new Chart(document.getElementById('topPagesChart'), {
+                type: 'bar',
+                data: {
+                    labels: tpLabels.length > 0 ? tpLabels : ['No Data'],
+                    datasets: [{ label: 'Visits', data: tpValues.length > 0 ? tpValues : [0], backgroundColor: colors.info, borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+            });
+        }
+
         function calculateStats() {
             const total = countsArr.reduce((a, b) => a + b, 0);
             document.getElementById('totalMonths').textContent = monthsArr.length;
@@ -1115,19 +1787,19 @@
             const container = document.getElementById('topCategoriesList');
             const maxCount = Math.max(...categoryCounts, 1);
             const sorted = categoryUsageRaw.slice().sort((a, b) => b.product_count - a.product_count).slice(0, 5);
-            container.innerHTML = sorted.map((cat, i) => `<div class="category-item"><div class="category-rank ${i === 0 ? 'top' : ''}">${i + 1}</div><div class="category-info"><div class="category-name">${cat.name}</div><div class="category-bar"><div class="category-bar-fill" style="width: ${(cat.product_count / maxCount) * 100}%"></div></div></div><div class="category-count">${cat.product_count}</div></div>`).join('');
+            container.innerHTML = sorted.map((cat, i) => `<div class="category-item"><div class="category-rank ${i === 0 ? 'top' : ''}">${i + 1}</div><div class="category-info"><div class="category-name">${escapeHtml(cat.name)}</div><div class="category-bar"><div class="category-bar-fill" style="width: ${(cat.product_count / maxCount) * 100}%"></div></div></div><div class="category-count">${cat.product_count}</div></div>`).join('');
         }
 
         function populateTopContributors() {
             const container = document.getElementById('topContributorsList');
             if (topContributors.length === 0) { container.innerHTML = '<p class="text-muted small">No activity in the last 30 days</p>'; return; }
-            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${(c.user__username || 'U').charAt(0).toUpperCase()}</div><div class="contributor-info"><div class="contributor-name">${c.user__username || 'Unknown'}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
+            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${escapeHtml((c.user__username || 'U').charAt(0).toUpperCase())}</div><div class="contributor-info"><div class="contributor-name">${escapeHtml(c.user__username || 'Unknown')}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
         }
 
         function populateTopContributorsDetail() {
             const container = document.getElementById('topContributorsDetailList');
             if (topContributors.length === 0) { container.innerHTML = '<p class="text-muted small">No activity in the last 30 days</p>'; return; }
-            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${(c.user__username || 'U').charAt(0).toUpperCase()}</div><div class="contributor-info"><div class="contributor-name">${c.user__username || 'Unknown'}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
+            container.innerHTML = topContributors.map((c, i) => `<div class="contributor-item"><div class="contributor-avatar">${escapeHtml((c.user__username || 'U').charAt(0).toUpperCase())}</div><div class="contributor-info"><div class="contributor-name">${escapeHtml(c.user__username || 'Unknown')}</div><div class="contributor-count">${c.action_count} actions</div></div></div>`).join('');
         }
 
         function toggleChartType(chartKey) { const chart = charts[chartKey]; if (!chart) return; const typeMap = { bar: 'line', line: 'bar', doughnut: 'pie', pie: 'polarArea', polarArea: 'doughnut' }; chart.config.type = typeMap[chart.config.type] || 'bar'; chart.update(); }
@@ -1157,7 +1829,7 @@
             const bgColors = { success: '#059669', info: '#0066cc', warning: '#d97706', danger: '#dc2626' };
             const icons = { success: 'check-circle', info: 'info-circle', warning: 'exclamation-triangle', danger: 'exclamation-circle' };
             toast.style.cssText = `position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; background: ${bgColors[type] || bgColors.info}; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; animation: slideIn 0.3s ease;`;
-            toast.innerHTML = `<i class="fas fa-${icons[type] || icons.info}"></i> ${message}`;
+            toast.innerHTML = `<i class="fas fa-${icons[type] || icons.info}"></i> ${escapeHtml(message)}`;
             document.body.appendChild(toast);
             setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
         }

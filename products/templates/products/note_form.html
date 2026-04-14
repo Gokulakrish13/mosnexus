@@ -1,16 +1,42 @@
 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if note %}Edit Note{% else %}Create Note{% endif %} - IGT MoS Inventory</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>{% if note %}Edit Note{% else %}Create Note{% endif %} - {{ BU_TITLE|default:'NexusOps' }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
+<!-- Page Navigation Toolbar (Breadcrumbs) -->
+{% if user.is_authenticated and page_nav_breadcrumbs %}
+<div class="pnav-bar" id="pnavBarNoteForm">
+    <a href="{% url 'page_nav_action' %}?action=back" class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}" title="Go Back"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'page_nav_action' %}?action=forward" class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}" title="Go Forward"><i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home"><i class="fas fa-home"></i></a>
+    <span class="pnav-sep"></span>
+    <div class="pnav-crumbs">
+        {% for crumb in page_nav_breadcrumbs %}{% if crumb.active %}<span class="pnav-crumb pnav-active">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</span>{% else %}<a href="{{ crumb.url }}" class="pnav-crumb">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</a><span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>{% endif %}{% endfor %}
+    </div>
+</div>
+<style>
+    .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+    .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+    .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+    .pnav-disabled{opacity:.3;pointer-events:none}
+    .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+    .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+    .pnav-crumbs::-webkit-scrollbar{display:none}
+    .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+    .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+    .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+    .pnav-chevron{color:#94a3b8;font-size:.6rem;flex-shrink:0;user-select:none}
+</style>
+{% endif %}
+<!-- End Page Navigation Toolbar -->
 <style>
     :root {
         --primary: #0066cc;
@@ -670,6 +696,157 @@
         padding: 1.25rem;
     }
 
+    /* Tag Selector Styles */
+    .tag-selector-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tag-selector-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        user-select: none;
+    }
+
+    .tag-selector-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .tag-selector-item.selected {
+        border-color: currentColor;
+        box-shadow: 0 0 0 1px currentColor;
+    }
+
+    .tag-selector-item .tag-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .tag-selector-item .tag-check {
+        font-size: 0.625rem;
+        display: none;
+    }
+
+    .tag-selector-item.selected .tag-check {
+        display: inline;
+    }
+
+    .new-tag-form {
+        display: flex;
+        gap: 0.375rem;
+        align-items: center;
+    }
+
+    .new-tag-form input[type="text"] {
+        flex: 1;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.625rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .new-tag-form input[type="text"]:focus {
+        border-color: var(--primary);
+    }
+
+    .color-picker-mini {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        margin-top: 0.375rem;
+    }
+
+    .color-picker-mini .color-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.15s;
+    }
+
+    .color-picker-mini .color-dot:hover {
+        transform: scale(1.2);
+    }
+
+    .color-picker-mini .color-dot.selected {
+        border-color: var(--text-primary);
+        box-shadow: 0 0 0 2px white, 0 0 0 3px var(--text-primary);
+    }
+
+    .tag-empty-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+
+    .tag-item-wrapper {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        position: relative;
+    }
+
+    .tag-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 0.5rem;
+        opacity: 0;
+        transition: all 0.2s;
+        color: var(--text-muted);
+        background: var(--bg-subtle);
+    }
+
+    .tag-item-wrapper:hover .tag-action-btn {
+        opacity: 1;
+    }
+
+    .tag-action-btn:hover {
+        background: var(--border-color);
+    }
+
+    .tag-delete-btn:hover {
+        color: var(--danger);
+        background: var(--danger-light);
+    }
+
+    .tag-edit-btn:hover {
+        color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    /* Tag inline rename input */
+    .tag-rename-input {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.4rem;
+        border: 1px solid var(--primary);
+        border-radius: 4px;
+        outline: none;
+        width: 80px;
+        font-weight: 600;
+    }
+
     .tips-list {
         list-style: none;
         margin: 0;
@@ -703,7 +880,7 @@
     /* Layout - 3 Column Grid */
     .form-layout {
         display: grid;
-        grid-template-columns: 1fr 1fr 280px;
+        grid-template-columns: 1fr 1fr 260px;
         gap: 1.25rem;
         align-items: start;
     }
@@ -779,28 +956,6 @@
 
 <div class="note-page-container">
     <div class="note-page-wrapper">
-        <!-- Breadcrumb -->
-        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-            <div class="breadcrumb-item">
-                <a href="{% url 'home' %}">
-                    <i class="fas fa-home"></i>Home
-                </a>
-            </div>
-            <span class="breadcrumb-separator">
-                <i class="fas fa-chevron-right"></i>
-            </span>
-            <div class="breadcrumb-item">
-                <a href="{% url 'notes_list' %}">
-                    <i class="fas fa-sticky-note"></i>Notes
-                </a>
-            </div>
-            <span class="breadcrumb-separator">
-                <i class="fas fa-chevron-right"></i>
-            </span>
-            <div class="breadcrumb-item current">
-                <i class="fas fa-{% if note %}edit{% else %}plus{% endif %}" style="margin-right: 0.375rem; color: var(--text-muted);"></i>{% if note %}Edit Note{% else %}Create Note{% endif %}
-            </div>
-        </nav>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -828,6 +983,11 @@
         <!-- Form Layout - 3 Columns -->
         <form method="post" id="noteForm" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
+            {% if form_error %}
+            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+            </div>
+            {% endif %}
             <div class="form-layout">
                 <!-- Column 1: Note Details -->
                 <div class="form-column-left">
@@ -860,6 +1020,66 @@
                                     <div class="content-preview-label">Table Preview</div>
                                     <div id="previewContent"></div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags Card -->
+                    <div class="form-card compact" style="margin-top: 1rem;">
+                        <div class="form-card-header">
+                            <i class="fas fa-tags"></i>
+                            <h3>Tags</h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="tag-selector-list" id="tagSelectorList">
+                                {% for tag in all_tags %}
+                                <div class="tag-item-wrapper" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}" data-tag-color="{{ tag.color }}">
+                                    <label class="tag-selector-item {% if note and tag in note.tags.all %}selected{% endif %}"
+                                           style="background: {{ tag.color }}18; color: {{ tag.color }};">
+                                        <input type="checkbox" name="tags" value="{{ tag.id }}" style="display:none;"
+                                               {% if note and tag in note.tags.all %}checked{% endif %}>
+                                        <span class="tag-dot" style="background: {{ tag.color }}"></span>
+                                        <span class="tag-name-text">{{ tag.name }}</span>
+                                        <i class="fas fa-check tag-check"></i>
+                                    </label>
+                                    <span class="tag-action-btn tag-edit-btn" title="Rename tag" data-tag-id="{{ tag.id }}">
+                                        <i class="fas fa-pen"></i>
+                                    </span>
+                                    <span class="tag-action-btn tag-delete-btn" title="Delete tag" data-tag-id="{{ tag.id }}">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                </div>
+                                {% empty %}
+                                <div class="tag-empty-hint" id="noTagsHint">
+                                    <i class="fas fa-info-circle"></i> No tags yet. Create one below.
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Create New Tag Inline -->
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 0.625rem; margin-top: 0.25rem;">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.375rem;">
+                                    <i class="fas fa-plus-circle"></i> Create New Tag
+                                </div>
+                                <div class="new-tag-form">
+                                    <input type="text" id="newTagName" placeholder="Tag name..." maxlength="50">
+                                    <button type="button" class="btn btn-primary" id="createTagBtn" style="padding: 0.375rem 0.625rem; font-size: 0.75rem; white-space: nowrap;">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div class="color-picker-mini" id="colorPicker">
+                                    <span class="color-dot selected" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></span>
+                                    <span class="color-dot" data-color="#059669" style="background: #059669;" title="Green"></span>
+                                    <span class="color-dot" data-color="#d97706" style="background: #d97706;" title="Amber"></span>
+                                    <span class="color-dot" data-color="#dc2626" style="background: #dc2626;" title="Red"></span>
+                                    <span class="color-dot" data-color="#0044CC" style="background: #0044CC;" title="Purple"></span>
+                                    <span class="color-dot" data-color="#0891b2" style="background: #0891b2;" title="Cyan"></span>
+                                    <span class="color-dot" data-color="#0044CC" style="background: #0044CC;" title="Pink"></span>
+                                    <span class="color-dot" data-color="#4b5563" style="background: #4b5563;" title="Gray"></span>
+                                    <span class="color-dot" data-color="#b8860b" style="background: #b8860b;" title="Orange"></span>
+                                    <span class="color-dot" data-color="#65a30d" style="background: #65a30d;" title="Lime"></span>
+                                </div>
+                                <div id="tagCreateFeedback" style="font-size: 0.75rem; margin-top: 0.25rem; display: none;"></div>
                             </div>
                         </div>
                     </div>
@@ -935,22 +1155,78 @@
                         </div>
                     </div>
 
-                    <!-- Visibility & Actions -->
+                    <!-- Settings Card -->
                     <div class="form-card compact" style="margin-top: 1rem;">
                         <div class="form-card-header">
                             <i class="fas fa-cog"></i>
                             <h3>Settings</h3>
                         </div>
                         <div class="form-card-body">
-                            <!-- Visibility Toggle -->
-                            <div class="visibility-toggle" style="margin: 0; padding: 0.875rem;">
-                                <input type="checkbox" id="is_public" name="is_public"
-                                    {% if note.is_public|default:True %}checked{% endif %}>
-                                <div class="visibility-toggle-content">
-                                    <label class="visibility-toggle-label" for="is_public" style="font-size: 0.875rem;">
-                                        <i class="fas fa-globe"></i> Public Note
+                            <!-- Visibility Options -->
+                            <div class="form-group" style="margin-bottom: 0.75rem;">
+                                <label class="form-label" style="font-size: 0.875rem; margin-bottom: 0.75rem;">
+                                    <i class="fas fa-eye"></i> Visibility
+                                </label>
+
+                                <!-- Public -->
+                                <div class="visibility-toggle" style="margin: 0 0 0.5rem; padding: 0.75rem; cursor: pointer;"
+                                     onclick="document.getElementById('vis_public').checked=true; updateVisibility();">
+                                    <input type="radio" id="vis_public" name="visibility" value="public"
+                                           {% if not note or note.visibility == 'public' or note.visibility == '' %}checked{% endif %}
+                                           style="width: 18px; height: 18px; accent-color: var(--success); cursor: pointer;"
+                                           onchange="updateVisibility()">
+                                    <div class="visibility-toggle-content">
+                                        <label class="visibility-toggle-label" for="vis_public" style="font-size: 0.875rem; color: var(--success); cursor: pointer;">
+                                            <i class="fas fa-globe"></i> Public
+                                        </label>
+                                        <div class="visibility-toggle-hint" style="font-size: 0.75rem;">Visible to all users in the Business Unit</div>
+                                    </div>
+                                </div>
+
+                                <!-- Stream Only -->
+                                <div class="visibility-toggle" style="margin: 0 0 0.5rem; padding: 0.75rem; cursor: pointer;"
+                                     onclick="document.getElementById('vis_stream').checked=true; updateVisibility();">
+                                    <input type="radio" id="vis_stream" name="visibility" value="stream"
+                                           {% if note and note.visibility == 'stream' %}checked{% endif %}
+                                           style="width: 18px; height: 18px; accent-color: var(--info, #0891b2); cursor: pointer;"
+                                           onchange="updateVisibility()">
+                                    <div class="visibility-toggle-content">
+                                        <label class="visibility-toggle-label" for="vis_stream" style="font-size: 0.875rem; color: var(--info, #0891b2); cursor: pointer;">
+                                            <i class="fas fa-sitemap"></i> Stream Only
+                                        </label>
+                                        <div class="visibility-toggle-hint" style="font-size: 0.75rem;">Only users with access to the selected stream</div>
+                                    </div>
+                                </div>
+
+                                <!-- Stream Selector (shown conditionally) -->
+                                <div id="streamSelectorWrapper" style="display: none; margin: 0 0 0.5rem; padding: 0.75rem 1rem; background: var(--info-light, #cffafe); border: 1px solid var(--info, #0891b2); border-radius: var(--radius);">
+                                    <label for="stream" class="form-label" style="font-size: 0.8125rem; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-code-branch"></i> Select Stream <span class="required">*</span>
                                     </label>
-                                    <div class="visibility-toggle-hint" style="font-size: 0.75rem;">Visible to all users</div>
+                                    <select name="stream" id="stream" class="form-control" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+                                        <option value="">-- Choose a stream --</option>
+                                        {% for s in user_streams %}
+                                        <option value="{{ s.id }}" {% if note and note.stream_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-hint" style="margin-top: 0.375rem;">
+                                        <i class="fas fa-info-circle"></i> Users without access to this stream will not see this note.
+                                    </div>
+                                </div>
+
+                                <!-- Private -->
+                                <div class="visibility-toggle" style="margin: 0; padding: 0.75rem; cursor: pointer;"
+                                     onclick="document.getElementById('vis_private').checked=true; updateVisibility();">
+                                    <input type="radio" id="vis_private" name="visibility" value="private"
+                                           {% if note and note.visibility == 'private' %}checked{% endif %}
+                                           style="width: 18px; height: 18px; accent-color: var(--warning); cursor: pointer;"
+                                           onchange="updateVisibility()">
+                                    <div class="visibility-toggle-content">
+                                        <label class="visibility-toggle-label" for="vis_private" style="font-size: 0.875rem; color: var(--warning); cursor: pointer;">
+                                            <i class="fas fa-lock"></i> Private
+                                        </label>
+                                        <div class="visibility-toggle-hint" style="font-size: 0.75rem;">Only visible to you</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -988,6 +1264,10 @@
                                     <i class="fas fa-lock"></i>
                                     <span>Private = only you can see</span>
                                 </li>
+                                <li style="padding: 0.5rem 0; font-size: 0.75rem;">
+                                    <i class="fas fa-sitemap"></i>
+                                    <span>Stream = only that stream's users</span>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -1010,7 +1290,17 @@
 </div>
 
 <script>
+// Visibility toggle: show/hide stream selector
+function updateVisibility() {
+    const streamWrapper = document.getElementById('streamSelectorWrapper');
+    const streamRadio = document.getElementById('vis_stream');
+    if (streamWrapper) {
+        streamWrapper.style.display = streamRadio && streamRadio.checked ? 'block' : 'none';
+    }
+}
+// Run on page load to handle edit mode
 document.addEventListener('DOMContentLoaded', function() {
+    updateVisibility();
     const titleInput = document.getElementById('title');
     const contentInput = document.getElementById('content');
     const titleCount = document.getElementById('titleCount');
@@ -1121,7 +1411,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const cells = line.split(/\t+|\s{2,}/).filter(cell => cell.trim());
                     if (cells.length > 1) {
                         const tag = index === 0 ? 'th' : 'td';
-                        tableHtml += `<tr>${cells.map(cell => `<${tag}>${cell.trim()}</${tag}>`).join('')}</tr>`;
+                        tableHtml += `<tr>${cells.map(cell => `<${tag}>${escapeHtml(cell.trim())}</${tag}>`).join('')}</tr>`;
                     }
                 });
                 tableHtml += '</table>';
@@ -1135,6 +1425,215 @@ document.addEventListener('DOMContentLoaded', function() {
         
         contentPreview.style.display = 'none';
     }
+
+    // ===== TAG SELECTOR FUNCTIONALITY =====
+    const _buPrefix = (function(){ const p=window.location.pathname; const i=p.indexOf('/notes'); if(i>0) return p.substring(0,i); return ''; })();
+
+    // Tag pill click to toggle selection
+    function bindTagPillClick(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            this.classList.toggle('selected', checkbox.checked);
+        });
+    }
+    document.querySelectorAll('.tag-selector-item').forEach(bindTagPillClick);
+
+    // Tag DELETE handler
+    function bindTagDelete(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const tagId = this.getAttribute('data-tag-id');
+            const wrapper = this.closest('.tag-item-wrapper');
+            const tagName = wrapper?.querySelector('.tag-name-text')?.textContent?.trim() || 'this tag';
+            if (!confirm(`Delete tag "${tagName}"? It will be removed from all notes.`)) return;
+
+            fetch(`${_buPrefix}/notes/api/tags/${tagId}/delete/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.deleted) {
+                    wrapper.remove();
+                    showTagFeedback('Tag deleted.', 'success');
+                } else {
+                    showTagFeedback(data.error || 'Failed to delete tag.', 'danger');
+                }
+            })
+            .catch(() => showTagFeedback('Network error.', 'danger'));
+        });
+    }
+    document.querySelectorAll('.tag-delete-btn').forEach(bindTagDelete);
+
+    // Tag RENAME handler
+    function bindTagEdit(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const tagId = this.getAttribute('data-tag-id');
+            const wrapper = this.closest('.tag-item-wrapper');
+            const nameSpan = wrapper.querySelector('.tag-name-text');
+            const currentName = nameSpan.textContent.trim();
+
+            // Replace name with input
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'tag-rename-input';
+            input.value = currentName;
+            input.maxLength = 50;
+            nameSpan.style.display = 'none';
+            nameSpan.parentNode.insertBefore(input, nameSpan.nextSibling);
+            input.focus();
+            input.select();
+
+            function saveRename() {
+                const newName = input.value.trim();
+                if (!newName || newName === currentName) {
+                    input.remove();
+                    nameSpan.style.display = '';
+                    return;
+                }
+                fetch(`${_buPrefix}/notes/api/tags/${tagId}/update/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ name: newName })
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    input.remove();
+                    nameSpan.style.display = '';
+                    if (data.updated) {
+                        nameSpan.textContent = data.name;
+                        wrapper.setAttribute('data-tag-name', data.name);
+                        showTagFeedback('Tag renamed!', 'success');
+                    } else {
+                        showTagFeedback(data.error || 'Failed to rename.', 'danger');
+                    }
+                })
+                .catch(() => {
+                    input.remove();
+                    nameSpan.style.display = '';
+                    showTagFeedback('Network error.', 'danger');
+                });
+            }
+
+            input.addEventListener('blur', saveRename);
+            input.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+                if (ev.key === 'Escape') { input.value = currentName; input.blur(); }
+            });
+        });
+    }
+    document.querySelectorAll('.tag-edit-btn').forEach(bindTagEdit);
+
+    // Color picker
+    const colorDots = document.querySelectorAll('#colorPicker .color-dot');
+    let selectedColor = '#3b82f6';
+
+    colorDots.forEach(dot => {
+        dot.addEventListener('click', function() {
+            colorDots.forEach(d => d.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedColor = this.getAttribute('data-color');
+        });
+    });
+
+    // Create new tag via API
+    const createTagBtn = document.getElementById('createTagBtn');
+    const newTagNameInput = document.getElementById('newTagName');
+    const tagFeedback = document.getElementById('tagCreateFeedback');
+
+    if (createTagBtn) {
+        createTagBtn.addEventListener('click', createNewTag);
+    }
+    if (newTagNameInput) {
+        newTagNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); createNewTag(); }
+        });
+    }
+
+    function createNewTag() {
+        const name = newTagNameInput.value.trim();
+        if (!name) {
+            showTagFeedback('Please enter a tag name.', 'warning');
+            return;
+        }
+
+        createTagBtn.disabled = true;
+
+        fetch(`${_buPrefix}/notes/api/tags/create/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ name: name, color: selectedColor })
+        })
+        .then(resp => {
+            if (!resp.ok && resp.status !== 201) {
+                return resp.json().then(d => { throw d; });
+            }
+            return resp.json();
+        })
+        .then(data => {
+            createTagBtn.disabled = false;
+            if (data.id) {
+                // Remove "no tags" hint
+                const hint = document.getElementById('noTagsHint');
+                if (hint) hint.remove();
+
+                // Create new tag wrapper with pill + edit/delete buttons
+                const tagList = document.getElementById('tagSelectorList');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tag-item-wrapper';
+                wrapper.setAttribute('data-tag-id', data.id);
+                wrapper.setAttribute('data-tag-name', data.name);
+                wrapper.setAttribute('data-tag-color', data.color);
+                wrapper.innerHTML = `
+                    <label class="tag-selector-item selected"
+                           style="background: ${data.color}18; color: ${data.color};">
+                        <input type="checkbox" name="tags" value="${data.id}" style="display:none;" checked>
+                        <span class="tag-dot" style="background: ${data.color}"></span>
+                        <span class="tag-name-text">${data.name}</span>
+                        <i class="fas fa-check tag-check"></i>
+                    </label>
+                    <span class="tag-action-btn tag-edit-btn" title="Rename tag" data-tag-id="${data.id}">
+                        <i class="fas fa-pen"></i>
+                    </span>
+                    <span class="tag-action-btn tag-delete-btn" title="Delete tag" data-tag-id="${data.id}">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                tagList.appendChild(wrapper);
+
+                // Bind events on new elements
+                bindTagPillClick(wrapper.querySelector('.tag-selector-item'));
+                bindTagDelete(wrapper.querySelector('.tag-delete-btn'));
+                bindTagEdit(wrapper.querySelector('.tag-edit-btn'));
+
+                newTagNameInput.value = '';
+                showTagFeedback(data.created === false ? 'Tag already exists — selected.' : 'Tag created!', 'success');
+            } else {
+                showTagFeedback(data.error || 'Failed to create tag.', 'danger');
+            }
+        })
+        .catch(err => {
+            createTagBtn.disabled = false;
+            showTagFeedback(err.error || 'Network error.', 'danger');
+        });
+    }
+
+    function showTagFeedback(msg, type) {
+        tagFeedback.style.display = 'block';
+        tagFeedback.style.color = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
+        tagFeedback.textContent = msg;
+        setTimeout(() => { tagFeedback.style.display = 'none'; }, 3000);
+    }
+    // ===== END TAG SELECTOR =====
     
     function showUploadProgress() {
         uploadProgressContainer.style.display = 'block';
@@ -1165,7 +1664,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showUploadError(message) {
-        uploadStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> Upload failed: ${message}`;
+        uploadStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> Upload failed: ${escapeHtml(message)}`;
         uploadStatus.className = 'upload-status error';
         submitBtn.disabled = false;
         isUploading = false;
@@ -1301,6 +1800,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function submitForm() {
+        // Guard against double submission
+        if (isUploading) return;
+        isUploading = true;
+        submitBtn.disabled = true;
+        
         const formData = new FormData(form);
         
         fetch(form.action, {
@@ -1329,6 +1833,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showUploadError('Network error occurred');
+            isUploading = false;
+            submitBtn.disabled = false;
         });
     }
 });

@@ -1,0 +1,811 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ recurring.title }} - Recurring Reservation{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-dark: #0047ab;
+        --success-green: #16a34a;
+        --warning-orange: #f59e0b;
+        --danger-red: #dc2626;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+    }
+
+    .detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 102, 204, 0.25);
+    }
+
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .page-title h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .status-badge.active {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--success-green);
+    }
+
+    .status-badge.paused {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--warning-orange);
+    }
+
+    .status-badge.cancelled {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--danger-red);
+    }
+
+    .status-badge.completed {
+        background: rgba(255, 255, 255, 0.95);
+        color: #0044CC;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 0.625rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+        height: 40px;
+        box-sizing: border-box;
+        line-height: 1;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--primary-blue);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-danger {
+        background: var(--danger-red);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #15803d;
+        transform: translateY(-2px);
+    }
+
+    .breadcrumb {
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.15s ease;
+    }
+
+    .breadcrumb a:hover {
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .page-header-content {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-actions {
+            justify-content: center;
+        }
+
+        .page-title {
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h2 i {
+        color: var(--primary-blue);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .detail-item.full-width {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 640px) {
+        .detail-item.full-width {
+            grid-column: span 1;
+        }
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .detail-value.description {
+        line-height: 1.6;
+        color: #475569;
+    }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .priority-badge.critical {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .priority-badge.high {
+        background: #ffedd5;
+        color: #b8860b;
+    }
+
+    .priority-badge.normal {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .priority-badge.low {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .recurrence-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        background: #f0f9ff;
+        color: #0369a1;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .sidebar-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .sidebar-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0B5FFF;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+    }
+
+    .instances-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .instance-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s ease;
+    }
+
+    .instance-item:last-child {
+        border-bottom: none;
+    }
+
+    .instance-item:hover {
+        background: #f8fafc;
+    }
+
+    .instance-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .instance-date {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .instance-time {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .instance-status {
+        padding: 0.25rem 0.625rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .instance-status.scheduled {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .instance-status.completed {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .instance-status.cancelled {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .instance-status.skipped {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .instance-status.confirmed {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .instance-status.conflict {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .btn-mini {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-confirm {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .btn-confirm:hover {
+        background: #16a34a;
+        color: white;
+    }
+
+    .btn-cancel-mini {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-cancel-mini:hover {
+        background: #dc2626;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .action-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-list .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .created-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .created-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0B5FFF 0%, #0043CE 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .created-details {
+        flex: 1;
+    }
+
+    .created-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .created-date {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="page-header">
+        <div class="breadcrumb">
+            <a href="{% url 'recurring_reservations_list' stream=stream %}"><i class="fas fa-arrow-left"></i> Back to Recurring Reservations</a>
+        </div>
+        <div class="page-header-content">
+            <div class="page-title">
+                <h1>{{ recurring.title }}</h1>
+                <span class="status-badge {{ recurring.status }}">
+                    {{ recurring.get_status_display }}
+                </span>
+            </div>
+            <div class="header-actions">
+                {% if recurring.status == 'active' %}
+                <form method="POST" action="{% url 'recurring_reservation_toggle_status' stream=stream pk=recurring.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning" title="Pausing cancels all future instances and frees up their system allocations.">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                </form>
+                {% elif recurring.status == 'paused' %}
+                <form method="POST" action="{% url 'recurring_reservation_toggle_status' stream=stream pk=recurring.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" title="Resuming regenerates instances and re-books available slots for upcoming dates.">
+                        <i class="fas fa-play"></i> Resume
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'recurring_reservation_edit' stream=stream pk=recurring.pk %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'recurring_reservation_delete' stream=stream pk=recurring.pk %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="main-content">
+            <!-- Reservation Details -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle"></i> Reservation Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">System</span>
+                            <span class="detail-value">{{ recurring.system.name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Stream</span>
+                            <span class="detail-value">{{ recurring.stream }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Recurrence Pattern</span>
+                            <span class="detail-value">
+                                <span class="recurrence-badge">
+                                    <i class="fas fa-redo"></i>
+                                    {{ recurring.get_recurrence_type_display }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Priority</span>
+                            <span class="detail-value">
+                                <span class="priority-badge {{ recurring.priority }}">
+                                    {% if recurring.priority == 'critical' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {% elif recurring.priority == 'high' %}
+                                    <i class="fas fa-arrow-up"></i>
+                                    {% elif recurring.priority == 'normal' %}
+                                    <i class="fas fa-minus"></i>
+                                    {% else %}
+                                    <i class="fas fa-arrow-down"></i>
+                                    {% endif %}
+                                    {{ recurring.get_priority_display }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time Slot</span>
+                            <span class="detail-value">{{ recurring.start_time|time:"H:i" }} - {{ recurring.end_time|time:"H:i" }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value">
+                                {% widthratio recurring.end_time.hour|add:recurring.end_time.minute 60 1 as end_mins %}
+                                {% widthratio recurring.start_time.hour|add:recurring.start_time.minute 60 1 as start_mins %}
+                                {{ recurring.start_time|time:"H:i" }} - {{ recurring.end_time|time:"H:i" }}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Start Date</span>
+                            <span class="detail-value">{{ recurring.start_date|date:"F d, Y" }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">End Date</span>
+                            <span class="detail-value">
+                                {% if recurring.end_date %}
+                                    {{ recurring.end_date|date:"F d, Y" }}
+                                {% else %}
+                                    <span style="color: #64748b;">No end date (ongoing)</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if recurring.description %}
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Description</span>
+                            <span class="detail-value description">{{ recurring.description }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instances -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Scheduled Instances</h2>
+                    <span style="font-size: 0.875rem; color: #64748b;">{{ instances.count }} instances</span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    {% if instances %}
+                    <div class="instances-list">
+                        {% for instance in instances %}
+                        <div class="instance-item">
+                            <div class="instance-info">
+                                <span class="instance-date">{{ instance.reservation_date|date:"l, F d, Y" }}</span>
+                                <span class="instance-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ instance.start_time|time:"H:i" }} - {{ instance.end_time|time:"H:i" }}
+                                </span>
+                                {% if instance.system_allocation %}
+                                <span style="font-size: 0.7rem; color: #16a34a;"><i class="fas fa-check-circle"></i> Allocation Created</span>
+                                {% endif %}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="instance-status {{ instance.status }}">
+                                    {{ instance.get_status_display }}
+                                </span>
+                                {% if instance.status == 'scheduled' or instance.status == 'conflict' %}
+                                <form method="POST" action="{% url 'reservation_instance_confirm' stream=stream pk=instance.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-mini btn-confirm" title="Confirm & Create Allocation">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if instance.status != 'cancelled' and instance.status != 'completed' %}
+                                <form method="POST" action="{% url 'reservation_instance_cancel' stream=stream pk=instance.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-mini btn-cancel-mini" title="Cancel Instance">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>No instances scheduled yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <!-- Quick Stats -->
+            <div class="card sidebar-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-pie"></i> Quick Stats</h2>
+                </div>
+                <div class="card-body">
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ instances.count }}</div>
+                            <div class="stat-label">Total Instances</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ completed_count|default:0 }}</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ scheduled_count|default:0 }}</div>
+                            <div class="stat-label">Scheduled</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ cancelled_count|default:0 }}</div>
+                            <div class="stat-label">Cancelled</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Created By -->
+            <div class="card sidebar-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user"></i> Created By</h2>
+                </div>
+                <div class="card-body">
+                    <div class="created-info">
+                        <div class="created-avatar">
+                            {{ recurring.created_by.first_name.0|default:recurring.created_by.username.0|upper }}
+                        </div>
+                        <div class="created-details">
+                            <div class="created-name">
+                                {{ recurring.created_by.get_full_name|default:recurring.created_by.username }}
+                            </div>
+                            <div class="created-date">
+                                Created {{ recurring.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card sidebar-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-list">
+                        <a href="{% url 'recurring_reservation_edit' stream=stream pk=recurring.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-edit"></i> Edit Reservation
+                        </a>
+                        {% if recurring.status == 'active' %}
+                        <form method="POST" action="{% url 'recurring_reservation_toggle_status' stream=stream pk=recurring.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning" style="width: 100%;">
+                                <i class="fas fa-pause"></i> Pause Reservation
+                            </button>
+                        </form>
+                        <div style="background:#fef3c7;border-radius:8px;padding:0.6rem 0.75rem;border-left:3px solid #f59e0b;margin-top:-0.25rem;">
+                            <p style="font-size:0.72rem;color:#92400e;margin:0;line-height:1.5;">
+                                <i class="fas fa-info-circle" style="margin-right:0.25rem;"></i>
+                                <strong>Pause</strong> cancels all future scheduled instances and frees up their system allocations. Past bookings remain unchanged.
+                            </p>
+                        </div>
+                        {% elif recurring.status == 'paused' %}
+                        <form method="POST" action="{% url 'recurring_reservation_toggle_status' stream=stream pk=recurring.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" style="width: 100%;">
+                                <i class="fas fa-play"></i> Resume Reservation
+                            </button>
+                        </form>
+                        <div style="background:#d1fae5;border-radius:8px;padding:0.6rem 0.75rem;border-left:3px solid #10b981;margin-top:-0.25rem;">
+                            <p style="font-size:0.72rem;color:#065f46;margin:0;line-height:1.5;">
+                                <i class="fas fa-info-circle" style="margin-right:0.25rem;"></i>
+                                <strong>Resume</strong> regenerates instances for upcoming dates and re-books available system slots based on the recurrence pattern.
+                            </p>
+                        </div>
+                        {% endif %}
+                        <a href="{% url 'conflicts_list' stream=stream %}" class="btn btn-secondary">
+                            <i class="fas fa-exclamation-triangle"></i> View Conflicts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

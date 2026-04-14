@@ -1,0 +1,481 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Join Waitlist - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #0B5FFF;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--purple) 0%, #6d28d9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--bg-light);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--purple);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--purple);
+        display: inline-block;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group label .required {
+        color: var(--danger-red);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--purple);
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .checkbox-group .help-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .flexibility-options {
+        background: #faf5ff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e9d5ff;
+        margin-top: 1rem;
+    }
+
+    .flexibility-options h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--purple);
+        margin: 0 0 1rem 0;
+    }
+
+    .priority-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+
+    .priority-option {
+        position: relative;
+    }
+
+    .priority-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .priority-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .priority-option input:checked + label {
+        border-color: var(--purple);
+        background: #faf5ff;
+    }
+
+    .priority-option label i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .priority-option.low label i { color: #94a3b8; }
+    .priority-option.normal label i { color: var(--primary-blue); }
+    .priority-option.high label i { color: var(--warning-orange); }
+    .priority-option.urgent label i { color: var(--danger-red); }
+
+    .priority-option label span {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .info-box {
+        background: var(--primary-blue-light);
+        border: 1px solid var(--primary-blue);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box i {
+        color: var(--primary-blue);
+    }
+
+    .info-box p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple) 0%, #6d28d9 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: var(--text-primary);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .errorlist li {
+        color: var(--danger-red);
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .priority-options {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-list-ol"></i> Join Waitlist</h1>
+    <p class="subtitle">Request to be notified when a system becomes available</p>
+</div>
+
+<div class="form-card">
+    <div class="form-header">
+        <h2>Waitlist Request Details</h2>
+    </div>
+    
+    <form method="POST" class="form-body">
+        {% csrf_token %}
+        
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>By joining the waitlist, you'll be automatically notified when the requested system becomes available for your desired time slot. You can specify flexibility options to increase your chances of getting a slot.</p>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">System & Project</span>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_system">System <span class="required">*</span></label>
+                    {{ form.system }}
+                    {% if form.system.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.system.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_project">Project (Optional)</label>
+                    {{ form.project }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Desired Time Slot</span>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_desired_date">Desired Date <span class="required">*</span></label>
+                    {{ form.desired_date }}
+                    {% if form.desired_date.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.desired_date.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_desired_start_time">Start Time <span class="required">*</span></label>
+                    {{ form.desired_start_time }}
+                    {% if form.desired_start_time.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.desired_start_time.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_desired_end_time">End Time <span class="required">*</span></label>
+                    {{ form.desired_end_time }}
+                    {% if form.desired_end_time.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.desired_end_time.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Priority</span>
+            
+            <div class="priority-options">
+                <div class="priority-option low">
+                    <input type="radio" name="priority" id="priority_low" value="low" {% if form.priority.value == 'low' or not form.priority.value %}checked{% endif %}>
+                    <label for="priority_low">
+                        <i class="fas fa-leaf"></i>
+                        <span>Low</span>
+                    </label>
+                </div>
+                <div class="priority-option normal">
+                    <input type="radio" name="priority" id="priority_normal" value="normal" {% if form.priority.value == 'normal' %}checked{% endif %}>
+                    <label for="priority_normal">
+                        <i class="fas fa-flag"></i>
+                        <span>Normal</span>
+                    </label>
+                </div>
+                <div class="priority-option high">
+                    <input type="radio" name="priority" id="priority_high" value="high" {% if form.priority.value == 'high' %}checked{% endif %}>
+                    <label for="priority_high">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>High</span>
+                    </label>
+                </div>
+                <div class="priority-option urgent">
+                    <input type="radio" name="priority" id="priority_urgent" value="urgent" {% if form.priority.value == 'urgent' %}checked{% endif %}>
+                    <label for="priority_urgent">
+                        <i class="fas fa-fire"></i>
+                        <span>Urgent</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Flexibility Options</span>
+            
+            <div class="flexibility-options">
+                <h4><i class="fas fa-arrows-alt"></i> Increase Your Chances</h4>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" name="is_flexible_date" id="id_is_flexible_date" {% if form.is_flexible_date.value %}checked{% endif %}>
+                    <div>
+                        <label for="id_is_flexible_date">I'm flexible on the date</label>
+                        <p class="help-text">Allow reservations within a range of days from your desired date</p>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="flexibility_days_group" style="display: none; margin-left: 2rem;">
+                    <label for="id_flexibility_days">Days Flexibility (±)</label>
+                    <input type="number" name="flexibility_days" id="id_flexibility_days" class="form-control" min="1" max="14" value="{{ form.flexibility_days.value|default:3 }}" style="max-width: 100px;">
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" name="is_flexible_time" id="id_is_flexible_time" {% if form.is_flexible_time.value %}checked{% endif %}>
+                    <div>
+                        <label for="id_is_flexible_time">I'm flexible on the time</label>
+                        <p class="help-text">Allow any available time slot on the selected day(s)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Additional Notes</span>
+            
+            <div class="form-group">
+                <label for="id_reason">Reason for Request</label>
+                <textarea name="reason" id="id_reason" class="form-control" placeholder="Explain why you need this system and any special requirements...">{{ form.reason.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'waitlist_list' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Join Waitlist
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const flexibleDateCheckbox = document.getElementById('id_is_flexible_date');
+    const flexibilityDaysGroup = document.getElementById('flexibility_days_group');
+    
+    function toggleFlexibilityDays() {
+        flexibilityDaysGroup.style.display = flexibleDateCheckbox.checked ? 'block' : 'none';
+    }
+    
+    flexibleDateCheckbox.addEventListener('change', toggleFlexibilityDays);
+    toggleFlexibilityDays(); // Initial state
+    
+    // Add form-control class to Django form widgets
+    document.querySelectorAll('select, input[type="date"], input[type="time"]').forEach(el => {
+        if (!el.classList.contains('form-control') && el.name !== 'priority') {
+            el.classList.add('form-control');
+        }
+    });
+});
+</script>
+{% endblock %}

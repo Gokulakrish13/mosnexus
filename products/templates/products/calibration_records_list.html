@@ -1,0 +1,550 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration Records - {{ stream }}</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+    :root {
+        --primary: #0066cc;
+        --primary-light: #e6f2ff;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --bg-light: #f8fafc;
+    }
+
+    .records-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #0047ab 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+
+    .header-btn {
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: var(--primary);
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .header-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--border);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+    }
+
+    .stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.red { background: var(--danger-light); color: var(--danger); }
+    .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .stat-content p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Filters */
+    .filters-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 14px;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .filters-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .filter-btn {
+        padding: 0.625rem 1.25rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .filter-btn:hover {
+        background: #0047ab;
+    }
+
+    .filter-btn-clear {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .filter-btn-clear:hover {
+        background: var(--border);
+        color: var(--text-primary);
+    }
+
+    /* Records Table */
+    .records-card {
+        background: white;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .records-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .records-table th {
+        background: var(--bg-light);
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .records-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .records-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .records-table tr:hover {
+        background: var(--bg-light);
+    }
+
+    .equipment-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .equipment-id {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .result-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .result-badge.pass { background: var(--success-light); color: var(--success); }
+    .result-badge.fail { background: var(--danger-light); color: var(--danger); }
+    .result-badge.adjusted { background: var(--warning-light); color: var(--warning); }
+    .result-badge.pending { background: var(--bg-light); color: var(--text-secondary); }
+
+    .action-btn {
+        padding: 0.5rem 0.75rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pagination-info {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .page-link {
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        background: var(--bg-light);
+    }
+
+    .page-link.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+        .records-page {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .filters-row {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .records-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+    </style>
+</head>
+<body>
+
+<div class="records-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-clipboard-check"></i> Calibration Records</h1>
+            <p>View and manage all calibration records for {{ stream }}</p>
+        </div>
+        <a href="{% url 'calibration_dashboard' stream=stream %}" class="header-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_records }}</h3>
+                <p>Total Records</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ passed_count }}</h3>
+                <p>Passed</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ failed_count }}</h3>
+                <p>Failed</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fas fa-wrench"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ adjusted_count }}</h3>
+                <p>Adjusted</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-card">
+        <form method="get" class="filters-row">
+            <div class="filter-group" style="flex: 2;">
+                <label>Search</label>
+                <input type="text" name="q" class="filter-input" placeholder="Search equipment name or ID..." value="{{ search_query }}">
+            </div>
+            <div class="filter-group">
+                <label>Result</label>
+                <select name="result" class="filter-input">
+                    <option value="">All Results</option>
+                    {% for value, label in result_choices %}
+                    <option value="{{ value }}" {% if result_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Date From</label>
+                <input type="date" name="date_from" class="filter-input" value="{{ date_from }}">
+            </div>
+            <div class="filter-group">
+                <label>Date To</label>
+                <input type="date" name="date_to" class="filter-input" value="{{ date_to }}">
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="filter-btn">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{% url 'calibration_records_list' stream=stream %}" class="filter-btn filter-btn-clear">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Records Table -->
+    <div class="records-card">
+        {% if records %}
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>Equipment</th>
+                    <th>Calibration Date</th>
+                    <th>Performed By</th>
+                    <th>Result</th>
+                    <th>Next Due</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>
+                        <div class="equipment-name">{{ record.calibration_schedule.equipment_name }}</div>
+                        <div class="equipment-id">ID: {{ record.calibration_schedule.equipment_id }}</div>
+                    </td>
+                    <td>{{ record.calibration_date|date:"M d, Y" }}</td>
+                    <td>{{ record.performed_by|default:"—" }}</td>
+                    <td>
+                        <span class="result-badge {{ record.result }}">{{ record.get_result_display }}</span>
+                    </td>
+                    <td>{{ record.calibration_schedule.next_calibration_date|date:"M d, Y"|default:"—" }}</td>
+                    <td>
+                        <a href="{% url 'calibration_schedule_detail' stream=stream pk=record.calibration_schedule.pk %}" class="action-btn">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if records.has_other_pages %}
+        <div class="pagination-wrapper">
+            <div class="pagination-info">
+                Showing {{ records.start_index }} - {{ records.end_index }} of {{ records.paginator.count }} records
+            </div>
+            <div class="pagination">
+                {% if records.has_previous %}
+                <a href="?page={{ records.previous_page_number }}&q={{ search_query }}&result={{ result_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" class="page-link">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in records.paginator.page_range %}
+                    {% if records.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                    {% elif num > records.number|add:'-3' and num < records.number|add:'3' %}
+                    <a href="?page={{ num }}&q={{ search_query }}&result={{ result_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if records.has_next %}
+                <a href="?page={{ records.next_page_number }}&q={{ search_query }}&result={{ result_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" class="page-link">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No Calibration Records Found</h3>
+            <p>{% if search_query or result_filter or date_from or date_to %}No records match your filters. Try adjusting your search.{% else %}No calibration records have been created yet.{% endif %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,535 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if alert %}Edit{% else %}Create{% endif %} Compliance Alert - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --danger-red: #ef4444;
+        --warning-orange: #f59e0b;
+        --info-blue: #3b82f6;
+        --success-green: #10b981;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 700px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+        height: 44px;
+        box-sizing: border-box;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child { border-bottom: none; }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* Form Elements */
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    .form-label .required { color: #ef4444; }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    textarea.form-control { resize: vertical; }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Grid Layout */
+    .form-grid { display: grid; gap: 1rem; }
+    .form-grid-2 { grid-template-columns: 1fr 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* Priority Cards */
+    .priority-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+
+    .priority-card {
+        position: relative;
+    }
+
+    .priority-card input { display: none; }
+
+    .priority-card label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.25rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .priority-card label:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+    .priority-card label i { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .priority-card label span { font-weight: 700; font-size: 0.85rem; }
+
+    .priority-card.info label { color: var(--info-blue); }
+    .priority-card.warning label { color: var(--warning-orange); }
+    .priority-card.critical label { color: var(--danger-red); }
+    .priority-card.urgent label { color: #003399; }
+
+    .priority-card.info input:checked + label { background: var(--info-blue); color: white; border-color: var(--info-blue); }
+    .priority-card.warning input:checked + label { background: var(--warning-orange); color: white; border-color: var(--warning-orange); }
+    .priority-card.critical input:checked + label { background: var(--danger-red); color: white; border-color: var(--danger-red); }
+    .priority-card.urgent input:checked + label { background: #003399; color: white; border-color: #003399; }
+
+    /* Form Actions */
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        border: none;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        .form-section { padding: 1.5rem; }
+        .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+        .priority-grid { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-bell"></i>
+                {% if alert %}Edit Alert{% else %}Create Compliance Alert{% endif %}
+            </h1>
+            <p class="subtitle">
+                {% if alert %}
+                    Update the details of this compliance alert
+                {% else %}
+                    Create a new compliance alert for the {{ stream }} stream
+                {% endif %}
+            </p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_alerts_list' stream %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Alerts
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" id="alertForm">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <!-- Alert Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #d1fae5; color: #047857;">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Alert Information</h5>
+                        <p class="section-subtitle">Basic details about the compliance alert</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Alert Title <span class="required">*</span></label>
+                        <input type="text" name="title" class="form-control" required
+                               value="{{ alert.title|default:'' }}"
+                               placeholder="Enter a clear, descriptive title for the alert">
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2" style="margin-top: 1rem;">
+                    <div>
+                        <label class="form-label">Alert Type <span class="required">*</span></label>
+                        <select name="alert_type" class="form-select" required>
+                            <option value="">Select Alert Type</option>
+                            {% for value, label in alert_types %}
+                                <option value="{{ value }}" {% if alert.alert_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Auto-Dismiss Date</label>
+                        <input type="date" name="auto_dismiss_date" class="form-control"
+                               value="{{ alert.auto_dismiss_date|date:'Y-m-d'|default:'' }}">
+                        <small class="form-text">Alert will be automatically dismissed after this date</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Severity -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fee2e2; color: #b91c1c;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Severity Level</h5>
+                        <p class="section-subtitle">Choose the appropriate severity for this alert</p>
+                    </div>
+                </div>
+
+                <div class="priority-grid">
+                    <div class="priority-card info">
+                        <input type="radio" name="severity" id="sev_info" value="info"
+                               {% if alert.severity == 'info' %}checked{% elif not alert %}checked{% endif %}>
+                        <label for="sev_info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Information</span>
+                        </label>
+                    </div>
+                    <div class="priority-card warning">
+                        <input type="radio" name="severity" id="sev_warning" value="warning"
+                               {% if alert.severity == 'warning' %}checked{% endif %}>
+                        <label for="sev_warning">
+                            <i class="fas fa-exclamation"></i>
+                            <span>Warning</span>
+                        </label>
+                    </div>
+                    <div class="priority-card critical">
+                        <input type="radio" name="severity" id="sev_critical" value="critical"
+                               {% if alert.severity == 'critical' %}checked{% endif %}>
+                        <label for="sev_critical">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Critical</span>
+                        </label>
+                    </div>
+                    <div class="priority-card urgent">
+                        <input type="radio" name="severity" id="sev_urgent" value="urgent"
+                               {% if alert.severity == 'urgent' %}checked{% endif %}>
+                        <label for="sev_urgent">
+                            <i class="fas fa-radiation"></i>
+                            <span>Urgent</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #dbeafe; color: #1e40af;">
+                        <i class="fas fa-comment-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Alert Message</h5>
+                        <p class="section-subtitle">Provide details about the compliance concern</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Message <span class="required">*</span></label>
+                    <textarea name="message" class="form-control" rows="5" required
+                              placeholder="Describe the compliance issue, what action is needed, and any relevant context...">{{ alert.message|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Related Items -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e8f0fe; color: #0044CC;">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Related Items</h5>
+                        <p class="section-subtitle">Optionally link to related compliance records</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Related Requirement</label>
+                        <select name="related_requirement" class="form-select">
+                            <option value="">None</option>
+                            {% for req in requirements %}
+                                <option value="{{ req.pk }}" {% if alert.related_requirement_id == req.pk %}selected{% endif %}>
+                                    {{ req.requirement_id }} - {{ req.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Related Document</label>
+                        <select name="related_document" class="form-select">
+                            <option value="">None</option>
+                            {% for doc in documents %}
+                                <option value="{{ doc.pk }}" {% if alert.related_document_id == doc.pk %}selected{% endif %}>
+                                    {{ doc.document_id }} - {{ doc.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2" style="margin-top: 1rem;">
+                    <div>
+                        <label class="form-label">Target User</label>
+                        <select name="target_user" class="form-select">
+                            <option value="">None</option>
+                            {% for u in users %}
+                                <option value="{{ u.pk }}" {% if alert.target_user_id == u.pk %}selected{% endif %}>
+                                    {{ u.get_full_name|default:u.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text">User responsible for addressing this alert</small>
+                    </div>
+                    <div>
+                        <label class="form-label">Resolution Notes</label>
+                        <textarea name="resolution_notes" class="form-control" rows="2"
+                                  placeholder="Add any resolution notes (optional)">{{ alert.resolution_notes|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'compliance_alerts_list' stream %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i>
+                    {% if alert %}Update Alert{% else %}Create Alert{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,355 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Document Versions - {{ document.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #059669;
+        --primary-dark: #047857;
+        --primary-light: #d1fae5;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+        color: white; padding: 2.5rem 2rem; border-radius: 20px;
+        margin-bottom: 2rem; display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 1.5rem;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+        position: relative; overflow: hidden;
+    }
+
+    .page-header::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 1.75rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        background: rgba(255,255,255,0.2); padding: 0.6rem; border-radius: 12px;
+    }
+
+    .page-header .subtitle { opacity: 0.9; margin-top: 0.5rem; font-size: 0.95rem; }
+
+    .header-actions .btn {
+        padding: 0.6rem 1.15rem; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3); color: white;
+        background: rgba(255,255,255,0.1); cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+
+    .header-actions .btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* Document Info Card */
+    .doc-info-card {
+        background: white; border-radius: 16px; padding: 1.5rem;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        margin-bottom: 2rem; display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+    }
+
+    .doc-info-item label {
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        color: var(--text-secondary); letter-spacing: 0.04em;
+    }
+
+    .doc-info-item .value { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+    /* Upload Form */
+    .upload-card {
+        background: white; border-radius: 16px; padding: 1.5rem;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .upload-card h3 {
+        font-size: 1.1rem; font-weight: 700; margin: 0 0 1.25rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        padding-bottom: 0.75rem; border-bottom: 2px solid var(--primary);
+    }
+
+    .upload-card h3 i { color: var(--primary); }
+
+    .upload-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+    }
+
+    .upload-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .upload-group.full { grid-column: 1 / -1; }
+
+    .upload-group label {
+        font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;
+    }
+
+    .upload-group label .req { color: #ef4444; }
+
+    .upload-group input, .upload-group select, .upload-group textarea {
+        padding: 0.55rem 0.75rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.88rem; background: var(--bg-light);
+        font-family: inherit;
+    }
+
+    .upload-group input:focus, .upload-group select:focus, .upload-group textarea:focus {
+        border-color: var(--primary); outline: none;
+    }
+
+    .upload-group textarea { min-height: 80px; resize: vertical; }
+
+    .upload-group input[type="file"] {
+        padding: 0.75rem; border-style: dashed;
+    }
+
+    .checkbox-row {
+        display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;
+    }
+
+    .checkbox-row input { width: 18px; height: 18px; cursor: pointer; }
+    .checkbox-row label { font-size: 0.88rem; cursor: pointer; text-transform: none; }
+
+    .btn-upload {
+        padding: 0.65rem 1.5rem; border-radius: 10px; font-weight: 700;
+        font-size: 0.9rem; border: none; cursor: pointer;
+        background: var(--primary); color: white; margin-top: 1rem;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+
+    .btn-upload:hover { background: var(--primary-dark); }
+
+    /* Version Timeline */
+    .versions-card {
+        background: white; border-radius: 16px;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .versions-header {
+        padding: 1rem 1.5rem; font-weight: 700; font-size: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex; align-items: center; gap: 0.5rem;
+        background: var(--bg-light);
+    }
+
+    .versions-header i { color: var(--primary); }
+
+    .version-item {
+        padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+        display: flex; justify-content: space-between; align-items: flex-start;
+        gap: 1.5rem; transition: background 0.15s;
+    }
+
+    .version-item:hover { background: #f8fafd; }
+
+    .version-item.current { background: #f0fdf4; border-left: 4px solid var(--primary); }
+
+    .version-main { flex: 1; }
+
+    .version-title {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-weight: 700; font-size: 0.95rem;
+    }
+
+    .version-badge {
+        padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.7rem;
+        font-weight: 700; text-transform: uppercase;
+    }
+
+    .badge-current { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-minor { background: #dbeafe; color: #1e40af; }
+    .badge-major { background: #e8f0fe; color: #5b21b6; }
+    .badge-revision { background: #fef3c7; color: #92400e; }
+
+    .version-meta {
+        font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.3rem;
+    }
+
+    .version-summary {
+        font-size: 0.85rem; color: var(--text-primary); margin-top: 0.4rem;
+        padding: 0.5rem 0.75rem; background: var(--bg-light); border-radius: 8px;
+        border-left: 3px solid var(--primary);
+    }
+
+    .version-actions { display: flex; gap: 0.5rem; flex-shrink: 0; align-items: center; }
+
+    .btn-version {
+        padding: 0.35rem 0.7rem; border-radius: 8px; font-size: 0.78rem;
+        font-weight: 600; border: none; cursor: pointer; text-decoration: none;
+    }
+
+    .btn-download { background: #dbeafe; color: #1e40af; }
+    .btn-download:hover { background: #bfdbfe; }
+    .btn-restore { background: #fef3c7; color: #92400e; }
+    .btn-restore:hover { background: #fde68a; }
+
+    .file-info { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-secondary); }
+
+    .alert { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-weight: 500; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-error { background: #fde2e2; color: #c53030; }
+
+    @media (max-width: 768px) {
+        .version-item { flex-direction: column; }
+        .version-actions { justify-content: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-code-branch"></i> Version History</h1>
+            <p class="subtitle">{{ document.title }}</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_document_detail' stream=stream pk=document.pk %}" class="btn">
+                <i class="fas fa-file-alt"></i> Document
+            </a>
+            <a href="{% url 'compliance_documents_list' stream=stream %}" class="btn">
+                <i class="fas fa-arrow-left"></i> All Docs
+            </a>
+        </div>
+    </div>
+
+    <!-- Document Info -->
+    <div class="doc-info-card">
+        <div class="doc-info-item">
+            <label>Document ID</label>
+            <div class="value">{{ document.document_id }}</div>
+        </div>
+        <div class="doc-info-item">
+            <label>Category</label>
+            <div class="value">{{ document.get_category_display }}</div>
+        </div>
+        <div class="doc-info-item">
+            <label>Status</label>
+            <div class="value">{{ document.get_status_display }}</div>
+        </div>
+        <div class="doc-info-item">
+            <label>Total Versions</label>
+            <div class="value">{{ versions|length }}</div>
+        </div>
+    </div>
+
+    <!-- Upload New Version -->
+    <div class="upload-card">
+        <h3><i class="fas fa-upload"></i> Upload New Version</h3>
+        <form method="post" action="{% url 'compliance_document_version_upload' stream=stream pk=document.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="upload-grid">
+                <div class="upload-group">
+                    <label>Version Number <span class="req">*</span></label>
+                    <input type="text" name="version_number" required placeholder="e.g., 2.1">
+                </div>
+                <div class="upload-group">
+                    <label>Version Label</label>
+                    <input type="text" name="version_label" placeholder="e.g., Annual Review 2025">
+                </div>
+                <div class="upload-group">
+                    <label>Change Type</label>
+                    <select name="change_type">
+                        <option value="minor">Minor</option>
+                        <option value="major">Major</option>
+                        <option value="revision">Revision</option>
+                        <option value="correction">Correction</option>
+                    </select>
+                </div>
+                <div class="upload-group full">
+                    <label>File <span class="req">*</span></label>
+                    <input type="file" name="file" required>
+                </div>
+                <div class="upload-group full">
+                    <label>Change Summary</label>
+                    <textarea name="change_summary" placeholder="Describe what changed in this version..."></textarea>
+                </div>
+                <div class="upload-group full">
+                    <label>Notes</label>
+                    <textarea name="notes" placeholder="Internal notes (optional)..." style="min-height:60px;"></textarea>
+                </div>
+                <div class="upload-group">
+                    <div class="checkbox-row">
+                        <input type="checkbox" name="make_current" id="makeCurrent">
+                        <label for="makeCurrent">Set as current version</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-upload"><i class="fas fa-upload"></i> Upload Version</button>
+        </form>
+    </div>
+
+    <!-- Versions List -->
+    <div class="versions-card">
+        <div class="versions-header">
+            <i class="fas fa-history"></i> All Versions ({{ versions|length }})
+        </div>
+        {% for v in versions %}
+        <div class="version-item {% if v.is_current %}current{% endif %}">
+            <div class="version-main">
+                <div class="version-title">
+                    v{{ v.version_number }}
+                    {% if v.version_label %} — {{ v.version_label }}{% endif %}
+                    {% if v.is_current %}<span class="version-badge badge-current">Current</span>{% endif %}
+                    <span class="version-badge badge-{{ v.change_type }}">{{ v.get_change_type_display }}</span>
+                </div>
+                <div class="version-meta">
+                    Uploaded by {{ v.created_by.get_full_name|default:v.created_by.username }} &middot;
+                    {{ v.created_at|date:"M d, Y H:i" }}
+                    {% if v.reviewed_by %} &middot; Reviewed by {{ v.reviewed_by.get_full_name|default:v.reviewed_by.username }}{% endif %}
+                    {% if v.approved_by %} &middot; Approved by {{ v.approved_by.get_full_name|default:v.approved_by.username }}{% endif %}
+                </div>
+                {% if v.change_summary %}
+                <div class="version-summary">{{ v.change_summary }}</div>
+                {% endif %}
+                <div class="file-info">
+                    <i class="fas fa-file"></i> {{ v.original_filename }}
+                    ({{ v.file_size|filesizeformat }})
+                    {% if v.file_hash %} &middot; SHA: {{ v.file_hash|truncatechars:16 }}{% endif %}
+                </div>
+            </div>
+            <div class="version-actions">
+                <a href="{% url 'compliance_document_version_download' stream=stream pk=document.pk version_id=v.pk %}" class="btn-version btn-download">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                {% if not v.is_current %}
+                <form method="post" action="{% url 'compliance_document_version_restore' stream=stream pk=document.pk version_id=v.pk %}" style="display:inline;" onsubmit="return confirm('Restore this version as current?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-version btn-restore">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-code-branch" style="font-size:2rem;opacity:0.3;"></i>
+            <h3>No Versions Yet</h3>
+            <p>Upload the first version of this document above.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

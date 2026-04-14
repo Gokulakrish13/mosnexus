@@ -1,0 +1,698 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Feature Hub{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #0B5FFF;
+        --indigo: #0B5FFF;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .hub-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .hub-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .hub-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .hub-header h1 i {
+        color: var(--primary-blue);
+    }
+
+    .hub-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        background: white;
+        color: var(--primary-blue);
+    }
+
+    /* ─── Feature Selector ─── */
+    .feature-selector {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .feature-selector h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .feature-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .feature-tab {
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .feature-tab:hover {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue-light);
+    }
+
+    .feature-tab.active {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .feature-tab i {
+        font-size: 1.25rem;
+    }
+
+    .feature-tab .tab-desc {
+        display: none;
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .feature-tab.active .tab-desc {
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* ─── Streams Container (separate card) ─── */
+    .streams-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .streams-container h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .streams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stream-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stream-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--indigo));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .stream-card:hover {
+        border-color: var(--primary-blue);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .stream-card:hover::before {
+        opacity: 1;
+    }
+
+    .stream-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--indigo));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .stream-icon i {
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stream-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stream-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .stream-arrow {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        opacity: 0;
+        transition: all 0.3s;
+    }
+
+    .stream-card:hover .stream-arrow {
+        opacity: 1;
+        right: 1rem;
+        color: var(--primary-blue);
+    }
+
+    /* ─── Direct-link card (no stream) ─── */
+    .direct-links {
+        margin-top: 2rem;
+    }
+
+    .direct-links h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .direct-links-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .direct-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .direct-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 4px; height: 100%;
+        background: transparent;
+        transition: background 0.25s;
+    }
+
+    .direct-card:hover {
+        border-color: var(--primary-blue);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        transform: translateX(4px);
+    }
+
+    .direct-card:hover::before {
+        background: var(--primary-blue);
+    }
+
+    .direct-card-icon {
+        flex-shrink: 0;
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.15rem;
+    }
+
+    .direct-card-body { flex: 1; }
+
+    .direct-card-body h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.15rem;
+    }
+
+    .direct-card-body p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .direct-card-arrow {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: all 0.25s;
+    }
+
+    .direct-card:hover .direct-card-arrow {
+        opacity: 1;
+        color: var(--primary-blue);
+        transform: translateX(3px);
+    }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* ─── AI Section (inside same container) ─── */
+    .ai-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .ai-divider::before {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    }
+
+    .ai-divider-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    .ai-divider-label i {
+        color: #0B5FFF;
+    }
+
+    .ai-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    }
+
+    .ai-feature-tabs {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.3s ease;
+        overflow: hidden;
+    }
+
+    .ai-feature-tabs.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        margin-bottom: 0;
+    }
+
+    .ai-feature-tabs.expanded {
+        opacity: 1;
+    }
+
+    /* Toggle button – matches .feature-tab style but smaller */
+    .ai-toggle-btn {
+        position: absolute;
+        top: 1.65rem;
+        right: 2rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: white;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+        z-index: 2;
+    }
+
+    .ai-toggle-btn:hover {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue-light);
+        box-shadow: 0 0 14px rgba(0, 102, 204, 0.35);
+    }
+
+    .ai-toggle-btn.active {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: white;
+        box-shadow: 0 0 12px rgba(0, 102, 204, 0.4), 0 0 4px rgba(0, 102, 204, 0.2);
+    }
+
+    .ai-toggle-btn:not(.active) {
+        box-shadow: 0 0 8px rgba(0, 102, 204, 0.2);
+        border-color: rgba(0, 102, 204, 0.35);
+    }
+
+    .ai-toggle-btn i {
+        font-size: 0.85rem;
+    }
+
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+        .hub-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .feature-tabs {
+            flex-direction: column;
+        }
+
+
+        .streams-grid,
+        .direct-links-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-toggle-btn {
+            position: static;
+            margin-bottom: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="hub-container">
+
+    <div class="hub-header">
+        <h1><i class="fas fa-rocket"></i> Feature Hub</h1>
+        <p>Advanced tools & management — select a feature, then choose a stream to proceed</p>
+    </div>
+
+    <!-- ─── Stream-based Features ─── -->
+    <div class="feature-selector" style="position:relative;">
+        <!-- AI Toggle Button (top-right) -->
+        <button class="ai-toggle-btn active" id="aiToggleBtn" onclick="toggleAiFeatures()" title="Show / Hide AI features">
+            <i class="fas fa-robot"></i>
+            <span id="aiToggleText">Hide AI Features</span>
+        </button>
+
+        <h2><i class="fas fa-layer-group"></i> Select Feature</h2>
+
+        <div class="feature-tabs" id="featureTabs">
+            <div class="feature-tab active" data-feature="asset_lifecycle" onclick="selectFeature('asset_lifecycle')">
+                <i class="fas fa-heartbeat"></i>
+                <span>Asset Lifecycle</span>
+            </div>
+            <div class="feature-tab" data-feature="maintenance_calendar" onclick="selectFeature('maintenance_calendar')">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Maintenance Calendar</span>
+            </div>
+            <div class="feature-tab" data-feature="inventory_alerts" onclick="selectFeature('inventory_alerts')">
+                <i class="fas fa-bell"></i>
+                <span>Inventory Alerts</span>
+            </div>
+            <div class="feature-tab" data-feature="inventory_thresholds" onclick="selectFeature('inventory_thresholds')">
+                <i class="fas fa-sliders-h"></i>
+                <span>Threshold Rules</span>
+            </div>
+            <div class="feature-tab" data-feature="lifecycle_dashboard" onclick="selectFeature('lifecycle_dashboard')">
+                <i class="fas fa-chart-pie"></i>
+                <span>Lifecycle Dashboard</span>
+            </div>
+        </div>
+
+        <!-- AI Features divider + tabs -->
+        <div id="aiSection">
+            <div class="ai-divider">
+                <span class="ai-divider-label"><i class="fas fa-robot"></i> AI-Powered Features</span>
+            </div>
+            <div class="ai-feature-tabs expanded" id="aiFeatureTabs">
+                <div class="feature-tab" data-feature="ai_calibration" onclick="selectFeature('ai_calibration')">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Calibration</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_ocr" onclick="selectFeature('ai_ocr')">
+                    <i class="fas fa-file-alt"></i>
+                    <span>AI Document OCR</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_forecast" onclick="selectFeature('ai_forecast')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>AI Forecast</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_scheduler" onclick="selectFeature('ai_scheduler')">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>AI Scheduler</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_nl_dashboard" onclick="selectFeature('ai_nl_dashboard')">
+                    <i class="fas fa-comments"></i>
+                    <span>AI NL Query</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_model_mgmt" onclick="selectFeature('ai_model_mgmt')">
+                    <i class="fas fa-cogs"></i>
+                    <span>AI Models</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_usage_analytics" onclick="selectFeature('ai_usage_analytics')">
+                    <i class="fas fa-chart-area"></i>
+                    <span>AI Usage Analytics</span>
+                </div>
+                <div class="feature-tab" data-feature="ai_anomaly_detection" onclick="selectFeature('ai_anomaly_detection')">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>AI Anomaly Detection</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Select Stream (separate container) ─── -->
+    <div class="streams-container">
+        <h2><i class="fas fa-sitemap"></i> Select Stream</h2>
+        {% if streams %}
+        <div class="streams-grid" id="streamsGrid">
+            {% for stream in streams %}
+            <a href="#" class="stream-card" data-stream="{{ stream.name }}" onclick="navigateToFeature('{{ stream.name }}'); return false;">
+                <div class="stream-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <div class="stream-name">{{ stream.name }}</div>
+                <div class="stream-label">Click to access selected feature</div>
+                <div class="stream-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h3>No Streams Available</h3>
+            <p>Contact your administrator to get access to streams.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── Direct-link Features (no stream required) ─── -->
+    {% if is_admin %}
+    <div class="direct-links">
+        <h2><i class="fas fa-bolt"></i> Quick Access (No Stream Required)</h2>
+        <div class="direct-links-grid">
+            <a href="{% url 'audit_log_list' %}" class="direct-card">
+                <div class="direct-card-icon" style="background: linear-gradient(135deg, #232526, #414345);">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="direct-card-body">
+                    <h3>Audit Log</h3>
+                    <p>Global activity timeline & security audit trail</p>
+                </div>
+                <span class="direct-card-arrow"><i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    let selectedFeature = 'asset_lifecycle';
+
+    function selectFeature(feature) {
+        selectedFeature = feature;
+        document.querySelectorAll('.feature-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.feature === feature);
+        });
+    }
+
+    /* AI toggle – show / hide AI features */
+    function toggleAiFeatures() {
+        const section = document.getElementById('aiSection');
+        const tabs = document.getElementById('aiFeatureTabs');
+        const btn = document.getElementById('aiToggleBtn');
+        const isVisible = !tabs.classList.contains('collapsed');
+
+        if (isVisible) {
+            tabs.classList.add('collapsed');
+            tabs.classList.remove('expanded');
+            section.querySelector('.ai-divider').style.display = 'none';
+            btn.classList.remove('active');
+            document.getElementById('aiToggleText').textContent = 'View AI Features';
+            // If an AI feature was selected, reset to first regular feature
+            if (selectedFeature.startsWith('ai_')) {
+                selectFeature('asset_lifecycle');
+            }
+        } else {
+            tabs.classList.remove('collapsed');
+            tabs.classList.add('expanded');
+            tabs.style.maxHeight = tabs.scrollHeight + 'px';
+            section.querySelector('.ai-divider').style.display = '';
+            btn.classList.add('active');
+            document.getElementById('aiToggleText').textContent = 'Hide AI Features';
+        }
+
+        // Persist preference
+        try { localStorage.setItem('featureHub_showAI', isVisible ? '0' : '1'); } catch(e) {}
+    }
+
+    // Restore AI toggle state on load
+    (function() {
+        try {
+            const pref = localStorage.getItem('featureHub_showAI');
+            if (pref === '0') {
+                const tabs = document.getElementById('aiFeatureTabs');
+                const section = document.getElementById('aiSection');
+                const btn = document.getElementById('aiToggleBtn');
+                tabs.classList.add('collapsed');
+                tabs.classList.remove('expanded');
+                section.querySelector('.ai-divider').style.display = 'none';
+                btn.classList.remove('active');
+                document.getElementById('aiToggleText').textContent = 'View AI Features';
+            }
+        } catch(e) {}
+    })();
+
+    function navigateToFeature(stream) {
+        const routes = {
+            asset_lifecycle:      `/stream/${stream}/lifecycle/`,
+            maintenance_calendar: `/stream/${stream}/maintenance-calendar/`,
+            inventory_alerts:     `/stream/${stream}/inventory-alerts/`,
+            inventory_thresholds: `/stream/${stream}/inventory-alerts/thresholds/`,
+            lifecycle_dashboard:  `/stream/${stream}/lifecycle/dashboard/`,
+            ai_calibration:       `/stream/${stream}/ai/calibration-reports/`,
+            ai_ocr:               `/stream/${stream}/ai/ocr/`,
+            ai_nl_dashboard:      `/stream/${stream}/ai/nl-dashboard/`,
+            ai_forecast:          `/stream/${stream}/ai/inventory-forecast/`,
+            ai_scheduler:         `/stream/${stream}/ai/smart-scheduler/`,
+            ai_model_mgmt:        `/stream/${stream}/ai/model-management/`,
+            ai_usage_analytics:   `/stream/${stream}/ai/usage-analytics/`,
+            ai_anomaly_detection: `/stream/${stream}/ai/anomaly-detection/`,
+        };
+        const url = routes[selectedFeature];
+        if (url) window.location.href = url;
+    }
+
+    // Pre-select feature from hash (e.g. /feature-hub/#maintenance_calendar)
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.replace('#', '');
+        if (hash && document.querySelector(`.feature-tab[data-feature="${hash}"]`)) {
+            selectFeature(hash);
+        }
+    });
+</script>
+{% endblock %}

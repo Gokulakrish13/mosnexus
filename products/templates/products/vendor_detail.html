@@ -1,0 +1,538 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}{{ vendor.name }} — Vendor Details{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --danger: #EF4444;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+        --shadow-xl: 0 20px 40px -5px rgba(0,0,0,0.12);
+        --shadow-glow: 0 0 40px rgba(11, 95, 255, 0.15);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+    }
+    body {
+        background: var(--bg-primary); min-height: 100vh;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .detail-page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+    /* Detail Header */
+    .detail-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .detail-header-left { display: flex; align-items: center; gap: 1rem; }
+    .detail-header-left .icon-wrap {
+        width: 56px; height: 56px; background: var(--gradient-primary); border-radius: var(--radius-md);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(11, 95, 255, 0.25);
+    }
+    .detail-header-left .icon-wrap i { color: #fff; font-size: 1.35rem; }
+    .vendor-title { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.025em; color: var(--text-primary); }
+    .vendor-meta { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.2rem; }
+    .vendor-code-tag {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+        background: var(--bg-secondary); padding: 0.15rem 0.5rem; border-radius: 4px;
+        color: var(--text-secondary); font-weight: 500;
+    }
+    .vendor-stream-tag { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; }
+
+    .status-badge {
+        padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem;
+        font-weight: 700; letter-spacing: 0.02em; text-transform: capitalize;
+    }
+    .status-active { background: #DCFCE7; color: #166534; }
+    .status-inactive { background: var(--bg-secondary); color: var(--text-tertiary); }
+    .status-blacklisted { background: #FEE2E2; color: #991B1B; }
+    .status-pending { background: #FEF3C7; color: #92400E; }
+
+    .header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-ph {
+        padding: 0.55rem 1.15rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.82rem;
+        cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; font-family: inherit;
+    }
+    .btn-primary {
+        background: var(--gradient-primary); color: #fff;
+        box-shadow: 0 2px 8px rgba(11, 95, 255, 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11, 95, 255, 0.35); }
+    .btn-outline {
+        background: var(--surface); border: 1.5px solid var(--border-color); color: var(--text-secondary);
+    }
+    .btn-outline:hover { border-color: var(--philips-blue); color: var(--philips-blue); }
+    .btn-danger {
+        background: #FEF2F2; border: 1.5px solid #FECACA; color: #DC2626;
+    }
+    .btn-danger:hover { background: #DC2626; color: #fff; border-color: #DC2626; }
+
+    /* Info Cards Grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+    .info-card {
+        background: var(--surface); border-radius: var(--radius-lg); padding: 1.5rem;
+        box-shadow: var(--shadow-md); border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+    .info-card:hover { box-shadow: var(--shadow-lg); }
+    .info-card-title {
+        font-size: 0.78rem; font-weight: 700; color: var(--philips-blue);
+        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);
+    }
+    .info-card-title i { font-size: 0.85rem; }
+    .info-row {
+        display: flex; justify-content: space-between; padding: 0.45rem 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5); font-size: 0.85rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-secondary); font-weight: 500; }
+    .info-value { font-weight: 600; color: var(--text-primary); text-align: right; max-width: 55%; }
+    .info-value a { color: var(--philips-blue); text-decoration: none; }
+    .info-value a:hover { text-decoration: underline; }
+    .rating-stars { color: var(--warning); letter-spacing: 1px; }
+
+    /* Notes Card */
+    .notes-card {
+        background: var(--surface); border-radius: var(--radius-lg); padding: 1.5rem;
+        box-shadow: var(--shadow-md); border: 1px solid var(--border-color); margin-bottom: 2rem;
+    }
+    .notes-card h3 {
+        font-size: 0.78rem; font-weight: 700; color: var(--philips-blue);
+        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .notes-card p {
+        font-size: 0.88rem; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;
+    }
+
+    /* Section Headers */
+    .section-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin: 2.5rem 0 1.25rem;
+    }
+    .section-title {
+        font-size: 1.1rem; font-weight: 800; color: var(--text-primary);
+        display: flex; align-items: center; gap: 0.75rem; letter-spacing: -0.02em;
+    }
+    .section-title .sec-icon {
+        width: 36px; height: 36px; background: var(--gradient-primary); border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .section-title .sec-icon i { color: #fff; font-size: 0.9rem; }
+    .section-count {
+        background: var(--bg-secondary); padding: 0.15rem 0.55rem; border-radius: 12px;
+        font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+    }
+
+    /* Tables */
+    .table-card {
+        background: var(--surface); border-radius: var(--radius-lg); overflow: hidden;
+        box-shadow: var(--shadow-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+    }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+        background: var(--bg-secondary); font-weight: 700; font-size: 0.72rem;
+        text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary);
+        padding: 0.8rem 1rem; text-align: left; border-bottom: 2px solid var(--border-color);
+    }
+    .data-table td {
+        padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);
+        font-size: 0.85rem; color: var(--text-primary); vertical-align: middle;
+    }
+    .data-table tbody tr { transition: background 0.15s; }
+    .data-table tbody tr:hover { background: rgba(11, 95, 255, 0.02); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    .expiry-warn { color: var(--warning); font-weight: 700; }
+    .expiry-ok { color: var(--success); font-weight: 600; }
+    .expiry-expired { color: var(--danger); font-weight: 700; }
+
+    .table-empty {
+        text-align: center; padding: 2.5rem; color: var(--text-tertiary); font-size: 0.88rem;
+    }
+
+    .table-action-btn {
+        background: none; border: none; cursor: pointer; font-size: 0.85rem;
+        padding: 0.3rem; border-radius: 4px; transition: all 0.2s;
+    }
+    .table-action-btn.delete { color: var(--danger); }
+    .table-action-btn.delete:hover { background: #FEF2F2; }
+    .table-action-btn.download { color: var(--philips-blue); }
+    .table-action-btn.download:hover { background: rgba(11, 95, 255, 0.05); }
+
+    /* Inline Add Forms */
+    .add-form-card {
+        background: var(--surface); border-radius: var(--radius-lg); padding: 1.5rem;
+        box-shadow: var(--shadow-md); border: 1px solid var(--border-color); margin-bottom: 1.25rem;
+        border-left: 4px solid var(--philips-blue);
+    }
+    .add-form-title {
+        font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .add-form-title i { color: var(--philips-blue); }
+    .add-form-row {
+        display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: flex-end;
+    }
+    .add-fg { display: flex; flex-direction: column; gap: 0.3rem; }
+    .add-fg label {
+        font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .add-fg input, .add-fg select, .add-fg textarea {
+        padding: 0.45rem 0.65rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+        font-size: 0.82rem; background: var(--bg-primary); color: var(--text-primary);
+        font-family: inherit; transition: border-color 0.2s;
+    }
+    .add-fg input:focus, .add-fg select:focus { border-color: var(--philips-blue); outline: none; }
+    .btn-add {
+        background: var(--philips-blue); color: #fff; padding: 0.45rem 1rem;
+        border-radius: var(--radius-sm); border: none; cursor: pointer; font-weight: 600;
+        font-size: 0.82rem; display: inline-flex; align-items: center; gap: 0.35rem;
+        transition: all 0.2s; font-family: inherit;
+    }
+    .btn-add:hover { background: var(--philips-blue-dark); }
+
+    .check-icon { font-size: 0.95rem; }
+    .check-icon.ok { color: var(--success); }
+    .check-icon.fail { color: var(--danger); }
+
+    @media (max-width: 992px) { .info-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+        .detail-page { padding: 1.25rem; }
+        .detail-header { flex-direction: column; }
+        .add-form-row { flex-direction: column; }
+    }
+</style>
+
+{% if messages %}
+<div style="position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;">
+    {% for message in messages %}
+    <div onclick="this.remove()" style="padding:14px 22px;border-radius:10px;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;max-width:420px;cursor:pointer;background:{% if message.tags == 'success' %}linear-gradient(135deg,#22c55e,#16a34a){% elif message.tags == 'error' %}linear-gradient(135deg,#dc2626,#b91c1c){% elif message.tags == 'warning' %}linear-gradient(135deg,#f59e0b,#d97706){% else %}linear-gradient(135deg,#0ea5e9,#0284c7){% endif %};">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-times-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+<script>setTimeout(function(){document.querySelectorAll('[onclick="this.remove()"]').forEach(function(el){el.style.transition='opacity .5s';el.style.opacity='0';setTimeout(function(){el.remove();},500);});},5000);</script>
+{% endif %}
+
+<div class="detail-page">
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="detail-header-left">
+            {% if vendor.logo %}
+            <div style="width:56px;height:56px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-color);flex-shrink:0;">
+                <img src="{{ vendor.logo.url }}" alt="{{ vendor.name }} logo" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            {% else %}
+            <div class="icon-wrap"><i class="fas fa-building"></i></div>
+            {% endif %}
+            <div>
+                <div class="vendor-title">{{ vendor.name }}</div>
+                <div class="vendor-meta">
+                    <span class="vendor-code-tag">{{ vendor.code }}</span>
+                    <span class="vendor-stream-tag">{{ stream }}</span>
+                    <span class="status-badge status-{{ vendor.status }}">{{ vendor.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            {% if is_admin %}
+            <a href="{% url 'vendor_edit' stream=stream pk=vendor.pk %}" class="btn-ph btn-primary"><i class="fas fa-edit"></i> Edit</a>
+            <form method="post" action="{% url 'vendor_delete' stream=stream pk=vendor.pk %}" style="display:inline;" onsubmit="return confirm('Delete this vendor? This action cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn-ph btn-danger"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'vendor_list' stream=stream %}" class="btn-ph btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card-title"><i class="fas fa-id-card"></i> Contact Information</div>
+            <div class="info-row"><span class="info-label">Contact Person</span><span class="info-value">{{ vendor.contact_person|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{% if vendor.email %}<a href="mailto:{{ vendor.email }}">{{ vendor.email }}</a>{% else %}-{% endif %}</span></div>
+            <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ vendor.phone|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Website</span><span class="info-value">{% if vendor.website %}<a href="{{ vendor.website }}" target="_blank">{{ vendor.website }}</a>{% else %}-{% endif %}</span></div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-title"><i class="fas fa-map-marker-alt"></i> Location & Business</div>
+            <div class="info-row"><span class="info-label">Address</span><span class="info-value">{{ vendor.address|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">City</span><span class="info-value">{{ vendor.city|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Country</span><span class="info-value">{{ vendor.country|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Tax ID</span><span class="info-value">{{ vendor.tax_id|default:"-" }}</span></div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-title"><i class="fas fa-file-invoice-dollar"></i> Terms & Rating</div>
+            <div class="info-row"><span class="info-label">Category</span><span class="info-value">{{ vendor.category|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Payment Terms</span><span class="info-value">{{ vendor.payment_terms|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Currency</span><span class="info-value">{{ vendor.currency }}</span></div>
+            <div class="info-row">
+                <span class="info-label">Rating</span>
+                <span class="info-value">
+                    {% if vendor.rating %}
+                    <span class="rating-stars">{% for i in "12345" %}{% if forloop.counter <= vendor.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span>
+                    {% else %}-{% endif %}
+                </span>
+            </div>
+            <div class="info-row"><span class="info-label">Created</span><span class="info-value">{{ vendor.created_at|date:"Y-m-d" }}</span></div>
+        </div>
+    </div>
+
+    {% if vendor.notes %}
+    <div class="notes-card">
+        <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+        <p>{{ vendor.notes }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Contracts Section -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon"><i class="fas fa-file-contract"></i></span>
+            Contracts <span class="section-count">{{ contracts|length }}</span>
+        </div>
+    </div>
+
+    {% if is_admin %}
+    <div class="add-form-card">
+        <div class="add-form-title"><i class="fas fa-plus-circle"></i> Add Contract</div>
+        <form method="post" action="{% url 'vendor_contract_create' stream=stream vendor_id=vendor.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="add-form-row">
+                <div class="add-fg"><label>Title *</label><input type="text" name="title" required placeholder="Contract title"></div>
+                <div class="add-fg"><label>Contract #</label><input type="text" name="contract_number" placeholder="CTR-001"></div>
+                <div class="add-fg"><label>Status</label>
+                    <select name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="expired">Expired</option></select>
+                </div>
+                <div class="add-fg"><label>Start Date *</label><input type="date" name="start_date" required></div>
+                <div class="add-fg"><label>End Date</label><input type="date" name="end_date"></div>
+                <div class="add-fg"><label>Value</label><input type="number" name="value" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="add-fg"><label>Currency</label><input type="text" name="currency" value="EUR" maxlength="10" style="width:70px;"></div>
+                <div class="add-fg"><label>Document</label><input type="file" name="document"></div>
+            </div>
+            <div class="add-form-row" style="margin-top:0.75rem;">
+                <div class="add-fg" style="flex:1;"><label>Notes</label><input type="text" name="notes" style="width:100%;" placeholder="Optional notes"></div>
+                <button type="submit" class="btn-add"><i class="fas fa-plus"></i> Add Contract</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if contracts %}
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr><th>Title</th><th>Contract #</th><th>Status</th><th>Period</th><th>Value</th><th>Expiry</th>{% if is_admin %}<th>Actions</th>{% endif %}</tr>
+            </thead>
+            <tbody>
+                {% for c in contracts %}
+                <tr>
+                    <td><strong>{{ c.title }}</strong></td>
+                    <td><span class="vendor-code-tag">{{ c.contract_number|default:"-" }}</span></td>
+                    <td><span class="status-badge status-{{ c.status }}">{{ c.get_status_display }}</span></td>
+                    <td>{{ c.start_date|date:"Y-m-d" }} {% if c.end_date %}<i class="fas fa-arrow-right" style="font-size:0.65rem;color:var(--text-tertiary);margin:0 0.25rem;"></i> {{ c.end_date|date:"Y-m-d" }}{% endif %}</td>
+                    <td>{% if c.value %}<strong>{{ c.currency }} {{ c.value|floatformat:2 }}</strong>{% else %}-{% endif %}</td>
+                    <td>
+                        {% if c.end_date %}
+                            {% if c.is_expired %}<span class="expiry-expired"><i class="fas fa-exclamation-circle"></i> Expired</span>
+                            {% elif c.days_until_expiry <= 30 %}<span class="expiry-warn"><i class="fas fa-clock"></i> {{ c.days_until_expiry }}d left</span>
+                            {% else %}<span class="expiry-ok"><i class="fas fa-check-circle"></i> {{ c.days_until_expiry }}d</span>{% endif %}
+                        {% else %}-{% endif %}
+                    </td>
+                    {% if is_admin %}
+                    <td>
+                        {% if c.document %}<a href="{{ c.document.url }}" target="_blank" class="table-action-btn download" title="Download"><i class="fas fa-download"></i></a>{% endif %}
+                        <form method="post" action="{% url 'vendor_contract_delete' stream=stream vendor_id=vendor.pk pk=c.pk %}" style="display:inline;" onsubmit="return confirm('Delete this contract?');">
+                            {% csrf_token %}
+                            <button type="submit" class="table-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-card">
+        <div class="table-empty"><i class="fas fa-file-contract" style="margin-right:0.5rem;"></i> No contracts yet.</div>
+    </div>
+    {% endif %}
+
+    <!-- Purchase Orders Section -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon"><i class="fas fa-shopping-cart"></i></span>
+            Purchase Orders <span class="section-count">{{ purchase_orders|length }}</span>
+        </div>
+        <a href="{% url 'vendor_po_create' stream=stream vendor_id=vendor.pk %}" class="btn-ph btn-primary" style="font-size:0.8rem;padding:0.45rem 1rem;">
+            <i class="fas fa-plus"></i> New Purchase Order
+        </a>
+    </div>
+
+    {% if purchase_orders %}
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr><th>PO #</th><th>Title</th><th>Status</th><th>Priority</th><th>Order Date</th><th>Items</th><th>Total</th><th>Delivery</th></tr>
+            </thead>
+            <tbody>
+                {% for po in purchase_orders %}
+                <tr style="cursor:pointer;" onclick="window.location='{% url 'vendor_po_detail' stream=stream vendor_id=vendor.pk po_id=po.pk %}'">
+                    <td><span class="vendor-code-tag">{{ po.po_number }}</span></td>
+                    <td><strong>{{ po.title }}</strong></td>
+                    <td>
+                        <span class="status-badge {% if po.status == 'delivered' or po.status == 'closed' %}status-active{% elif po.status == 'cancelled' %}status-blacklisted{% elif po.status == 'draft' %}status-inactive{% else %}status-pending{% endif %}">
+                            {{ po.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-size:0.78rem;font-weight:600;{% if po.priority == 'urgent' %}color:#DC2626;{% elif po.priority == 'high' %}color:#F59E0B;{% else %}color:var(--text-secondary);{% endif %}">
+                            {% if po.priority == 'urgent' %}<i class="fas fa-exclamation-triangle"></i> {% elif po.priority == 'high' %}<i class="fas fa-arrow-up"></i> {% endif %}{{ po.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>{{ po.order_date|date:"Y-m-d" }}</td>
+                    <td>{{ po.items.count }} item{{ po.items.count|pluralize }}</td>
+                    <td><strong>{{ po.currency }} {{ po.total_amount|floatformat:2 }}</strong></td>
+                    <td>
+                        {% if po.is_overdue %}<span class="expiry-expired"><i class="fas fa-exclamation-circle"></i> Overdue</span>
+                        {% elif po.actual_delivery_date %}<span class="expiry-ok"><i class="fas fa-check-circle"></i> {{ po.actual_delivery_date|date:"Y-m-d" }}</span>
+                        {% elif po.expected_delivery_date %}<span class="expiry-warn"><i class="fas fa-clock"></i> Expected {{ po.expected_delivery_date|date:"Y-m-d" }}</span>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-card">
+        <div class="table-empty"><i class="fas fa-shopping-cart" style="margin-right:0.5rem;"></i> No purchase orders yet. Create one to start tracking vendor requests.</div>
+    </div>
+    {% endif %}
+
+    <!-- Linked Assets / Lifecycle Records Section -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon"><i class="fas fa-recycle"></i></span>
+            Linked Assets <span class="section-count">{{ lifecycle_records|length }}</span>
+        </div>
+    </div>
+
+    {% if lifecycle_records %}
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr><th>Asset</th><th>Serial Number</th><th>Stage</th><th>Condition</th><th>Purchase Cost</th><th>Purchase Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for lr in lifecycle_records %}
+                <tr>
+                    <td><strong>{{ lr.product.name }}</strong></td>
+                    <td><span class="vendor-code-tag">{{ lr.product.serial_number|default:"-" }}</span></td>
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:0.3rem;color:{{ lr.current_stage.color }};font-weight:600;font-size:0.82rem;">
+                            <i class="{{ lr.current_stage.icon_class }}" style="font-size:0.75rem;"></i> {{ lr.current_stage.name }}
+                        </span>
+                    </td>
+                    <td>{{ lr.get_condition_display }}</td>
+                    <td>{% if lr.purchase_cost %}${{ lr.purchase_cost|floatformat:2 }}{% else %}-{% endif %}</td>
+                    <td>{{ lr.purchase_date|date:"Y-m-d"|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'asset_lifecycle_detail' stream=lr.product.stream.name pk=lr.pk %}" class="btn-ph btn-outline" style="font-size:0.75rem;padding:0.3rem 0.65rem;">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-card">
+        <div class="table-empty"><i class="fas fa-recycle" style="margin-right:0.5rem;"></i> No assets linked to this vendor yet. Link assets via the Lifecycle Tracking page.</div>
+    </div>
+    {% endif %}
+
+    <!-- Performance Logs -->
+    <div class="section-header">
+        <div class="section-title">
+            <span class="sec-icon"><i class="fas fa-chart-line"></i></span>
+            Performance Log
+        </div>
+    </div>
+
+    <div class="add-form-card">
+        <div class="add-form-title"><i class="fas fa-plus-circle"></i> Log Performance</div>
+        <form method="post" action="{% url 'vendor_performance_log_create' stream=stream vendor_id=vendor.pk %}">
+            {% csrf_token %}
+            <div class="add-form-row">
+                <div class="add-fg"><label>Date *</label><input type="date" name="date" required></div>
+                <div class="add-fg"><label>Rating (1-5) *</label>
+                    <select name="rating"><option value="5">5 ★</option><option value="4">4 ★</option><option value="3" selected>3 ★</option><option value="2">2 ★</option><option value="1">1 ★</option></select>
+                </div>
+                <div class="add-fg"><label style="display:flex;align-items:center;gap:0.35rem;"><input type="checkbox" name="delivery_on_time" checked style="accent-color:var(--philips-blue);"> On-Time Delivery</label></div>
+                <div class="add-fg"><label style="display:flex;align-items:center;gap:0.35rem;"><input type="checkbox" name="quality_ok" checked style="accent-color:var(--philips-blue);"> Quality OK</label></div>
+                <div class="add-fg" style="flex:1;"><label>Comments</label><input type="text" name="comments" style="width:100%;" placeholder="Optional comments"></div>
+                <button type="submit" class="btn-add"><i class="fas fa-plus"></i> Log</button>
+            </div>
+        </form>
+    </div>
+
+    {% if perf_logs %}
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr><th>Date</th><th>Rating</th><th>On-Time</th><th>Quality</th><th>Comments</th><th>Logged By</th></tr>
+            </thead>
+            <tbody>
+                {% for log in perf_logs %}
+                <tr>
+                    <td>{{ log.date|date:"Y-m-d" }}</td>
+                    <td><span class="rating-stars">{% for i in "12345" %}{% if forloop.counter <= log.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span></td>
+                    <td>{% if log.delivery_on_time %}<i class="fas fa-check-circle check-icon ok"></i>{% else %}<i class="fas fa-times-circle check-icon fail"></i>{% endif %}</td>
+                    <td>{% if log.quality_ok %}<i class="fas fa-check-circle check-icon ok"></i>{% else %}<i class="fas fa-times-circle check-icon fail"></i>{% endif %}</td>
+                    <td>{{ log.comments|default:"-" }}</td>
+                    <td><span style="color:var(--text-secondary); font-weight:500;">{{ log.logged_by.username|default:"-" }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-card">
+        <div class="table-empty"><i class="fas fa-chart-line" style="margin-right:0.5rem;"></i> No performance logs yet.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,1261 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}My Bookings - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<style>
+    :root {
+        --primary: #0066cc;
+        --primary-light: #e6f2ff;
+        --primary-dark: #0047ab;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --bg-light: #f8fafc;
+        --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .my-bookings-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header p {
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+        font-size: 0.9rem;
+    }
+
+    .header-btn {
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: var(--primary);
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .header-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Main Layout */
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+    }
+
+    /* Stats & Charts Row */
+    .stats-charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .stats-card h3 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stats-card h3 i {
+        color: var(--primary);
+    }
+
+    .stats-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-mini {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+    }
+
+    .stat-mini .value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-mini .label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .stat-mini.green .value { color: var(--success); }
+    .stat-mini.purple .value { color: var(--purple); }
+    .stat-mini.orange .value { color: var(--warning); }
+
+    .chart-container {
+        position: relative;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chart-center-text {
+        position: absolute;
+        text-align: center;
+    }
+
+    .chart-center-text .total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .chart-center-text .label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+    }
+
+    /* Section */
+    .section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .section-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .section-header h2 i {
+        color: var(--primary);
+    }
+
+    .section-header .count-badge {
+        padding: 0.25rem 0.75rem;
+        background: var(--bg-light);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    /* Booking List with Scrollbar */
+    .bookings-list {
+        max-height: 340px;
+        overflow-y: auto;
+    }
+
+    .bookings-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .bookings-list::-webkit-scrollbar-track {
+        background: var(--bg-light);
+    }
+
+    .bookings-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+
+    .bookings-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    /* Booking Cards */
+    .booking-card {
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .booking-card:last-child {
+        border-bottom: none;
+    }
+
+    .booking-card:hover {
+        background: var(--bg-light);
+    }
+
+    .booking-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .booking-icon.confirmed { background: var(--success-light); color: var(--success); }
+    .booking-icon.recurring { background: var(--purple-light); color: var(--purple); }
+    .booking-icon.waitlist { background: var(--warning-light); color: var(--warning); }
+    .booking-icon.past { background: var(--bg-light); color: var(--text-secondary); }
+
+    .booking-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .booking-details h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .booking-details .meta {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .booking-details .meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .booking-status {
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
+
+    .booking-status.active { background: var(--success-light); color: var(--success); }
+    .booking-status.recurring { background: var(--purple-light); color: var(--purple); }
+    .booking-status.waiting { background: var(--warning-light); color: var(--warning); }
+    .booking-status.not_allocated { background: #fef2f2; color: #991b1b; }
+    .booking-status.past { background: var(--bg-light); color: var(--text-secondary); }
+    .booking-status.paused { background: var(--warning-light); color: var(--warning); }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    /* Sidebar Trends */
+    .trends-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .trends-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .trends-header h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .trends-body {
+        padding: 1.5rem;
+    }
+
+    .trend-chart-wrap {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .trend-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+        font-size: 0.8rem;
+    }
+
+    .legend-item .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .legend-item .label {
+        flex: 1;
+        color: var(--text-primary);
+    }
+
+    .legend-item .value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal {
+        background: white;
+        border-radius: 20px;
+        width: 92%;
+        max-width: 750px;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s;
+    }
+
+    .modal-overlay.show .modal {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .modal-header .modal-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .modal-header .modal-icon.confirmed { background: var(--success-light); color: var(--success); }
+    .modal-header .modal-icon.recurring { background: var(--purple-light); color: var(--purple); }
+    .modal-header .modal-icon.waitlist { background: var(--warning-light); color: var(--warning); }
+    .modal-header .modal-icon.past { background: var(--bg-light); color: var(--text-secondary); }
+
+    .modal-header h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        flex: 1;
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: var(--bg-light);
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        max-height: calc(90vh - 180px);
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        width: 120px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+
+    .detail-value {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .modal-btn {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .modal-btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-primary);
+    }
+
+    .modal-btn-secondary:hover {
+        background: var(--border);
+    }
+
+    .modal-btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .modal-btn-primary:hover {
+        background: var(--primary-dark);
+    }
+
+    .modal-btn-danger {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    .modal-btn-danger:hover {
+        background: var(--danger);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .main-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .my-bookings-page {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stats-mini-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .booking-card {
+            padding: 1rem;
+        }
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="my-bookings-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-bookmark"></i> My Bookings</h1>
+            <p>View and manage all your system reservations</p>
+        </div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <a href="{% url 'system_allocation_stream' stream=stream %}" class="header-btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-server"></i> System Allocation
+            </a>
+            <a href="{% url 'unified_booking_hub' stream=stream %}" class="header-btn">
+                <i class="fas fa-plus"></i> New Booking
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div style="margin-bottom:1.5rem;">
+        {% for message in messages %}
+        <div class="alert-toast alert-{{ message.tags }}" style="
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideDown 0.4s ease;
+            {% if message.tags == 'success' %}
+                background: #d1fae5; color: #065f46; border-left: 4px solid #10b981;
+            {% elif message.tags == 'error' %}
+                background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444;
+            {% elif message.tags == 'warning' %}
+                background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b;
+            {% else %}
+                background: #e6f2ff; color: #1e40af; border-left: 4px solid #0066cc;
+            {% endif %}
+        ">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+            <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.1rem;opacity:0.6;">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="main-layout">
+        <!-- Left Column -->
+        <div>
+            <!-- Stats & Distribution Charts -->
+            <div class="stats-charts-row">
+                <div class="stats-card">
+                    <h3><i class="fas fa-chart-bar"></i> Overview</h3>
+                    <div class="stats-mini-grid">
+                        <div class="stat-mini green">
+                            <div class="value">{{ active_bookings }}</div>
+                            <div class="label">Active</div>
+                        </div>
+                        <div class="stat-mini purple">
+                            <div class="value">{{ active_recurring }}</div>
+                            <div class="label">Recurring</div>
+                        </div>
+                        <div class="stat-mini orange">
+                            <div class="value">{{ pending_waitlist }}</div>
+                            <div class="label">Waitlist</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-chart-pie"></i> Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="distributionChart"></canvas>
+                        <div class="chart-center-text">
+                            <div class="total">{{ total_count }}</div>
+                            <div class="label">Total</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmed Bookings -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-check"></i> Confirmed Bookings</h2>
+                    <span class="count-badge">{{ allocations|length }} items</span>
+                </div>
+                <div class="bookings-list">
+                    {% if allocations %}
+                        {% for alloc in allocations %}
+                        <div class="booking-card" onclick="showBookingDetail('allocation', {{ alloc.id }}, '{{ alloc.system_type|escapejs }}', '{{ alloc.start_date|date:"M d, Y" }}', '{{ alloc.start_date|time:"H:i" }}', '{{ alloc.end_date|date:"M d, Y" }}', '{{ alloc.end_date|time:"H:i" }}', '{% if alloc.end_date < now %}past{% else %}active{% endif %}', '{{ alloc.user.username|escapejs }}')">
+                            <div class="booking-icon {% if alloc.end_date < now %}past{% else %}confirmed{% endif %}">
+                                <i class="fas fa-{% if alloc.end_date < now %}history{% else %}check{% endif %}"></i>
+                            </div>
+                            <div class="booking-details">
+                                <h3>{{ alloc.system_type }}</h3>
+                                <div class="meta">
+                                    <span><i class="fas fa-calendar"></i> {{ alloc.start_date|date:"M d, Y" }} - {{ alloc.end_date|date:"M d, Y" }}</span>
+                                    <span><i class="fas fa-clock"></i> {{ alloc.start_date|time:"H:i" }} - {{ alloc.end_date|time:"H:i" }}</span>
+                                </div>
+                            </div>
+                            <span class="booking-status {% if alloc.end_date < now %}past{% else %}active{% endif %}">
+                                {% if alloc.end_date < now %}Completed{% else %}Active{% endif %}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No confirmed bookings</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recurring Reservations -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-redo"></i> Recurring Reservations</h2>
+                    <span class="count-badge">{{ recurring|length }} items</span>
+                </div>
+                <div class="bookings-list">
+                    {% if recurring %}
+                        {% for rec in recurring %}
+                        <div class="booking-card" onclick="showRecurringDetail({{ rec.pk }}, '{{ rec.system.name|escapejs }}', '{{ rec.title|escapejs }}', '{{ rec.get_recurrence_type_display }}', '{{ rec.start_time|time:"H:i" }}', '{{ rec.end_time|time:"H:i" }}', '{{ rec.start_date|date:"M d, Y" }}', '{{ rec.end_date|date:"M d, Y"|default:"Ongoing" }}', '{{ rec.status }}', {{ rec.confirmed_count|default:0 }}, {{ rec.conflict_count|default:0 }})">
+                            <div class="booking-icon recurring">
+                                <i class="fas fa-redo"></i>
+                            </div>
+                            <div class="booking-details">
+                                <h3>{{ rec.system.name }} - {{ rec.title }}</h3>
+                                <div class="meta">
+                                    <span><i class="fas fa-redo"></i> {{ rec.get_recurrence_type_display }}</span>
+                                    <span><i class="fas fa-clock"></i> {{ rec.start_time|time:"H:i" }} - {{ rec.end_time|time:"H:i" }}</span>
+                                </div>
+                            </div>
+                            <span class="booking-status {% if rec.status == 'active' %}recurring{% elif rec.status == 'paused' %}paused{% else %}past{% endif %}">
+                                {{ rec.get_status_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-redo"></i>
+                            <p>No recurring reservations</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Waitlist -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> Waitlist</h2>
+                    <span class="count-badge">{{ waitlist|length }} items</span>
+                </div>
+                <div class="bookings-list">
+                    {% if waitlist %}
+                        {% for wait in waitlist %}
+                        <div class="booking-card" onclick="showWaitlistDetail({{ wait.pk }}, '{{ wait.system.name|escapejs }}', '{{ wait.desired_date|date:"M d, Y" }}', '{{ wait.desired_start_time|time:"H:i" }}', '{{ wait.desired_end_time|time:"H:i" }}', {{ wait.queue_position }}, '{{ wait.status }}', '{{ wait.reason|escapejs|default:"" }}')">
+                            <div class="booking-icon waitlist">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="booking-details">
+                                <h3>{{ wait.system.name }}</h3>
+                                <div class="meta">
+                                    <span><i class="fas fa-calendar"></i> {{ wait.desired_date|date:"M d, Y" }}</span>
+                                    <span><i class="fas fa-list-ol"></i> #{{ wait.queue_position }} in queue</span>
+                                </div>
+                            </div>
+                            <span class="booking-status {% if wait.status == 'not_allocated' %}not_allocated{% elif wait.status == 'waiting' %}waiting{% elif wait.status == 'expired' %}past{% else %}waiting{% endif %}">{{ wait.get_status_display }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clock"></i>
+                            <p>No waitlist entries</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Trends -->
+        <div>
+            <div class="trends-card">
+                <div class="trends-header">
+                    <h3><i class="fas fa-chart-pie"></i> Booking Breakdown</h3>
+                </div>
+                <div class="trends-body">
+                    <div class="trend-chart-wrap">
+                        <canvas id="breakdownChart" height="200"></canvas>
+                    </div>
+                    <div class="trend-legend">
+                        <div class="legend-item">
+                            <span class="dot" style="background: var(--success);"></span>
+                            <span class="label">Active Bookings</span>
+                            <span class="value">{{ active_bookings }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot" style="background: var(--purple);"></span>
+                            <span class="label">Recurring Active</span>
+                            <span class="value">{{ active_recurring }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot" style="background: var(--warning);"></span>
+                            <span class="label">In Waitlist</span>
+                            <span class="value">{{ pending_waitlist }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot" style="background: var(--danger, #ef4444);"></span>
+                            <span class="label">Not Allocated</span>
+                            <span class="value">{{ not_allocated_count|default:0 }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot" style="background: #94a3b8;"></span>
+                            <span class="label">Completed</span>
+                            <span class="value">{{ completed_count|default:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Distribution -->
+            <div class="trends-card" style="margin-top: 1.5rem;">
+                <div class="trends-header">
+                    <h3><i class="fas fa-tasks"></i> Status Overview</h3>
+                </div>
+                <div class="trends-body">
+                    <div class="trend-chart-wrap">
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-icon confirmed" id="modalIcon">
+                <i class="fas fa-check" id="modalIconInner"></i>
+            </div>
+            <h3 id="modalTitle">Booking Details</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Dynamic content -->
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <!-- Dynamic buttons -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Chart.js Configuration
+const chartColors = {
+    success: '#10b981',
+    purple: '#0B5FFF',
+    warning: '#f59e0b',
+    gray: '#94a3b8',
+    danger: '#ef4444'
+};
+
+// Distribution Doughnut Chart
+const distributionCtx = document.getElementById('distributionChart');
+if (distributionCtx) {
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Recurring', 'Waitlist'],
+            datasets: [{
+                data: [{{ active_bookings }}, {{ active_recurring }}, {{ pending_waitlist }}],
+                backgroundColor: [chartColors.success, chartColors.purple, chartColors.warning],
+                borderWidth: 0,
+                cutout: '75%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// Breakdown Pie Chart
+const breakdownCtx = document.getElementById('breakdownChart');
+if (breakdownCtx) {
+    new Chart(breakdownCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Recurring', 'Waitlist', 'Not Allocated', 'Completed'],
+            datasets: [{
+                data: [{{ active_bookings }}, {{ active_recurring }}, {{ pending_waitlist }}, {{ not_allocated_count|default:0 }}, {{ completed_count|default:0 }}],
+                backgroundColor: [chartColors.success, chartColors.purple, chartColors.warning, chartColors.danger, chartColors.gray],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// Status Chart
+const statusCtx = document.getElementById('statusChart');
+if (statusCtx) {
+    new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Active', 'Scheduled', 'Waiting', 'Not Allocated', 'Completed'],
+            datasets: [{
+                data: [{{ active_bookings }}, {{ scheduled_count|default:0 }}, {{ pending_waitlist }}, {{ not_allocated_count|default:0 }}, {{ completed_count|default:0 }}],
+                backgroundColor: [chartColors.success, chartColors.purple, chartColors.warning, chartColors.danger, chartColors.gray],
+                borderRadius: 6,
+                barThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { display: false }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// Modal Functions
+function showBookingDetail(type, id, system, startDate, startTime, endDate, endTime, status, user) {
+    const modal = document.getElementById('detailModal');
+    const icon = document.getElementById('modalIcon');
+    const iconInner = document.getElementById('modalIconInner');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+    
+    icon.className = 'modal-icon ' + (status === 'active' ? 'confirmed' : 'past');
+    iconInner.className = 'fas fa-' + (status === 'active' ? 'check' : 'history');
+    title.textContent = system;
+    
+    const isMultiDay = startDate !== endDate;
+
+    // Generate list of individual days for multi-day bookings
+    let daysListHtml = '';
+    if (isMultiDay && status === 'active') {
+        const sDate = new Date(startDate);
+        const eDate = new Date(endDate);
+        let days = [];
+        for (let d = new Date(sDate); d <= eDate; d.setDate(d.getDate() + 1)) {
+            days.push(new Date(d));
+        }
+        const totalDays = days.length;
+        // Helper to format date as YYYY-MM-DD in local timezone (avoids UTC shift from toISOString)
+        const toLocalISO = (dt) => dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+        const todayStr = toLocalISO(new Date());
+
+        // Group days by week (Mon-Sun)
+        let weeks = [];
+        let currentWeek = null;
+        days.forEach(d => {
+            const weekStart = new Date(d);
+            weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7)); // Monday
+            const weekKey = toLocalISO(weekStart);
+            if (!currentWeek || currentWeek.key !== weekKey) {
+                currentWeek = { key: weekKey, label: 'Week of ' + weekStart.toLocaleDateString('en-US', {month:'short', day:'numeric'}), days: [] };
+                weeks.push(currentWeek);
+            }
+            currentWeek.days.push(d);
+        });
+
+        const useCompact = totalDays > 14;
+
+        daysListHtml = `
+        <div style="margin-top:1rem;border-top:2px solid #e2e8f0;padding-top:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <label style="display:flex;align-items:center;gap:0.35rem;cursor:pointer;font-size:0.75rem;color:#64748b;user-select:none;">
+                        <input type="checkbox" id="selectAll_${id}" onchange="toggleAllDays(this,${id})" style="accent-color:#0066cc;width:15px;height:15px;cursor:pointer;">
+                        <span>Select All</span>
+                    </label>
+                    <div style="font-size:0.85rem;font-weight:700;color:#1e293b;"><i class="fas fa-calendar-alt" style="color:#0066cc;margin-right:0.5rem;"></i>Manage Individual Days</div>
+                </div>
+                <span style="font-size:0.7rem;background:#e6f2ff;color:#0066cc;padding:0.25rem 0.6rem;border-radius:12px;font-weight:600;">${totalDays} days</span>
+            </div>
+            <div style="max-height:320px;overflow-y:auto;padding-right:4px;" id="daysList_${id}">
+                ${weeks.map(week => `
+                    <div style="margin-bottom:0.75rem;">
+                        <div style="font-size:0.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;padding:0.25rem 0.5rem;margin-bottom:0.35rem;">${week.label}</div>
+                        <div style="display:grid;grid-template-columns:${useCompact ? 'repeat(auto-fill,minmax(200px,1fr))' : 'repeat(auto-fill,minmax(280px,1fr))'};gap:0.4rem;">
+                            ${week.days.map(d => {
+                                const iso = toLocalISO(d);
+                                const isToday = iso === todayStr;
+                                const isPast = d < new Date(todayStr);
+                                const dayName = d.toLocaleDateString('en-US', {weekday:'short'});
+                                const dateDisplay = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+                                return `
+                                <label style="display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0.65rem;background:${isToday ? '#eff6ff' : isPast ? '#fafafa' : '#f8fafc'};border-radius:8px;border:1px solid ${isToday ? '#93c5fd' : '#e2e8f0'};${isToday ? 'box-shadow:0 0 0 1px #93c5fd;' : ''}cursor:${isPast ? 'default' : 'pointer'};transition:all 0.15s;user-select:none;" ${!isPast ? `onmouseover="this.style.borderColor='#93c5fd';this.style.background='#eff6ff'" onmouseout="this.style.borderColor='${isToday ? '#93c5fd' : '#e2e8f0'}';this.style.background='${isToday ? '#eff6ff' : '#f8fafc'}'"` : ''}>
+                                    <input type="checkbox" class="day-cb-${id}" data-date="${iso}" data-label="${dayName}, ${dateDisplay}" onchange="updateBulkBar(${id})" ${isPast ? 'disabled' : ''} style="accent-color:#0066cc;width:15px;height:15px;cursor:${isPast ? 'not-allowed' : 'pointer'};flex-shrink:0;">
+                                    <span style="font-size:0.7rem;font-weight:700;color:${isToday ? '#0066cc' : isPast ? '#94a3b8' : '#475569'};padding:0.15rem 0.4rem;background:${isToday ? '#dbeafe' : isPast ? '#f1f5f9' : '#e2e8f0'};border-radius:4px;">${dayName}</span>
+                                    <span style="font-size:0.8rem;font-weight:${isToday ? '700' : '500'};color:${isPast ? '#94a3b8' : '#1e293b'};flex:1;">${dateDisplay}</span>
+                                    ${isToday ? '<span style="font-size:0.6rem;font-weight:700;color:#0066cc;background:#dbeafe;padding:0.1rem 0.35rem;border-radius:4px;">TODAY</span>' : ''}
+                                </label>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <form id="bulkForm_${id}" method="post" action="{% url 'cancel_booking_days_stream' stream=stream %}" style="display:none;">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="hidden" name="allocation_id" value="${id}">
+                <input type="hidden" name="cancel_dates" id="bulkDates_${id}">
+            </form>
+        </div>`;
+    }
+    
+    body.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">${isMultiDay ? 'Multi-Day Booking' : 'One-Time Booking'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">System</div>
+            <div class="detail-value">${system}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">${isMultiDay ? 'Start' : 'Date'}</div>
+            <div class="detail-value">${startDate}${isMultiDay ? ' at ' + startTime : ''}</div>
+        </div>
+        ${isMultiDay ? `
+        <div class="detail-row">
+            <div class="detail-label">End</div>
+            <div class="detail-value">${endDate} at ${endTime}</div>
+        </div>
+        ` : `
+        <div class="detail-row">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">${startTime} - ${endTime}</div>
+        </div>
+        `}
+        <div class="detail-row">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="booking-status ${status}">${status === 'active' ? 'Active' : 'Completed'}</span></div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Booked By</div>
+            <div class="detail-value">${user}</div>
+        </div>
+        ${daysListHtml}
+    `;
+    
+    if (status === 'active') {
+        footer.innerHTML = `
+            <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+            ${isMultiDay ? `<button id="bulkCancelBtn_${id}" class="modal-btn modal-btn-danger" style="display:none;" onclick="confirmBulkCancel(${id})">
+                <i class="fas fa-trash-alt"></i> Cancel Selected (<span id="bulkCount_${id}">0</span>)
+            </button>` : ''}
+            <form method="post" action="{% url 'release_system_stream' stream=stream %}" style="display:inline" onsubmit="return confirm('Cancel ALL days of this booking?')">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="hidden" name="allocation_id" value="${id}">
+                <input type="hidden" name="system_type" value="${system}">
+                <input type="hidden" name="username" value="${user}">
+                <button type="submit" class="modal-btn modal-btn-danger">
+                    <i class="fas fa-times"></i> Cancel All Days
+                </button>
+            </form>
+        `;
+    } else {
+        footer.innerHTML = `<button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>`;
+    }
+    
+    modal.classList.add('show');
+}
+
+function showRecurringDetail(id, system, recTitle, recurrence, startTime, endTime, startDate, endDate, status, confirmed, conflicts) {
+    const modal = document.getElementById('detailModal');
+    const icon = document.getElementById('modalIcon');
+    const iconInner = document.getElementById('modalIconInner');
+    const modalTitle = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+    
+    icon.className = 'modal-icon recurring';
+    iconInner.className = 'fas fa-redo';
+    modalTitle.textContent = recTitle || system;
+    
+    body.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">Recurring Reservation</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">System</div>
+            <div class="detail-value">${system}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Recurrence</div>
+            <div class="detail-value">${recurrence}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Time</div>
+            <div class="detail-value">${startTime} - ${endTime}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Date Range</div>
+            <div class="detail-value">${startDate} - ${endDate}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="booking-status ${status === 'active' ? 'recurring' : 'paused'}">${status}</span></div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Instances</div>
+            <div class="detail-value">
+                <span style="color: var(--success); font-weight: 600;">${confirmed} confirmed</span>
+                ${conflicts > 0 ? `<span style="color: var(--warning); margin-left: 0.5rem;">${conflicts} waitlisted</span>` : ''}
+            </div>
+        </div>
+    `;
+    
+    footer.innerHTML = `
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+        <a href="${_buPrefix}/stream/{{ stream }}/recurring-reservations/${id}/" class="modal-btn modal-btn-primary">
+            <i class="fas fa-eye"></i> View Details
+        </a>
+    `;
+    
+    modal.classList.add('show');
+}
+
+function showWaitlistDetail(id, system, date, startTime, endTime, position, status, reason) {
+    const modal = document.getElementById('detailModal');
+    const icon = document.getElementById('modalIcon');
+    const iconInner = document.getElementById('modalIconInner');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+    
+    icon.className = 'modal-icon waitlist';
+    iconInner.className = 'fas fa-clock';
+    title.textContent = system;
+    
+    body.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">Waitlist Entry</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">System</div>
+            <div class="detail-value">${system}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Desired Date</div>
+            <div class="detail-value">${date}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Desired Time</div>
+            <div class="detail-value">${startTime} - ${endTime}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Queue Position</div>
+            <div class="detail-value"><strong>#${position}</strong> in queue</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="booking-status ${status === 'not_allocated' ? 'not_allocated' : 'waiting'}">${status === 'not_allocated' ? 'Not Allocated' : status}</span></div>
+        </div>
+        ${reason ? `
+        <div class="detail-row">
+            <div class="detail-label">Reason</div>
+            <div class="detail-value">${reason}</div>
+        </div>
+        ` : ''}
+    `;
+    
+    footer.innerHTML = `
+        <a href="${_buPrefix}/stream/{{ stream }}/waitlist/${id}/cancel/" class="modal-btn modal-btn-danger" onclick="return confirm('Leave waitlist?')">
+            <i class="fas fa-times"></i> Leave Waitlist
+        </a>
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+    `;
+    
+    modal.classList.add('show');
+}
+
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('detailModal').classList.remove('show');
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+// Bulk cancel helpers
+function toggleAllDays(selectAllCb, allocId) {
+    const cbs = document.querySelectorAll('.day-cb-' + allocId + ':not(:disabled)');
+    cbs.forEach(cb => cb.checked = selectAllCb.checked);
+    updateBulkBar(allocId);
+}
+
+function updateBulkBar(allocId) {
+    const checked = document.querySelectorAll('.day-cb-' + allocId + ':checked');
+    const btn = document.getElementById('bulkCancelBtn_' + allocId);
+    const count = document.getElementById('bulkCount_' + allocId);
+    if (btn && count) {
+        count.textContent = checked.length;
+        btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+    }
+    // Update Select All checkbox state
+    const allCbs = document.querySelectorAll('.day-cb-' + allocId + ':not(:disabled)');
+    const selectAll = document.getElementById('selectAll_' + allocId);
+    if (selectAll) {
+        selectAll.checked = allCbs.length > 0 && checked.length === allCbs.length;
+        selectAll.indeterminate = checked.length > 0 && checked.length < allCbs.length;
+    }
+}
+
+function confirmBulkCancel(allocId) {
+    const checked = document.querySelectorAll('.day-cb-' + allocId + ':checked');
+    if (checked.length === 0) return;
+
+    const labels = Array.from(checked).map(cb => cb.dataset.label);
+    const dates = Array.from(checked).map(cb => cb.dataset.date);
+
+    const msg = 'Cancel the following ' + checked.length + ' day(s)?\n\n' + labels.map(l => '  \u2022 ' + l).join('\n');
+    if (!confirm(msg)) return;
+
+    document.getElementById('bulkDates_' + allocId).value = dates.join(',');
+    document.getElementById('bulkForm_' + allocId).submit();
+}
+</script>
+{% endblock %}

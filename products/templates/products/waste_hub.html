@@ -1,0 +1,283 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Waste Management Hub{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #0B5FFF;
+        --indigo: #0B5FFF;
+        --teal: #14b8a6;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+    }
+
+    .hub-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+    .hub-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    .hub-header h1 {
+        font-size: 2.5rem; font-weight: 700; color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex; align-items: center; justify-content: center; gap: 1rem;
+    }
+    .hub-header h1 i { color: var(--success-green); }
+    .hub-header p { color: var(--text-secondary); font-size: 1.1rem; }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        color: var(--text-secondary); text-decoration: none;
+        margin-bottom: 1.5rem; padding: 0.5rem 1rem;
+        border-radius: 8px; transition: all 0.2s;
+    }
+    .back-link:hover { background: white; color: var(--primary-blue); }
+
+    /* ===== GLOBAL SUMMARY ROW ===== */
+    .global-stats {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem; margin-bottom: 2.5rem;
+    }
+    .g-stat-card {
+        background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+        box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 1rem;
+        border: 1px solid transparent; transition: all 0.2s;
+    }
+    .g-stat-card:hover { border-color: var(--primary-blue); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    .g-stat-icon {
+        width: 52px; height: 52px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    .g-stat-icon.blue { background: rgba(0,102,204,0.1); color: var(--primary-blue); }
+    .g-stat-icon.orange { background: rgba(245,158,11,0.1); color: var(--warning-orange); }
+    .g-stat-icon.red { background: rgba(239,68,68,0.1); color: var(--danger-red); }
+    .g-stat-icon.green { background: rgba(16,185,129,0.1); color: var(--success-green); }
+    .g-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .g-stat-label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; margin-top: 0.125rem; }
+
+    /* ===== COMBINED CARD ===== */
+    .combined-card {
+        background: linear-gradient(135deg, #0066cc, #0B5FFF);
+        border-radius: 20px; padding: 2rem 2.5rem;
+        margin-bottom: 2.5rem;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 8px 24px rgba(0,102,204,0.2);
+        cursor: pointer; transition: all 0.3s; text-decoration: none;
+        color: white; position: relative; overflow: hidden;
+    }
+    .combined-card::before {
+        content: ''; position: absolute; top: -50%; right: -20%;
+        width: 400px; height: 400px; border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .combined-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,102,204,0.3); color: white; }
+    .combined-info h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .combined-info p { opacity: 0.85; font-size: 0.9375rem; }
+    .combined-stats {
+        display: flex; gap: 2.5rem; position: relative; z-index: 1;
+    }
+    .combined-stat-item { text-align: center; }
+    .combined-stat-val { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .combined-stat-lbl { font-size: 0.75rem; opacity: 0.8; margin-top: 0.25rem; }
+    .combined-arrow {
+        width: 48px; height: 48px; border-radius: 50%;
+        background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;
+        font-size: 1.25rem; transition: all 0.3s; position: relative; z-index: 1;
+    }
+    .combined-card:hover .combined-arrow { background: rgba(255,255,255,0.35); transform: translateX(4px); }
+
+    /* ===== STREAMS SECTION ===== */
+    .streams-section-title {
+        font-size: 1.25rem; font-weight: 600; color: var(--text-primary);
+        margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;
+    }
+    .streams-section-title i { color: var(--primary-blue); }
+
+    .streams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stream-card {
+        background: white; border-radius: 16px; padding: 1.75rem;
+        box-shadow: var(--card-shadow); border: 2px solid transparent;
+        transition: all 0.3s ease; text-decoration: none; display: block;
+        position: relative; overflow: hidden;
+    }
+    .stream-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--teal));
+        opacity: 0; transition: opacity 0.3s;
+    }
+    .stream-card:hover { border-color: var(--primary-blue); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+    .stream-card:hover::before { opacity: 1; }
+
+    .stream-card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .stream-icon {
+        width: 52px; height: 52px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--teal));
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stream-icon i { color: white; font-size: 1.375rem; }
+    .stream-name { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+    .stream-label { font-size: 0.8125rem; color: var(--text-secondary); }
+
+    .stream-stats {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+        border-top: 1px solid var(--border-color); padding-top: 1rem;
+    }
+    .s-stat { text-align: center; }
+    .s-stat-val { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); }
+    .s-stat-lbl { font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+    .s-stat-val.danger { color: var(--danger-red); }
+    .s-stat-val.warning { color: var(--warning-orange); }
+
+    .stream-arrow {
+        position: absolute; right: 1.5rem; top: 2rem;
+        color: var(--text-secondary); opacity: 0; transition: all 0.3s;
+    }
+    .stream-card:hover .stream-arrow { opacity: 1; right: 1rem; color: var(--primary-blue); }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+    .empty-state i { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+
+    @media (max-width: 992px) { .global-stats { grid-template-columns: repeat(2, 1fr); } .combined-card { flex-direction: column; gap: 1.5rem; text-align: center; } .combined-stats { justify-content: center; } }
+    @media (max-width: 768px) {
+        .hub-header h1 { font-size: 1.75rem; }
+        .streams-grid { grid-template-columns: 1fr; }
+        .stream-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<div class="hub-container">
+
+    <div class="hub-header">
+        <h1><i class="fas fa-recycle"></i> Lab Waste Management</h1>
+        <p>Track hazardous &amp; non-hazardous waste generation, disposal schedules, manifests, and regulatory compliance</p>
+    </div>
+
+    <!-- ===== GLOBAL STATS (super admin only) ===== -->
+    {% if is_super_admin %}
+    <div class="global-stats">
+        <div class="g-stat-card">
+            <div class="g-stat-icon blue"><i class="fas fa-clipboard-list"></i></div>
+            <div>
+                <div class="g-stat-value">{{ total_all }}</div>
+                <div class="g-stat-label">Total Records</div>
+            </div>
+        </div>
+        <div class="g-stat-card">
+            <div class="g-stat-icon orange"><i class="fas fa-clock"></i></div>
+            <div>
+                <div class="g-stat-value">{{ pending_all }}</div>
+                <div class="g-stat-label">Pending Disposal</div>
+            </div>
+        </div>
+        <div class="g-stat-card">
+            <div class="g-stat-icon red"><i class="fas fa-radiation"></i></div>
+            <div>
+                <div class="g-stat-value">{{ hazardous_all }}</div>
+                <div class="g-stat-label">Hazardous Waste</div>
+            </div>
+        </div>
+        <div class="g-stat-card">
+            <div class="g-stat-icon {% if overdue_all > 0 %}red{% else %}green{% endif %}"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div class="g-stat-value">{{ overdue_all }}</div>
+                <div class="g-stat-label">Overdue Items</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== COMBINED / ALL STREAMS CARD ===== -->
+    {% if is_super_admin %}
+    <a href="{% url 'waste_stream_detail' 'all' %}" class="combined-card">
+        <div class="combined-info">
+            <h2><i class="fas fa-layer-group"></i> All Streams Combined</h2>
+            <p>View and manage waste records across all streams in one place</p>
+        </div>
+        <div class="combined-stats">
+            <div class="combined-stat-item">
+                <div class="combined-stat-val">{{ total_all }}</div>
+                <div class="combined-stat-lbl">Records</div>
+            </div>
+            <div class="combined-stat-item">
+                <div class="combined-stat-val">{{ pending_all }}</div>
+                <div class="combined-stat-lbl">Pending</div>
+            </div>
+            <div class="combined-stat-item">
+                <div class="combined-stat-val">{{ overdue_all }}</div>
+                <div class="combined-stat-lbl">Overdue</div>
+            </div>
+        </div>
+        <div class="combined-arrow"><i class="fas fa-arrow-right"></i></div>
+    </a>
+    {% endif %}
+
+    <!-- ===== STREAM CARDS ===== -->
+    <div class="streams-section-title"><i class="fas fa-code-branch"></i> Select a Stream</div>
+
+    {% if streams %}
+    <div class="streams-grid">
+        {% for stream in streams %}
+        <a href="{% url 'waste_stream_detail' stream.name %}" class="stream-card">
+            <div class="stream-card-header">
+                <div class="stream-icon"><i class="fas fa-code-branch"></i></div>
+                <div>
+                    <div class="stream-name">{{ stream.name }}</div>
+                    <div class="stream-label">View waste details for this stream</div>
+                </div>
+            </div>
+            <div class="stream-stats">
+                <div class="s-stat">
+                    <div class="s-stat-val">{{ stream.w_total }}</div>
+                    <div class="s-stat-lbl">Total</div>
+                </div>
+                <div class="s-stat">
+                    <div class="s-stat-val {% if stream.w_pending > 0 %}warning{% endif %}">{{ stream.w_pending }}</div>
+                    <div class="s-stat-lbl">Pending</div>
+                </div>
+                <div class="s-stat">
+                    <div class="s-stat-val">{{ stream.w_hazardous }}</div>
+                    <div class="s-stat-lbl">Hazardous</div>
+                </div>
+                <div class="s-stat">
+                    <div class="s-stat-val {% if stream.w_overdue > 0 %}danger{% endif %}">{{ stream.w_overdue }}</div>
+                    <div class="s-stat-lbl">Overdue</div>
+                </div>
+            </div>
+            <div class="stream-arrow"><i class="fas fa-arrow-right"></i></div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>No Streams Available</h3>
+        <p>Contact your administrator to get access to streams.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

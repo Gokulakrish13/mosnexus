@@ -1,0 +1,736 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}New{% endif %} Calibration Schedule - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --purple-dark: #0044CC;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 50%, #5b21b6 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 450px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--bg-light);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-header i {
+        color: var(--purple);
+    }
+
+    .form-header h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--purple);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--purple);
+        display: inline-block;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group label .required {
+        color: var(--danger-red);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.375rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--purple);
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .frequency-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .frequency-option {
+        position: relative;
+    }
+
+    .frequency-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .frequency-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .frequency-option input:checked + label {
+        border-color: var(--purple);
+        background: var(--purple-light);
+    }
+
+    .frequency-option label i {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--purple);
+    }
+
+    .frequency-option label span {
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .notification-settings {
+        background: var(--purple-light);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #c4b5fd;
+    }
+
+    .notification-settings h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--purple);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #c4b5fd;
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item span {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        border-radius: 24px;
+        transition: 0.3s;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: var(--purple);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn i {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: var(--text-primary);
+        transform: translateY(-2px);
+    }
+
+    .btn-header {
+        background: white;
+        color: var(--purple);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-header:hover {
+        background: #f8f5ff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-header-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-header-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .errorlist li {
+        color: var(--danger-red);
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .frequency-options {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+<div class="page-header">
+    <div class="header-content">
+        <h1><i class="fas fa-calendar-plus"></i> {% if form.instance.pk %}Edit{% else %}Create{% endif %} Calibration Schedule</h1>
+        <p class="subtitle">{% if form.instance.pk %}Update{% else %}Set up{% endif %} a calibration schedule for equipment maintenance</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'calibration_schedule_list' stream=stream %}" class="btn btn-header-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Schedules
+        </a>
+        <a href="{% url 'calibration_dashboard' stream=stream %}" class="btn btn-header">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="form-header">
+        <i class="fas fa-clipboard-list"></i>
+        <h2>Schedule Details</h2>
+    </div>
+    
+    <form method="POST" class="form-body">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+        
+        <div class="form-section">
+            <span class="section-title">Equipment Information</span>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_title">Schedule Title <span class="required">*</span></label>
+                    <input type="text" name="title" id="id_title" class="form-control" value="{{ schedule.title|default:'' }}" placeholder="e.g., Annual System Calibration" required>
+                    <p class="help-text">Give this calibration schedule a descriptive name</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_system">System/Equipment <span class="required">*</span></label>
+                    <select name="system" id="id_system" class="form-control" required>
+                        <option value="">-- Select System --</option>
+                        {% for system in systems %}
+                            <option value="{{ system.id }}" {% if schedule.system_id == system.id %}selected{% endif %}>{{ system.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-text">Select the system requiring calibration</p>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_calibration_type">Calibration Type <span class="required">*</span></label>
+                    <select name="calibration_type" id="id_calibration_type" class="form-control" required>
+                        {% for value, label in calibration_types %}
+                            <option value="{{ value }}" {% if schedule.calibration_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-text">Type of calibration to be performed</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_priority">Priority</label>
+                    <select name="priority" id="id_priority" class="form-control">
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if schedule.priority == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-text">Priority level for this calibration</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Schedule Frequency</span>
+            
+            <div class="frequency-options">
+                <div class="frequency-option">
+                    <input type="radio" name="frequency" id="freq_weekly" value="weekly" {% if form.frequency.value == 'weekly' %}checked{% endif %}>
+                    <label for="freq_weekly">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Weekly</span>
+                    </label>
+                </div>
+                <div class="frequency-option">
+                    <input type="radio" name="frequency" id="freq_monthly" value="monthly" {% if form.frequency.value == 'monthly' or not form.frequency.value %}checked{% endif %}>
+                    <label for="freq_monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Monthly</span>
+                    </label>
+                </div>
+                <div class="frequency-option">
+                    <input type="radio" name="frequency" id="freq_quarterly" value="quarterly" {% if form.frequency.value == 'quarterly' %}checked{% endif %}>
+                    <label for="freq_quarterly">
+                        <i class="fas fa-calendar"></i>
+                        <span>Quarterly</span>
+                    </label>
+                </div>
+                <div class="frequency-option">
+                    <input type="radio" name="frequency" id="freq_biannual" value="biannual" {% if form.frequency.value == 'biannual' %}checked{% endif %}>
+                    <label for="freq_biannual">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Bi-Annual</span>
+                    </label>
+                </div>
+                <div class="frequency-option">
+                    <input type="radio" name="frequency" id="freq_annual" value="annual" {% if form.frequency.value == 'annual' %}checked{% endif %}>
+                    <label for="freq_annual">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>Annual</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-row" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label for="id_last_calibration_date">Last Calibration Date</label>
+                    <input type="date" name="last_calibration_date" id="id_last_calibration_date" class="form-control" value="{{ schedule.last_calibration_date|date:'Y-m-d' }}">
+                    <p class="help-text">Leave empty if this is a new equipment</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_next_calibration_date">Next Due Date <span class="required">*</span></label>
+                    <input type="date" name="next_calibration_date" id="id_next_calibration_date" class="form-control" value="{{ schedule.next_calibration_date|date:'Y-m-d' }}" required>
+                    <p class="help-text">Calculated automatically based on frequency, or set manually</p>
+                </div>
+            </div>
+            
+            <div class="checkbox-group" style="margin-top: 1rem; background: #fef3c7; border: 1px solid #fbbf24;">
+                <input type="checkbox" name="block_system" id="id_block_system" checked>
+                <div>
+                    <label for="id_block_system" style="color: #92400e; font-weight: 600;">
+                        <i class="fas fa-lock" style="margin-right: 0.5rem;"></i>Block System on Calibration Date
+                    </label>
+                    <p class="help-text" style="margin: 0; color: #b45309;">
+                        When enabled, the system will be automatically reserved/blocked on the calibration date, 
+                        preventing other users from booking it.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Compliance Requirements</span>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_responsible_person">Assigned To / Responsible Person</label>
+                    <select name="responsible_person" id="id_responsible_person" class="form-control">
+                        <option value="">-- Select Person --</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if schedule.responsible_person_id == user.id %}selected{% endif %}>
+                                {{ user.get_full_name|default:user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-text">Person responsible for performing or overseeing calibration</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_service_provider">Service Provider</label>
+                    <input type="text" name="service_provider" id="id_service_provider" class="form-control" value="{{ schedule.service_provider|default:'' }}" placeholder="e.g., External Calibration Lab">
+                    <p class="help-text">External vendor/service provider (if applicable)</p>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_regulatory_standard">Regulatory Standard</label>
+                    <input type="text" name="regulatory_standard" id="id_regulatory_standard" class="form-control" value="{{ form.regulatory_standard.value|default:'' }}" placeholder="e.g., ISO 9001, FDA 21 CFR Part 11">
+                    <p class="help-text">Applicable regulatory standard</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_tolerance">Tolerance Specification</label>
+                    <input type="text" name="tolerance" id="id_tolerance" class="form-control" value="{{ form.tolerance.value|default:'' }}" placeholder="e.g., ±0.5°C, ±1%">
+                    <p class="help-text">Acceptable tolerance range</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_calibration_procedure">Calibration Procedure</label>
+                <textarea name="calibration_procedure" id="id_calibration_procedure" class="form-control" placeholder="Describe the calibration procedure...">{{ form.calibration_procedure.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Notifications</span>
+            
+            <div class="notification-settings">
+                <h4><i class="fas fa-bell"></i> Alert Settings</h4>
+                
+                <div class="notification-item">
+                    <span>Email notifications enabled</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="email_notifications" {% if form.email_notifications.value or not form.instance.pk %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="notification-item">
+                    <span>Reminder days before due date</span>
+                    <select name="reminder_days" class="form-control" style="width: auto;">
+                        <option value="7" {% if form.reminder_days.value == 7 %}selected{% endif %}>7 days</option>
+                        <option value="14" {% if form.reminder_days.value == 14 %}selected{% endif %}>14 days</option>
+                        <option value="30" {% if form.reminder_days.value == 30 or not form.instance.pk %}selected{% endif %}>30 days</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or not form.instance.pk %}checked{% endif %}>
+            <div>
+                <label for="id_is_active">Schedule is Active</label>
+                <p class="help-text" style="margin: 0;">Deactivate to pause calibration reminders</p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'calibration_dashboard' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Schedule
+            </button>
+        </div>
+    </form>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate next due date based on frequency
+    const lastCalibrationInput = document.getElementById('id_last_calibration_date');
+    const nextDueDateInput = document.getElementById('id_next_calibration_date');
+    const frequencyInputs = document.querySelectorAll('input[name="frequency"]');
+    
+    function calculateNextDueDate() {
+        const lastDate = lastCalibrationInput.value ? new Date(lastCalibrationInput.value) : new Date();
+        const frequency = document.querySelector('input[name="frequency"]:checked').value;
+        
+        let nextDate = new Date(lastDate);
+        
+        switch(frequency) {
+            case 'weekly':
+                nextDate.setDate(nextDate.getDate() + 7);
+                break;
+            case 'monthly':
+                nextDate.setMonth(nextDate.getMonth() + 1);
+                break;
+            case 'quarterly':
+                nextDate.setMonth(nextDate.getMonth() + 3);
+                break;
+            case 'biannual':
+                nextDate.setMonth(nextDate.getMonth() + 6);
+                break;
+            case 'annual':
+                nextDate.setFullYear(nextDate.getFullYear() + 1);
+                break;
+        }
+        
+        nextDueDateInput.value = nextDate.toISOString().split('T')[0];
+    }
+    
+    // Set initial date if not already set
+    if (!nextDueDateInput.value) {
+        calculateNextDueDate();
+    }
+    
+    lastCalibrationInput.addEventListener('change', calculateNextDueDate);
+    frequencyInputs.forEach(input => {
+        input.addEventListener('change', calculateNextDueDate);
+    });
+    
+    // Add form-control class to Django form widgets
+    document.querySelectorAll('select').forEach(el => {
+        if (!el.classList.contains('form-control')) {
+            el.classList.add('form-control');
+        }
+    });
+});
+</script>
+{% endblock %}

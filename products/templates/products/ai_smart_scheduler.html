@@ -1,0 +1,231 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}AI Smart Scheduler | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    .page-container { max-width: 1900px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline-w { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline-w:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    /* Form */
+    .sched-form { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #64748b; }
+    .form-group select, .form-group input { padding: 0.6rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.88rem; outline: none; transition: border-color 0.2s; min-width: 150px; }
+    .form-group select:focus, .form-group input:focus { border-color: var(--primary); }
+
+    /* Slots grid */
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .slot-card { background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; position: relative; }
+    .slot-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(11,95,255,0.15); }
+    .slot-card.best { border-color: var(--success); background: #f0fdf4; }
+    .slot-rank { position: absolute; top: -8px; right: 12px; background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+    .slot-card.best .slot-rank { background: var(--success); }
+    .slot-system { font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.5rem; }
+    .slot-details { font-size: 0.82rem; color: #64748b; display: flex; flex-direction: column; gap: 0.3rem; }
+    .slot-details span { display: flex; align-items: center; gap: 0.4rem; }
+    .slot-score { margin-top: 0.75rem; }
+    .score-bar { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; }
+    .score-bar-inner { height: 100%; border-radius: 4px; transition: width 0.5s; }
+    .score-label { font-size: 0.72rem; color: #64748b; display: flex; justify-content: space-between; margin-top: 0.25rem; }
+    .slot-reason { font-size: 0.78rem; color: #475569; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #e2e8f0; line-height: 1.5; }
+
+    /* Insights */
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .insight-item { padding: 1rem; background: #f8fafc; border-radius: 10px; border-top: 3px solid var(--primary); }
+    .insight-item .ii-val { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .insight-item .ii-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 0.15rem; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+
+    .spinner { width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #slotsLoading { display: none; text-align: center; padding: 2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-calendar-check"></i> AI Smart Scheduler</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Get intelligent reservation slot recommendations</div>
+        </div>
+        <a href="{% url 'feature_hub' %}" class="btn btn-outline-w"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+    </div>
+
+    <!-- Request Form -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-sliders-h"></i> Find Optimal Slots</div>
+        <div class="sched-form">
+            <div class="form-group">
+                <label>System (optional)</label>
+                <select id="systemSelect">
+                    <option value="">Any System</option>
+                    {% for sys in systems %}
+                    <option value="{{ sys.pk }}">{{ sys.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Desired Date</label>
+                <input type="date" id="dateInput" value="">
+            </div>
+            <div class="form-group">
+                <label>Duration</label>
+                <select id="durationSelect">
+                    <option value="1">1 Hour</option>
+                    <option value="2" selected>2 Hours</option>
+                    <option value="4">4 Hours</option>
+                    <option value="8">Full Day</option>
+                </select>
+            </div>
+            <button id="recommendBtn" class="btn btn-primary"><i class="fas fa-magic"></i> Get Recommendations</button>
+        </div>
+    </div>
+
+    <!-- Recommendations Result -->
+    <div class="card" id="resultCard" style="display:none;">
+        <div class="card-title"><i class="fas fa-star"></i> Recommended Slots</div>
+        <div id="slotsLoading">
+            <div class="spinner"></div>
+            <p style="margin-top: 0.75rem; color: #64748b;">Analyzing patterns and finding optimal slots...</p>
+        </div>
+        <div id="slotsGrid" class="slots-grid"></div>
+    </div>
+
+    <!-- User Insights -->
+    {% if user_insights %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-user-chart"></i> Your Usage Insights</div>
+        <div class="insights-grid">
+            {% if user_insights.preferred_systems %}
+            <div class="insight-item">
+                <div class="ii-val">{{ user_insights.preferred_systems.0 }}</div>
+                <div class="ii-label">Most Used System</div>
+            </div>
+            {% endif %}
+            {% if user_insights.preferred_hours %}
+            <div class="insight-item">
+                <div class="ii-val">{{ user_insights.preferred_hours.0 }}:00</div>
+                <div class="ii-label">Preferred Start Hour</div>
+            </div>
+            {% endif %}
+            {% if user_insights.preferred_days %}
+            <div class="insight-item">
+                <div class="ii-val">{{ user_insights.preferred_days.0 }}</div>
+                <div class="ii-label">Preferred Day</div>
+            </div>
+            {% endif %}
+            <div class="insight-item">
+                <div class="ii-val">{{ user_insights.conflict_rate|floatformat:1 }}%</div>
+                <div class="ii-label">Conflict Rate</div>
+            </div>
+        </div>
+        {% if user_insights.insight_text %}
+        <div style="margin-top: 1rem; padding: 1rem; background: #eef2ff; border-radius: 10px; font-size: 0.85rem; color: #475569;">
+            <i class="fas fa-lightbulb" style="color: var(--primary);"></i> {{ user_insights.insight_text }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recommendBtn = document.getElementById('recommendBtn');
+    const systemSelect = document.getElementById('systemSelect');
+    const dateInput = document.getElementById('dateInput');
+    const durationSelect = document.getElementById('durationSelect');
+    const resultCard = document.getElementById('resultCard');
+    const slotsGrid = document.getElementById('slotsGrid');
+    const slotsLoading = document.getElementById('slotsLoading');
+    const csrfToken = '{{ csrf_token }}';
+
+    // Default date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateInput.value = tomorrow.toISOString().split('T')[0];
+
+    recommendBtn.addEventListener('click', function() {
+        const desired_date = dateInput.value;
+        if (!desired_date) { alert('Please select a desired date.'); return; }
+
+        resultCard.style.display = 'block';
+        slotsLoading.style.display = 'block';
+        slotsGrid.innerHTML = '';
+        recommendBtn.disabled = true;
+
+        fetch('{% url "ai_smart_scheduler_recommend" stream=stream %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({
+                system_id: systemSelect.value || null,
+                desired_date: desired_date,
+                duration_hours: parseInt(durationSelect.value),
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            slotsLoading.style.display = 'none';
+            recommendBtn.disabled = false;
+            if (!data.success) {
+                slotsGrid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>' + escapeHtml(data.error || 'Failed to get recommendations') + '</p></div>';
+                return;
+            }
+            renderSlots(data.recommendations || []);
+        })
+        .catch(err => {
+            slotsLoading.style.display = 'none';
+            recommendBtn.disabled = false;
+            slotsGrid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error: ' + escapeHtml(err.message) + '</p></div>';
+        });
+    });
+
+    function renderSlots(slots) {
+        if (!slots.length) {
+            slotsGrid.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>No available slots found for the selected criteria.</p></div>';
+            return;
+        }
+        let html = '';
+        slots.forEach((slot, idx) => {
+            const score = slot.score || 0;
+            const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+            html += `
+            <div class="slot-card ${idx === 0 ? 'best' : ''}">
+                <div class="slot-rank">${idx + 1}</div>
+                <div class="slot-system">${escapeHtml(slot.system || 'Any System')}</div>
+                <div class="slot-details">
+                    <span><i class="fas fa-calendar"></i> ${escapeHtml(slot.date || '—')}</span>
+                    <span><i class="fas fa-clock"></i> ${slot.start_time || '—'} — ${slot.end_time || '—'}</span>
+                    <span><i class="fas fa-hourglass-half"></i> ${slot.duration_hours || 2} hours</span>
+                </div>
+                <div class="slot-score">
+                    <div class="score-bar"><div class="score-bar-inner" style="width:${score}%; background:${color};"></div></div>
+                    <div class="score-label"><span>Score</span><span style="font-weight:700; color:${color};">${score.toFixed(0)}/100</span></div>
+                </div>
+                ${slot.reasoning ? `<div class="slot-reason">${escapeHtml(slot.reasoning)}</div>` : ''}
+            </div>`;
+        });
+        slotsGrid.innerHTML = html;
+    }
+});
+</script>
+{% endblock %}

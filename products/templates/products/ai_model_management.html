@@ -1,0 +1,204 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}AI Model Management | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    .page-container { max-width: 1900px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { opacity: 0.9; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    /* Model cards */
+    .models-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    .model-card { background: #fff; border-radius: 14px; padding: 1.5rem; border: 1px solid #e2e8f0; position: relative; overflow: hidden; }
+    .model-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .model-card.active::before { background: var(--success); }
+    .model-card.inactive::before { background: #94a3b8; }
+    .model-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .model-desc { font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 1rem; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .status-dot.active { background: var(--success); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+    .status-dot.inactive { background: #94a3b8; }
+    .model-status { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .model-status.active { color: var(--success); }
+    .model-status.inactive { color: #94a3b8; }
+    .model-actions { margin-top: 1rem; display: flex; gap: 0.75rem; }
+    .train-result { margin-top: 0.75rem; padding: 0.75rem; border-radius: 8px; font-size: 0.82rem; display: none; }
+    .train-result.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #065f46; display: block; }
+    .train-result.error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; display: block; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .data-table th, .data-table td { padding: 0.55rem 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .data-table th { font-weight: 600; color: #64748b; background: #f8fafc; }
+    .data-table tr:hover { background: #f8fafc; }
+    .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-error { background: #fecaca; color: #991b1b; }
+    .empty-state { text-align: center; padding: 2rem; color: #94a3b8; }
+    .spinner-sm { width: 16px; height: 16px; border: 2px solid #e2e8f0; border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-cogs"></i> AI Model Management</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Train, retrain, and monitor local AI models</div>
+        </div>
+        <a href="{% url 'feature_hub' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+    </div>
+
+    <!-- Model Cards -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-brain"></i> Available Models</div>
+        <div class="models-grid">
+            <!-- Document Classifier -->
+            <div class="model-card {% if model_status.doc_classifier %}active{% else %}inactive{% endif %}">
+                <div class="model-name">
+                    Document Classifier
+                    <div class="model-status {% if model_status.doc_classifier %}active{% else %}inactive{% endif %}">
+                        <span class="status-dot {% if model_status.doc_classifier %}active{% else %}inactive{% endif %}"></span>
+                        {% if model_status.doc_classifier %}Trained{% else %}Not Trained{% endif %}
+                    </div>
+                </div>
+                <div class="model-desc">
+                    TF-IDF + SVM classifier for automatic document type classification.
+                    Used by the OCR & Auto-Extraction feature to categorize uploaded documents.
+                </div>
+                <div class="model-actions">
+                    <button class="btn {% if model_status.doc_classifier %}btn-primary{% else %}btn-success{% endif %} train-btn" data-model="doc_classifier">
+                        <i class="fas fa-graduation-cap"></i> {% if model_status.doc_classifier %}Retrain{% else %}Train Now{% endif %}
+                    </button>
+                </div>
+                <div class="train-result" id="result-doc_classifier"></div>
+            </div>
+
+            <!-- NL Query Classifier -->
+            <div class="model-card {% if model_status.nl_query %}active{% else %}inactive{% endif %}">
+                <div class="model-name">
+                    NL Query Classifier
+                    <div class="model-status {% if model_status.nl_query %}active{% else %}inactive{% endif %}">
+                        <span class="status-dot {% if model_status.nl_query %}active{% else %}inactive{% endif %}"></span>
+                        {% if model_status.nl_query %}Trained{% else %}Not Trained{% endif %}
+                    </div>
+                </div>
+                <div class="model-desc">
+                    TF-IDF + Naive Bayes classifier for interpreting natural language queries.
+                    Trained on 20 intent categories with ~200 example queries. Keyword fallback available.
+                </div>
+                <div class="model-actions">
+                    <button class="btn {% if model_status.nl_query %}btn-primary{% else %}btn-success{% endif %} train-btn" data-model="nl_query">
+                        <i class="fas fa-graduation-cap"></i> {% if model_status.nl_query %}Retrain{% else %}Train Now{% endif %}
+                    </button>
+                </div>
+                <div class="train-result" id="result-nl_query"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Logs -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Training History</div>
+        {% if training_logs %}
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Trained By</th>
+                        <th>Samples</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in training_logs %}
+                    <tr>
+                        <td><strong>{{ log.model_type }}</strong></td>
+                        <td>{% if log.trained_by %}{{ log.trained_by.get_full_name|default:log.trained_by.username }}{% else %}System (CLI){% endif %}</td>
+                        <td>{{ log.training_samples }}</td>
+                        <td>
+                            <span class="badge {% if log.was_successful %}badge-success{% else %}badge-error{% endif %}">
+                                {% if log.was_successful %}Success{% else %}Failed{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ log.trained_at|date:"M d, Y H:i" }}</td>
+                        <td style="font-size:0.78rem; color:#64748b;">
+                            {% if log.error_message %}{{ log.error_message|truncatewords:15 }}{% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No training history yet. Train a model above to get started.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = '{{ csrf_token }}';
+
+    document.querySelectorAll('.train-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modelType = this.dataset.model;
+            const resultDiv = document.getElementById('result-' + modelType);
+            const originalHTML = this.innerHTML;
+
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-sm"></span> Training...';
+            resultDiv.style.display = 'none';
+            resultDiv.className = 'train-result';
+
+            fetch('{% url "ai_train_model_api" stream=stream %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ model_type: modelType })
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = originalHTML;
+                if (data.success) {
+                    resultDiv.className = 'train-result success';
+                    resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> Model trained successfully with ' + (data.samples || 0) + ' samples. Accuracy: ' + ((data.accuracy || 0) * 100).toFixed(1) + '%';
+                } else {
+                    resultDiv.className = 'train-result error';
+                    resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + escapeHtml(data.error || 'Training failed.');
+                }
+            })
+            .catch(err => {
+                this.disabled = false;
+                this.innerHTML = originalHTML;
+                resultDiv.className = 'train-result error';
+                resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error: ' + escapeHtml(err.message);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

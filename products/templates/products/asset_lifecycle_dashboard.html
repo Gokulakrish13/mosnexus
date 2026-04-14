@@ -1,0 +1,428 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Lifecycle Analytics - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    :root {
+        --primary: #0044CC;
+        --primary-dark: #003399;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    .dashboard-container { max-width: 1600px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0044CC 0%, #003399 50%, #002266 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(118, 75, 162, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .page-header .subtitle { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
+
+    .header-actions { display: flex; gap: 0.75rem; position: relative; z-index: 1; }
+
+    .header-actions .btn {
+        padding: 0.65rem 1.25rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        background: rgba(255,255,255,0.1);
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-actions .btn:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    /* Stats */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+    .stat-card .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Charts Grid */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .chart-card-header {
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-light);
+    }
+
+    .chart-card-header i { color: var(--primary); }
+
+    .chart-card-body {
+        padding: 1.5rem;
+        position: relative;
+        height: 300px;
+    }
+
+    /* Recent Transitions Table */
+    .recent-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .recent-header {
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-light);
+    }
+
+    .recent-header i { color: var(--primary); }
+
+    .recent-table { width: 100%; border-collapse: collapse; }
+
+    .recent-table th {
+        background: var(--bg-light);
+        padding: 0.75rem 1rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        text-align: left;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .recent-table td {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .recent-table tr:hover { background: #f8fafd; }
+
+    .stage-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .charts-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-chart-pie"></i> Lifecycle Analytics</h1>
+            <p class="subtitle">Financial and operational insights for {{ total_assets }} tracked assets in {{ stream }}</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'asset_lifecycle_list' stream=stream %}" class="btn">
+                <i class="fas fa-list"></i> Asset List
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #e8f0fe; color: #0044CC;">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_assets }}</div>
+                <div class="stat-label">Total Assets</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #dbeafe; color: #2563eb;">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div>
+                <div class="stat-value">${{ total_purchase_value|floatformat:0 }}</div>
+                <div class="stat-label">Purchase Value</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #dcfce7; color: #16a34a;">
+                <i class="fas fa-book"></i>
+            </div>
+            <div>
+                <div class="stat-value">${{ total_book_value|floatformat:0 }}</div>
+                <div class="stat-label">Book Value</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fef3c7; color: #d97706;">
+                <i class="fas fa-wrench"></i>
+            </div>
+            <div>
+                <div class="stat-value">${{ total_maintenance_cost|floatformat:0 }}</div>
+                <div class="stat-label">Maintenance Cost</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #dcfce7; color: #16a34a;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ warranty_active }}</div>
+                <div class="stat-label">Warranty Active</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fef3c7; color: #d97706;">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ warranty_expiring }}</div>
+                <div class="stat-label">Expiring Soon</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-card-header"><i class="fas fa-chart-pie"></i> Assets by Stage</div>
+            <div class="chart-card-body">
+                <canvas id="stageChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-header"><i class="fas fa-chart-bar"></i> Assets by Condition</div>
+            <div class="chart-card-body">
+                <canvas id="conditionChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-header"><i class="fas fa-chart-doughnut"></i> Warranty Status</div>
+            <div class="chart-card-body">
+                <canvas id="warrantyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transitions -->
+    <div class="recent-card">
+        <div class="recent-header"><i class="fas fa-exchange-alt"></i> Recent Transitions</div>
+        <table class="recent-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>By</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent_transitions %}
+                <tr>
+                    <td style="font-weight:600;">{{ t.lifecycle.product.name }}</td>
+                    <td>
+                        <span class="stage-badge" style="background: {{ t.from_stage.color }}20; color: {{ t.from_stage.color }};">
+                            {{ t.from_stage.name }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="stage-badge" style="background: {{ t.to_stage.color }}20; color: {{ t.to_stage.color }};">
+                            {{ t.to_stage.name }}
+                        </span>
+                    </td>
+                    <td>{{ t.transitioned_by.get_full_name|default:t.transitioned_by.username }}</td>
+                    <td style="font-size:0.8rem;color:var(--text-secondary);">{{ t.transitioned_at|date:"M d, Y H:i" }}</td>
+                    <td style="font-size:0.8rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{ t.note|truncatewords:8|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">No transition history yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ stage_distribution|json_script:"stage-distribution-data" }}
+{{ condition_dist|json_script:"condition-dist-data" }}
+<script>
+    // Stage Distribution Chart
+    const stageData = JSON.parse(document.getElementById('stage-distribution-data').textContent);
+    if (stageData.length > 0) {
+        new Chart(document.getElementById('stageChart'), {
+            type: 'doughnut',
+            data: {
+                labels: stageData.map(s => s.name),
+                datasets: [{
+                    data: stageData.map(s => s.count),
+                    backgroundColor: stageData.map(s => s.color),
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { padding: 12, font: { size: 11 } } },
+                }
+            }
+        });
+    }
+
+    // Condition Chart
+    const conditionData = JSON.parse(document.getElementById('condition-dist-data').textContent);
+    const conditionColors = { 'new': '#10b981', 'good': '#3b82f6', 'fair': '#f59e0b', 'poor': '#d48806', 'damaged': '#ef4444', 'refurbished': '#0B5FFF' };
+    if (conditionData.length > 0) {
+        new Chart(document.getElementById('conditionChart'), {
+            type: 'bar',
+            data: {
+                labels: conditionData.map(c => c.condition.charAt(0).toUpperCase() + c.condition.slice(1)),
+                datasets: [{
+                    label: 'Assets',
+                    data: conditionData.map(c => c.count),
+                    backgroundColor: conditionData.map(c => conditionColors[c.condition] || '#94a3b8'),
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // Warranty Chart
+    new Chart(document.getElementById('warrantyChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Expiring Soon', 'Expired'],
+            datasets: [{
+                data: [{{ warranty_active }}, {{ warranty_expiring }}, {{ warranty_expired }}],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { padding: 12, font: { size: 11 } } },
+            }
+        }
+    });
+</script>
+{% endblock %}

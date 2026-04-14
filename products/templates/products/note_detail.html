@@ -1,11 +1,11 @@
+{% load static %}
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes Detail - IGT MoS Inventory</title>
-    {% load static %}
+    <title>Notes Detail - {{ BU_TITLE|default:'NexusOps' }}</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -56,7 +56,7 @@
     }
 
     .note-page-wrapper {
-        max-width: 1000px;
+        max-width: 1340px;
         margin: 0 auto;
         animation: fadeIn 0.4s ease-out;
     }
@@ -178,6 +178,42 @@
         color: var(--warning);
     }
 
+    .visibility-badge.stream {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    /* Tag Pill Styles */
+    .note-detail-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .note-detail-tag:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+    }
+
+    .note-detail-tag .tag-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .detail-tags-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
     /* Action Buttons */
     .page-actions {
         display: flex;
@@ -287,10 +323,37 @@
         margin-bottom: 0;
     }
 
+    .note-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .note-content table th,
+    .note-content table td {
+        padding: 0.6rem 1rem;
+        text-align: left;
+        border: 1px solid var(--border-color);
+    }
+
+    .note-content table th {
+        background: var(--primary-light);
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .note-content table tr:hover {
+        background: #f8fafc;
+    }
+
     /* Sidebar Layout */
     .note-layout {
         display: grid;
-        grid-template-columns: 1fr 320px;
+        grid-template-columns: 1fr 280px 220px;
         gap: 1.5rem;
         align-items: start;
     }
@@ -300,6 +363,12 @@
     }
 
     .note-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .note-actions-col {
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
@@ -587,7 +656,61 @@
         font-size: 0.875rem;
     }
 
+    /* Toast alert for messages */
+    .alert-toast {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 9999;
+        box-shadow: var(--shadow-lg);
+        animation: toastSlideIn 0.4s ease;
+        color: white;
+    }
+
+    .alert-toast-success {
+        background: var(--success);
+    }
+
+    .alert-toast-warning {
+        background: var(--warning);
+    }
+
+    .alert-toast-error {
+        background: var(--danger);
+    }
+
+    .alert-toast-info {
+        background: #0066cc;
+    }
+
+    @keyframes toastSlideIn {
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toastSlideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(120%); opacity: 0; }
+    }
+
     /* Responsive */
+    @media (max-width: 1100px) {
+        .note-layout {
+            grid-template-columns: 1fr 280px;
+        }
+        .note-actions-col {
+            grid-column: 1 / -1;
+            flex-direction: row;
+        }
+    }
+
     @media (max-width: 900px) {
         .note-layout {
             grid-template-columns: 1fr;
@@ -625,29 +748,45 @@
     }
 </style>
 
+<!-- Page Navigation Toolbar (Breadcrumbs) -->
+{% if user.is_authenticated and page_nav_breadcrumbs %}
+<div class="pnav-bar" id="pnavBarNoteDetail">
+    <a href="{% url 'page_nav_action' %}?action=back" class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}" title="Go Back"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'page_nav_action' %}?action=forward" class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}" title="Go Forward"><i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home"><i class="fas fa-home"></i></a>
+    <span class="pnav-sep"></span>
+    <div class="pnav-crumbs">
+        {% for crumb in page_nav_breadcrumbs %}{% if crumb.active %}<span class="pnav-crumb pnav-active">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</span>{% else %}<a href="{{ crumb.url }}" class="pnav-crumb">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</a><span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>{% endif %}{% endfor %}
+    </div>
+</div>
+<style>
+    .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+    .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+    .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+    .pnav-disabled{opacity:.3;pointer-events:none}
+    .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+    .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+    .pnav-crumbs::-webkit-scrollbar{display:none}
+    .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+    .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+    .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+    .pnav-chevron{color:#94a3b8;font-size:.6rem;flex-shrink:0;user-select:none}
+</style>
+{% endif %}
+<!-- End Page Navigation Toolbar -->
+
 <div class="note-page-container">
     <div class="note-page-wrapper">
-        <!-- Breadcrumb -->
-        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-            <div class="breadcrumb-item">
-                <a href="{% url 'notes_list' %}"><i class="fas fa-home"></i>Home</a>
-                </a>
-            </div>
-            <span class="breadcrumb-separator">
-                <i class="fas fa-chevron-right"></i>
-            </span>
-            <div class="breadcrumb-item">
-                <a href="{% url 'notes_list' %}">
-                    <i class="fas fa-sticky-note"></i>Notes
-                </a>
-            </div>
-            <span class="breadcrumb-separator">
-                <i class="fas fa-chevron-right"></i>
-            </span>
-            <div class="breadcrumb-item current">
-                <i class="fas fa-file-alt" style="margin-right: 0.375rem; color: var(--text-muted);"></i>{{ note.title|truncatewords:5 }}
-            </div>
-        </nav>
+
+        <!-- Success/Error Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-toast alert-toast-{{ message.tags }}" id="msgToast{{ forloop.counter }}">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% elif message.tags == 'error' %}times-circle{% else %}info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
 
         <!-- Page Header -->
         <div class="page-header">
@@ -662,7 +801,11 @@
                         <i class="fas fa-user"></i>
                         {{ note.created_by.username }}
                     </span>
-                    {% if note.is_public %}
+                    {% if note.visibility == 'stream' %}
+                    <span class="visibility-badge stream">
+                        <i class="fas fa-sitemap"></i> Stream: {{ note.stream.name }}
+                    </span>
+                    {% elif note.is_public %}
                     <span class="visibility-badge public">
                         <i class="fas fa-globe"></i> Public
                     </span>
@@ -670,6 +813,14 @@
                     <span class="visibility-badge private">
                         <i class="fas fa-lock"></i> Private
                     </span>
+                    {% endif %}
+                    {% if note.tags.all %}
+                    {% for tag in note.tags.all %}
+                    <a href="{% url 'notes_list' %}?tag={{ tag.id }}" class="note-detail-tag" style="background: {{ tag.color }}22; color: {{ tag.color }};" title="Filter by {{ tag.name }}">
+                        <span class="tag-dot" style="background: {{ tag.color }}"></span>
+                        {{ tag.name }}
+                    </a>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -699,7 +850,7 @@
                         <h3>Note Content</h3>
                     </div>
                     <div class="content-card-body">
-                        <div class="note-content">
+                        <div class="note-content" id="noteContentArea">
                             {{ note.content|linebreaks }}
                         </div>
                     </div>
@@ -799,7 +950,9 @@
                                 <div class="info-list-content">
                                     <div class="info-list-label">Visibility</div>
                                     <div class="info-list-value">
-                                        {% if note.is_public %}
+                                        {% if note.visibility == 'stream' %}
+                                        <span style="color: #0891b2;"><i class="fas fa-sitemap"></i> Stream Only</span>
+                                        {% elif note.is_public %}
                                         <span style="color: var(--success);">Public</span>
                                         {% else %}
                                         <span style="color: var(--warning);">Private</span>
@@ -807,6 +960,17 @@
                                     </div>
                                 </div>
                             </li>
+                            {% if note.stream %}
+                            <li>
+                                <div class="info-list-icon" style="background: #cffafe; color: #0891b2;">
+                                    <i class="fas fa-code-branch"></i>
+                                </div>
+                                <div class="info-list-content">
+                                    <div class="info-list-label">Stream</div>
+                                    <div class="info-list-value" style="color: #0891b2;">{{ note.stream.name }}</div>
+                                </div>
+                            </li>
+                            {% endif %}
                             {% if attachments %}
                             <li>
                                 <div class="info-list-icon">
@@ -818,11 +982,33 @@
                                 </div>
                             </li>
                             {% endif %}
+                            {% if note.tags.all %}
+                            <li>
+                                <div class="info-list-icon" style="background: var(--primary-light); color: var(--primary);">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div class="info-list-content">
+                                    <div class="info-list-label">Tags</div>
+                                    <div class="info-list-value">
+                                        <div class="detail-tags-row">
+                                            {% for tag in note.tags.all %}
+                                            <a href="{% url 'notes_list' %}?tag={{ tag.id }}" class="note-detail-tag" style="background: {{ tag.color }}22; color: {{ tag.color }};">
+                                                <span class="tag-dot" style="background: {{ tag.color }}"></span>
+                                                {{ tag.name }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
+            </div>
 
-                <!-- Quick Actions -->
+            <!-- Third Column: Quick Actions -->
+            <div class="note-actions-col">
                 <div class="info-card">
                     <div class="info-card-header">
                         <h4>Quick Actions</h4>
@@ -884,5 +1070,41 @@ document.addEventListener('keydown', function(e) {
         closeImageModal();
     }
 });
+
+// Auto-dismiss toast messages
+document.querySelectorAll('.alert-toast').forEach(function(toast) {
+    setTimeout(function() {
+        toast.style.animation = 'toastSlideOut 0.4s ease forwards';
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 3500);
+});
+
+// ─── Render tab-separated content as tables ───
+(function() {
+    var el = document.getElementById('noteContentArea');
+    if (!el) return;
+    var rawContent = '{{ note.content|escapejs }}';
+    if (!rawContent) return;
+    // Check if content has tab-separated or multi-space-separated data
+    if (rawContent.indexOf('\t') !== -1 || (rawContent.indexOf('\n') !== -1 && rawContent.split('\n').some(function(line) { return line.split(/\t+|\s{2,}/).filter(function(c) { return c.trim(); }).length > 1; }))) {
+        var lines = rawContent.split('\n').filter(function(line) { return line.trim(); });
+        if (lines.length > 1) {
+            var tableHtml = '<table>';
+            var hasTable = false;
+            lines.forEach(function(line, index) {
+                var cells = line.split(/\t+|\s{2,}/).filter(function(cell) { return cell.trim(); });
+                if (cells.length > 1) {
+                    hasTable = true;
+                    var tag = index === 0 ? 'th' : 'td';
+                    tableHtml += '<tr>' + cells.map(function(cell) { return '<' + tag + '>' + cell.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</' + tag + '>'; }).join('') + '</tr>';
+                }
+            });
+            tableHtml += '</table>';
+            if (hasTable) {
+                el.innerHTML = tableHtml;
+            }
+        }
+    }
+})();
 </script>
 {% endblock %}

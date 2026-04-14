@@ -1,0 +1,139 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}AI Inventory Forecast | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    /* Generate form */
+    .gen-form { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #64748b; }
+    .form-group select, .form-group input { padding: 0.6rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+    .form-group select:focus, .form-group input:focus { border-color: var(--primary); }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th, .data-table td { padding: 0.65rem 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .data-table th { font-weight: 600; color: #64748b; background: #f8fafc; }
+    .data-table tr:hover { background: #f8fafc; }
+
+    .trend-up { color: var(--success); }
+    .trend-down { color: var(--danger); }
+    .trend-flat { color: #94a3b8; }
+
+    .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fecaca; color: #991b1b; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-chart-line"></i> AI Inventory Forecast</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Predict future inventory levels using local machine learning</div>
+        </div>
+        <a href="{% url 'feature_hub' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+    </div>
+
+    <!-- Generate Forecast -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-magic"></i> Generate New Forecast</div>
+        <form method="post" action="{% url 'ai_inventory_forecast_generate' stream=stream %}" class="gen-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Forecast Period</label>
+                <select name="forecast_days">
+                    <option value="30">30 Days</option>
+                    <option value="60">60 Days</option>
+                    <option value="90" selected>90 Days</option>
+                    <option value="180">180 Days</option>
+                    <option value="365">1 Year</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-robot"></i> Generate Forecast</button>
+        </form>
+    </div>
+
+    <!-- Past Forecasts -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Past Forecasts</div>
+        {% if past_forecasts %}
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Generated</th>
+                        <th>Period</th>
+                        <th>Method</th>
+                        <th>Current Count</th>
+                        <th>Predicted End</th>
+                        <th>Trend</th>
+                        <th>Warnings</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in past_forecasts %}
+                    <tr>
+                        <td>{{ f.generated_at|date:"M d, Y H:i" }}</td>
+                        <td>{{ f.forecast_days }} days</td>
+                        <td><strong>{{ f.forecast_method }}</strong></td>
+                        <td>{{ f.current_count }}</td>
+                        <td>{{ f.predicted_end_count }}</td>
+                        <td>
+                            {% if f.trend_direction == 'increasing' %}
+                            <span class="trend-up"><i class="fas fa-arrow-up"></i> +{{ f.trend_change_rate|floatformat:1 }}%</span>
+                            {% elif f.trend_direction == 'decreasing' %}
+                            <span class="trend-down"><i class="fas fa-arrow-down"></i> {{ f.trend_change_rate|floatformat:1 }}%</span>
+                            {% else %}
+                            <span class="trend-flat"><i class="fas fa-minus"></i> Stable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if f.threshold_warnings_count > 0 %}
+                            <span class="badge badge-warning">{{ f.threshold_warnings_count }} warning{{ f.threshold_warnings_count|pluralize }}</span>
+                            {% else %}
+                            <span class="badge badge-success">None</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'ai_inventory_forecast_view' stream=stream pk=f.pk %}" class="btn btn-primary" style="padding:0.3rem 0.75rem; font-size:0.78rem;">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <p>No forecasts generated yet. Create your first forecast above.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

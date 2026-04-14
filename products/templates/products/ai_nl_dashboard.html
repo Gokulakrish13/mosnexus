@@ -1,0 +1,264 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}AI Natural Language Dashboard | NexusOps{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+
+    /* Query input */
+    .query-box { background: #fff; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .query-bar { display: flex; gap: 0.75rem; }
+    .query-input { flex: 1; padding: 0.75rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .query-input:focus { border-color: var(--primary); }
+    .query-input::placeholder { color: #94a3b8; }
+
+    /* Suggestions */
+    .suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .suggestion-chip { background: #eef2ff; color: var(--primary); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .suggestion-chip:hover { background: var(--primary); color: #fff; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    /* Result area */
+    #resultArea { min-height: 120px; }
+    .result-loading { text-align: center; padding: 2rem; }
+    .result-loading .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 0.75rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .result-meta { display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; }
+    .result-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .result-meta strong { color: #1e293b; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .data-table th, .data-table td { padding: 0.55rem 0.65rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .data-table th { font-weight: 600; color: #64748b; background: #f8fafc; position: sticky; top: 0; }
+    .data-table tr:hover { background: #f8fafc; }
+
+    .stat-card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+    .stat-card { background: #f8fafc; border-radius: 10px; padding: 1.25rem; text-align: center; border-top: 3px solid var(--primary); }
+    .stat-card .sv { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    .stat-card .sl { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-top: 0.25rem; }
+
+    .chart-container { position: relative; width: 100%; max-height: 400px; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+
+    /* Recent queries */
+    .recent-queries { display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+    .rq-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .rq-item:hover { background: #eef2ff; }
+    .rq-text { font-size: 0.83rem; font-weight: 500; color: #1e293b; }
+    .rq-meta { font-size: 0.72rem; color: #94a3b8; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.68rem; font-weight: 600; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-red { background: #fecaca; color: #991b1b; }
+
+    .feedback-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .fb-btn { padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.75rem; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; transition: all 0.2s; }
+    .fb-btn:hover { background: #eef2ff; }
+    .fb-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-row">
+            <div>
+                <h1><i class="fas fa-comments"></i> AI Natural Language Dashboard</h1>
+                <div class="subtitle">{{ stream_obj.name }} — Ask questions about your data in plain English — powered by local AI</div>
+            </div>
+            <a href="{% url 'feature_hub' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+        </div>
+    </div>
+
+    <!-- Query Bar -->
+    <div class="query-box">
+        <div class="query-bar">
+            <input type="text" id="queryInput" class="query-input" placeholder="Ask anything... e.g. 'How many products per stream?' or 'Show low stock items'" autofocus>
+            <button id="queryBtn" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Ask</button>
+        </div>
+        <div class="suggestions">
+            {% for s in suggestions %}
+            <button class="suggestion-chip" data-query="{{ s }}">{{ s }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="resultCard" style="display:none;">
+        <div class="card-title"><i class="fas fa-chart-bar"></i> <span id="resultTitle">Results</span></div>
+        <div id="resultArea"></div>
+    </div>
+
+    <!-- Recent Queries -->
+    {% if recent_queries %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Recent Queries</div>
+        <div class="recent-queries">
+            {% for q in recent_queries %}
+            <div class="rq-item" data-query="{{ q.query_text }}">
+                <div>
+                    <div class="rq-text">{{ q.query_text }}</div>
+                    <div class="rq-meta">
+                        {{ q.detected_intent }} · {{ q.confidence|floatformat:0 }}% · {{ q.execution_time_ms }}ms
+                    </div>
+                </div>
+                <span class="badge {% if q.was_successful %}badge-green{% else %}badge-red{% endif %}">
+                    {% if q.was_successful %}OK{% else %}FAIL{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('queryInput');
+    const btn = document.getElementById('queryBtn');
+    const resultCard = document.getElementById('resultCard');
+    const resultArea = document.getElementById('resultArea');
+    const resultTitle = document.getElementById('resultTitle');
+    const csrfToken = '{{ csrf_token }}';
+    let activeChart = null;
+
+    // Fire query
+    function fireQuery(text) {
+        if (!text.trim()) return;
+        input.value = text;
+        resultCard.style.display = 'block';
+        resultArea.innerHTML = '<div class="result-loading"><div class="spinner"></div><p>Analyzing your question...</p></div>';
+        btn.disabled = true;
+
+        fetch('{% url "ai_nl_query_api" stream=stream %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ query: text })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            if (!data.success) {
+                resultArea.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>' + escapeHtml(data.error || 'Query failed') + '</p></div>';
+                return;
+            }
+            renderResult(data);
+        })
+        .catch(err => {
+            btn.disabled = false;
+            resultArea.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error: ' + escapeHtml(err.message) + '</p></div>';
+        });
+    }
+
+    function renderResult(data) {
+        resultTitle.textContent = data.title || 'Results';
+        let html = '<div class="result-meta">';
+        html += '<span><i class="fas fa-tag"></i> Intent: <strong>' + escapeHtml(data.intent || '—') + '</strong></span>';
+        html += '<span><i class="fas fa-percent"></i> Confidence: <strong>' + (data.confidence || 0).toFixed(0) + '%</strong></span>';
+        html += '<span><i class="fas fa-clock"></i> Time: <strong>' + (data.execution_time_ms || 0) + 'ms</strong></span>';
+        html += '<span><i class="fas fa-database"></i> Results: <strong>' + (data.total || 0) + '</strong></span>';
+        html += '</div>';
+
+        const ct = data.chart_type || 'table';
+
+        if (ct === 'stat_card') {
+            html += '<div class="stat-card-row">';
+            if (data.data && Array.isArray(data.data)) {
+                data.data.forEach(item => {
+                    const v = Object.values(item);
+                    html += '<div class="stat-card"><div class="sv">' + escapeHtml(String(v[1] !== undefined ? v[1] : v[0])) + '</div><div class="sl">' + escapeHtml(String(v[0] || '')) + '</div></div>';
+                });
+            } else if (data.labels && data.values) {
+                data.labels.forEach((l, i) => {
+                    html += '<div class="stat-card"><div class="sv">' + escapeHtml(String(data.values[i] || 0)) + '</div><div class="sl">' + escapeHtml(l) + '</div></div>';
+                });
+            }
+            html += '</div>';
+        } else if (ct === 'table') {
+            html += renderTable(data);
+        } else if (ct === 'bar' || ct === 'pie') {
+            html += '<div class="chart-container"><canvas id="nlChart"></canvas></div>';
+            if (data.data && Array.isArray(data.data)) {
+                html += renderTable(data);
+            }
+        }
+
+        resultArea.innerHTML = html;
+
+        // Render chart if needed
+        if ((ct === 'bar' || ct === 'pie') && data.labels && data.values) {
+            if (activeChart) activeChart.destroy();
+            const ctx = document.getElementById('nlChart');
+            if (ctx) {
+                const colors = ['#0B5FFF','#10b981','#f59e0b','#ef4444','#3b82f6','#0B5FFF','#0B5FFF','#14b8a6','#d48806','#0B5FFF'];
+                activeChart = new Chart(ctx, {
+                    type: ct === 'pie' ? 'doughnut' : 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.values,
+                            backgroundColor: ct === 'pie' ? colors.slice(0, data.labels.length) : 'rgba(11,95,255,0.7)',
+                            borderColor: ct === 'pie' ? '#fff' : 'rgba(11,95,255,1)',
+                            borderWidth: ct === 'pie' ? 2 : 1,
+                            borderRadius: ct === 'bar' ? 6 : 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { display: ct === 'pie', position: 'right' } },
+                        scales: ct === 'bar' ? { y: { beginAtZero: true } } : {},
+                    }
+                });
+            }
+        }
+    }
+
+    function renderTable(data) {
+        if (!data.data || !data.data.length) return '<div class="empty-state"><i class="fas fa-table"></i><p>No data returned</p></div>';
+        const cols = data.columns || Object.keys(data.data[0]);
+        let h = '<div style="overflow-x:auto;max-height:400px;"><table class="data-table"><thead><tr>';
+        cols.forEach(c => { h += '<th>' + escapeHtml(c.replace(/_/g, ' ')) + '</th>'; });
+        h += '</tr></thead><tbody>';
+        data.data.forEach(row => {
+            h += '<tr>';
+            cols.forEach(c => { h += '<td>' + escapeHtml(String(row[c] !== undefined && row[c] !== null ? row[c] : '—')) + '</td>'; });
+            h += '</tr>';
+        });
+        h += '</tbody></table></div>';
+        return h;
+    }
+
+    // Event listeners
+    btn.addEventListener('click', () => fireQuery(input.value));
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') fireQuery(input.value); });
+
+    document.querySelectorAll('.suggestion-chip').forEach(chip => {
+        chip.addEventListener('click', () => fireQuery(chip.dataset.query));
+    });
+    document.querySelectorAll('.rq-item').forEach(item => {
+        item.addEventListener('click', () => fireQuery(item.dataset.query));
+    });
+});
+</script>
+{% endblock %}

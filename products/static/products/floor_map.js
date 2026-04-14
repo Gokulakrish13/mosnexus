@@ -1,9 +1,7 @@
-// filepath: c:\Users\320268488\OneDrive - Philips\Documents\Hackathon\products\static\products\floor_map.js
 // Map functionality for location visualization
 
-// Initialize map-related variables
 let map;
-let activeFloor = 2; // Default to 2nd floor
+let activeFloor = 2;
 let locationMarkers = {};
 let mapVisible = false; // Track if map view is visible
 let isDraggingMarker = false; // Flag to track marker dragging state
@@ -17,7 +15,6 @@ function initMap() {
         return;
     }
     
-    // Check if map container has dimensions
     const containerRect = floorMapElement.getBoundingClientRect();
     if (containerRect.width === 0 || containerRect.height === 0) {
         console.warn('Map container has no dimensions, retrying in 200ms...');
@@ -31,7 +28,6 @@ function initMap() {
         return;
     }
     
-    // Get unique floors from location data
     generateFloorButtons();
     
     // Create map with bounds for our virtual building
@@ -47,7 +43,6 @@ function initMap() {
     
     mapInitialized = true;
     
-    // Define map bounds
     // Use proper aspect ratio bounds for PIC stream to prevent stretching
     const bounds = isPicStream ? [[0, 0], [600, 800]] : [[0, 0], [100, 100]];
     
@@ -134,7 +129,7 @@ function initMap() {
     // Check if this is PIC stream and use Bay.png instead with full opacity
     if (typeof currentStream !== 'undefined' && currentStream === 'PIC') {
         imageUrl = '/static/floor_map/Bay.png';
-        opacity = 1.0; // Maximum opacity for PIC stream
+        opacity = 1.0;
     }
     
     // Use the canvas image or custom image as our floor plan
@@ -158,18 +153,14 @@ function initMap() {
 
 // Render markers for all locations (floor filtering disabled)
 function renderFloorMarkers(floor) {
-    // Clear any existing markers
     clearMarkers();
     
-    // Update the floor plan
     updateFloorPlan(floor);
     
-    // Skip adding markers for PIC stream
     if (typeof currentStream !== 'undefined' && currentStream === 'PIC') {
         return;
     }
     
-    // Add markers for ALL locations (no floor filtering)
     Object.values(locationData).forEach(location => {
         // Create marker with style based on location type
         const locationType = location.type || getLocationType(location.name);
@@ -177,7 +168,7 @@ function renderFloorMarkers(floor) {
             
             let marker = L.marker(location.coords, {
                 icon: markerIcon,
-                draggable: true // Make marker draggable
+                draggable: true
             }).addTo(map);
             
             // Add click event to show location details - only if not currently dragging
@@ -195,7 +186,7 @@ function renderFloorMarkers(floor) {
             // Handle marker drag end
             marker.on('dragend', function(e) {
                 const newPos = marker.getLatLng();
-                location.coords = [newPos.lat, newPos.lng]; // Update coordinates in data
+                location.coords = [newPos.lat, newPos.lng];
                 
                 // Determine whether marker is on RoadSide or LakeSide
                 const side = newPos.lng > 50 ? 'RoadSide' : 'LakeSide';
@@ -217,7 +208,6 @@ function renderFloorMarkers(floor) {
                 className: 'location-tooltip'
             });
             
-            // Store marker reference for later removal
             locationMarkers[location.id] = marker;
     });
 }
@@ -365,7 +355,6 @@ function getRandomCoordinates() {
 function updateFloorPlan(floor) {
     if (!map) return;
     
-    // Remove the existing floor plan if it exists
     if (window.currentFloorPlan) {
         map.removeLayer(window.currentFloorPlan);
     }
@@ -431,7 +420,6 @@ function updateFloorPlan(floor) {
     ctx.strokeRect(100, 500, 400, 200); // Room 3
     ctx.strokeRect(550, 500, 350, 200); // Room 4
     
-    // Add location map label
     ctx.fillStyle = '#005fa3';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'left';
@@ -446,7 +434,7 @@ function updateFloorPlan(floor) {
     // Check if this is PIC stream and use Bay.png instead with full opacity
     if (typeof currentStream !== 'undefined' && currentStream === 'PIC') {
         imageUrl = '/static/floor_map/Bay.png';
-        opacity = 1.0; // Maximum opacity for PIC stream
+        opacity = 1.0;
     }
     
     // Use the canvas image or custom image as our floor plan
@@ -458,7 +446,6 @@ function updateFloorPlan(floor) {
 
 // Setup map functionality when ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up map view button
     const toggleMapViewBtn = document.getElementById('toggleMapView');
     const mapView = document.getElementById('mapView');
     const tableView = document.getElementById('tableView');
@@ -543,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Set up floor selection buttons
     document.querySelectorAll('.floor-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const floor = parseInt(this.getAttribute('data-floor'));
@@ -552,7 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Set up modal close button
     const closeModalBtn = document.querySelector('.close-modal');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', closeLocationModal);

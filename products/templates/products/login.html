@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - IGT Mobile Surgery Portal | Enterprise Access</title>
-    <meta name="description" content="Secure enterprise login to IGT Mobile Surgery Management Portal">
+    <title>Login - NexusOps Portal | AI-Powered Operations Management</title>
+    <meta name="description" content="Secure enterprise login to NexusOps — AI-Powered Unified Operations & Resource Management Portal">
     <link rel="icon" type="image/png" href="{% static 'products/philips.png' %}" />
     
     <!-- Google Fonts -->
@@ -19,7 +19,7 @@
             --philips-light: #e6f2ff;
             --accent-cyan: #00d4ff;
             --accent-teal: #00c9a7;
-            --accent-purple: #7c3aed;
+            --accent-purple: #0044CC;
             --gradient-primary: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
             --gradient-hero: linear-gradient(135deg, #0a0f1a 0%, #0d1929 25%, #0f1f3d 50%, #0a1628 100%);
             --glass-bg: rgba(255, 255, 255, 0.03);
@@ -96,7 +96,7 @@
         .sphere-2 {
             width: 500px;
             height: 500px;
-            background: linear-gradient(135deg, #7c3aed 0%, #00d4ff 100%);
+            background: linear-gradient(135deg, #0044CC 0%, #00d4ff 100%);
             bottom: -150px;
             right: -150px;
             animation-delay: -7s;
@@ -166,7 +166,7 @@
             z-index: 10;
             display: flex;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             min-height: 700px;
             border-radius: 32px;
             overflow: hidden;
@@ -274,7 +274,6 @@
         .logo-container img {
             width: 32px;
             height: 32px;
-            filter: brightness(0) invert(1);
         }
 
         .brand-logo-text {
@@ -418,7 +417,7 @@
 
         /* Right Panel - Login Form */
         .form-panel {
-            flex: 0 0 480px;
+            flex: 0 0 580px;
             background: var(--white);
             display: flex;
             flex-direction: column;
@@ -871,7 +870,7 @@
         @media (max-width: 1100px) {
             .login-container {
                 flex-direction: column;
-                max-width: 500px;
+                max-width: 580px;
                 min-height: auto;
             }
 
@@ -966,9 +965,9 @@
                 <div class="brand-content">
                     <div class="brand-logo fade-in">
                         <div class="logo-container">
-                            <img src="{% static 'products/philips.png' %}" alt="Philips">
+                            <img src="{% static 'products/Philips_NoBG_white.png' %}" alt="Philips">
                         </div>
-                        <div class="brand-logo-text">IGT <span>Portal</span></div>
+                        <div class="brand-logo-text">NexusOps<span> Portal</span></div>
                     </div>
 
                     <h1 class="brand-headline fade-in delay-2">
@@ -1028,7 +1027,7 @@
                 <div class="form-header fade-in">
                     <div class="form-welcome">Welcome back</div>
                     <h2 class="form-title">Sign in to your account</h2>
-                    <p class="form-subtitle">Enter your credentials to access the IGT Portal</p>
+                    <p class="form-subtitle">Enter your credentials to access the NexusOps Portal</p>
                 </div>
 
                 <!-- Display Django messages -->
@@ -1043,6 +1042,12 @@
 
                 <form method="post" class="login-form" id="loginForm">
                     {% csrf_token %}
+                    {% if form_error %}
+                    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                        <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+                    </div>
+                    {% endif %}
+                    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
                     <div class="form-group fade-in delay-1">
                         <label for="username" class="form-label">Username</label>
@@ -1132,6 +1137,9 @@
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
 
+        // Clear loader flag so the dashboard shows the loading animation after login
+        sessionStorage.removeItem('nexus_loader_shown');
+
         // Form Submission
         const loginForm = document.getElementById('loginForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -1164,5 +1172,8 @@
             }
         });
     </script>
+
+<!-- Version badge -->
+<div style="position:fixed;bottom:8px;right:12px;z-index:9999;font-size:0.7rem;color:#aab;font-family:'Segoe UI',system-ui,sans-serif;letter-spacing:0.02em;user-select:none;pointer-events:none;opacity:0.6;">v{{ APP_VERSION }}{% if APP_ENV_KEY != 'prod' %} <span style="background:#ffd700;color:#333;padding:1px 5px;border-radius:3px;font-weight:600;font-size:0.6rem;pointer-events:auto;">{{ APP_ENVIRONMENT }}</span>{% endif %}</div>
 </body>
 </html>

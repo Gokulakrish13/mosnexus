@@ -1,0 +1,1223 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Waste Management — {% if current_stream %}{{ current_stream.name }}{% else %}All Streams{% endif %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --gradient-secondary: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%);
+        --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --gradient-warning: linear-gradient(135deg, #d4a017 0%, #FFD200 100%);
+        --gradient-danger: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        --gradient-purple: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --bg-tertiary: #E2E8F0;
+        --surface: #FFFFFF;
+        --surface-elevated: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: rgba(148, 163, 184, 0.2);
+        --border-hover: rgba(11, 95, 255, 0.3);
+        --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+        --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
+
+    /* Page wrapper */
+    .page-wrap { max-width: 1480px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+
+    /* Back bar */
+    .back-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); text-decoration: none; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; transition: all 0.2s; border: 1px solid var(--border-color); background: var(--surface); }
+    .back-link:hover { background: var(--bg-secondary); color: var(--philips-blue); border-color: var(--philips-blue); }
+
+    /* Stream switcher tabs */
+    .stream-tabs { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+    .stream-tab { padding: 0.375rem 0.875rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
+    .stream-tab:hover { border-color: var(--philips-blue); color: var(--philips-blue); }
+    .stream-tab.active { background: var(--philips-blue); color: #fff; border-color: var(--philips-blue); }
+
+    /* Page header */
+    .page-title { margin-bottom: 1.5rem; }
+    .page-title h1 { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.625rem; }
+    .page-title h1 i { color: var(--philips-blue); font-size: 1.375rem; }
+    .page-title p { font-size: 0.875rem; color: var(--text-secondary); margin: 0; }
+    .page-title strong { color: var(--philips-blue); }
+
+    /* Stats row */
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+    .stat-card { background: var(--surface); border-radius: var(--radius-xl); padding: 1.25rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); transition: var(--transition-base); position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .stat-card:nth-child(1)::before { background: var(--gradient-primary); }
+    .stat-card:nth-child(2)::before { background: var(--gradient-warning); }
+    .stat-card:nth-child(3)::before { background: var(--gradient-danger); }
+    .stat-card:nth-child(4)::before { background: var(--gradient-success); }
+    .stat-card:nth-child(5)::before { background: var(--gradient-purple); }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .stat-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .stat-card-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.125rem; }
+    .stat-card:nth-child(1) .stat-card-icon { background: rgba(11,95,255,0.1); color: var(--philips-blue); }
+    .stat-card:nth-child(2) .stat-card-icon { background: rgba(247,151,30,0.1); color: #d4a017; }
+    .stat-card:nth-child(3) .stat-card-icon { background: rgba(255,65,108,0.1); color: #dc3545; }
+    .stat-card:nth-child(4) .stat-card-icon { background: rgba(17,153,142,0.1); color: #11998e; }
+    .stat-card:nth-child(5) .stat-card-icon { background: rgba(11,95,255,0.1); color: #0B5FFF; }
+    .stat-card-value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+    .stat-card-label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; }
+    .stat-badge { display: inline-block; padding: 2px 8px; border-radius: 50px; font-size: 0.6875rem; font-weight: 600; }
+    .stat-badge.danger { background: rgba(255,65,108,0.1); color: #dc3545; }
+
+    /* Action bar */
+    .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
+    .action-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* Buttons */
+    .btn-primary-gradient { background: var(--gradient-primary); color: #fff; border: none; padding: 0.5rem 1.25rem; border-radius: var(--radius-md); font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: var(--transition-fast); display: inline-flex; align-items: center; gap: 0.375rem; text-decoration: none; font-family: inherit; }
+    .btn-primary-gradient:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-secondary { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 500; font-size: 0.8125rem; cursor: pointer; transition: var(--transition-fast); display: inline-flex; align-items: center; gap: 0.375rem; text-decoration: none; font-family: inherit; }
+    .btn-secondary:hover { background: var(--bg-secondary); color: var(--philips-blue); border-color: var(--philips-blue); }
+    .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+    .btn-danger-sm { background: rgba(255,65,108,0.1); color: #dc3545; border: 1px solid rgba(255,65,108,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; cursor: pointer; font-family: inherit; font-weight: 500; }
+    .btn-danger-sm:hover { background: rgba(255,65,108,0.2); }
+    .btn-success-sm { background: rgba(17,153,142,0.1); color: #11998e; border: 1px solid rgba(17,153,142,0.2); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; cursor: pointer; font-family: inherit; font-weight: 500; }
+    .btn-success-sm:hover { background: rgba(17,153,142,0.2); }
+
+    /* Section Card */
+    .section-card { background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+    .section-header h3 { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+    .section-header h3 i { color: var(--philips-blue); font-size: 0.875rem; }
+    .section-body { padding: 1.5rem; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; padding: 1rem 1.5rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); }
+    .filter-bar select, .filter-bar input[type="text"] { padding: 0.5rem 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-size: 0.8125rem; font-family: inherit; min-width: 140px; outline: none; transition: var(--transition-fast); }
+    .filter-bar select:focus, .filter-bar input[type="text"]:focus { border-color: var(--philips-blue); box-shadow: 0 0 0 3px rgba(11,95,255,0.1); }
+    .filter-bar .search-input { flex: 1; min-width: 200px; }
+
+    /* Table */
+    .waste-table { width: 100%; border-collapse: collapse; }
+    .waste-table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); border-bottom: 2px solid var(--border-color); }
+    .waste-table td { padding: 0.75rem 1rem; font-size: 0.8125rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    .waste-table tr:hover { background: var(--bg-secondary); }
+    .waste-table tr { cursor: pointer; transition: var(--transition-fast); }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.6875rem; font-weight: 600; }
+    .badge-hazardous { background: rgba(255,65,108,0.12); color: #dc3545; }
+    .badge-non-hazardous { background: rgba(17,153,142,0.12); color: #11998e; }
+    .badge-non_hazardous { background: rgba(17,153,142,0.12); color: #11998e; }
+    .badge-mixed { background: rgba(247,151,30,0.12); color: #d4a017; }
+    .badge-status-generated { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
+    .badge-status-stored { background: rgba(11,95,255,0.12); color: var(--philips-blue); }
+    .badge-status-scheduled { background: rgba(11,95,255,0.12); color: #0B5FFF; }
+    .badge-status-manifested { background: rgba(147,51,234,0.12); color: #003399; }
+    .badge-status-collected { background: rgba(247,151,30,0.12); color: #d4a017; }
+    .badge-status-disposed { background: rgba(17,153,142,0.12); color: #11998e; }
+    .badge-status-rejected { background: rgba(255,65,108,0.12); color: #dc3545; }
+    .badge-overdue { background: rgba(255,65,108,0.2); color: #dc3545; animation: pulse-overdue 2s infinite; }
+    @keyframes pulse-overdue { 0%,100%{opacity:1;} 50%{opacity:0.7;} }
+    .cat-tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.6875rem; font-weight: 600; }
+
+    /* Grid layout */
+    .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+
+    /* Schedule cards */
+    .schedule-card { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 0.75rem; transition: var(--transition-fast); }
+    .schedule-card:hover { background: var(--bg-secondary); }
+    .schedule-date { flex-shrink: 0; width: 50px; height: 54px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .schedule-date .day { font-size: 1.125rem; font-weight: 800; color: var(--philips-blue); line-height: 1; }
+    .schedule-date .month { font-size: 0.625rem; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; }
+    .schedule-info { flex: 1; min-width: 0; }
+    .schedule-info .vendor { font-weight: 600; font-size: 0.8125rem; color: var(--text-primary); margin-bottom: 0.125rem; }
+    .schedule-info .meta { font-size: 0.75rem; color: var(--text-tertiary); display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* Scrapped products */
+    .scrap-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); transition: var(--transition-fast); cursor: pointer; }
+    .scrap-item:last-child { border-bottom: none; }
+    .scrap-item:hover { background: var(--bg-secondary); }
+    .scrap-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(255,65,108,0.1); color: #dc3545; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0; }
+    .scrap-info { flex: 1; min-width: 0; }
+    .scrap-info .name { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .scrap-info .detail { font-size: 0.6875rem; color: var(--text-tertiary); }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--surface); border-radius: var(--radius-xl); border: 1px solid var(--border-color); width: 600px; max-width: 95vw; max-height: 90vh; overflow: hidden; box-shadow: var(--shadow-xl); animation: modalSlideUp 0.3s ease; }
+    @keyframes modalSlideUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header h3 i { color: var(--philips-blue); }
+    .modal-close { width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: var(--transition-fast); }
+    .modal-close:hover { background: rgba(255,65,108,0.1); color: #dc3545; border-color: rgba(255,65,108,0.3); }
+    .modal-body { padding: 1.5rem; overflow-y: auto; max-height: 65vh; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+    /* Form */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.5rem 0.875rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-family: inherit; font-size: 0.8125rem; outline: none; transition: var(--transition-fast); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--philips-blue); box-shadow: 0 0 0 3px rgba(11,95,255,0.1); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* Detail panel */
+    .detail-section { margin-bottom: 1.25rem; }
+    .detail-section h4 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-tertiary); letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .detail-row { display: flex; justify-content: space-between; padding: 0.375rem 0; border-bottom: 1px solid var(--border-color); }
+    .detail-row:last-child { border: none; }
+    .detail-key { font-size: 0.8125rem; color: var(--text-secondary); }
+    .detail-val { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); text-align: right; max-width: 60%; }
+
+    /* Audit timeline */
+    .audit-timeline { padding-left: 1rem; border-left: 2px solid var(--border-color); }
+    .audit-entry { padding: 0.5rem 0 0.5rem 1rem; position: relative; }
+    .audit-entry::before { content:''; position: absolute; left: -1.3rem; top: 0.75rem; width: 8px; height: 8px; border-radius: 50%; background: var(--philips-blue); border: 2px solid var(--surface); }
+    .audit-entry .audit-action { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
+    .audit-entry .audit-detail { font-size: 0.6875rem; color: var(--text-secondary); margin-top: 0.125rem; }
+    .audit-entry .audit-meta { font-size: 0.625rem; color: var(--text-tertiary); margin-top: 0.25rem; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 3rem 2rem; }
+    .empty-state i { font-size: 3rem; color: var(--text-tertiary); margin-bottom: 1rem; }
+    .empty-state h4 { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; }
+    .empty-state p { font-size: 0.8125rem; color: var(--text-tertiary); }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 2rem; right: 2rem; z-index: 99999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { padding: 0.875rem 1.25rem; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 0.75rem; font-size: 0.8125rem; font-weight: 500; animation: toastIn 0.3s ease; min-width: 280px; }
+    .toast.success { border-left: 4px solid #11998e; }
+    .toast.success i { color: #11998e; }
+    .toast.error { border-left: 4px solid #dc3545; }
+    .toast.error i { color: #dc3545; }
+    .toast.info { border-left: 4px solid var(--philips-blue); }
+    .toast.info i { color: var(--philips-blue); }
+    @keyframes toastIn { from{opacity:0;transform:translateX(24px);} to{opacity:1;transform:translateX(0);} }
+
+    @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } .grid-main { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .stream-tabs { gap: 0.25rem; } .filter-bar { flex-direction: column; } .page-wrap { padding: 1rem; } }
+</style>
+
+<div class="page-wrap">
+
+    <!-- ===== BACK BAR + STREAM TABS ===== -->
+    <div class="back-bar">
+        <a href="{% url 'waste_dashboard' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Waste Hub
+        </a>
+        <div class="stream-tabs">
+            {% if is_super_admin %}
+            <a href="{% url 'waste_stream_detail' 'all' %}" class="stream-tab {% if stream_slug == 'all' %}active{% endif %}">All Streams</a>
+            {% endif %}
+            {% for s in streams %}
+            <a href="{% url 'waste_stream_detail' s.name %}" class="stream-tab {% if current_stream and current_stream.name == s.name %}active{% endif %}">{{ s.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="page-title">
+        <h1>
+            <i class="fas fa-recycle"></i>
+            {% if current_stream %}{{ current_stream.name }}{% else %}All Streams{% endif %} — Waste Management
+        </h1>
+        <p>{% if current_stream %}Waste records for <strong>{{ current_stream.name }}</strong> stream{% else %}Combined waste records across <strong>all streams</strong>{% endif %}</p>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card-header"><div class="stat-card-icon"><i class="fas fa-clipboard-list"></i></div></div>
+            <div class="stat-card-value">{{ total_records }}</div>
+            <div class="stat-card-label">Total Records</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
+                {% if overdue_count > 0 %}<span class="stat-badge danger">{{ overdue_count }} overdue</span>{% endif %}
+            </div>
+            <div class="stat-card-value">{{ pending_disposal }}</div>
+            <div class="stat-card-label">Pending Disposal</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header"><div class="stat-card-icon"><i class="fas fa-radiation"></i></div></div>
+            <div class="stat-card-value">{{ hazardous_count }}</div>
+            <div class="stat-card-label">Hazardous Waste</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header"><div class="stat-card-icon"><i class="fas fa-check-circle"></i></div></div>
+            <div class="stat-card-value">{{ disposed_this_month }}</div>
+            <div class="stat-card-label">Disposed This Month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header"><div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div></div>
+            <div class="stat-card-value">{{ overdue_count }}</div>
+            <div class="stat-card-label">Overdue Items</div>
+        </div>
+    </div>
+
+    <!-- ===== ACTION BAR ===== -->
+    <div class="action-bar">
+        <div class="action-group">
+            <button class="btn-primary-gradient" onclick="openCreateRecordModal()">
+                <i class="fas fa-plus"></i> New Waste Record
+            </button>
+            <button class="btn-secondary" onclick="openScheduleModal()">
+                <i class="fas fa-calendar-plus"></i> Schedule Pickup
+            </button>
+            <button class="btn-secondary" onclick="openCategoryModal()">
+                <i class="fas fa-tags"></i> Manage Categories
+            </button>
+        </div>
+        <div class="action-group">
+            <a href="{% url 'waste_export' %}" class="btn-secondary">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== MAIN GRID ===== -->
+    <div class="grid-main">
+        <!-- LEFT: Records -->
+        <div>
+            <div class="section-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-list-ul"></i> Waste Records</h3>
+                    <span style="font-size:0.75rem;color:var(--text-tertiary);">{{ records|length }} shown</span>
+                </div>
+                <div class="filter-bar">
+                    <select id="filterStatus" onchange="applyFilters()">
+                        <option value="">All Statuses</option>
+                        {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="filterHazard" onchange="applyFilters()">
+                        <option value="">All Hazard Levels</option>
+                        {% for val, label in hazard_choices %}
+                        <option value="{{ val }}" {% if hazard_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" id="filterSearch" class="search-input" placeholder="Search tracking #, description..." value="{{ search_q }}" onkeydown="if(event.key==='Enter')applyFilters()">
+                </div>
+                <div style="overflow-x:auto;">
+                    {% if records %}
+                    <table class="waste-table">
+                        <thead>
+                            <tr>
+                                <th>Tracking #</th>
+                                <th>Category</th>
+                                {% if not current_stream %}<th>Stream</th>{% endif %}
+                                <th>Qty</th>
+                                <th>Status</th>
+                                <th>Generated</th>
+                                <th>Deadline</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in records %}
+                            <tr onclick="viewRecord({{ r.pk }})" data-id="{{ r.pk }}">
+                                <td style="font-weight:600;color:var(--text-primary);">{{ r.tracking_number }}</td>
+                                <td>
+                                    <span class="cat-tag" style="background:{{ r.category.color }}20;color:{{ r.category.color }};">
+                                        <i class="{{ r.category.icon_class }}" style="font-size:0.625rem;"></i>
+                                        {{ r.category.name }}
+                                    </span>
+                                </td>
+                                {% if not current_stream %}<td>{{ r.stream.name }}</td>{% endif %}
+                                <td>{{ r.quantity }} {{ r.get_unit_display }}</td>
+                                <td>
+                                    <span class="badge badge-status-{{ r.status }}">{{ r.get_status_display }}</span>
+                                    {% if r.is_overdue %}<span class="badge badge-overdue" style="margin-left:0.25rem;font-size:0.6rem;">OVERDUE</span>{% endif %}
+                                </td>
+                                <td>{{ r.generated_date|date:"M d, Y"|default:"-" }}</td>
+                                <td>
+                                    {% if r.disposal_deadline %}
+                                        <span {% if r.is_overdue %}style="color:#dc3545;font-weight:600;"{% endif %}>{{ r.disposal_deadline|date:"M d, Y" }}</span>
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td onclick="event.stopPropagation();">
+                                    <div style="display:flex;gap:0.25rem;">
+                                        <button class="btn-success-sm" onclick="openEditModal({{ r.pk }})" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-danger-sm" onclick="deleteRecord({{ r.pk }})" title="Delete"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-recycle"></i>
+                        <h4>No waste records found</h4>
+                        <p>Start by creating a new waste record or adjusting your filters.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Side panels -->
+        <div>
+            <!-- Upcoming Schedules -->
+            <div class="section-card">
+                <div class="section-header"><h3><i class="fas fa-calendar-alt"></i> Upcoming Pickups</h3></div>
+                <div class="section-body" style="padding:0.75rem;">
+                    {% if upcoming_schedules %}
+                        {% for s in upcoming_schedules %}
+                        <div class="schedule-card" onclick="viewSchedule({{ s.pk }})" style="cursor:pointer;">
+                            <div class="schedule-date">
+                                <div class="day">{{ s.scheduled_date|date:"d" }}</div>
+                                <div class="month">{{ s.scheduled_date|date:"M" }}</div>
+                            </div>
+                            <div class="schedule-info">
+                                <div class="vendor">{{ s.vendor|default:"TBD" }}</div>
+                                <div class="meta">
+                                    {% if s.stream %}<span><i class="fas fa-code-branch"></i> {{ s.stream.name }}</span>{% endif %}
+                                    {% if s.category %}<span><i class="fas fa-tag"></i> {{ s.category.name }}</span>{% endif %}
+                                    <span><i class="fas fa-sync-alt"></i> {{ s.get_frequency_display }}</span>
+                                    <span><i class="fas fa-cubes"></i> {{ s.record_count }} record{{ s.record_count|pluralize }}</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-status-{{ s.status }}">{{ s.get_status_display }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state" style="padding:2rem 1rem;">
+                            <i class="fas fa-calendar-check" style="font-size:2rem;"></i>
+                            <p>No upcoming pickups scheduled</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Scrapped Products -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-ban"></i> Scrapped Products</h3>
+                    <span style="font-size:0.6875rem;color:var(--text-tertiary);">Not yet in waste system</span>
+                </div>
+                <div style="padding:0;">
+                    {% if scrapped_products %}
+                        {% for p in scrapped_products %}
+                        <div class="scrap-item" onclick="createRecordFromScrap({{ p.pk }}, '{{ p.name|escapejs }}', '{{ p.stream.name|escapejs }}')">
+                            <div class="scrap-icon"><i class="fas fa-box-open"></i></div>
+                            <div class="scrap-info">
+                                <div class="name">{{ p.name }}</div>
+                                <div class="detail">{{ p.stream.name }} &middot; {{ p.category.name|default:"-" }}</div>
+                            </div>
+                            <button class="btn-secondary btn-sm" style="flex-shrink:0;" title="Create waste record"><i class="fas fa-plus"></i></button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state" style="padding:2rem 1rem;">
+                            <i class="fas fa-check-double" style="font-size:2rem;"></i>
+                            <p>All scrapped products accounted for</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="section-card">
+                <div class="section-header"><h3><i class="fas fa-tags"></i> Categories</h3></div>
+                <div class="section-body" id="categoriesList" style="padding:0.75rem;">
+                    {% for c in categories %}
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.5rem;border-bottom:1px solid var(--border-color);">
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span style="width:10px;height:10px;border-radius:50%;background:{{ c.color }};flex-shrink:0;"></span>
+                            <span style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);">{{ c.name }}</span>
+                            <span class="badge badge-{{ c.hazard_level }}">{{ c.get_hazard_level_display }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="font-size:0.8125rem;color:var(--text-tertiary);text-align:center;padding:1rem;">No categories yet. Create one to get started.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CREATE / EDIT RECORD MODAL ===== -->
+<div class="modal-overlay" id="recordModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 id="recordModalTitle"><i class="fas fa-plus-circle"></i> New Waste Record</h3>
+            <button class="modal-close" onclick="closeModal('recordModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editRecordId" value="">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stream *</label>
+                    {% if current_stream %}
+                    <input type="hidden" id="recStream" value="{{ current_stream.name }}">
+                    <input type="text" value="{{ current_stream.name }}" disabled style="background:var(--bg-secondary);cursor:not-allowed;font-weight:600;">
+                    {% else %}
+                    <select id="recStream">
+                        {% for s in streams %}
+                        <option value="{{ s.name }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="recCategory">
+                        {% for c in categories %}
+                        <option value="{{ c.pk }}">{{ c.name }} ({{ c.get_hazard_level_display }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="recDescription" placeholder="Describe the waste material..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quantity *</label>
+                    <input type="number" id="recQuantity" value="1" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <select id="recUnit">
+                        {% for val, label in unit_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" id="recWeight" step="0.01" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <select id="recSource">
+                        {% for val, label in source_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Generated Date</label>
+                    <input type="date" id="recGenDate">
+                </div>
+                <div class="form-group">
+                    <label>Disposal Deadline</label>
+                    <input type="date" id="recDeadline">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Storage Location</label>
+                    <input type="text" id="recStorage" placeholder="e.g. Waste Room B">
+                </div>
+                <div class="form-group">
+                    <label>Container ID</label>
+                    <input type="text" id="recContainer" placeholder="e.g. DRUM-001">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="recNotes" placeholder="Additional notes..."></textarea>
+            </div>
+            <input type="hidden" id="recSourceProduct" value="">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('recordModal')">Cancel</button>
+            <button class="btn-primary-gradient" id="saveRecordBtn" onclick="saveRecord()"><i class="fas fa-save"></i> Save Record</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-card" style="width:650px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> <span id="detailTitle">Record Details</span></h3>
+            <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="detailBody">
+            <div style="text-align:center;padding:2rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><p>Loading...</p></div>
+        </div>
+        <div class="modal-footer" id="detailFooter"></div>
+    </div>
+</div>
+
+<!-- ===== SCHEDULE MODAL ===== -->
+<div class="modal-overlay" id="scheduleModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fas fa-calendar-plus"></i> Schedule Disposal Pickup</h3>
+            <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Vendor *</label>
+                    <input type="text" id="schedVendor" placeholder="Disposal vendor name">
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Date *</label>
+                    <input type="date" id="schedDate">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="schedTime">
+                </div>
+                <div class="form-group">
+                    <label>Frequency</label>
+                    <select id="schedFrequency">
+                        {% for val, label in frequency_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stream</label>
+                    {% if current_stream %}
+                    <input type="hidden" id="schedStream" value="{{ current_stream.name }}">
+                    <input type="text" value="{{ current_stream.name }}" disabled style="background:var(--bg-secondary);cursor:not-allowed;font-weight:600;">
+                    {% else %}
+                    <select id="schedStream">
+                        <option value="">All Streams</option>
+                        {% for s in streams %}
+                        <option value="{{ s.name }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="schedCategory">
+                        <option value="">All Categories</option>
+                        {% for c in categories %}
+                        <option value="{{ c.pk }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Contact Name</label>
+                    <input type="text" id="schedContactName" placeholder="Contact person">
+                </div>
+                <div class="form-group">
+                    <label>Contact Phone</label>
+                    <input type="text" id="schedContactPhone" placeholder="+1 555-0100">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="schedNotes" placeholder="Special instructions..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Assign Waste Records <span style="font-weight:400;color:var(--text-tertiary);">(optional — can also assign later)</span></label>
+                <div id="schedRecordCheckboxes" style="max-height:180px;overflow-y:auto;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:0.5rem;">
+                    <p style="font-size:0.75rem;color:var(--text-tertiary);text-align:center;padding:0.5rem;">Loading available records...</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('scheduleModal')">Cancel</button>
+            <button class="btn-primary-gradient" onclick="saveSchedule()"><i class="fas fa-calendar-check"></i> Create Schedule</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCHEDULE DETAIL MODAL ===== -->
+<div class="modal-overlay" id="scheduleDetailModal">
+    <div class="modal-card" style="width:750px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-calendar-alt"></i> <span id="schedDetailTitle">Pickup Details</span></h3>
+            <button class="modal-close" onclick="closeModal('scheduleDetailModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="schedDetailBody">
+            <div style="text-align:center;padding:2rem;color:var(--text-tertiary);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>
+        </div>
+        <div class="modal-footer" id="schedDetailFooter"></div>
+    </div>
+</div>
+
+<!-- ===== CATEGORY MODAL ===== -->
+<div class="modal-overlay" id="categoryModal">
+    <div class="modal-card" style="width:500px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-tags"></i> Manage Waste Categories</h3>
+            <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="categoryList" style="margin-bottom:1.25rem;"></div>
+            <h4 style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:0.75rem;">Add New Category</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="catName" placeholder="e.g. Electronic Waste">
+                </div>
+                <div class="form-group">
+                    <label>Hazard Level *</label>
+                    <select id="catHazard">
+                        {% for val, label in hazard_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="color" id="catColor" value="#6c757d" style="height:36px;">
+                </div>
+                <div class="form-group">
+                    <label>Regulatory Code</label>
+                    <input type="text" id="catRegCode" placeholder="e.g. EPA-HW001">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="catDescription" placeholder="Brief description">
+            </div>
+            <div class="form-group">
+                <label>Handling Instructions</label>
+                <textarea id="catHandling" placeholder="Special handling requirements..." style="min-height:60px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('categoryModal')">Close</button>
+            <button class="btn-primary-gradient" onclick="saveCategory()"><i class="fas fa-plus"></i> Add Category</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+const currentStreamSlug = '{{ stream_slug }}';
+const _buPrefix = (function(){ const p = window.location.pathname; const i = p.indexOf('/waste-management'); return i > 0 ? p.substring(0, i) : ''; })();
+
+function currentPageUrl() {
+    return `${_buPrefix}/waste-management/${currentStreamSlug}/`;
+}
+
+// ===== TOAST =====
+function showToast(msg, type='success') {
+    const c = document.getElementById('toastContainer');
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fas ${icons[type]||icons.info}"></i><span>${escapeHtml(msg)}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(24px)'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ===== FILTERS =====
+function applyFilters() {
+    const status = document.getElementById('filterStatus').value;
+    const hazard = document.getElementById('filterHazard').value;
+    const q = document.getElementById('filterSearch').value;
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    if (hazard) params.set('hazard', hazard);
+    if (q) params.set('q', q);
+    window.location.href = currentPageUrl() + (params.toString() ? '?' + params.toString() : '');
+}
+
+// ===== CREATE RECORD =====
+function openCreateRecordModal() {
+    // Guard — must have at least one category
+    const catSel = document.getElementById('recCategory');
+    if (catSel && catSel.options.length === 0) {
+        showToast('Please create at least one waste category first', 'info');
+        openCategoryModal();
+        return;
+    }
+    document.getElementById('editRecordId').value = '';
+    document.getElementById('recordModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Waste Record';
+    document.getElementById('recDescription').value = '';
+    document.getElementById('recQuantity').value = '1';
+    document.getElementById('recUnit').value = 'units';
+    document.getElementById('recWeight').value = '';
+    document.getElementById('recSource').value = 'manual';
+    document.getElementById('recGenDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('recDeadline').value = '';
+    document.getElementById('recStorage').value = '';
+    document.getElementById('recContainer').value = '';
+    document.getElementById('recNotes').value = '';
+    document.getElementById('recSourceProduct').value = '';
+    openModal('recordModal');
+}
+
+function createRecordFromScrap(productId, productName, streamName) {
+    openCreateRecordModal();
+    document.getElementById('recSourceProduct').value = productId;
+    document.getElementById('recSource').value = 'product_scrap';
+    document.getElementById('recDescription').value = `Scrapped product: ${productName}`;
+    const sel = document.getElementById('recStream');
+    for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === streamName) { sel.selectedIndex = i; break; }
+    }
+}
+
+function saveRecord() {
+    const editId = document.getElementById('editRecordId').value;
+    const data = {
+        stream: document.getElementById('recStream').value,
+        category: document.getElementById('recCategory').value,
+        description: document.getElementById('recDescription').value,
+        quantity: document.getElementById('recQuantity').value,
+        unit: document.getElementById('recUnit').value,
+        weight_kg: document.getElementById('recWeight').value || null,
+        source: document.getElementById('recSource').value,
+        generated_date: document.getElementById('recGenDate').value,
+        disposal_deadline: document.getElementById('recDeadline').value || null,
+        storage_location: document.getElementById('recStorage').value,
+        container_id: document.getElementById('recContainer').value,
+        notes: document.getElementById('recNotes').value,
+        source_product: document.getElementById('recSourceProduct').value || null,
+    };
+    const url = editId
+        ? `${_buPrefix}/api/waste/records/${editId}/update/`
+        : `${_buPrefix}/api/waste/records/create/`;
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); closeModal('recordModal'); setTimeout(() => location.reload(), 600); }
+        else showToast(res.error || 'Failed to save', 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===== EDIT =====
+function openEditModal(pk) {
+    fetch(`${_buPrefix}/api/waste/records/${pk}/`)
+    .then(r => r.json())
+    .then(res => {
+        if (!res.success) { showToast(res.error, 'error'); return; }
+        const r = res.record;
+        document.getElementById('editRecordId').value = r.id;
+        document.getElementById('recordModalTitle').innerHTML = `<i class="fas fa-edit"></i> Edit ${escapeHtml(r.tracking_number)}`;
+        document.getElementById('recStream').value = r.stream;
+        document.getElementById('recCategory').value = r.category_id;
+        document.getElementById('recDescription').value = r.description;
+        document.getElementById('recQuantity').value = r.quantity;
+        document.getElementById('recUnit').value = r.unit;
+        document.getElementById('recWeight').value = r.weight_kg;
+        document.getElementById('recSource').value = r.source;
+        document.getElementById('recGenDate').value = r.generated_date;
+        document.getElementById('recDeadline').value = r.disposal_deadline;
+        document.getElementById('recStorage').value = r.storage_location;
+        document.getElementById('recContainer').value = r.container_id;
+        document.getElementById('recNotes').value = r.notes;
+        document.getElementById('recSourceProduct').value = r.source_product_id || '';
+        openModal('recordModal');
+    }).catch(() => showToast('Failed to load record', 'error'));
+}
+
+// ===== VIEW DETAIL =====
+function viewRecord(pk) {
+    openModal('detailModal');
+    document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--text-tertiary);"></i></div>';
+    document.getElementById('detailFooter').innerHTML = '';
+
+    fetch(`${_buPrefix}/api/waste/records/${pk}/`)
+    .then(r => r.json())
+    .then(res => {
+        if (!res.success) { document.getElementById('detailBody').innerHTML = `<p style="color:#dc3545;">${escapeHtml(res.error)}</p>`; return; }
+        const r = res.record;
+        document.getElementById('detailTitle').textContent = r.tracking_number;
+
+        let html = `
+            <div class="detail-section"><h4>General Information</h4>
+                <div class="detail-row"><span class="detail-key">Tracking #</span><span class="detail-val">${escapeHtml(r.tracking_number)}</span></div>
+                <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val"><span class="cat-tag" style="background:${r.category_color}20;color:${r.category_color};">${escapeHtml(r.category_name)}</span></span></div>
+                <div class="detail-row"><span class="detail-key">Hazard Level</span><span class="detail-val"><span class="badge badge-${r.hazard_level}">${r.hazard_display}</span></span></div>
+                <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${escapeHtml(r.stream)}</span></div>
+                <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val"><span class="badge badge-status-${r.status}">${r.status_display}</span>${r.is_overdue?'<span class="badge badge-overdue" style="margin-left:0.25rem;">OVERDUE</span>':''}</span></div>
+                <div class="detail-row"><span class="detail-key">Description</span><span class="detail-val">${escapeHtml(r.description||'-')}</span></div>
+            </div>
+            <div class="detail-section"><h4>Quantity &amp; Storage</h4>
+                <div class="detail-row"><span class="detail-key">Quantity</span><span class="detail-val">${r.quantity} ${r.unit_display}</span></div>
+                <div class="detail-row"><span class="detail-key">Weight</span><span class="detail-val">${r.weight_kg?r.weight_kg+' kg':'-'}</span></div>
+                <div class="detail-row"><span class="detail-key">Storage Location</span><span class="detail-val">${escapeHtml(r.storage_location||'-')}</span></div>
+                <div class="detail-row"><span class="detail-key">Container</span><span class="detail-val">${escapeHtml(r.container_id||'-')}</span></div>
+            </div>
+            <div class="detail-section"><h4>Source &amp; Dates</h4>
+                <div class="detail-row"><span class="detail-key">Source</span><span class="detail-val">${r.source_display}</span></div>
+                ${r.source_product_name?`<div class="detail-row"><span class="detail-key">Source Product</span><span class="detail-val">${escapeHtml(r.source_product_name)}</span></div>`:''}
+                ${r.source_reference?`<div class="detail-row"><span class="detail-key">Reference</span><span class="detail-val">${escapeHtml(r.source_reference)}</span></div>`:''}
+                <div class="detail-row"><span class="detail-key">Generated</span><span class="detail-val">${r.generated_date||'-'}</span></div>
+                <div class="detail-row"><span class="detail-key">Deadline</span><span class="detail-val">${r.disposal_deadline||'-'} ${r.days_until_deadline!==null?'('+r.days_until_deadline+' days)':''}</span></div>
+            </div>
+            <div class="detail-section"><h4>Disposal</h4>
+                <div class="detail-row"><span class="detail-key">Disposal Date</span><span class="detail-val">${r.disposal_date||'-'}</span></div>
+                <div class="detail-row"><span class="detail-key">Method</span><span class="detail-val">${escapeHtml(r.disposal_method||'-')}</span></div>
+                <div class="detail-row"><span class="detail-key">Vendor</span><span class="detail-val">${escapeHtml(r.disposal_vendor||'-')}</span></div>
+                <div class="detail-row"><span class="detail-key">Cost</span><span class="detail-val">${r.disposal_cost?'$'+r.disposal_cost:'-'}</span></div>
+                <div class="detail-row"><span class="detail-key">Manifest #</span><span class="detail-val">${escapeHtml(r.manifest_number||'-')}</span></div>
+                <div class="detail-row"><span class="detail-key">Compliant</span><span class="detail-val">${r.is_compliant?'<span style="color:#11998e;">Yes</span>':'<span style="color:#dc3545;">No</span>'}</span></div>
+                ${r.compliance_notes?`<div class="detail-row"><span class="detail-key">Compliance Notes</span><span class="detail-val">${escapeHtml(r.compliance_notes)}</span></div>`:''}
+            </div>
+            ${r.notes?`<div class="detail-section"><h4>Notes</h4><p style="font-size:0.8125rem;color:var(--text-secondary);">${escapeHtml(r.notes)}</p></div>`:''}
+
+            ${r.linked_schedules && r.linked_schedules.length > 0 ? `
+            <div class="detail-section"><h4>Linked Pickup Schedules</h4>
+                ${r.linked_schedules.map(s => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border:1px solid var(--border-color);border-radius:var(--radius-md);margin-bottom:0.375rem;cursor:pointer;" onclick="closeModal('detailModal');setTimeout(()=>viewSchedule(${s.id}),300);">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <i class="fas fa-calendar-alt" style="color:var(--philips-blue);font-size:0.75rem;"></i>
+                        <span style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);">${escapeHtml(s.vendor)}</span>
+                        <span style="font-size:0.75rem;color:var(--text-tertiary);">${s.scheduled_date}</span>
+                    </div>
+                    <span class="badge badge-status-${s.status}">${s.status_display}</span>
+                </div>`).join('')}
+            </div>` : ''}
+
+            <div class="detail-section"><h4>Metadata</h4>
+                <div class="detail-row"><span class="detail-key">Created By</span><span class="detail-val">${escapeHtml(r.created_by)} at ${r.created_at}</span></div>
+                <div class="detail-row"><span class="detail-key">Updated By</span><span class="detail-val">${escapeHtml(r.updated_by)} at ${r.updated_at}</span></div>
+            </div>`;
+
+        if (r.audit_logs && r.audit_logs.length > 0) {
+            html += `<div class="detail-section"><h4>Audit Trail</h4><div class="audit-timeline">`;
+            r.audit_logs.forEach(l => {
+                html += `<div class="audit-entry"><div class="audit-action">${escapeHtml(l.action.replace(/_/g,' ').toUpperCase())}</div><div class="audit-detail">${escapeHtml(l.details)}</div><div class="audit-meta">${escapeHtml(l.by)} &middot; ${l.at}</div></div>`;
+            });
+            html += `</div></div>`;
+        }
+        document.getElementById('detailBody').innerHTML = html;
+
+        const statusFlow = ['generated','stored','scheduled','manifested','collected','disposed'];
+        const idx = statusFlow.indexOf(r.status);
+        let footer = '';
+        if (idx >= 0 && idx < statusFlow.length - 1) {
+            const next = statusFlow[idx+1];
+            footer += `<button class="btn-primary-gradient" onclick="updateRecordStatus(${r.id},'${next}')"><i class="fas fa-arrow-right"></i> Move to ${next.charAt(0).toUpperCase()+next.slice(1)}</button>`;
+        }
+        if (r.status !== 'rejected') footer += `<button class="btn-danger-sm" style="padding:0.5rem 1rem;font-size:0.8125rem;" onclick="updateRecordStatus(${r.id},'rejected')"><i class="fas fa-times-circle"></i> Reject</button>`;
+        footer += `<button class="btn-secondary" onclick="closeModal('detailModal')">Close</button>`;
+        document.getElementById('detailFooter').innerHTML = footer;
+    }).catch(() => {
+        document.getElementById('detailBody').innerHTML = '<p style="color:#dc3545;">Failed to load details</p>';
+    });
+}
+
+function updateRecordStatus(pk, newStatus) {
+    fetch(`${_buPrefix}/api/waste/records/${pk}/update/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ status: newStatus }),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); closeModal('detailModal'); setTimeout(() => location.reload(), 600); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===== DELETE =====
+function deleteRecord(pk) {
+    if (!confirm('Are you sure you want to delete this waste record?')) return;
+    fetch(`${_buPrefix}/api/waste/records/${pk}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrfToken } })
+    .then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); setTimeout(() => location.reload(), 600); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===== SCHEDULE =====
+function openScheduleModal() {
+    // Load eligible unassigned records for the checkbox list
+    loadScheduleEligibleRecords();
+    openModal('scheduleModal');
+}
+function loadScheduleEligibleRecords() {
+    const el = document.getElementById('schedRecordCheckboxes');
+    el.innerHTML = '<p style="font-size:0.75rem;color:var(--text-tertiary);text-align:center;padding:0.5rem;">Loading...</p>';
+    // We'll use a simple fetch of all non-assigned records via the stats endpoint or just filter visible records
+    // Actually, fetch a dummy schedule detail to get eligible records — but we don't have one yet.
+    // Instead, we get unassigned records from the page data.
+    const rows = document.querySelectorAll('.waste-table tbody tr');
+    if (rows.length === 0) {
+        el.innerHTML = '<p style="font-size:0.75rem;color:var(--text-tertiary);text-align:center;padding:0.5rem;">No waste records available</p>';
+        return;
+    }
+    let html = '';
+    rows.forEach(row => {
+        const id = row.getAttribute('data-id');
+        const tracking = row.querySelector('td:first-child')?.textContent?.trim() || '';
+        const cat = row.querySelectorAll('td')[1]?.textContent?.trim() || '';
+        html += `<label style="display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.25rem;border-bottom:1px solid var(--border-color);cursor:pointer;font-size:0.8125rem;">
+            <input type="checkbox" class="sched-record-cb" value="${id}" style="accent-color:var(--philips-blue);">
+            <span style="font-weight:600;">${tracking}</span>
+            <span style="color:var(--text-tertiary);">${cat}</span>
+        </label>`;
+    });
+    el.innerHTML = html;
+}
+function saveSchedule() {
+    const data = {
+        vendor: document.getElementById('schedVendor').value,
+        scheduled_date: document.getElementById('schedDate').value,
+        scheduled_time: document.getElementById('schedTime').value || null,
+        frequency: document.getElementById('schedFrequency').value,
+        stream: document.getElementById('schedStream').value || null,
+        category: document.getElementById('schedCategory').value || null,
+        contact_name: document.getElementById('schedContactName').value,
+        contact_phone: document.getElementById('schedContactPhone').value,
+        notes: document.getElementById('schedNotes').value,
+    };
+    // Collect selected record IDs
+    const cbs = document.querySelectorAll('.sched-record-cb:checked');
+    data.waste_record_ids = Array.from(cbs).map(c => parseInt(c.value));
+
+    if (!data.vendor || !data.scheduled_date) { showToast('Vendor and date are required', 'error'); return; }
+    fetch(`${_buPrefix}/api/waste/schedules/create/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); closeModal('scheduleModal'); setTimeout(() => location.reload(), 600); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===== SCHEDULE DETAIL =====
+function viewSchedule(pk) {
+    openModal('scheduleDetailModal');
+    const body = document.getElementById('schedDetailBody');
+    body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--text-tertiary);"></i></div>';
+    document.getElementById('schedDetailFooter').innerHTML = '';
+
+    fetch(`${_buPrefix}/api/waste/schedules/${pk}/`)
+    .then(r => r.json())
+    .then(res => {
+        if (!res.success) { body.innerHTML = `<p style="color:#dc3545;">${escapeHtml(res.error)}</p>`; return; }
+        const s = res.schedule;
+        document.getElementById('schedDetailTitle').textContent = `${s.vendor} — ${s.scheduled_date}`;
+
+        let html = `
+        <div class="detail-section"><h4>Pickup Information</h4>
+            <div class="detail-row"><span class="detail-key">Vendor</span><span class="detail-val">${s.vendor}</span></div>
+            <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val"><span class="badge badge-status-${s.status}">${s.status_display}</span></span></div>
+            <div class="detail-row"><span class="detail-key">Date</span><span class="detail-val">${s.scheduled_date}${s.scheduled_time ? ' at '+s.scheduled_time : ''}</span></div>
+            <div class="detail-row"><span class="detail-key">Frequency</span><span class="detail-val">${s.frequency_display}</span></div>
+            ${s.stream ? `<div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${s.stream}</span></div>` : ''}
+            ${s.category ? `<div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">${s.category}</span></div>` : ''}
+            ${s.contact_name ? `<div class="detail-row"><span class="detail-key">Contact</span><span class="detail-val">${s.contact_name}${s.contact_phone ? ' · '+s.contact_phone : ''}</span></div>` : ''}
+            ${s.notes ? `<div class="detail-row"><span class="detail-key">Notes</span><span class="detail-val" style="white-space:pre-wrap;">${s.notes}</span></div>` : ''}
+        </div>
+
+        <div class="detail-section">
+            <h4 style="display:flex;align-items:center;justify-content:space-between;">
+                Assigned Waste Records (${s.record_count})
+                <span style="font-size:0.6875rem;font-weight:400;color:var(--text-tertiary);">click to unassign</span>
+            </h4>`;
+
+        if (s.linked_records.length > 0) {
+            html += `<div style="border:1px solid var(--border-color);border-radius:var(--radius-md);overflow:hidden;">
+            <table style="width:100%;border-collapse:collapse;">
+                <thead><tr>
+                    <th style="text-align:left;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Tracking #</th>
+                    <th style="text-align:left;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Category</th>
+                    <th style="text-align:left;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Stream</th>
+                    <th style="text-align:left;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Qty</th>
+                    <th style="text-align:left;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Status</th>
+                    <th style="text-align:center;padding:0.5rem 0.75rem;font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-tertiary);border-bottom:2px solid var(--border-color);">Remove</th>
+                </tr></thead><tbody>`;
+            s.linked_records.forEach(r => {
+                html += `<tr style="transition:0.15s;"><td style="padding:0.5rem 0.75rem;font-size:0.8125rem;font-weight:600;border-bottom:1px solid var(--border-color);">${r.tracking_number}</td>
+                    <td style="padding:0.5rem 0.75rem;font-size:0.8125rem;border-bottom:1px solid var(--border-color);"><span class="cat-tag" style="background:${r.category_color}20;color:${r.category_color};">${r.category_name}</span></td>
+                    <td style="padding:0.5rem 0.75rem;font-size:0.8125rem;border-bottom:1px solid var(--border-color);">${r.stream}</td>
+                    <td style="padding:0.5rem 0.75rem;font-size:0.8125rem;border-bottom:1px solid var(--border-color);">${r.quantity} ${r.unit_display}</td>
+                    <td style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--border-color);"><span class="badge badge-status-${r.status}">${r.status_display}</span>${r.is_overdue?'<span class="badge badge-overdue" style="margin-left:0.25rem;font-size:0.6rem;">OVERDUE</span>':''}</td>
+                    <td style="padding:0.5rem 0.75rem;text-align:center;border-bottom:1px solid var(--border-color);"><button class="btn-danger-sm" onclick="unassignRecord(${pk},${r.id})" title="Remove from pickup"><i class="fas fa-times"></i></button></td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+        } else {
+            html += `<div style="text-align:center;padding:1.5rem;color:var(--text-tertiary);"><i class="fas fa-inbox" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i><p style="font-size:0.8125rem;">No records assigned to this pickup yet</p></div>`;
+        }
+        html += `</div>`;
+
+        // Eligible records to assign
+        if (res.eligible_records.length > 0 && s.status !== 'completed' && s.status !== 'cancelled') {
+            html += `<div class="detail-section">
+                <h4>Available Records to Assign</h4>
+                <div style="max-height:220px;overflow-y:auto;border:1px solid var(--border-color);border-radius:var(--radius-md);">`;
+            res.eligible_records.forEach(r => {
+                html += `<label style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.75rem;border-bottom:1px solid var(--border-color);cursor:pointer;font-size:0.8125rem;transition:0.15s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''">
+                    <input type="checkbox" class="assign-record-cb" value="${r.id}" style="accent-color:var(--philips-blue);flex-shrink:0;">
+                    <span style="font-weight:600;min-width:110px;">${r.tracking_number}</span>
+                    <span class="cat-tag" style="background:${r.category_color}20;color:${r.category_color};flex-shrink:0;">${r.category_name}</span>
+                    <span style="color:var(--text-tertiary);flex-shrink:0;">${r.stream}</span>
+                    <span style="margin-left:auto;color:var(--text-tertiary);">${r.quantity} ${r.unit_display}</span>
+                </label>`;
+            });
+            html += `</div>
+                <div style="margin-top:0.75rem;text-align:right;">
+                    <button class="btn-primary-gradient" onclick="assignSelectedRecords(${pk})"><i class="fas fa-link"></i> Assign Selected</button>
+                </div>
+            </div>`;
+        }
+
+        body.innerHTML = html;
+
+        // Footer actions
+        let footer = '';
+        if (s.status === 'scheduled') {
+            footer += `<button class="btn-primary-gradient" onclick="updateScheduleStatus(${pk},'confirmed')"><i class="fas fa-check"></i> Confirm</button>`;
+        } else if (s.status === 'confirmed') {
+            footer += `<button class="btn-primary-gradient" onclick="updateScheduleStatus(${pk},'completed')"><i class="fas fa-check-double"></i> Mark Completed</button>`;
+        }
+        if (s.status !== 'cancelled' && s.status !== 'completed') {
+            footer += `<button class="btn-danger-sm" style="padding:0.5rem 1rem;font-size:0.8125rem;" onclick="updateScheduleStatus(${pk},'cancelled')"><i class="fas fa-ban"></i> Cancel</button>`;
+        }
+        footer += `<button class="btn-danger-sm" style="padding:0.5rem 1rem;font-size:0.8125rem;" onclick="deleteSchedule(${pk})"><i class="fas fa-trash"></i> Delete</button>`;
+        footer += `<button class="btn-secondary" onclick="closeModal('scheduleDetailModal')">Close</button>`;
+        document.getElementById('schedDetailFooter').innerHTML = footer;
+    }).catch(() => { body.innerHTML = '<p style="color:#dc3545;">Failed to load schedule details</p>'; });
+}
+
+function assignSelectedRecords(schedulePk) {
+    const cbs = document.querySelectorAll('.assign-record-cb:checked');
+    if (cbs.length === 0) { showToast('Select at least one record to assign', 'info'); return; }
+    const ids = Array.from(cbs).map(c => parseInt(c.value));
+    fetch(`${_buPrefix}/api/waste/schedules/${schedulePk}/assign/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ action: 'assign', record_ids: ids }),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); viewSchedule(schedulePk); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+function unassignRecord(schedulePk, recordId) {
+    if (!confirm('Remove this record from the pickup?')) return;
+    fetch(`${_buPrefix}/api/waste/schedules/${schedulePk}/assign/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ action: 'unassign', record_ids: [recordId] }),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); viewSchedule(schedulePk); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+function updateScheduleStatus(pk, newStatus) {
+    fetch(`${_buPrefix}/api/waste/schedules/${pk}/update/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ status: newStatus }),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); viewSchedule(pk); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+function deleteSchedule(pk) {
+    if (!confirm('Delete this schedule permanently?')) return;
+    fetch(`${_buPrefix}/api/waste/schedules/${pk}/delete/`, {
+        method: 'POST', headers: { 'X-CSRFToken': csrfToken },
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); closeModal('scheduleDetailModal'); setTimeout(() => location.reload(), 600); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===== CATEGORIES =====
+function openCategoryModal() { loadCategories(); openModal('categoryModal'); }
+function loadCategories() {
+    fetch(`${_buPrefix}/api/waste/categories/`)
+    .then(r => r.json()).then(res => {
+        if (!res.success) return;
+        const el = document.getElementById('categoryList');
+        if (res.categories.length === 0) { el.innerHTML = '<p style="color:var(--text-tertiary);font-size:0.8125rem;">No categories yet.</p>'; return; }
+        el.innerHTML = res.categories.map(c => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border-color);">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="width:12px;height:12px;border-radius:50%;background:${c.color};"></span>
+                    <span style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);">${c.name}</span>
+                    <span class="badge badge-${c.hazard_level}">${c.hazard_level.replace('_',' ')}</span>
+                    ${c.regulatory_code?`<span style="font-size:0.625rem;color:var(--text-tertiary);">${c.regulatory_code}</span>`:''}
+                </div>
+                <button class="btn-danger-sm" onclick="deleteCategory(${c.id})" title="Deactivate"><i class="fas fa-times"></i></button>
+            </div>
+        `).join('');
+    });
+}
+function saveCategory() {
+    const data = { name: document.getElementById('catName').value, hazard_level: document.getElementById('catHazard').value, color: document.getElementById('catColor').value, regulatory_code: document.getElementById('catRegCode').value, description: document.getElementById('catDescription').value, handling_instructions: document.getElementById('catHandling').value };
+    if (!data.name) { showToast('Category name is required', 'error'); return; }
+    fetch(`${_buPrefix}/api/waste/categories/`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+    }).then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); document.getElementById('catName').value = ''; document.getElementById('catRegCode').value = ''; document.getElementById('catDescription').value = ''; document.getElementById('catHandling').value = ''; loadCategories(); refreshCategoryDropdowns(); }
+        else showToast(res.error, 'error');
+    }).catch(() => showToast('Network error', 'error'));
+}
+function refreshCategoryDropdowns() {
+    fetch(`${_buPrefix}/api/waste/categories/`)
+    .then(r => r.json()).then(res => {
+        if (!res.success) return;
+        // Update record form dropdown
+        const recCat = document.getElementById('recCategory');
+        const prevRec = recCat ? recCat.value : '';
+        if (recCat) {
+            recCat.innerHTML = res.categories.map(c =>
+                `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.hazard_level.replace('_',' '))})</option>`
+            ).join('');
+            if (prevRec) recCat.value = prevRec;
+        }
+        // Update schedule form dropdown
+        const schedCat = document.getElementById('schedCategory');
+        const prevSched = schedCat ? schedCat.value : '';
+        if (schedCat) {
+            schedCat.innerHTML = '<option value="">All Categories</option>' +
+                res.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            if (prevSched) schedCat.value = prevSched;
+        }
+    });
+}
+function deleteCategory(pk) {
+    if (!confirm('Deactivate this category?')) return;
+    fetch(`${_buPrefix}/api/waste/categories/${pk}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrfToken } })
+    .then(r => r.json()).then(res => {
+        if (res.success) { showToast(res.message); loadCategories(); }
+        else showToast(res.error, 'error');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,1220 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Export Compliance Report - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --teal: #0d9488;
+        --teal-dark: #0f766e;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 500px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--emerald);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f0fdf4;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    /* Report Layout */
+    .report-layout {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Sidebar Panel */
+    .sidebar-panel {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-header {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .sidebar-header i {
+        font-size: 1.1rem;
+    }
+
+    .sidebar-body {
+        padding: 1.5rem;
+    }
+
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    /* Report Type Options */
+    .report-type-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .report-type-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .report-type-option:hover {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .report-type-option.selected {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .report-type-option input {
+        display: none;
+    }
+
+    .option-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .option-content {
+        flex: 1;
+    }
+
+    .option-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .option-desc {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* Export Buttons */
+    .export-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-export {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-generate {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+    }
+
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-csv {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-csv:hover {
+        background: #0055aa;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 102, 204, 0.3);
+    }
+
+    .btn-print {
+        background: var(--bg-light);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-print:hover {
+        background: var(--border-color);
+    }
+
+    /* Main Content Panel */
+    .main-panel {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .panel-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .panel-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .panel-header h3 i {
+        color: var(--emerald);
+    }
+
+    .panel-date {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .panel-body {
+        padding: 1.5rem;
+    }
+
+    /* Score Section */
+    .score-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .score-card {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        border-radius: 20px;
+        padding: 2rem 3rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .score-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+
+    .score-value {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .score-label {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-light);
+        border-radius: 14px;
+        padding: 1.25rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.emerald { background: #d1fae5; color: var(--emerald); }
+    .stat-icon.blue { background: #dbeafe; color: var(--primary-blue); }
+    .stat-icon.orange { background: #fef3c7; color: var(--warning-orange); }
+    .stat-icon.red { background: #fee2e2; color: var(--danger-red); }
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Category Grid */
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .category-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .category-card:hover {
+        border-color: var(--emerald);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .category-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .category-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .category-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    .category-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.625rem 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .stat-row .label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .stat-row .value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .stat-row .value.success { color: var(--emerald); }
+    .stat-row .value.warning { color: var(--warning-orange); }
+    .stat-row .value.danger { color: var(--danger-red); }
+
+    /* Data Table */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: var(--bg-light);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .data-table tr:hover td {
+        background: var(--bg-light);
+    }
+
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .status-compliant { background: #d1fae5; color: #047857; }
+    .status-partial { background: #fef3c7; color: #b45309; }
+    .status-non_compliant { background: #fee2e2; color: #b91c1c; }
+    .status-approved { background: #d1fae5; color: #047857; }
+    .status-pending_review { background: #dbeafe; color: #1e40af; }
+    .status-draft { background: #f1f5f9; color: #475569; }
+    .status-active { background: #fee2e2; color: #b91c1c; }
+    .status-resolved { background: #d1fae5; color: #047857; }
+    .status-completed { background: #d1fae5; color: #047857; }
+    .status-verified { background: #d1fae5; color: #047857; }
+    .status-in_progress { background: #dbeafe; color: #1e40af; }
+    .status-not_started { background: #f1f5f9; color: #475569; }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .priority-critical { background: #fecaca; color: #b91c1c; }
+    .priority-high { background: #fed7aa; color: #c2410c; }
+    .priority-medium { background: #fef3c7; color: #b45309; }
+    .priority-low { background: #d1fae5; color: #047857; }
+
+    /* Progress Bar */
+    .progress-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .progress-bar-container {
+        flex: 1;
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        min-width: 80px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--emerald), var(--teal));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 45px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-state-icon i {
+        font-size: 2rem;
+        color: var(--emerald);
+    }
+
+    .empty-state h4 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Print Styles */
+    @media print {
+        .sidebar-panel, .page-header, .no-print {
+            display: none !important;
+        }
+        
+        .report-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .main-panel {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+        
+        .dashboard-container {
+            padding: 0;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .report-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .sidebar-panel {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        
+        .header-actions {
+            width: 100%;
+        }
+        
+        .date-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header no-print">
+        <div class="header-content">
+            <h1><i class="fas fa-file-export"></i> Export Compliance Report</h1>
+            <p class="subtitle">Generate and export comprehensive compliance reports for {{ stream }} stream</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_dashboard' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <form method="GET" id="reportForm">
+    <div class="report-layout">
+        <!-- Sidebar -->
+        <div class="sidebar-panel no-print">
+            <div class="sidebar-header">
+                <i class="fas fa-sliders-h"></i>
+                <h3>Report Options</h3>
+            </div>
+            <div class="sidebar-body">
+                <!-- Date Range -->
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <div class="date-row">
+                        <input type="date" name="start_date" class="form-control" value="{{ start_date }}" placeholder="Start">
+                        <input type="date" name="end_date" class="form-control" value="{{ end_date }}" placeholder="End">
+                    </div>
+                </div>
+
+                <!-- Report Type -->
+                <div class="filter-group">
+                    <label>Report Type</label>
+                    <div class="report-type-options">
+                        <label class="report-type-option {% if report_type == 'summary' %}selected{% endif %}">
+                            <input type="radio" name="report_type" value="summary" {% if report_type == 'summary' %}checked{% endif %}>
+                            <div class="option-icon" style="background: #d1fae5; color: #047857;">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="option-content">
+                                <span class="option-label">Summary</span>
+                                <p class="option-desc">Overall compliance overview</p>
+                            </div>
+                        </label>
+                        <label class="report-type-option {% if report_type == 'requirements' %}selected{% endif %}">
+                            <input type="radio" name="report_type" value="requirements" {% if report_type == 'requirements' %}checked{% endif %}>
+                            <div class="option-icon" style="background: #dbeafe; color: #1e40af;">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="option-content">
+                                <span class="option-label">Requirements</span>
+                                <p class="option-desc">Regulatory requirements status</p>
+                            </div>
+                        </label>
+                        <label class="report-type-option {% if report_type == 'documents' %}selected{% endif %}">
+                            <input type="radio" name="report_type" value="documents" {% if report_type == 'documents' %}checked{% endif %}>
+                            <div class="option-icon" style="background: #fef3c7; color: #b45309;">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="option-content">
+                                <span class="option-label">Documents</span>
+                                <p class="option-desc">Compliance documents list</p>
+                            </div>
+                        </label>
+                        <label class="report-type-option {% if report_type == 'checklists' %}selected{% endif %}">
+                            <input type="radio" name="report_type" value="checklists" {% if report_type == 'checklists' %}checked{% endif %}>
+                            <div class="option-icon" style="background: #e8f0fe; color: #0044CC;">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="option-content">
+                                <span class="option-label">Checklists</span>
+                                <p class="option-desc">Compliance checklists progress</p>
+                            </div>
+                        </label>
+                        <label class="report-type-option {% if report_type == 'alerts' %}selected{% endif %}">
+                            <input type="radio" name="report_type" value="alerts" {% if report_type == 'alerts' %}checked{% endif %}>
+                            <div class="option-icon" style="background: #fee2e2; color: #b91c1c;">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="option-content">
+                                <span class="option-label">Alerts</span>
+                                <p class="option-desc">Compliance alerts history</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Export Actions -->
+                <div class="export-actions">
+                    <button type="submit" class="btn-export btn-generate" name="format" value="">
+                        <i class="fas fa-sync-alt"></i> Generate Report
+                    </button>
+                    <button type="submit" class="btn-export btn-csv" name="format" value="csv">
+                        <i class="fas fa-file-csv"></i> Export as CSV
+                    </button>
+                    <button type="button" class="btn-export btn-print" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-panel">
+            <div class="panel-header">
+                <h3>
+                    <i class="fas {% if report_type == 'summary' %}fa-chart-pie{% elif report_type == 'requirements' %}fa-balance-scale{% elif report_type == 'documents' %}fa-file-alt{% elif report_type == 'checklists' %}fa-tasks{% elif report_type == 'alerts' %}fa-bell{% endif %}"></i>
+                    {% if report_type == 'summary' %}Compliance Summary Report
+                    {% elif report_type == 'requirements' %}Regulatory Requirements Report
+                    {% elif report_type == 'documents' %}Compliance Documents Report
+                    {% elif report_type == 'checklists' %}Compliance Checklists Report
+                    {% elif report_type == 'alerts' %}Compliance Alerts Report
+                    {% endif %}
+                </h3>
+                <span class="panel-date">Generated: {% now "F d, Y" %}</span>
+            </div>
+
+            <div class="panel-body">
+                {% if report_type == 'summary' %}
+                <!-- Summary Report -->
+                <div class="score-section">
+                    <div class="score-card">
+                        <div class="score-value">{{ stats.compliance_score|default:0 }}%</div>
+                        <div class="score-label">Overall Compliance Score</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon emerald">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="stat-number">{{ stats.total_requirements|default:0 }}</div>
+                        <div class="stat-label">Requirements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-number">{{ stats.total_documents|default:0 }}</div>
+                        <div class="stat-label">Documents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-number">{{ stats.total_checklists|default:0 }}</div>
+                        <div class="stat-label">Checklists</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="stat-number">{{ stats.active_alerts|default:0 }}</div>
+                        <div class="stat-label">Active Alerts</div>
+                    </div>
+                </div>
+
+                <div class="category-grid">
+                    <div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon" style="background: #d1fae5; color: #047857;">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div>
+                                <div class="category-title">Requirements</div>
+                                <p class="category-subtitle">Regulatory compliance status</p>
+                            </div>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-row">
+                                <span class="label">Compliant</span>
+                                <span class="value success">{{ stats.compliant|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Partial</span>
+                                <span class="value warning">{{ stats.partial|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Non-Compliant</span>
+                                <span class="value danger">{{ stats.non_compliant|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon" style="background: #dbeafe; color: #1e40af;">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <div class="category-title">Documents</div>
+                                <p class="category-subtitle">Document management status</p>
+                            </div>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-row">
+                                <span class="label">Approved</span>
+                                <span class="value success">{{ stats.approved_docs|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Pending Review</span>
+                                <span class="value warning">{{ stats.pending_docs|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Draft</span>
+                                <span class="value">{{ stats.draft_docs|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon" style="background: #e8f0fe; color: #0044CC;">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div>
+                                <div class="category-title">Checklists</div>
+                                <p class="category-subtitle">Checklist completion status</p>
+                            </div>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-row">
+                                <span class="label">Completed</span>
+                                <span class="value success">{{ stats.completed_checklists|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">In Progress</span>
+                                <span class="value warning">{{ stats.in_progress_checklists|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Total</span>
+                                <span class="value">{{ stats.total_checklists|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon" style="background: #fee2e2; color: #b91c1c;">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div>
+                                <div class="category-title">Alerts</div>
+                                <p class="category-subtitle">Alert monitoring status</p>
+                            </div>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-row">
+                                <span class="label">Active</span>
+                                <span class="value danger">{{ stats.active_alerts|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Critical</span>
+                                <span class="value danger">{{ stats.critical_alerts|default:0 }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="label">Resolved</span>
+                                <span class="value success">{{ stats.resolved_alerts|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif report_type == 'requirements' %}
+                <!-- Requirements Report -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Requirement ID</th>
+                                <th>Title</th>
+                                <th>Regulatory Body</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requirements %}
+                            <tr>
+                                <td><strong>{{ req.requirement_id|default:"—" }}</strong></td>
+                                <td>{{ req.title }}</td>
+                                <td>{{ req.regulatory_body|default:"—" }}</td>
+                                <td><span class="status-badge status-{{ req.compliance_status }}">{{ req.get_compliance_status_display|default:req.compliance_status|title }}</span></td>
+                                <td><span class="priority-badge priority-{{ req.priority }}">{{ req.get_priority_display|default:req.priority|title }}</span></td>
+                                <td>{{ req.compliance_deadline|date:"M d, Y"|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <h4>No Requirements Found</h4>
+                                        <p>No regulatory requirements match the selected criteria</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% elif report_type == 'documents' %}
+                <!-- Documents Report -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Document ID</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Version</th>
+                                <th>Effective Date</th>
+                                <th>Expiry Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td><strong>{{ doc.document_id|default:"—" }}</strong></td>
+                                <td>{{ doc.title }}</td>
+                                <td>{{ doc.get_document_type_display|default:doc.document_type|title }}</td>
+                                <td><span class="status-badge status-{{ doc.status }}">{{ doc.get_status_display|default:doc.status|title }}</span></td>
+                                <td>v{{ doc.version|default:"1.0" }}</td>
+                                <td>{{ doc.effective_date|date:"M d, Y"|default:"—" }}</td>
+                                <td>{{ doc.expiry_date|date:"M d, Y"|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <h4>No Documents Found</h4>
+                                        <p>No compliance documents match the selected criteria</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% elif report_type == 'checklists' %}
+                <!-- Checklists Report -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Checklist</th>
+                                <th>Linked Requirement</th>
+                                <th>Status</th>
+                                <th>Completion</th>
+                                <th>Target Date</th>
+                                <th>Completed Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for checklist in checklists %}
+                            <tr>
+                                <td><strong>{{ checklist.title }}</strong></td>
+                                <td>{{ checklist.regulatory_requirement.title|default:"—" }}</td>
+                                <td><span class="status-badge status-{{ checklist.status }}">{{ checklist.get_status_display|default:checklist.status|title }}</span></td>
+                                <td>
+                                    <div class="progress-wrapper">
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: {{ checklist.completion_percentage|default:0 }}%"></div>
+                                        </div>
+                                        <span class="progress-text">{{ checklist.completion_percentage|default:0 }}%</span>
+                                    </div>
+                                </td>
+                                <td>{{ checklist.target_date|date:"M d, Y"|default:"—" }}</td>
+                                <td>{{ checklist.completed_date|date:"M d, Y"|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-tasks"></i>
+                                        </div>
+                                        <h4>No Checklists Found</h4>
+                                        <p>No compliance checklists match the selected criteria</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% elif report_type == 'alerts' %}
+                <!-- Alerts Report -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Alert</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in alerts %}
+                            <tr>
+                                <td><strong>{{ alert.title }}</strong></td>
+                                <td>{{ alert.get_alert_type_display|default:alert.alert_type|title }}</td>
+                                <td><span class="priority-badge priority-{{ alert.severity }}">{{ alert.get_severity_display|default:alert.severity|title }}</span></td>
+                                <td><span class="status-badge status-{{ alert.status }}">{{ alert.get_status_display|default:alert.status|title }}</span></td>
+                                <td>{{ alert.created_at|date:"M d, Y" }}</td>
+                                <td>{{ alert.due_date|date:"M d, Y"|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                        <h4>No Alerts Found</h4>
+                                        <p>No compliance alerts match the selected criteria</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update selected state on radio change
+    const reportOptions = document.querySelectorAll('.report-type-option');
+    reportOptions.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        radio.addEventListener('change', function() {
+            reportOptions.forEach(opt => opt.classList.remove('selected'));
+            if (this.checked) {
+                option.classList.add('selected');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

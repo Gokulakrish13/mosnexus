@@ -1,0 +1,286 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Support Tickets{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Shell ── */
+    .stp { max-width: 1600px; margin: 0 auto; padding: 1.5rem 1.75rem; }
+
+    /* ── Hero Header ── */
+    .stp-hero {
+        background: linear-gradient(135deg, #003366 0%, #0066cc 50%, #00a8cc 100%);
+        border-radius: 18px;
+        padding: 2rem 2.25rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,51,102,0.25);
+    }
+    .stp-hero::before {
+        content: '';
+        position: absolute;
+        top: -60%;
+        right: -10%;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .stp-hero-left h1 { font-size: 1.65rem; font-weight: 800; margin: 0 0 0.35rem; display: flex; align-items: center; gap: 0.6rem; }
+    .stp-hero-left p { margin: 0; font-size: 0.88rem; opacity: 0.85; font-weight: 400; }
+    .btn-raise {
+        padding: 0.65rem 1.5rem;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        border: 1.5px solid rgba(255,255,255,0.35);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        transition: all 0.2s;
+        position: relative; z-index: 1;
+    }
+    .btn-raise:hover { background: rgba(255,255,255,0.35); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+    /* ── Stat Cards ── */
+    .stp-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.85rem; margin-bottom: 1.5rem; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.15rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 14px 0 0 14px; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .stat-card.active { border-color: #0066cc; box-shadow: 0 0 0 2px rgba(0,102,204,0.15); }
+    .stat-card .sc-val { font-size: 1.65rem; font-weight: 800; line-height: 1; margin-bottom: 0.2rem; }
+    .stat-card .sc-label { font-size: 0.76rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card.total::before { background: #0066cc; } .stat-card.total .sc-val { color: #0066cc; }
+    .stat-card.open::before { background: #3b82f6; } .stat-card.open .sc-val { color: #3b82f6; }
+    .stat-card.in-progress::before { background: #f59e0b; } .stat-card.in-progress .sc-val { color: #f59e0b; }
+    .stat-card.resolved::before { background: #10b981; } .stat-card.resolved .sc-val { color: #10b981; }
+    .stat-card.closed::before { background: #94a3b8; } .stat-card.closed .sc-val { color: #94a3b8; }
+
+    /* ── Toolbar ── */
+    .stp-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+    .stp-toolbar h2 { font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b; }
+    .stp-filters { display: flex; gap: 0.5rem; align-items: center; }
+    .stp-filters select { padding: 0.45rem 0.75rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.82rem; background: #fff; color: #1e293b; font-weight: 500; cursor: pointer; transition: border 0.2s; }
+    .stp-filters select:focus { border-color: #0066cc; outline: none; }
+    .stp-search { position: relative; }
+    .stp-search input { padding: 0.45rem 0.75rem 0.45rem 2.2rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.82rem; width: 200px; transition: border 0.2s; }
+    .stp-search input:focus { border-color: #0066cc; outline: none; }
+    .stp-search i { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem; }
+
+    /* ── Ticket Table ── */
+    .stp-table { width: 100%; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .stp-table table { width: 100%; border-collapse: collapse; }
+    .stp-table thead th { background: #f8fafc; padding: 0.75rem 1rem; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .stp-table tbody tr { cursor: pointer; transition: background 0.15s; }
+    .stp-table tbody tr:hover { background: rgba(0,102,204,0.02); }
+    .stp-table tbody tr:not(:last-child) td { border-bottom: 1px solid #f1f5f9; }
+    .stp-table td { padding: 0.85rem 1rem; font-size: 0.86rem; vertical-align: middle; }
+    .stp-table .t-id { font-weight: 700; color: #0066cc; font-size: 0.82rem; white-space: nowrap; }
+    .stp-table .t-title-cell { max-width: 320px; }
+    .stp-table .t-title { font-weight: 600; color: #1e293b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stp-table .t-subtitle { font-size: 0.74rem; color: #94a3b8; margin-top: 1px; }
+    .t-cat { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; }
+    .t-cat-icon { width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 0.65rem; flex-shrink: 0; }
+    .t-cat-icon.bug { background: linear-gradient(135deg,#ef4444,#dc2626); }
+    .t-cat-icon.feature { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .t-cat-icon.enhancement { background: linear-gradient(135deg,#0B5FFF,#0044CC); }
+    .t-cat-icon.question { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+    .badge { padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: capitalize; white-space: nowrap; }
+    .badge-open { background: #dbeafe; color: #1d4ed8; }
+    .badge-in_progress { background: #fef3c7; color: #92400e; }
+    .badge-resolved { background: #d1fae5; color: #065f46; }
+    .badge-closed { background: #f1f5f9; color: #64748b; }
+    .badge-low { background: #f0fdf4; color: #166534; }
+    .badge-medium { background: #dbeafe; color: #1d4ed8; }
+    .badge-high { background: #fef3c7; color: #92400e; }
+    .badge-critical { background: #fee2e2; color: #991b1b; }
+    .t-user { display: flex; align-items: center; gap: 0.45rem; }
+    .t-user-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #fff; flex-shrink: 0; background: linear-gradient(135deg,#0066cc,#00a8cc); }
+    .t-user-name { font-size: 0.82rem; font-weight: 500; color: #334155; }
+    .stp-table .t-date { font-size: 0.78rem; color: #94a3b8; white-space: nowrap; }
+
+    /* ── Empty State ── */
+    .stp-empty { text-align: center; padding: 4rem 2rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; }
+    .stp-empty i { font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem; display: block; }
+    .stp-empty h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.3rem; }
+    .stp-empty p { color: #94a3b8; font-size: 0.88rem; margin: 0; }
+
+    /* ── Create Modal ── */
+    .ct-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+    .ct-overlay.show { display: flex; }
+    .ct-modal { background: #fff; border-radius: 20px; max-width: 600px; width: 94%; box-shadow: 0 24px 64px rgba(0,0,0,0.18); animation: ctSlide 0.3s ease; max-height: 90vh; overflow-y: auto; }
+    @keyframes ctSlide { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .ct-head { padding: 1.5rem 1.75rem 0; display: flex; align-items: center; justify-content: space-between; }
+    .ct-head h2 { font-size: 1.2rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+    .ct-head h2 i { color: #0066cc; }
+    .ct-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .ct-close:hover { background: #fee2e2; color: #dc2626; }
+    .ct-body { padding: 1.5rem 1.75rem; }
+    .ct-fg { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.15rem; }
+    .ct-fg label { font-weight: 600; font-size: 0.8rem; color: #475569; }
+    .ct-fg input, .ct-fg select, .ct-fg textarea { padding: 0.6rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.86rem; font-family: inherit; transition: border 0.2s, box-shadow 0.2s; }
+    .ct-fg input:focus, .ct-fg select:focus, .ct-fg textarea:focus { border-color: #0066cc; outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+    .ct-fg textarea { resize: vertical; min-height: 110px; }
+    .ct-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .ct-foot { padding: 0 1.75rem 1.5rem; display: flex; gap: 0.6rem; justify-content: flex-end; }
+    .ct-btn { padding: 0.55rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.86rem; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .ct-btn-cancel { background: #f1f5f9; color: #475569; }
+    .ct-btn-cancel:hover { background: #e2e8f0; }
+    .ct-btn-submit { background: linear-gradient(135deg,#0066cc,#00a8cc); color: #fff; box-shadow: 0 2px 10px rgba(0,102,204,0.3); }
+    .ct-btn-submit:hover { box-shadow: 0 6px 20px rgba(0,102,204,0.4); transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+        .stp-hero { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.5rem; }
+        .stp-stats { grid-template-columns: repeat(3, 1fr); }
+        .stp-toolbar { flex-direction: column; align-items: flex-start; }
+        .stp-table { overflow-x: auto; }
+        .ct-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) { .stp-stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<div class="stp">
+    <div class="stp-hero">
+        <div class="stp-hero-left">
+            <h1><i class="fas fa-headset"></i> Support Center</h1>
+            <p>Track issues, feature requests, and enhancements in one place</p>
+        </div>
+        <button class="btn-raise" onclick="document.getElementById('createTicketModal').classList.add('show')">
+            <i class="fas fa-plus"></i> Raise Ticket
+        </button>
+    </div>
+
+    <div class="stp-stats">
+        <div class="stat-card total{% if not status_filter %} active{% endif %}" onclick="filterByStatus('')">
+            <div class="sc-val">{{ stats.total }}</div><div class="sc-label">Total</div>
+        </div>
+        <div class="stat-card open{% if status_filter == 'open' %} active{% endif %}" onclick="filterByStatus('open')">
+            <div class="sc-val">{{ stats.open }}</div><div class="sc-label">Open</div>
+        </div>
+        <div class="stat-card in-progress{% if status_filter == 'in_progress' %} active{% endif %}" onclick="filterByStatus('in_progress')">
+            <div class="sc-val">{{ stats.in_progress }}</div><div class="sc-label">In Progress</div>
+        </div>
+        <div class="stat-card resolved{% if status_filter == 'resolved' %} active{% endif %}" onclick="filterByStatus('resolved')">
+            <div class="sc-val">{{ stats.resolved }}</div><div class="sc-label">Resolved</div>
+        </div>
+        <div class="stat-card closed{% if status_filter == 'closed' %} active{% endif %}" onclick="filterByStatus('closed')">
+            <div class="sc-val">{{ stats.closed }}</div><div class="sc-label">Closed</div>
+        </div>
+    </div>
+
+    <div class="stp-toolbar">
+        <h2>{% if status_filter %}{{ status_filter|title }} Tickets{% else %}All Tickets{% endif %}</h2>
+        <div class="stp-filters">
+            <div class="stp-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search tickets..." oninput="filterTable()">
+            </div>
+            <select id="categoryFilter" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option value="bug" {% if category_filter == 'bug' %}selected{% endif %}>Bug / Issue</option>
+                <option value="feature" {% if category_filter == 'feature' %}selected{% endif %}>Feature Request</option>
+                <option value="enhancement" {% if category_filter == 'enhancement' %}selected{% endif %}>Enhancement</option>
+                <option value="question" {% if category_filter == 'question' %}selected{% endif %}>Question</option>
+            </select>
+        </div>
+    </div>
+
+    {% if tickets %}
+    <div class="stp-table">
+        <table>
+            <thead><tr>
+                <th style="width:60px">ID</th><th>Title</th><th>Type</th><th>Status</th><th>Priority</th><th>Raised By</th><th>Date</th>
+            </tr></thead>
+            <tbody id="ticketBody">
+                {% for t in tickets %}
+                <tr onclick="window.location.href='{% url 'support_ticket_detail' ticket_id=t.pk %}'" class="ticket-row">
+                    <td class="t-id">#{{ t.pk }}</td>
+                    <td class="t-title-cell">
+                        <span class="t-title">{{ t.title }}</span>
+                        {% if t.assigned_to %}<span class="t-subtitle">→ {{ t.assigned_to.username }}</span>{% endif %}
+                    </td>
+                    <td><span class="t-cat"><span class="t-cat-icon {{ t.category }}"><i class="fas {{ t.category_icon }}"></i></span> {{ t.get_category_display }}</span></td>
+                    <td><span class="badge badge-{{ t.status }}">{{ t.get_status_display }}</span></td>
+                    <td><span class="badge badge-{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+                    <td><div class="t-user"><span class="t-user-avatar">{{ t.created_by.username|make_list|first|upper }}</span><span class="t-user-name">{{ t.created_by.username }}</span></div></td>
+                    <td class="t-date">{{ t.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="stp-empty">
+        <i class="fas fa-ticket"></i>
+        <h3>No tickets found</h3>
+        <p>{% if status_filter or category_filter %}Try adjusting your filters or {% endif %}raise a new ticket to get started.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Ticket Modal -->
+<div class="ct-overlay" id="createTicketModal">
+    <div class="ct-modal">
+        <div class="ct-head">
+            <h2><i class="fas fa-plus-circle"></i> Raise a Ticket</h2>
+            <button class="ct-close" onclick="document.getElementById('createTicketModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ct-body">
+            <div class="ct-fg"><label>Title *</label><input type="text" id="ctTitle" placeholder="Short summary of the issue or request"></div>
+            <div class="ct-row">
+                <div class="ct-fg"><label>Category *</label>
+                    <select id="ctCategory">
+                        <option value="bug">🐛 Bug / Issue</option>
+                        <option value="feature">✨ Feature Request</option>
+                        <option value="enhancement">🚀 Enhancement</option>
+                        <option value="question">❓ General Question</option>
+                    </select>
+                </div>
+                <div class="ct-fg"><label>Priority</label>
+                    <select id="ctPriority">
+                        <option value="low">Low</option><option value="medium" selected>Medium</option>
+                        <option value="high">High</option><option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ct-fg"><label>Description *</label><textarea id="ctDescription" placeholder="Provide details — what happened, what you expected, steps to reproduce..."></textarea></div>
+        </div>
+        <div class="ct-foot">
+            <button class="ct-btn ct-btn-cancel" onclick="document.getElementById('createTicketModal').classList.remove('show')">Cancel</button>
+            <button class="ct-btn ct-btn-submit" id="ctSubmitBtn" onclick="submitTicket()"><i class="fas fa-paper-plane"></i> Submit Ticket</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const _buPrefix=(function(){const m=window.location.pathname.match(/^\/bu\/[^/]+\//);return m?m[0]:'/';})();
+function getCsrf(){return document.querySelector('[name=csrfmiddlewaretoken]')?.value||'{{ csrf_token }}';}
+let _currentStatus='{{ status_filter }}';
+function filterByStatus(s){_currentStatus=s;applyFilters();}
+function applyFilters(){const c=document.getElementById('categoryFilter').value;let u=`${_buPrefix}support/?`;if(_currentStatus)u+=`status=${_currentStatus}&`;if(c)u+=`category=${c}&`;window.location.href=u;}
+function filterTable(){const t=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.ticket-row').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(t)?'':'none';});}
+function submitTicket(){
+    const title=document.getElementById('ctTitle').value.trim();
+    const desc=document.getElementById('ctDescription').value.trim();
+    const cat=document.getElementById('ctCategory').value;
+    const pri=document.getElementById('ctPriority').value;
+    if(!title||!desc)return alert('Title and description are required');
+    const btn=document.getElementById('ctSubmitBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    fetch(`${_buPrefix}support/create/`,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},body:JSON.stringify({title,description:desc,category:cat,priority:pri})})
+    .then(r=>r.json()).then(d=>{if(d.id){window.location.href=`${_buPrefix}support/${d.id}/`;}else{alert(d.error||'Failed');btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Ticket';}})
+    .catch(()=>{alert('Error creating ticket');btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Ticket';});
+}
+document.getElementById('createTicketModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('createTicketModal').classList.remove('show');});
+</script>
+{% endblock %}

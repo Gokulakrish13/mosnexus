@@ -1,0 +1,1315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Unit Management — NexusOps</title>
+  <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* ───── Design Tokens ───── */
+    :root {
+      --bg-body: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-card-hover: #f1f5f9;
+      --bg-elevated: #e2e8f0;
+      --bg-input: #ffffff;
+      --bg-input-focus: #ffffff;
+      --border-default: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --border-focus: #3b82f6;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --text-inverse: #f1f5f9;
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-primary-soft: rgba(59,130,246,0.12);
+      --accent-success: #10b981;
+      --accent-success-soft: rgba(16,185,129,0.12);
+      --accent-warning: #f59e0b;
+      --accent-warning-soft: rgba(245,158,11,0.12);
+      --accent-danger: #ef4444;
+      --accent-danger-soft: rgba(239,68,68,0.12);
+      --accent-info: #06b6d4;
+      --accent-info-soft: rgba(6,182,212,0.12);
+      --accent-purple: #0B5FFF;
+      --accent-purple-soft: rgba(139,92,246,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.1);
+      --shadow-glow: 0 0 20px rgba(59,130,246,0.1);
+      --transition: 0.2s ease;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ───── Page Transition ───── */
+    .page-transition-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      background: var(--bg-body);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .page-transition-overlay.active { opacity: 1; pointer-events: all; }
+
+    @keyframes pageSlideIn {
+      from { opacity: 0; transform: translateY(32px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pageSlideOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-24px) scale(0.98); }
+    }
+
+    /* ───── Reset & Base ───── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-body);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    a { color: var(--accent-primary); text-decoration: none; }
+
+    /* ───── Layout Shell ───── */
+    .page-shell {
+      max-width: 1360px; margin: 0 auto; padding: 1.5rem 2rem 3rem;
+      animation: pageSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    body.page-exit .page-shell,
+    body.page-exit .top-bar {
+      animation: pageSlideOut 0.38s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    /* ───── Top Navigation Bar ───── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 2rem;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      position: sticky; top: 0; z-index: 100;
+      animation: pageSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+      backdrop-filter: blur(12px);
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 1rem; }
+    .top-bar-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.75rem; color: #fff; letter-spacing: -0.5px;
+    }
+    .top-bar-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+    .top-bar-breadcrumb { font-size: 0.82rem; color: var(--text-muted); }
+    .top-bar-breadcrumb a { color: var(--text-secondary); transition: color var(--transition); }
+    .top-bar-breadcrumb a:hover { color: var(--accent-primary); }
+    .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    /* ───── Buttons ───── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.5rem 1rem; border-radius: var(--radius-sm);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      border: 1px solid transparent; transition: all var(--transition);
+      white-space: nowrap; text-decoration: none; font-family: var(--font);
+    }
+    .btn-primary { background: var(--accent-primary); color: #fff; }
+    .btn-primary:hover { background: var(--accent-primary-hover); box-shadow: var(--shadow-glow); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border-color: var(--border-default); }
+    .btn-ghost:hover { background: var(--bg-card); color: var(--text-primary); }
+    .btn-danger { background: var(--accent-danger); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: var(--accent-success); color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+    .btn-icon {
+      width: 34px; height: 34px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm); color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition); font-size: 0.85rem;
+    }
+    .btn-icon:hover { background: var(--bg-card); color: var(--text-primary); }
+    .btn-icon.danger:hover { background: var(--accent-danger-soft); color: var(--accent-danger); border-color: var(--accent-danger); }
+    .btn-icon.edit:hover { background: var(--accent-primary-soft); color: var(--accent-primary); border-color: var(--accent-primary); }
+    .btn-icon.success:hover { background: var(--accent-success-soft); color: var(--accent-success); border-color: var(--accent-success); }
+
+    /* ───── Page Header ───── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap;
+    }
+    .page-header-text h1 {
+      font-size: 1.65rem; font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .page-header-text h1 i {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-header-text p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem; }
+    .page-header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+    /* ───── Toast / Flash Messages ───── */
+    .toast-stack { position: fixed; top: 80px; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.15rem; border-radius: var(--radius-md);
+      font-size: 0.88rem; font-weight: 500; min-width: 300px; max-width: 420px;
+      box-shadow: var(--shadow-lg); animation: toastIn 0.35s ease; cursor: pointer;
+    }
+    .toast.success { background: #f0fdf4; color: #166534; border-left: 4px solid var(--accent-success); box-shadow: var(--shadow-md); }
+    .toast.error   { background: #fef2f2; color: #991b1b; border-left: 4px solid var(--accent-danger); box-shadow: var(--shadow-md); }
+    .toast.warning { background: #fffbeb; color: #92400e; border-left: 4px solid var(--accent-warning); box-shadow: var(--shadow-md); }
+    .toast.info    { background: #ecfeff; color: #155e75; border-left: 4px solid var(--accent-info); box-shadow: var(--shadow-md); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
+    /* ───── KPI Cards ───── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 1.15rem 1.1rem;
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      transition: all var(--transition);
+    }
+    .kpi-card:hover { border-color: var(--accent-primary); box-shadow: var(--shadow-glow); transform: translateY(-2px); }
+    .kpi-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .kpi-icon.blue   { background: var(--accent-primary-soft); color: var(--accent-primary); }
+    .kpi-icon.green  { background: var(--accent-success-soft); color: var(--accent-success); }
+    .kpi-icon.yellow { background: var(--accent-warning-soft); color: var(--accent-warning); }
+    .kpi-icon.purple { background: var(--accent-purple-soft); color: var(--accent-purple); }
+    .kpi-icon.cyan   { background: var(--accent-info-soft); color: var(--accent-info); }
+    .kpi-icon.red    { background: var(--accent-danger-soft); color: var(--accent-danger); }
+    .kpi-body { flex: 1; min-width: 0; }
+    .kpi-value { font-size: 1.55rem; font-weight: 800; line-height: 1.1; }
+    .kpi-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-top: 0.15rem; }
+
+    /* ───── Toolbar ───── */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
+    .toolbar-right { display: flex; align-items: center; gap: 0.5rem; }
+    .search-box { position: relative; flex: 1; max-width: 360px; }
+    .search-box input {
+      width: 100%; padding: 0.55rem 0.8rem 0.55rem 2.4rem;
+      background: var(--bg-input); border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-size: 0.88rem; transition: all var(--transition); font-family: var(--font);
+    }
+    .search-box input:focus { outline: none; border-color: var(--accent-primary); background: var(--bg-input-focus); }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box i {
+      position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 0.85rem; pointer-events: none;
+    }
+    .filter-select {
+      padding: 0.55rem 0.8rem; background: var(--bg-input);
+      border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+      color: var(--text-primary); font-size: 0.85rem; cursor: pointer; font-family: var(--font);
+    }
+    .filter-select:focus { outline: none; border-color: var(--accent-primary); }
+    .filter-select option { background: #fff; color: var(--text-primary); }
+    .view-toggle { display: flex; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; }
+    .view-toggle button {
+      background: transparent; border: none; padding: 0.5rem 0.7rem;
+      color: var(--text-muted); cursor: pointer; transition: all var(--transition);
+      font-size: 0.85rem;
+    }
+    .view-toggle button.active { background: var(--accent-primary); color: #fff; }
+    .view-toggle button:hover:not(.active) { background: var(--bg-card); color: var(--text-primary); }
+
+    /* ───── BU Cards Grid ───── */
+    .bu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1rem;
+    }
+    .bu-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      overflow: hidden; transition: all 0.25s ease;
+      position: relative;
+    }
+    .bu-card:hover { border-color: var(--accent-primary); box-shadow: var(--shadow-glow); transform: translateY(-3px); }
+    .bu-card.inactive { opacity: 0.55; }
+    .bu-card.inactive:hover { opacity: 0.85; }
+    .bu-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 1.25rem 1.25rem 0.75rem;
+    }
+    .bu-card-identity { display: flex; align-items: center; gap: 0.85rem; flex: 1; min-width: 0; }
+    .bu-avatar {
+      width: 48px; height: 48px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .bu-avatar.c0 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .bu-avatar.c1 { background: linear-gradient(135deg, #0B5FFF, #6d28d9); }
+    .bu-avatar.c2 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .bu-avatar.c3 { background: linear-gradient(135deg, #10b981, #059669); }
+    .bu-avatar.c4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .bu-avatar.c5 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .bu-info { min-width: 0; flex: 1; }
+    .bu-slug-tag {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      background: var(--accent-primary-soft); color: var(--accent-primary);
+      border-radius: 4px; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 0.25rem;
+    }
+    .bu-fullname {
+      font-size: 1rem; font-weight: 700; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;
+    }
+    .bu-desc {
+      font-size: 0.82rem; color: var(--text-muted); margin-top: 0.1rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;
+    }
+    .bu-card-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .bu-card-badge.active { background: var(--accent-success-soft); color: var(--accent-success); }
+    .bu-card-badge.inactive-badge { background: var(--accent-danger-soft); color: var(--accent-danger); }
+    .bu-card-badge i { font-size: 0.45rem; }
+
+    /* Mini stat row */
+    .bu-stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; padding: 0 1.25rem; margin: 0.5rem 0;
+    }
+    .bu-mini-stat {
+      text-align: center; padding: 0.6rem 0.25rem;
+      border-right: 1px solid var(--border-default);
+    }
+    .bu-mini-stat:last-child { border-right: none; }
+    .bu-mini-stat-val { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); }
+    .bu-mini-stat-lbl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+
+    /* Stream chips */
+    .bu-streams-section { padding: 0.6rem 1.25rem 0.85rem; }
+    .bu-streams-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.4px; margin-bottom: 0.4rem; }
+    .bu-stream-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .bu-stream-chip {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.22rem 0.6rem; background: var(--bg-card);
+      border: 1px solid var(--border-default); border-radius: 4px;
+      font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .bu-stream-chip i { font-size: 0.5rem; }
+    .bu-stream-chip.active-stream i { color: var(--accent-success); }
+    .bu-stream-chip.inactive-stream { opacity: 0.5; }
+    .bu-stream-chip.inactive-stream i { color: var(--accent-danger); }
+    .bu-no-streams { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+
+    /* Card footer */
+    .bu-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-default);
+    }
+    .bu-card-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; }
+    .bu-card-actions { display: flex; gap: 0.4rem; }
+
+    /* ───── Table View ───── */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      overflow: hidden; display: none;
+    }
+    .table-container.active { display: block; }
+    .bu-grid.active { display: grid; }
+    .bu-grid:not(.active) { display: none; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead th {
+      padding: 0.75rem 1rem; font-size: 0.72rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      text-align: left; border-bottom: 1px solid var(--border-default);
+      background: var(--bg-card); white-space: nowrap;
+    }
+    .data-table tbody td {
+      padding: 0.85rem 1rem; font-size: 0.88rem; border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary); vertical-align: middle;
+    }
+    .data-table tbody tr { transition: background var(--transition); }
+    .data-table tbody tr:hover { background: var(--bg-card); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .table-slug { font-weight: 700; color: var(--accent-primary); font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.84rem; }
+    .table-status {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    }
+    .table-status.active { background: var(--accent-success-soft); color: var(--accent-success); }
+    .table-status.inactive { background: var(--accent-danger-soft); color: var(--accent-danger); }
+
+    /* ───── Empty State ───── */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      background: var(--bg-surface); border: 2px dashed var(--border-default);
+      border-radius: var(--radius-lg);
+    }
+    .empty-state-icon {
+      width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.25rem;
+      background: var(--accent-primary-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: var(--accent-primary);
+    }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .empty-state p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+
+    /* ───── Modal ───── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 10000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl); width: 100%; max-width: 540px;
+      box-shadow: var(--shadow-lg); animation: modalIn 0.3s ease;
+      max-height: 90vh; overflow-y: auto;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-default);
+      position: sticky; top: 0; background: var(--bg-surface); z-index: 1;
+    }
+    .modal-header h3 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header h3 i { color: var(--accent-primary); font-size: 1rem; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: var(--radius-sm); border: none;
+      background: transparent; color: var(--text-muted); font-size: 1.3rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .modal-close:hover { background: var(--bg-card); color: var(--text-primary); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 0.5rem;
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border-default);
+      position: sticky; bottom: 0; background: var(--bg-surface);
+    }
+
+    /* ───── Form Elements ───── */
+    .form-group { margin-bottom: 1.15rem; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-weight: 600; font-size: 0.82rem;
+      color: var(--text-secondary); margin-bottom: 0.35rem;
+    }
+    .form-label .required { color: var(--accent-danger); margin-left: 2px; }
+    .form-input, .form-textarea {
+      width: 100%; padding: 0.6rem 0.85rem;
+      background: var(--bg-input); border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-size: 0.9rem; font-family: var(--font);
+      transition: all var(--transition);
+    }
+    .form-input:focus, .form-textarea:focus {
+      outline: none; border-color: var(--accent-primary);
+      background: var(--bg-input-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+    .form-textarea { resize: vertical; min-height: 70px; }
+    .form-help { font-size: 0.73rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* Slug preview */
+    .slug-preview {
+      padding: 0.5rem 0.85rem; background: var(--bg-card); border-radius: var(--radius-sm);
+      font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.88rem;
+      color: var(--accent-primary); font-weight: 700; border: 1px dashed var(--border-default);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .slug-preview i { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--bg-elevated);
+      border-radius: 24px; cursor: pointer; transition: all var(--transition);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      left: 3px; bottom: 3px; background: #fff; border-radius: 50%;
+      transition: all var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent-success); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .toggle-label { font-size: 0.88rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
+
+    /* Delete confirmation */
+    .delete-warning {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 1.15rem; border-radius: var(--radius-md);
+      background: var(--accent-danger-soft); border: 1px solid rgba(239,68,68,0.2);
+    }
+    .delete-warning > i { color: var(--accent-danger); font-size: 1.35rem; margin-top: 0.1rem; flex-shrink: 0; }
+    .delete-warning-text h4 { color: var(--accent-danger); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .delete-warning-text p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+    .delete-warning-text strong { color: var(--text-primary); }
+    .delete-impact {
+      margin-top: 0.85rem; padding: 0.85rem;
+      background: var(--bg-card); border-radius: var(--radius-sm);
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .delete-impact ul { list-style: none; }
+    .delete-impact li { margin: 0.25rem 0; padding-left: 0.25rem; display: flex; align-items: center; gap: 0.4rem; }
+    .delete-impact li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-danger); flex-shrink: 0; }
+
+    /* ───── Password Input Group ───── */
+    .password-input-wrap {
+      position: relative; margin-top: 1rem;
+    }
+    .password-input-wrap input {
+      width: 100%; padding: 0.65rem 2.8rem 0.65rem 0.85rem;
+      border: 1.5px solid var(--border-default); border-radius: var(--radius-sm);
+      font-size: 0.92rem; background: var(--bg-input);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .password-input-wrap input:focus {
+      outline: none; border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .password-input-wrap .toggle-vis {
+      position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--text-muted);
+      font-size: 0.92rem; padding: 0.2rem;
+    }
+    .password-input-wrap .toggle-vis:hover { color: var(--text-primary); }
+
+    /* ───── Pending Deletion Badge ───── */
+    .pending-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.7rem;
+      font-weight: 700; background: var(--accent-warning-soft);
+      color: #b45309; white-space: nowrap;
+    }
+    .pending-badge i { font-size: 0.6rem; }
+
+    /* ───── Deletion Requests Panel ───── */
+    .deletion-panel {
+      margin-top: 2rem; border: 1.5px solid var(--border-default);
+      border-radius: var(--radius-lg); background: var(--bg-surface);
+      overflow: hidden;
+    }
+    .deletion-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem; background: var(--bg-card);
+      border-bottom: 1px solid var(--border-default); cursor: pointer;
+      user-select: none; transition: background var(--transition);
+    }
+    .deletion-panel-header:hover { background: var(--bg-card-hover); }
+    .deletion-panel-header h3 {
+      font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .deletion-panel-header .badge-count {
+      background: var(--accent-danger); color: #fff; font-size: 0.72rem;
+      padding: 0.1rem 0.5rem; border-radius: 20px; font-weight: 700;
+    }
+    .deletion-panel-header .chevron {
+      transition: transform 0.3s ease; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .deletion-panel.collapsed .chevron { transform: rotate(-90deg); }
+    .deletion-panel-body { padding: 0; }
+    .deletion-panel.collapsed .deletion-panel-body { display: none; }
+
+    .dr-card {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition);
+    }
+    .dr-card:last-child { border-bottom: none; }
+    .dr-card:hover { background: var(--bg-card); }
+
+    .dr-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .dr-icon.pending { background: var(--accent-warning-soft); color: #b45309; }
+    .dr-icon.approved { background: var(--accent-success-soft); color: #047857; }
+    .dr-icon.rejected { background: var(--accent-danger-soft); color: #b91c1c; }
+    .dr-icon.cancelled { background: var(--bg-elevated); color: var(--text-muted); }
+
+    .dr-content { flex: 1; min-width: 0; }
+    .dr-title { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+    .dr-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .dr-reason { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.35rem; font-style: italic; }
+    .dr-actions { display: flex; gap: 0.4rem; flex-shrink: 0; align-self: center; }
+
+    .dr-status {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+    }
+    .dr-status.pending { background: var(--accent-warning-soft); color: #b45309; }
+    .dr-status.approved { background: var(--accent-success-soft); color: #047857; }
+    .dr-status.rejected { background: var(--accent-danger-soft); color: #b91c1c; }
+    .dr-status.cancelled { background: var(--bg-elevated); color: var(--text-muted); }
+
+    /* ───── Responsive ───── */
+    @media (max-width: 900px) {
+      .page-shell { padding: 1rem; }
+      .bu-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .data-table thead th:nth-child(4),
+      .data-table tbody td:nth-child(4) { display: none; }
+    }
+    @media (max-width: 600px) {
+      .top-bar { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .page-header { flex-direction: column; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar-left { flex-direction: column; }
+      .search-box { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Page-transition overlay -->
+  <div class="page-transition-overlay" id="pageOverlay"></div>
+
+  <!-- ═══ Top Bar ═══ -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">PN</div>
+      <div>
+        <div class="top-bar-title">NexusOps</div>
+        <div class="top-bar-breadcrumb">
+          <a href="/select-bu/">Home</a>&nbsp; / &nbsp;Business Unit Management
+        </div>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <a href="/select-bu/" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Back to BU Selection</a>
+    </div>
+  </div>
+
+  <!-- ═══ Flash Messages as Toasts ═══ -->
+  {% if messages %}
+  <div class="toast-stack" id="toastStack">
+    {% for message in messages %}
+    <div class="toast {{ message.tags }}" onclick="dismissToast(this)">
+      <i class="fas fa-{% if 'success' in message.tags %}check-circle{% elif 'error' in message.tags %}times-circle{% elif 'warning' in message.tags %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="page-shell">
+    <!-- ═══ Page Header ═══ -->
+    <div class="page-header">
+      <div class="page-header-text">
+        <h1><i class="fas fa-building"></i> Business Unit Management</h1>
+        <p>Configure and manage your organisation's business units, divisions, and their associated streams</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportBUData()" title="Export data as CSV">
+          <i class="fas fa-file-export"></i> Export
+        </button>
+        <button class="btn btn-primary" onclick="openModal('createModal')" id="createBtn">
+          <i class="fas fa-plus"></i> New Business Unit
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ KPI Cards ═══ -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon blue"><i class="fas fa-building"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ total_bus }}</div>
+          <div class="kpi-label">Total BUs</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ active_bus }}</div>
+          <div class="kpi-label">Active</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon red"><i class="fas fa-pause-circle"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ inactive_bus }}</div>
+          <div class="kpi-label">Inactive</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon purple"><i class="fas fa-code-branch"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ total_streams_all }}</div>
+          <div class="kpi-label">Total Streams</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon cyan"><i class="fas fa-users"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ total_users_all }}</div>
+          <div class="kpi-label">Users with Access</div>
+        </div>
+      </div>
+      {% if pending_count %}
+      <div class="kpi-card" style="border-color:var(--accent-warning);cursor:pointer" onclick="document.getElementById('deletionPanel').scrollIntoView({behavior:'smooth'});document.getElementById('deletionPanel').classList.remove('collapsed');">
+        <div class="kpi-icon" style="background:var(--accent-warning-soft);color:#b45309;"><i class="fas fa-shield-alt"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value" style="color:#b45309;">{{ pending_count }}</div>
+          <div class="kpi-label">Pending Deletions</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ═══ Toolbar ═══ -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="buSearch" placeholder="Search by name, slug, or division…" oninput="filterBUs()">
+        </div>
+        <select class="filter-select" id="statusFilter" onchange="filterBUs()">
+          <option value="all">All Status</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <span style="font-size:0.82rem;color:var(--text-muted);" id="resultCount">{{ business_units|length }} unit{{ business_units|length|pluralize:"s" }}</span>
+        <div class="view-toggle">
+          <button id="viewGrid" class="active" onclick="setView('grid')" title="Card View"><i class="fas fa-th-large"></i></button>
+          <button id="viewTable" onclick="setView('table')" title="Table View"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Card View ═══ -->
+    <div class="bu-grid active" id="gridView">
+      {% for bu in business_units %}
+      <div class="bu-card {% if not bu.is_active %}inactive{% endif %}"
+           data-name="{{ bu.bu_name|lower }} {{ bu.division|lower }} {{ bu.name|lower }} {{ bu.slug|lower }} {{ bu.description|lower }}"
+           data-status="{% if bu.is_active %}active{% else %}inactive{% endif %}">
+        <div class="bu-card-top">
+          <div class="bu-card-identity">
+            <div class="bu-avatar c{{ forloop.counter0|divisibleby:6|yesno:"0," }}{% widthratio forloop.counter0 6 1 as grp %}{{ forloop.counter0 }}">
+              {{ bu.bu_name|truncatechars:4 }}
+            </div>
+            <div class="bu-info">
+              <div class="bu-slug-tag">{{ bu.slug }}</div>
+              <div class="bu-fullname" title="{{ bu.name }}">{{ bu.name|default:bu.slug }}</div>
+              {% if bu.description %}<div class="bu-desc" title="{{ bu.description }}">{{ bu.description }}</div>{% endif %}
+            </div>
+          </div>
+          <span class="bu-card-badge {% if bu.is_active %}active{% else %}inactive-badge{% endif %}">
+            <i class="fas fa-circle"></i> {% if bu.is_active %}Active{% else %}Inactive{% endif %}
+          </span>
+          {% if bu.id in pending_bu_ids %}
+          <span class="pending-badge" title="Deletion pending approval">
+            <i class="fas fa-clock"></i> Deletion Pending
+          </span>
+          {% endif %}
+        </div>
+
+        <div class="bu-stats-row">
+          <div class="bu-mini-stat">
+            <div class="bu-mini-stat-val">{{ bu.stream_count }}</div>
+            <div class="bu-mini-stat-lbl">Streams</div>
+          </div>
+          <div class="bu-mini-stat">
+            <div class="bu-mini-stat-val">{{ bu.user_count }}</div>
+            <div class="bu-mini-stat-lbl">Users</div>
+          </div>
+        </div>
+
+        <div class="bu-streams-section">
+          <div class="bu-streams-label">Streams</div>
+          <div class="bu-stream-chips">
+            {% for s in bu.streams.all %}
+            <span class="bu-stream-chip {% if s.is_active %}active-stream{% else %}inactive-stream{% endif %}">
+              <i class="fas fa-circle"></i> {{ s.name }}
+            </span>
+            {% empty %}
+            <span class="bu-no-streams">No streams assigned</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="bu-card-footer">
+          <div class="bu-card-meta">
+            <i class="far fa-calendar-alt"></i> {{ bu.created_at|date:"M d, Y" }}{% if bu.created_by %} &middot; {{ bu.created_by.username }}{% endif %}
+          </div>
+          <div class="bu-card-actions">
+            <button class="btn-icon edit" title="Edit"
+              onclick="editBU({{ bu.id }},'{{ bu.bu_name|escapejs }}','{{ bu.division|escapejs }}','{{ bu.name|escapejs }}','{{ bu.description|default:""|escapejs }}',{{ bu.is_active|yesno:'true,false' }})">
+              <i class="fas fa-pen"></i>
+            </button>
+            <form method="post" style="display:inline">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle_active">
+              <input type="hidden" name="bu_id" value="{{ bu.id }}">
+              <button type="submit" class="btn-icon {% if bu.is_active %}danger{% else %}success{% endif %}"
+                      title="{% if bu.is_active %}Deactivate{% else %}Activate{% endif %}">
+                <i class="fas fa-{% if bu.is_active %}power-off{% else %}toggle-on{% endif %}"></i>
+              </button>
+            </form>
+            <button class="btn-icon danger" title="Delete"
+              onclick="confirmDelete({{ bu.id }},'{{ bu.slug|escapejs }}','{{ bu.name|escapejs }}',{{ bu.stream_count }},{{ bu.user_count }})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-state-icon"><i class="fas fa-building"></i></div>
+        <h3>No Business Units Yet</h3>
+        <p>Create your first business unit to start organising streams and users.</p>
+        <button class="btn btn-primary" onclick="openModal('createModal')"><i class="fas fa-plus"></i> Create First BU</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ═══ Table View ═══ -->
+    <div class="table-container" id="tableView">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>BU Name</th>
+            <th>Division</th>
+            <th>Slug</th>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Streams</th>
+            <th>Users</th>
+            <th>Created</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bu in business_units %}
+          <tr class="table-row"
+              data-name="{{ bu.bu_name|lower }} {{ bu.division|lower }} {{ bu.name|lower }} {{ bu.slug|lower }} {{ bu.description|lower }}"
+              data-status="{% if bu.is_active %}active{% else %}inactive{% endif %}">
+            <td><strong style="color:var(--text-primary)">{{ bu.bu_name }}</strong></td>
+            <td>{{ bu.division }}</td>
+            <td><span class="table-slug">{{ bu.slug }}</span></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ bu.name }}">{{ bu.name|default:"—" }}</td>
+            <td>
+              <span class="table-status {% if bu.is_active %}active{% else %}inactive{% endif %}">
+                <i class="fas fa-circle" style="font-size:0.4rem"></i>
+                {% if bu.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+              {% if bu.id in pending_bu_ids %}
+              <span class="pending-badge" style="margin-left:0.4rem"><i class="fas fa-clock"></i> Pending</span>
+              {% endif %}
+            </td>
+            <td style="font-weight:700;color:var(--text-primary)">{{ bu.stream_count }}</td>
+            <td style="font-weight:700;color:var(--text-primary)">{{ bu.user_count }}</td>
+            <td style="font-size:0.82rem;color:var(--text-muted);white-space:nowrap">{{ bu.created_at|date:"M d, Y" }}</td>
+            <td>
+              <div style="display:flex;gap:0.35rem;justify-content:flex-end">
+                <button class="btn-icon edit" title="Edit"
+                  onclick="editBU({{ bu.id }},'{{ bu.bu_name|escapejs }}','{{ bu.division|escapejs }}','{{ bu.name|escapejs }}','{{ bu.description|default:""|escapejs }}',{{ bu.is_active|yesno:'true,false' }})">
+                  <i class="fas fa-pen"></i>
+                </button>
+                <form method="post" style="display:inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle_active">
+                  <input type="hidden" name="bu_id" value="{{ bu.id }}">
+                  <button type="submit" class="btn-icon {% if bu.is_active %}danger{% else %}success{% endif %}"
+                          title="{% if bu.is_active %}Deactivate{% else %}Activate{% endif %}">
+                    <i class="fas fa-{% if bu.is_active %}power-off{% else %}toggle-on{% endif %}"></i>
+                  </button>
+                </form>
+                <button class="btn-icon danger" title="Delete"
+                  onclick="confirmDelete({{ bu.id }},'{{ bu.slug|escapejs }}','{{ bu.name|escapejs }}',{{ bu.stream_count }},{{ bu.user_count }})">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" style="text-align:center;padding:3rem;color:var(--text-muted);">
+              <i class="fas fa-building" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>
+              No business units found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ Deletion Requests Panel ═══ -->
+    {% if all_deletion_requests %}
+    <div class="deletion-panel" id="deletionPanel">
+      <div class="deletion-panel-header" onclick="toggleDeletionPanel()">
+        <h3>
+          <i class="fas fa-shield-alt" style="color:var(--accent-warning)"></i>
+          Deletion Requests
+          {% if pending_count %}<span class="badge-count">{{ pending_count }} pending</span>{% endif %}
+        </h3>
+        <i class="fas fa-chevron-down chevron"></i>
+      </div>
+      <div class="deletion-panel-body">
+        {% if pending_count %}
+        <div style="padding:0.85rem 1.25rem;background:var(--accent-warning-soft);border-bottom:1px solid rgba(245,158,11,0.15);display:flex;align-items:center;gap:0.65rem;font-size:0.85rem;">
+          <i class="fas fa-info-circle" style="color:#b45309;flex-shrink:0;"></i>
+          <span style="color:#92400e;">Pending requests require approval from a <strong>Super Admin</strong> or another <strong>App Admin</strong> on the
+            <a href="{{ BU_URL_PREFIX }}/users/" style="color:#b45309;font-weight:700;text-decoration:underline;">User Administration</a> page.</span>
+        </div>
+        {% endif %}
+        {% for dr in all_deletion_requests %}
+        <div class="dr-card">
+          <div class="dr-icon {{ dr.status }}">
+            <i class="fas fa-{% if dr.status == 'pending' %}clock{% elif dr.status == 'approved' %}check{% elif dr.status == 'rejected' %}times{% else %}ban{% endif %}"></i>
+          </div>
+          <div class="dr-content">
+            <div class="dr-title">
+              {{ dr.bu_snapshot.slug|default:"(unknown)" }}
+              <span class="dr-status {{ dr.status }}">
+                <i class="fas fa-circle" style="font-size:0.35rem"></i>
+                {{ dr.get_status_display }}
+              </span>
+            </div>
+            <div class="dr-meta">
+              Requested by <strong>{{ dr.requested_by.username|default:"(deleted user)" }}</strong>
+              on {{ dr.requested_at|date:"M d, Y H:i" }}
+              {% if dr.reviewed_by %}
+                &middot; Reviewed by <strong>{{ dr.reviewed_by.username }}</strong>
+                on {{ dr.reviewed_at|date:"M d, Y H:i" }}
+              {% endif %}
+            </div>
+            {% if dr.request_reason %}<div class="dr-reason">"{{ dr.request_reason }}"</div>{% endif %}
+            {% if dr.review_comment %}<div class="dr-reason" style="color:var(--accent-primary)"><i class="fas fa-reply"></i> {{ dr.review_comment }}</div>{% endif %}
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;">
+              Impact: {{ dr.bu_snapshot.stream_count|default:0 }} streams, {{ dr.bu_snapshot.user_count|default:0 }} users
+            </div>
+          </div>
+          <div class="dr-actions">
+            {% if dr.status == 'pending' %}
+              {% if dr.requested_by == request.user %}
+              <form method="post" action="{% url 'bu_deletion_cancel' dr.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost btn-sm" title="Cancel your request">
+                  <i class="fas fa-undo"></i> Cancel
+                </button>
+              </form>
+              {% endif %}
+              <a href="{{ BU_URL_PREFIX }}/users/#buDeletionSection" class="btn btn-primary btn-sm" title="Review on Users page">
+                <i class="fas fa-external-link-alt"></i> Review
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ Create Modal ═══ -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Create Business Unit</h3>
+        <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
+      </div>
+      <form method="post" id="createForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">BU Name <span class="required">*</span></label>
+              <input class="form-input" type="text" name="bu_name" id="c_bu_name" placeholder="e.g. IGT, DXR" required maxlength="64">
+              <div class="form-help">Abbreviation for the business unit</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Division <span class="required">*</span></label>
+              <input class="form-input" type="text" name="division" id="c_division" placeholder="e.g. MoS, CT" required maxlength="64">
+              <div class="form-help">Division abbreviation within the BU</div>
+            </div>
+          </div>
+          <div class="form-group" id="slugPreviewGroup" style="display:none;">
+            <label class="form-label">Slug Preview</label>
+            <div class="slug-preview"><i class="fas fa-link"></i> <span id="slugPreview"></span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" type="text" name="name" id="c_fullname" placeholder="e.g. Image Guided Therapy – Modality Solutions" maxlength="200">
+            <div class="form-help">Descriptive display name (auto-generated from BU Name – Division if blank)</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" name="description" placeholder="Optional — describe the purpose of this business unit" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('createModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create BU</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ Edit Modal ═══ -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit"></i> Edit Business Unit</h3>
+        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="bu_id" id="e_bu_id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">BU Name <span class="required">*</span></label>
+              <input class="form-input" type="text" name="bu_name" id="e_bu_name" required maxlength="64">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Division <span class="required">*</span></label>
+              <input class="form-input" type="text" name="division" id="e_division" required maxlength="64">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" type="text" name="name" id="e_fullname" maxlength="200">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" name="description" id="e_desc" maxlength="500"></textarea>
+          </div>
+          <div class="toggle-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" name="is_active" id="e_active">
+              <span class="toggle-slider"></span>
+            </label>
+            <label class="toggle-label" for="e_active">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ Delete Request Modal (Password Verified) ═══ -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="color:var(--accent-danger)"><i class="fas fa-shield-alt"></i> Request BU Deletion</h3>
+        <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+      </div>
+      <form method="post" id="deleteRequestForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="bu_id" id="d_bu_id">
+        <div class="modal-body">
+          <div class="delete-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="delete-warning-text">
+              <h4>Two-step deletion — Admin approval required</h4>
+              <p>You are requesting the deletion of <strong id="d_bu_label"></strong>. A System Admin must approve before it is permanently removed.</p>
+              <div class="delete-impact">
+                <ul>
+                  <li><span id="d_stream_count">0</span> stream(s) will be disassociated</li>
+                  <li><span id="d_user_count">0</span> user access record(s) will be removed</li>
+                  <li>All data associated with this BU will be removed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="form-group" style="margin-top:1rem;">
+            <label class="form-label"><i class="fas fa-comment-alt"></i> Reason for Deletion <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+            <textarea name="reason" class="form-textarea" rows="2" placeholder="Why should this BU be deleted?"></textarea>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" style="margin-top:0.75rem;">
+            <label class="form-label"><i class="fas fa-lock"></i> Confirm Your Password</label>
+            <div class="password-input-wrap">
+              <input type="password" name="password" id="d_password" required placeholder="Enter your password to confirm" autocomplete="current-password">
+              <button type="button" class="toggle-vis" onclick="togglePasswordVis('d_password', this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-help" style="color:var(--accent-danger)">Your identity must be verified before the request is submitted.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
+          <button type="submit" class="btn btn-danger" id="d_submit_btn" disabled>
+            <i class="fas fa-paper-plane"></i> Submit Deletion Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Modal helpers ── */
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      if (!document.querySelector('.modal-overlay.open')) document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+      }
+    });
+
+    /* ── Edit BU ── */
+    function editBU(id, buName, division, fullName, desc, active) {
+      document.getElementById('e_bu_id').value = id;
+      document.getElementById('e_bu_name').value = buName;
+      document.getElementById('e_division').value = division;
+      document.getElementById('e_fullname').value = fullName;
+      document.getElementById('e_desc').value = desc;
+      document.getElementById('e_active').checked = active;
+      openModal('editModal');
+    }
+
+    /* ── Delete BU — Request deletion (password-verified) ── */
+    function confirmDelete(id, slug, name, streams, users) {
+      document.getElementById('d_bu_id').value = id;
+      document.getElementById('d_bu_label').textContent = name || slug;
+      document.getElementById('d_stream_count').textContent = streams;
+      document.getElementById('d_user_count').textContent = users;
+      // Reset form
+      document.getElementById('d_password').value = '';
+      document.getElementById('d_submit_btn').disabled = true;
+      openModal('deleteModal');
+      setTimeout(() => document.getElementById('d_password').focus(), 150);
+    }
+
+    /* ── Password field: enable submit when non-empty ── */
+    document.getElementById('d_password').addEventListener('input', function () {
+      document.getElementById('d_submit_btn').disabled = !this.value.trim();
+    });
+    /* ── Toggle password visibility ── */
+    function togglePasswordVis(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        inp.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+
+    /* ── Toggle Deletion Panel ── */
+    function toggleDeletionPanel() {
+      document.getElementById('deletionPanel').classList.toggle('collapsed');
+    }
+
+    /* ── Slug Preview (Create form) ── */
+    const cBuName = document.getElementById('c_bu_name');
+    const cDivision = document.getElementById('c_division');
+    const slugPreview = document.getElementById('slugPreview');
+    const slugGroup = document.getElementById('slugPreviewGroup');
+    function updateSlugPreview() {
+      const b = cBuName.value.trim();
+      const d = cDivision.value.trim();
+      if (b && d) {
+        slugPreview.textContent = b + '-' + d;
+        slugGroup.style.display = '';
+      } else {
+        slugGroup.style.display = 'none';
+      }
+    }
+    cBuName.addEventListener('input', updateSlugPreview);
+    cDivision.addEventListener('input', updateSlugPreview);
+
+    /* ── View Toggle ── */
+    function setView(view) {
+      const grid = document.getElementById('gridView');
+      const table = document.getElementById('tableView');
+      const btnGrid = document.getElementById('viewGrid');
+      const btnTable = document.getElementById('viewTable');
+      if (view === 'table') {
+        grid.classList.remove('active');
+        table.classList.add('active');
+        btnGrid.classList.remove('active');
+        btnTable.classList.add('active');
+      } else {
+        grid.classList.add('active');
+        table.classList.remove('active');
+        btnGrid.classList.add('active');
+        btnTable.classList.remove('active');
+      }
+      localStorage.setItem('bu_view_mode', view);
+    }
+    // Restore saved view preference
+    const savedView = localStorage.getItem('bu_view_mode');
+    if (savedView) setView(savedView);
+
+    /* ── Search & Filter ── */
+    function filterBUs() {
+      const q = document.getElementById('buSearch').value.toLowerCase().trim();
+      const status = document.getElementById('statusFilter').value;
+      let visible = 0;
+
+      // Filter cards
+      document.querySelectorAll('.bu-card').forEach(card => {
+        const nameMatch = !q || card.dataset.name.includes(q);
+        const statusMatch = status === 'all' || card.dataset.status === status;
+        const show = nameMatch && statusMatch;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      // Filter table rows
+      document.querySelectorAll('.table-row').forEach(row => {
+        const nameMatch = !q || row.dataset.name.includes(q);
+        const statusMatch = status === 'all' || row.dataset.status === status;
+        row.style.display = (nameMatch && statusMatch) ? '' : 'none';
+      });
+
+      document.getElementById('resultCount').textContent = visible + ' unit' + (visible !== 1 ? 's' : '');
+    }
+
+    /* ── Export CSV ── */
+    function exportBUData() {
+      const rows = [['BU Name','Division','Slug','Full Name','Status','Streams','Users','Created']];
+      {% for bu in business_units %}
+      rows.push([
+        '{{ bu.bu_name|escapejs }}',
+        '{{ bu.division|escapejs }}',
+        '{{ bu.slug|escapejs }}',
+        '{{ bu.name|escapejs }}',
+        '{% if bu.is_active %}Active{% else %}Inactive{% endif %}',
+        '{{ bu.stream_count }}',
+        '{{ bu.user_count }}',
+        '{{ bu.created_at|date:"Y-m-d" }}'
+      ]);
+      {% endfor %}
+      const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'business_units_export_' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    /* ── Toast management ── */
+    function dismissToast(el) {
+      el.style.animation = 'toastOut 0.3s ease forwards';
+      setTimeout(() => el.remove(), 300);
+    }
+    // Auto-dismiss after 5s
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach((t, i) => {
+        setTimeout(() => dismissToast(t), i * 250);
+      });
+    }, 5000);
+
+    /* ── Keyboard shortcut: Ctrl+N → create ── */
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+        e.preventDefault();
+        openModal('createModal');
+        setTimeout(() => document.getElementById('c_bu_name').focus(), 100);
+      }
+    });
+
+    /* ── BU Avatar colour assignment (JS-based for reliability) ── */
+    document.querySelectorAll('.bu-avatar').forEach((el, i) => {
+      el.className = 'bu-avatar c' + (i % 6);
+    });
+
+    /* ── Smooth page-transition for navigation links ── */
+    function navigateWithTransition(href) {
+      const overlay = document.getElementById('pageOverlay');
+      document.body.classList.add('page-exit');
+      overlay.classList.add('active');
+      setTimeout(() => { window.location.href = href; }, 380);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Intercept <a> tags navigating between BU pages
+      document.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && (href.includes('select-bu') || href.includes('manage-business-units'))) {
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            navigateWithTransition(href);
+          });
+        }
+      });
+
+      // Fade-in on page load (remove overlay if user arrived via transition)
+      const overlay = document.getElementById('pageOverlay');
+      overlay.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          overlay.classList.remove('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

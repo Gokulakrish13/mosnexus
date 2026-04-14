@@ -1,6 +1,6 @@
 {% load static %}
 {% load product_filters %}
-<title>Mos - Manage Streams</title>
+<title>{{ BU_TITLE|default:'NexusOps' }} - Manage Streams</title>
 
 
 {% block content %}
@@ -69,7 +69,7 @@ body {
 
 /* Main Container */
 .main-content {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -603,7 +603,7 @@ body {
     }
     
     .data-table {
-        min-width: 700px;
+        min-width: 850px;
     }
     
     .page-header {
@@ -626,12 +626,38 @@ body {
 }
 </style>
 
+<!-- Page Navigation Toolbar (Breadcrumbs) -->
+{% if user.is_authenticated and page_nav_breadcrumbs %}
+<div class="pnav-bar" id="pnavBarStreams">
+    <a href="{% url 'page_nav_action' %}?action=back" class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}" title="Go Back"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'page_nav_action' %}?action=forward" class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}" title="Go Forward"><i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home"><i class="fas fa-home"></i></a>
+    <span class="pnav-sep"></span>
+    <div class="pnav-crumbs">
+        {% for crumb in page_nav_breadcrumbs %}{% if crumb.active %}<span class="pnav-crumb pnav-active">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</span>{% else %}<a href="{{ crumb.url }}" class="pnav-crumb">{% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}</a><span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>{% endif %}{% endfor %}
+    </div>
+</div>
+<style>
+    .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+    .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+    .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+    .pnav-disabled{opacity:.3;pointer-events:none}
+    .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+    .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+    .pnav-crumbs::-webkit-scrollbar{display:none}
+    .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+    .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+    .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+    .pnav-chevron{color:#94a3b8;font-size:.6rem;display:inline-flex;align-items:center;flex-shrink:0}
+</style>
+{% endif %}
+
 <!-- Top Navigation -->
 <div class="top-nav">
     <div class="nav-left">
-        <a href="/dashboard/" class="nav-back">
+        {% comment %} <a href="{% url 'dashboard' %}" class="nav-back">
             <i class="fas fa-arrow-left"></i> Dashboard
-        </a>
+        </a> {% endcomment %}
         <span class="nav-title">Stream Management</span>
     </div>
     <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
@@ -652,15 +678,15 @@ body {
     <!-- Stats Row -->
     <div class="stats-row">
         <div class="stat-box">
-            <div class="stat-value">{{ streams|length }}</div>
+            <div class="stat-value">{{ total_streams }}</div>
             <div class="stat-label">Total Streams</div>
         </div>
         <div class="stat-box">
-            <div class="stat-value">{{ streams|length }}</div>
+            <div class="stat-value" style="color:#1e7e34;">{{ active_streams }}</div>
             <div class="stat-label">Active</div>
         </div>
         <div class="stat-box">
-            <div class="stat-value">0</div>
+            <div class="stat-value" style="color:#c62828;">{{ inactive_streams }}</div>
             <div class="stat-label">Inactive</div>
         </div>
     </div>
@@ -671,29 +697,58 @@ body {
             <i class="fas fa-search"></i>
             <input type="text" id="searchStreams" placeholder="Search streams..." onkeyup="filterStreams()">
         </div>
+        <div class="toolbar-actions" style="display:flex;gap:0.5rem;margin-left:auto;flex-wrap:wrap;">
+            <!-- Filter tabs -->
+            <div class="filter-tabs" style="display:flex;gap:0;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;">
+                <button class="filter-tab active" data-filter="all" onclick="filterByStatus('all',this)" style="padding:0.5rem 0.85rem;font-size:0.8rem;border:none;background:#0066cc;color:#fff;cursor:pointer;font-weight:500;">All</button>
+                <button class="filter-tab" data-filter="active" onclick="filterByStatus('active',this)" style="padding:0.5rem 0.85rem;font-size:0.8rem;border:none;border-left:1px solid #d0d0d0;background:#fff;color:#333;cursor:pointer;font-weight:500;">Active</button>
+                <button class="filter-tab" data-filter="inactive" onclick="filterByStatus('inactive',this)" style="padding:0.5rem 0.85rem;font-size:0.8rem;border:none;border-left:1px solid #d0d0d0;background:#fff;color:#333;cursor:pointer;font-weight:500;">Inactive</button>
+            </div>
+            <!-- Export CSV -->
+            <a href="{% url 'export_streams_csv' %}" class="btn-export" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 0.85rem;font-size:0.8rem;border:1px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;text-decoration:none;cursor:pointer;font-weight:500;transition:all 0.2s;" onmouseover="this.style.background='#f0f7ff';this.style.borderColor='#0066cc';this.style.color='#0066cc'" onmouseout="this.style.background='#fff';this.style.borderColor='#d0d0d0';this.style.color='#333'">
+                <i class="fas fa-download"></i> Export CSV
+            </a>
+        </div>
     </div>
 
     <!-- Data Table -->
     <div class="data-table-container">
-        <table class="data-table">
+        <table class="data-table" id="streamsTable">
             <thead>
                 <tr>
-                    <th>Stream Name</th>
-                    <th>Users</th>
+                    <th data-sort="name" class="sortable" onclick="sortTable(0)" style="cursor:pointer;user-select:none;">Stream Name <i class="fas fa-sort" style="font-size:0.65rem;color:#aaa;margin-left:0.25rem;"></i></th>
+                    <th>Business Unit</th>
+                    <th data-sort="users" class="sortable" onclick="sortTable(2)" style="cursor:pointer;user-select:none;">Users <i class="fas fa-sort" style="font-size:0.65rem;color:#aaa;margin-left:0.25rem;"></i></th>
+                    <th>Resources</th>
                     <th>Permissions</th>
                     <th>Status</th>
-                    <th>Created</th>
-                    <th style="width: 100px;">Actions</th>
+                    <th data-sort="created" class="sortable" onclick="sortTable(6)" style="cursor:pointer;user-select:none;">Created <i class="fas fa-sort" style="font-size:0.65rem;color:#aaa;margin-left:0.25rem;"></i></th>
+                    <th style="width: 120px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="streamsTableBody">
                 {% for stream in streams %}
-                <tr data-name="{{ stream.name|lower }}" data-description="{{ stream.description|default:''|lower }}">
+                <tr data-name="{{ stream.name|lower }}" data-description="{{ stream.description|default:''|lower }}" data-status="{% if stream.is_active %}active{% else %}inactive{% endif %}">
                     <td>
                         <div class="stream-name-cell">{{ stream.name }}</div>
                         <div class="stream-desc">{{ stream.description|default:"No description"|truncatewords:8 }}</div>
                     </td>
+                    <td>
+                        {% if stream.business_unit %}
+                        <span class="chip yes" style="font-weight:600;">{{ stream.business_unit.bu_name }}-{{ stream.business_unit.division }}</span>
+                        {% else %}
+                        <span class="chip no">Unassigned</span>
+                        {% endif %}
+                    </td>
                     <td>{{ stream.get_active_users_count }}</td>
+                    <td>
+                        <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                            <span class="chip yes" title="Products" style="font-size:0.7rem;"><i class="fas fa-box" style="font-size:0.6rem;margin-right:2px;"></i> {{ stream.product_count }}</span>
+                            <span class="chip yes" title="Categories" style="font-size:0.7rem;"><i class="fas fa-folder" style="font-size:0.6rem;margin-right:2px;"></i> {{ stream.category_count }}</span>
+                            <span class="chip yes" title="Systems" style="font-size:0.7rem;"><i class="fas fa-desktop" style="font-size:0.6rem;margin-right:2px;"></i> {{ stream.system_count }}</span>
+                            <span class="chip yes" title="Build Servers" style="font-size:0.7rem;"><i class="fas fa-server" style="font-size:0.6rem;margin-right:2px;"></i> {{ stream.build_server_count }}</span>
+                        </div>
+                    </td>
                     <td>
                         <div class="permission-chips">
                             <span class="chip {% if stream.allow_public_registration %}yes{% else %}no{% endif %}">
@@ -713,8 +768,11 @@ body {
                     <td>{{ stream.created_at|date:"M d, Y" }}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-icon edit" title="Edit" onclick="editStream({{ stream.id }}, '{{ stream.name|escapejs }}', '{{ stream.description|default:''|escapejs }}', {{ stream.allow_public_registration|yesno:'true,false'|lower }}, {{ stream.requires_approval|yesno:'true,false'|lower }}, {{ stream.is_active|yesno:'true,false'|lower }})">
+                            <button class="btn-icon edit" title="Edit" onclick="editStream({{ stream.id }}, '{{ stream.name|escapejs }}', '{{ stream.description|default:''|escapejs }}', {{ stream.allow_public_registration|yesno:'true,false'|lower }}, {{ stream.requires_approval|yesno:'true,false'|lower }}, {{ stream.is_active|yesno:'true,false'|lower }}, '{{ stream.business_unit_id|default:"" }}')">
                                 <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="btn-icon" title="Clone" style="color:#6b21a8;" onclick="openCloneModal({{ stream.id }}, '{{ stream.name|escapejs }}')" onmouseover="this.style.color='#0044CC';this.style.borderColor='#0044CC';this.style.background='#eef4ff'" onmouseout="this.style.color='#6b21a8';this.style.borderColor='#e0e0e0';this.style.background='white'">
+                                <i class="fas fa-clone"></i>
                             </button>
                             <button class="btn-icon delete" title="Delete" onclick="deleteStream({{ stream.id }}, '{{ stream.name|escapejs }}')">
                                 <i class="fas fa-trash"></i>
@@ -724,7 +782,7 @@ body {
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6">
+                    <td colspan="8">
                         <div class="empty-state">
                             <i class="fas fa-inbox"></i>
                             <h3>No streams found</h3>
@@ -756,6 +814,21 @@ body {
                 <div class="form-group">
                     <label>Description</label>
                     <input type="text" id="create_description" name="description" placeholder="Brief description (optional)">
+                </div>
+
+                <div class="form-group">
+                    <label>Business Unit</label>
+                    {% if current_bu %}
+                    <input type="hidden" name="business_unit" value="{{ current_bu.id }}">
+                    <input type="text" value="{{ current_bu.bu_name }}-{{ current_bu.division }}" disabled style="width:100%; padding:0.55rem 0.75rem; border:1px solid #dde1e6; border-radius:6px; font-size:0.9rem; background:#f4f4f4; color:#555;">
+                    {% else %}
+                    <select name="business_unit" id="create_business_unit" style="width:100%; padding:0.55rem 0.75rem; border:1px solid #dde1e6; border-radius:6px; font-size:0.9rem;">
+                        <option value="">— No BU (unassigned) —</option>
+                        {% for bu in business_units %}
+                        <option value="{{ bu.id }}">{{ bu.bu_name }}-{{ bu.division }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
                 </div>
                 
                 <div class="toggle-row">
@@ -807,6 +880,21 @@ body {
                 <div class="form-group">
                     <label>Description</label>
                     <input type="text" id="edit_description" name="description">
+                </div>
+
+                <div class="form-group">
+                    <label>Business Unit</label>
+                    {% if current_bu %}
+                    <input type="hidden" name="business_unit" value="{{ current_bu.id }}">
+                    <input type="text" value="{{ current_bu.bu_name }}-{{ current_bu.division }}" disabled style="width:100%; padding:0.55rem 0.75rem; border:1px solid #dde1e6; border-radius:6px; font-size:0.9rem; background:#f4f4f4; color:#555;">
+                    {% else %}
+                    <select name="business_unit" id="edit_business_unit" style="width:100%; padding:0.55rem 0.75rem; border:1px solid #dde1e6; border-radius:6px; font-size:0.9rem;">
+                        <option value="">— No BU (unassigned) —</option>
+                        {% for bu in business_units %}
+                        <option value="{{ bu.id }}">{{ bu.bu_name }}-{{ bu.division }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
                 </div>
                 
                 <div class="toggle-row">
@@ -884,7 +972,40 @@ body {
     </div>
 </div>
 
+<!-- Clone Stream Modal -->
+<div class="modal-overlay" id="cloneStreamModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Clone Stream</h3>
+            <button class="modal-close" onclick="closeCloneModal()">&times;</button>
+        </div>
+        <form method="post" action="{% url 'clone_stream' %}" id="cloneStreamForm">
+            {% csrf_token %}
+            <input type="hidden" name="stream_id" id="clone_stream_id">
+            <div class="modal-body">
+                <div style="background:#f0f7ff;border:1px solid #b3d4fc;border-radius:6px;padding:0.85rem;margin-bottom:1.25rem;display:flex;gap:0.6rem;align-items:flex-start;">
+                    <i class="fas fa-info-circle" style="color:#0066cc;margin-top:2px;"></i>
+                    <p style="font-size:0.85rem;color:#1a4971;line-height:1.5;margin:0;">Cloning copies the stream's settings (description, permissions, BU assignment) but <strong>not</strong> its data (products, systems, etc.).</p>
+                </div>
+                <div class="form-group">
+                    <label>Source Stream</label>
+                    <input type="text" id="clone_source_name" disabled style="background:#f4f4f4;color:#555;">
+                </div>
+                <div class="form-group">
+                    <label>New Stream Name *</label>
+                    <input type="text" name="new_name" id="clone_new_name" placeholder="Enter name for the cloned stream" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeCloneModal()">Cancel</button>
+                <button type="submit" class="btn-primary" style="background:#6b21a8;"><i class="fas fa-clone" style="margin-right:0.3rem;"></i> Clone Stream</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+  const _buPrefix = (function(){ const p=window.location.pathname; const i=p.indexOf('/manage-streams'); if(i>0) return p.substring(0,i); return ''; })();
 function openCreateModal() {
     document.getElementById('createStreamModal').classList.add('open');
     document.getElementById('create_name').focus();
@@ -895,13 +1016,15 @@ function closeCreateModal() {
     document.getElementById('createStreamForm').reset();
 }
 
-function editStream(id, name, description, allowPublic, requiresApproval, isActive) {
+function editStream(id, name, description, allowPublic, requiresApproval, isActive, buId) {
     document.getElementById('edit_stream_id').value = id;
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_description').value = description;
     document.getElementById('edit_allow_public_registration').checked = allowPublic;
     document.getElementById('edit_requires_approval').checked = requiresApproval;
     document.getElementById('edit_is_active').checked = isActive;
+    var buSelect = document.getElementById('edit_business_unit');
+    if (buSelect) buSelect.value = buId || '';
     document.getElementById('editStreamModal').classList.add('open');
 }
 
@@ -924,17 +1047,82 @@ function closeDeleteModal() {
 function filterStreams() {
     const query = document.getElementById('searchStreams').value.toLowerCase();
     const rows = document.querySelectorAll('#streamsTableBody tr[data-name]');
+    const activeFilter = document.querySelector('.filter-tab.active');
+    const statusFilter = activeFilter ? activeFilter.dataset.filter : 'all';
     
     rows.forEach(row => {
         const name = row.dataset.name || '';
         const desc = row.dataset.description || '';
+        const status = row.dataset.status || '';
         
-        if (name.includes(query) || desc.includes(query)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        const matchesSearch = name.includes(query) || desc.includes(query);
+        const matchesStatus = statusFilter === 'all' || status === statusFilter;
+        
+        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
     });
+}
+
+function filterByStatus(filter, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.remove('active');
+        t.style.background = '#fff';
+        t.style.color = '#333';
+    });
+    btn.classList.add('active');
+    btn.style.background = '#0066cc';
+    btn.style.color = '#fff';
+    filterStreams();
+}
+
+// ── Sortable columns ──
+let sortDir = {};
+function sortTable(colIndex) {
+    const table = document.getElementById('streamsTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+    if (rows.length < 2) return;
+
+    const dir = sortDir[colIndex] === 'asc' ? 'desc' : 'asc';
+    sortDir[colIndex] = dir;
+
+    rows.sort((a, b) => {
+        let aVal = a.cells[colIndex]?.textContent.trim().toLowerCase() || '';
+        let bVal = b.cells[colIndex]?.textContent.trim().toLowerCase() || '';
+        // Try numeric sort
+        const aNum = parseFloat(aVal);
+        const bNum = parseFloat(bVal);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return dir === 'asc' ? aNum - bNum : bNum - aNum;
+        }
+        return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+
+    // Update sort icons
+    table.querySelectorAll('th.sortable i').forEach(icon => {
+        icon.className = 'fas fa-sort';
+        icon.style.color = '#aaa';
+    });
+    const th = table.querySelectorAll('th.sortable')[colIndex === 0 ? 0 : colIndex === 2 ? 1 : 2];
+    if (th) {
+        const icon = th.querySelector('i');
+        icon.className = dir === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+        icon.style.color = '#0066cc';
+    }
+}
+
+// ── Clone modal ──
+function openCloneModal(id, name) {
+    document.getElementById('clone_stream_id').value = id;
+    document.getElementById('clone_source_name').value = name;
+    document.getElementById('clone_new_name').value = name + ' (Copy)';
+    document.getElementById('cloneStreamModal').classList.add('open');
+    setTimeout(() => document.getElementById('clone_new_name').select(), 100);
+}
+
+function closeCloneModal() {
+    document.getElementById('cloneStreamModal').classList.remove('open');
 }
 
 document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -956,7 +1144,7 @@ document.getElementById('confirmDeleteStreamBtn').addEventListener('click', func
         return;
     }
 
-    fetch('/stream/delete/', {
+    fetch(_buPrefix + '/stream/delete/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

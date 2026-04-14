@@ -1,0 +1,758 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Calibration Schedules - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --purple-dark: #0044CC;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 50%, #5b21b6 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 450px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn i {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--purple);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f8f5ff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.purple { background: #e8f0fe; color: var(--purple); }
+    .stat-icon.green { background: #d1fae5; color: var(--success-green); }
+    .stat-icon.orange { background: #fef3c7; color: var(--warning-orange); }
+    .stat-icon.red { background: #fee2e2; color: var(--danger-red); }
+
+    .stat-content .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-content .label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .filters-bar {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .filter-group select, .filter-group input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        background: var(--bg-light);
+    }
+
+    .filter-group select:focus, .filter-group input:focus {
+        outline: none;
+        border-color: var(--purple);
+    }
+
+    .btn-filter {
+        background: var(--purple);
+        color: white;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-filter:hover {
+        background: #0044CC;
+    }
+
+    .schedules-table {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .table-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        background: var(--bg-light);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background: var(--bg-light);
+    }
+
+    .equipment-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .equipment-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .equipment-id {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.scheduled {
+        background: #e8f0fe;
+        color: #003399;
+    }
+
+    .status-badge.in_progress {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-badge.completed {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-badge.overdue {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-badge.cancelled {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .priority-badge.critical {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .priority-badge.high {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .priority-badge.medium {
+        background: #e8f0fe;
+        color: #003399;
+    }
+
+    .priority-badge.low {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .date-cell {
+        white-space: nowrap;
+    }
+
+    .date-primary {
+        font-weight: 500;
+    }
+
+    .date-secondary {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .days-until {
+        font-size: 0.7rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 4px;
+        margin-top: 0.25rem;
+        display: inline-block;
+    }
+
+    .days-until.urgent {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .days-until.soon {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .days-until.normal {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        background: var(--bg-light);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        background: var(--purple);
+        color: white;
+    }
+
+    .btn-action.delete:hover {
+        background: var(--danger-red);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state > i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.125rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 1.5rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pagination a, .pagination span {
+        padding: 0.5rem 0.875rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        background: var(--bg-light);
+    }
+
+    .pagination a:hover {
+        background: var(--purple);
+        color: white;
+    }
+
+    .pagination .current {
+        background: var(--purple);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filters-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-group select, .filter-group input {
+            flex: 1;
+        }
+
+        .schedules-table {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 800px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Messages Container -->
+    {% if messages %}
+    <div class="messages-container" style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem; {% if message.tags == 'success' %}background: var(--success-green-light); color: #065f46; border: 1px solid #a7f3d0;{% elif message.tags == 'error' %}background: var(--danger-red-light); color: #991b1b; border: 1px solid #fecaca;{% elif message.tags == 'warning' %}background: var(--warning-orange-light); color: #92400e; border: 1px solid #fde68a;{% else %}background: var(--primary-blue-light); color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-calendar-check"></i> Calibration Schedules</h1>
+            <p class="subtitle">Manage and track equipment calibration schedules for {{ stream }} stream</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'calibration_dashboard' stream %}" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'calibration_schedule_create' stream %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Schedule
+            </a>
+        </div>
+    </div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fas fa-list"></i>
+        </div>
+        <div class="stat-content">
+            <div class="value">{{ total_schedules|default:schedules.count }}</div>
+            <div class="label">Total Schedules</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <div class="value">{{ upcoming_count|default:0 }}</div>
+            <div class="label">Due This Week</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="value">{{ overdue_count|default:0 }}</div>
+            <div class="label">Overdue</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="value">{{ completed_count|default:0 }}</div>
+            <div class="label">Completed This Month</div>
+        </div>
+    </div>
+</div>
+
+<form method="GET" class="filters-bar">
+    <div class="filter-group">
+        <label>Status:</label>
+        <select name="status">
+            <option value="">All Statuses</option>
+            <option value="scheduled" {% if request.GET.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+            <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="overdue" {% if request.GET.status == 'overdue' %}selected{% endif %}>Overdue</option>
+            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Priority:</label>
+        <select name="priority">
+            <option value="">All Priorities</option>
+            <option value="critical" {% if request.GET.priority == 'critical' %}selected{% endif %}>Critical</option>
+            <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+            <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Due Date:</label>
+        <input type="date" name="due_date" value="{{ request.GET.due_date }}">
+    </div>
+    <button type="submit" class="btn btn-filter">
+        <i class="fas fa-filter"></i> Filter
+    </button>
+</form>
+
+<div class="schedules-table">
+    <div class="table-header">
+        <h3>Calibration Schedules</h3>
+        <span style="color: var(--text-secondary); font-size: 0.875rem;">
+            {{ schedules.count }} schedule{{ schedules.count|pluralize }}
+        </span>
+    </div>
+    
+    {% if schedules %}
+    <table>
+        <thead>
+            <tr>
+                <th>Equipment</th>
+                <th>Calibration Type</th>
+                <th>Scheduled Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+            <tr>
+                <td>
+                    <div class="equipment-info">
+                        <span class="equipment-name">{{ schedule.equipment_name }}</span>
+                        {% if schedule.equipment_id %}
+                        <span class="equipment-id">ID: {{ schedule.equipment_id }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ schedule.calibration_type|default:"Standard" }}</td>
+                <td class="date-cell">
+                    <div class="date-primary">{{ schedule.next_calibration_date|date:"M d, Y" }}</div>
+                    {% if schedule.next_calibration_date %}
+                        {% with days_left=schedule.days_until_due %}
+                            {% if days_left < 0 %}
+                                <span class="days-until urgent">{{ days_left|abs_value }} days overdue</span>
+                            {% elif days_left == 0 %}
+                                <span class="days-until urgent">Due today</span>
+                            {% elif days_left <= 7 %}
+                                <span class="days-until soon">{{ days_left }} days left</span>
+                            {% else %}
+                                <span class="days-until normal">{{ days_left }} days left</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="priority-badge {{ schedule.priority|default:'medium' }}">
+                        {{ schedule.priority|default:"Medium" }}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge {{ schedule.status }}">
+                        <i class="fas fa-{% if schedule.status == 'completed' %}check{% elif schedule.status == 'overdue' %}exclamation{% elif schedule.status == 'in_progress' %}spinner{% else %}clock{% endif %}"></i>
+                        {{ schedule.get_status_display|default:schedule.status|title }}
+                    </span>
+                </td>
+                <td>
+                    {% if schedule.responsible_person %}
+                        {{ schedule.responsible_person.get_full_name|default:schedule.responsible_person.username }}
+                    {% elif schedule.assigned_to %}
+                        {{ schedule.assigned_to.get_full_name|default:schedule.assigned_to.username }}
+                    {% else %}
+                        <span style="color: var(--text-secondary);">Unassigned</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'calibration_schedule_detail' stream schedule.pk %}" class="btn-action" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'calibration_schedule_edit' stream schedule.pk %}" class="btn-action" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'calibration_schedule_delete' stream schedule.pk %}" class="btn-action delete" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">&laquo; First</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Previous</a>
+        {% endif %}
+        
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <h3>No Calibration Schedules Found</h3>
+        <p>No schedules match your current filters, or no schedules have been created yet.</p>
+        <a href="{% url 'calibration_schedule_create' stream %}" class="btn btn-primary" style="background: var(--purple); color: white;"><i class="fas fa-plus" style="font-size: 0.75rem;"></i> Create First Schedule</a>
+    </div>
+    {% endif %}
+</div>
+</div>
+
+<script>
+// Auto-close alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,555 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Asset Lifecycle Management - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0B5FFF;
+        --primary-dark: #0747A6;
+        --primary-light: #deebff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        --danger-red: #ef4444;
+        --warning-orange: #f59e0b;
+        --success-green: #10b981;
+    }
+
+    .dashboard-container { max-width: 1700px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0044CC 0%, #003399 50%, #002266 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(118, 75, 162, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .page-header .subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
+    .header-actions { display: flex; gap: 0.75rem; position: relative; z-index: 1; align-items: center; flex-wrap: wrap; }
+
+    .header-actions form { display: flex; margin: 0; }
+
+    .header-actions .btn {
+        padding: 0.65rem 1.25rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-actions .btn:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-2px);
+    }
+
+    .header-actions .btn-create {
+        background: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.5);
+    }
+
+    /* Stats Row */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+    .stat-card .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .filter-bar form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .filter-group label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+
+    .filter-group select, .filter-group input {
+        padding: 0.5rem 0.75rem;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.85rem;
+        background: var(--bg-light);
+        min-width: 140px;
+    }
+
+    .filter-group select:focus, .filter-group input:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+
+    .btn-filter {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    .btn-filter-primary { background: var(--primary); color: white; }
+    .btn-filter-clear { background: var(--bg-light); color: var(--text-secondary); border: 1.5px solid var(--border-color); }
+
+    /* Table */
+    .data-table-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table thead th {
+        background: var(--bg-light);
+        padding: 0.85rem 1rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: left;
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+        transition: background 0.15s;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .data-table tbody tr:hover { background: #f8fafd; }
+
+    .data-table td {
+        padding: 0.75rem 1rem;
+        font-size: 0.88rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    /* Stage Badge */
+    .stage-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Condition text */
+    .condition-new { color: #16a34a; font-weight: 600; }
+    .condition-good { color: #2563eb; font-weight: 600; }
+    .condition-fair { color: #d97706; font-weight: 600; }
+    .condition-poor { color: #dc2626; font-weight: 600; }
+    .condition-damaged { color: #ef4444; font-weight: 600; }
+
+    /* Warranty Status */
+    .warranty-active { background: #dcfce7; color: #166534; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .warranty-expiring_soon { background: #fef3c7; color: #92400e; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .warranty-expired { background: #fde2e2; color: #c53030; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .warranty-no_warranty { background: #f1f5f9; color: #64748b; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+
+    .product-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .product-link:hover { text-decoration: underline; }
+
+    .cost-cell { font-family: 'SF Mono', monospace; font-weight: 600; }
+
+    /* Pagination */
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-light);
+    }
+
+    .pagination-info { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .pagination-links { display: flex; gap: 0.25rem; }
+
+    .pagination-links a, .pagination-links span {
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        text-decoration: none;
+    }
+
+    .pagination-links a:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .pagination-links .current { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+
+    @media (max-width: 1200px) {
+        .data-table-container { overflow-x: auto; }
+        .data-table { min-width: 900px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-recycle"></i> Asset Lifecycle Management</h1>
+            <p class="subtitle">Track procurement, deployment, maintenance, depreciation, and disposal of all equipment in {{ stream }}</p>
+        </div>
+        <div class="header-actions">
+            {% if unenrolled_count > 0 %}
+            <form method="post" action="{% url 'asset_lifecycle_bulk_enroll' stream=stream %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-create" onclick="return confirm('Enroll all {{ unenrolled_count }} unenrolled product(s) into lifecycle tracking?');">
+                    <i class="fas fa-plus-circle"></i> Enroll All ({{ unenrolled_count }})
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'asset_lifecycle_dashboard' stream=stream %}" class="btn">
+                <i class="fas fa-chart-pie"></i> Analytics
+            </a>
+            <a href="{% url 'feature_hub' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #e8f0fe; color: #0044CC;">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ total|default:"0" }}</div>
+                <div class="stat-label">Tracked Assets</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fef9c3; color: #ca8a04;">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ unenrolled_count|default:"0" }}</div>
+                <div class="stat-label">Not Enrolled</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #dcfce7; color: #16a34a;">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div>
+                <div class="stat-value">${{ total_value|floatformat:0|default:"0" }}</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fef3c7; color: #d97706;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ warranty_expiring|default:"0" }}</div>
+                <div class="stat-label">Warranty Expiring</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <form method="get" action="">
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Product, serial, vendor...">
+            </div>
+            <div class="filter-group">
+                <label>Stage</label>
+                <select name="stage">
+                    <option value="">All Stages</option>
+                    {% for stage in stages %}
+                    <option value="{{ stage.stage_type }}" {% if selected_stage == stage.stage_type %}selected{% endif %}>{{ stage.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Condition</label>
+                <select name="condition">
+                    <option value="">All</option>
+                    {% for val, label in condition_choices %}
+                    <option value="{{ val }}" {% if selected_condition == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:flex-end;">
+                <button type="submit" class="btn-filter btn-filter-primary"><i class="fas fa-search"></i> Filter</button>
+                <a href="{% url 'asset_lifecycle_list' stream=stream %}" class="btn-filter btn-filter-clear"><i class="fas fa-times"></i> Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-container">
+        {% if page_obj.object_list %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Stage</th>
+                    <th>Condition</th>
+                    <th>Purchase Date</th>
+                    <th>Cost</th>
+                    <th>Book Value</th>
+                    <th>Warranty</th>
+                    <th>Vendor</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in page_obj %}
+                <tr>
+                    <td>
+                        <a class="product-link" href="{% url 'asset_lifecycle_detail' stream=stream pk=record.pk %}">
+                            {{ record.product.name }}
+                        </a>
+                        {% if record.product.serial_number %}
+                        <br><span style="font-size:0.75rem;color:var(--text-secondary);">SN: {{ record.product.serial_number }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.current_stage %}
+                        <span class="stage-badge" style="background: {{ record.current_stage.color }}20; color: {{ record.current_stage.color }};">
+                            <i class="{{ record.current_stage.icon_class }}"></i>
+                            {{ record.current_stage.name }}
+                        </span>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td><span class="condition-{{ record.condition }}">{{ record.get_condition_display }}</span></td>
+                    <td>{{ record.purchase_date|date:"M d, Y"|default:"-" }}</td>
+                    <td class="cost-cell">{% if record.purchase_cost %}${{ record.purchase_cost|floatformat:2 }}{% else %}-{% endif %}</td>
+                    <td class="cost-cell">{% if record.current_book_value %}${{ record.current_book_value|floatformat:2 }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if record.warranty_end_date %}
+                        <span class="warranty-{{ record.warranty_status }}">
+                            {{ record.warranty_status|title }}
+                        </span>
+                        {% else %}<span style="color:var(--text-secondary);">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if record.vendor_link %}
+                        <a href="{% url 'vendor_detail' stream=stream pk=record.vendor_link.pk %}" style="color:var(--primary);text-decoration:none;font-weight:600;" title="View vendor details">
+                            {{ record.vendor_link.name }} <i class="fas fa-external-link-alt" style="font-size:0.6rem;opacity:0.5;"></i>
+                        </a>
+                        {% elif record.vendor %}{{ record.vendor }}{% else %}-{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'asset_lifecycle_detail' stream=stream pk=record.pk %}" style="color:var(--primary);font-weight:600;font-size:0.85rem;" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        &nbsp;
+                        <a href="{% url 'asset_lifecycle_edit' stream=stream pk=record.pk %}" style="color:#d97706;font-weight:600;font-size:0.85rem;" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination-bar">
+            <div class="pagination-info">
+                Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+            </div>
+            <div class="pagination-links">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">&lsaquo;</a>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">&rsaquo;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+            {% if unenrolled_products %}
+            <!-- Show unenrolled products when no lifecycle records exist -->
+            <div style="padding:1.5rem;text-align:center;color:var(--text-secondary);background:#f8fafc;border-radius:12px;margin-bottom:1.5rem;">
+                <i class="fas fa-info-circle" style="font-size:1.2rem;color:var(--primary);margin-right:0.5rem;"></i>
+                No products are enrolled in lifecycle tracking yet. Enroll individually or use <strong>"Enroll All"</strong> above.
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-recycle"></i>
+                <h3>No Products in This Stream</h3>
+                <p>Add products to this stream first, then enroll them in lifecycle tracking.</p>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+        {% if unenrolled_products %}
+        <!-- Unenrolled Products Section -->
+        <div style="margin-top:2rem;">
+            <h3 style="font-size:1.05rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-inbox" style="color:#ca8a04;"></i> Products Not Yet Enrolled
+                <span style="background:#fef3c7;color:#92400e;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;">{{ unenrolled_count }}</span>
+            </h3>
+            <div class="data-table-container">
+                <table class="data-table" style="table-layout:fixed;width:100%;">
+                    <colgroup>
+                        <col style="width:35%;">
+                        <col style="width:25%;">
+                        <col style="width:22%;">
+                        <col style="width:18%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Serial Number</th>
+                            <th>Category</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in unenrolled_products %}
+                        <tr>
+                            <td style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ product.name }}</td>
+                            <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ product.serial_number|default:"-" }}</td>
+                            <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ product.category.name|default:"-" }}</td>
+                            <td style="text-align:center;">
+                                <a href="{% url 'asset_lifecycle_create' stream=stream product_id=product.pk %}"
+                                   style="background:var(--primary);color:white;padding:0.35rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;white-space:nowrap;">
+                                    <i class="fas fa-plus-circle"></i> Enroll
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+</div>
+{% endblock %}

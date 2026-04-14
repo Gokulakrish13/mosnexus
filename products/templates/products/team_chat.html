@@ -1,0 +1,348 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Team Chat{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --gradient-global: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        --gradient-stream: linear-gradient(135deg, #00C4B4, #06b6d4);
+        --gradient-group: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0;
+        --success: #10B981;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+        --shadow-xl: 0 20px 40px -5px rgba(0,0,0,0.12);
+        --shadow-glow: 0 0 40px rgba(11, 95, 255, 0.15);
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+    }
+    body { background: var(--bg-primary); min-height: 100vh; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; color: var(--text-primary); }
+
+    .chat-hub { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .hub-header { text-align: center; margin-bottom: 2.5rem; }
+    .hub-header::after { content: ''; display: block; width: 80px; height: 4px; background: var(--gradient-primary); border-radius: 2px; margin: 1rem auto 0; }
+    .hub-header h1 { font-size: 2.25rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
+    .hub-header h1 .icon-wrap { width: 52px; height: 52px; background: var(--gradient-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(11,95,255,0.3); }
+    .hub-header h1 .icon-wrap i { color: #fff; font-size: 1.35rem; }
+    .hub-header p { color: var(--text-secondary); font-size: 1.05rem; font-weight: 500; }
+
+    /* Action bar */
+    .admin-bar { display: flex; justify-content: flex-end; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .btn-create { padding: 0.6rem 1.35rem; border-radius: var(--radius-sm); border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.25s; font-family: inherit; box-shadow: 0 2px 8px rgba(11,95,255,0.25); }
+    .btn-create.primary { background: var(--gradient-primary); color: #fff; }
+    .btn-create.group { background: var(--gradient-group); color: #fff; box-shadow: 0 2px 8px rgba(139,92,246,0.25); }
+    .btn-create:hover { transform: translateY(-1px); }
+
+    /* Sections */
+    .chat-section { margin-bottom: 2.5rem; }
+    .chat-section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
+    .chat-section-title .sec-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+    .chat-section-title .sec-icon.global { background: rgba(11,95,255,0.1); color: var(--philips-blue); }
+    .chat-section-title .sec-icon.stream { background: rgba(0,196,180,0.1); color: var(--philips-teal); }
+    .chat-section-title .sec-icon.group { background: rgba(139,92,246,0.1); color: #0B5FFF; }
+
+    /* Room Cards */
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; }
+    .room-card { background: var(--surface); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md); border: 1.5px solid var(--border-color); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); text-decoration: none; display: block; position: relative; overflow: hidden; color: inherit; }
+    .room-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0; transition: opacity 0.3s; }
+    .room-card.global::before { background: var(--gradient-global); }
+    .room-card.stream::before { background: var(--gradient-stream); }
+    .room-card.group::before { background: var(--gradient-group); }
+    .room-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
+    .room-card:hover::before { opacity: 1; }
+    .room-card.global:hover { border-color: var(--philips-blue); }
+    .room-card.stream:hover { border-color: var(--philips-teal); }
+    .room-card.group:hover { border-color: #0B5FFF; }
+
+    .room-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .room-icon i { color: white; font-size: 1.25rem; }
+    .room-icon.global { background: var(--gradient-global); }
+    .room-icon.stream { background: var(--gradient-stream); }
+    .room-icon.group { background: var(--gradient-group); }
+
+    .room-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.01em; }
+    .room-desc { color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 0.75rem; line-height: 1.45; }
+    .room-meta { display: flex; gap: 0.75rem; font-size: 0.78rem; color: var(--text-secondary); align-items: center; flex-wrap: wrap; }
+    .msg-count-badge { background: rgba(11,95,255,0.08); color: var(--philips-blue); padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; font-size: 0.72rem; }
+    .new-count-badge { background: #DCFCE7; color: #166534; padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; font-size: 0.72rem; }
+    .unread-badge { background: #EF4444; color: #fff; padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; font-size: 0.72rem; min-width: 20px; text-align: center; }
+    .member-badge { background: rgba(139,92,246,0.08); color: #0B5FFF; padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; font-size: 0.72rem; }
+
+    /* Member avatars */
+    .member-avatars { display: flex; margin-top: 0.75rem; }
+    .member-avatars .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #fff; border: 2px solid var(--surface); margin-left: -6px; }
+    .member-avatars .avatar:first-child { margin-left: 0; }
+    .member-avatars .avatar-more { background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.6rem; }
+
+    .last-msg { font-size: 0.78rem; color: var(--text-tertiary); margin-top: 0.65rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-top: 0.65rem; border-top: 1px solid var(--border-color); }
+    .last-msg strong { color: var(--text-secondary); font-weight: 600; }
+
+    .room-arrow { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); opacity: 0; transition: all 0.3s; font-size: 1.1rem; }
+    .room-card:hover .room-arrow { opacity: 1; right: 1rem; }
+    .room-card.global:hover .room-arrow { color: var(--philips-blue); }
+    .room-card.stream:hover .room-arrow { color: var(--philips-teal); }
+    .room-card.group:hover .room-arrow { color: #0B5FFF; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 2.5rem; color: var(--text-secondary); }
+    .empty-state .empty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--bg-secondary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+    .empty-state .empty-icon i { font-size: 1.5rem; color: var(--text-tertiary); }
+    .empty-state h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: var(--surface); border-radius: var(--radius-xl); padding: 2rem; max-width: 560px; width: 92%; box-shadow: var(--shadow-xl); border: 1px solid var(--border-color); animation: modalIn 0.25s ease; max-height: 90vh; overflow-y: auto; }
+    @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.65rem; }
+    .modal-box h2 .modal-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+    .modal-box h2 .modal-icon i { color: #fff; font-size: 0.9rem; }
+    .modal-fg { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.15rem; }
+    .modal-fg label { font-weight: 600; font-size: 0.8rem; color: var(--text-secondary); }
+    .modal-fg input, .modal-fg select, .modal-fg textarea { padding: 0.6rem 0.85rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.88rem; font-family: inherit; background: var(--bg-primary); color: var(--text-primary); transition: border-color 0.2s; }
+    .modal-fg input:focus, .modal-fg select:focus, .modal-fg textarea:focus { border-color: var(--philips-blue); outline: none; }
+    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); }
+    .btn-modal { padding: 0.55rem 1.25rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s; font-family: inherit; }
+    .btn-modal-cancel { background: var(--bg-secondary); color: var(--text-secondary); }
+    .btn-modal-cancel:hover { background: var(--border-color); }
+    .btn-modal-primary { background: var(--gradient-primary); color: #fff; box-shadow: 0 2px 8px rgba(11,95,255,0.25); }
+    .btn-modal-primary:hover { box-shadow: 0 4px 14px rgba(11,95,255,0.35); }
+    .btn-modal-group { background: var(--gradient-group); color: #fff; box-shadow: 0 2px 8px rgba(139,92,246,0.25); }
+
+    /* People Picker */
+    .people-picker { border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; background: var(--bg-primary); }
+    .people-picker-search { width: 100%; padding: 0.55rem 0.85rem; border: none; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-family: inherit; background: transparent; color: var(--text-primary); }
+    .people-picker-search:focus { outline: none; }
+    .people-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.85rem; cursor: pointer; transition: background 0.15s; }
+    .people-item:hover { background: rgba(11,95,255,0.04); }
+    .people-item.selected { background: rgba(11,95,255,0.08); }
+    .people-item input[type="checkbox"] { accent-color: var(--philips-blue); width: 16px; height: 16px; }
+    .people-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.65rem; font-weight: 700; flex-shrink: 0; }
+    .people-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+    .people-email { font-size: 0.72rem; color: var(--text-tertiary); }
+    .selected-count { font-size: 0.78rem; color: var(--philips-blue); font-weight: 600; margin-top: 0.35rem; }
+
+    @media (max-width: 768px) {
+        .chat-hub { padding: 1.25rem; }
+        .hub-header h1 { font-size: 1.65rem; }
+        .rooms-grid { grid-template-columns: 1fr; }
+        .admin-bar { flex-direction: column; }
+    }
+</style>
+
+<div class="chat-hub">
+    <div class="hub-header">
+        <h1>
+            <span class="icon-wrap"><i class="fas fa-comments"></i></span>
+            Team Chat
+        </h1>
+        <p>Collaborate with your team — global conversations, stream channels &amp; private group chats</p>
+    </div>
+
+    <div class="admin-bar">
+        <button class="btn-create group" onclick="document.getElementById('createGroupModal').classList.add('show');">
+            <i class="fas fa-user-friends"></i> New Group Chat
+        </button>
+        <button class="btn-create primary" onclick="document.getElementById('createRoomModal').classList.add('show');">
+            <i class="fas fa-plus"></i> Create Channel
+        </button>
+    </div>
+
+    <!-- Group Chats -->
+    {% if group_rooms %}
+    <div class="chat-section">
+        <div class="chat-section-title">
+            <span class="sec-icon group"><i class="fas fa-user-friends"></i></span>
+            Group Chats
+        </div>
+        <div class="rooms-grid">
+            {% for rd in group_rooms %}
+            <a href="{% url 'chat_room_view' room_id=rd.room.pk %}" class="room-card group">
+                <div class="room-icon group"><i class="fas fa-user-friends"></i></div>
+                <div class="room-name">{{ rd.room.name }}</div>
+                <div class="room-desc">{{ rd.room.description|default:"Private group conversation" }}</div>
+                <div class="room-meta">
+                    <span class="member-badge"><i class="fas fa-users" style="margin-right:3px;"></i> {{ rd.member_count }} members</span>
+                    <span class="msg-count-badge">{{ rd.msg_count }} messages</span>
+                    {% if rd.unread %}<span class="unread-badge">{{ rd.unread }} unread</span>{% endif %}
+                </div>
+                {% if rd.last_msg %}
+                <div class="last-msg"><strong>{{ rd.last_msg.user.username }}:</strong> {{ rd.last_msg.message|truncatechars:50 }}</div>
+                {% endif %}
+                <div class="room-arrow"><i class="fas fa-arrow-right"></i></div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Global Rooms -->
+    <div class="chat-section">
+        <div class="chat-section-title">
+            <span class="sec-icon global"><i class="fas fa-globe"></i></span>
+            Global Channels
+        </div>
+        <div class="rooms-grid">
+            {% for rd in rooms %}
+            {% if rd.room.room_type == 'global' %}
+            <a href="{% url 'chat_room_view' room_id=rd.room.pk %}" class="room-card global">
+                <div class="room-icon global"><i class="fas fa-globe"></i></div>
+                <div class="room-name">{{ rd.room.name }}</div>
+                <div class="room-desc">{{ rd.room.description|default:"General discussion for all team members" }}</div>
+                <div class="room-meta">
+                    <span class="msg-count-badge">{{ rd.msg_count }} messages</span>
+                    {% if rd.recent_count %}<span class="new-count-badge">{{ rd.recent_count }} new (24h)</span>{% endif %}
+                </div>
+                {% if rd.last_msg %}
+                <div class="last-msg"><strong>{{ rd.last_msg.user.username }}:</strong> {{ rd.last_msg.message|truncatechars:50 }}</div>
+                {% endif %}
+                <div class="room-arrow"><i class="fas fa-arrow-right"></i></div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Stream Rooms -->
+    <div class="chat-section">
+        <div class="chat-section-title">
+            <span class="sec-icon stream"><i class="fas fa-code-branch"></i></span>
+            Stream Channels
+        </div>
+        <div class="rooms-grid">
+            {% for rd in rooms %}
+            {% if rd.room.room_type == 'stream' %}
+            <a href="{% url 'chat_room_view' room_id=rd.room.pk %}" class="room-card stream">
+                <div class="room-icon stream"><i class="fas fa-code-branch"></i></div>
+                <div class="room-name">{{ rd.room.name }}</div>
+                <div class="room-desc">{{ rd.room.description|default:"Stream-specific discussions" }}</div>
+                <div class="room-meta">
+                    <span class="msg-count-badge">{{ rd.msg_count }} messages</span>
+                    {% if rd.recent_count %}<span class="new-count-badge">{{ rd.recent_count }} new</span>{% endif %}
+                </div>
+                {% if rd.last_msg %}
+                <div class="last-msg"><strong>{{ rd.last_msg.user.username }}:</strong> {{ rd.last_msg.message|truncatechars:50 }}</div>
+                {% endif %}
+                <div class="room-arrow"><i class="fas fa-arrow-right"></i></div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Create Channel Modal -->
+<div class="modal-overlay" id="createRoomModal">
+    <div class="modal-box">
+        <h2><span class="modal-icon" style="background:var(--gradient-primary);"><i class="fas fa-plus"></i></span> Create Channel</h2>
+        <form method="post" action="{% url 'chat_room_create' %}">
+            {% csrf_token %}
+            <div class="modal-fg">
+                <label>Channel Name *</label>
+                <input type="text" name="name" required placeholder="e.g. General Discussion">
+            </div>
+            <div class="modal-fg">
+                <label>Type</label>
+                <select name="room_type" id="roomTypeSelect" onchange="document.getElementById('streamSelect').style.display = this.value === 'stream' ? 'flex' : 'none';">
+                    <option value="global">Global (all streams)</option>
+                    <option value="stream">Stream-specific</option>
+                </select>
+            </div>
+            <div class="modal-fg" id="streamSelect" style="display:none;">
+                <label>Stream</label>
+                <select name="stream_id">
+                    <option value="">— Select Stream —</option>
+                    {% for s in streams %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-fg">
+                <label>Description</label>
+                <textarea name="description" rows="2" placeholder="Optional description"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="document.getElementById('createRoomModal').classList.remove('show');">Cancel</button>
+                <button type="submit" class="btn-modal btn-modal-primary"><i class="fas fa-plus"></i> Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Group Chat Modal -->
+<div class="modal-overlay" id="createGroupModal">
+    <div class="modal-box">
+        <h2><span class="modal-icon" style="background:var(--gradient-group);"><i class="fas fa-user-friends"></i></span> New Group Chat</h2>
+        <form method="post" action="{% url 'chat_room_create' %}" id="groupForm">
+            {% csrf_token %}
+            <input type="hidden" name="room_type" value="group">
+            <div class="modal-fg">
+                <label>Group Name *</label>
+                <input type="text" name="name" required placeholder="e.g. Project Alpha Team">
+            </div>
+            <div class="modal-fg">
+                <label>Description</label>
+                <textarea name="description" rows="2" placeholder="What is this group about?"></textarea>
+            </div>
+            <div class="modal-fg">
+                <label>Add Members *</label>
+                <div class="people-picker" id="peoplePicker">
+                    <input type="text" class="people-picker-search" placeholder="Search people..." oninput="filterPeople(this.value)">
+                    {% for u in bu_users %}
+                    {% if u.id != request.user.id %}
+                    <label class="people-item" data-name="{{ u.username|lower }} {{ u.first_name|lower }} {{ u.last_name|lower }} {{ u.email|lower }}">
+                        <input type="checkbox" name="members" value="{{ u.id }}" onchange="updateSelectedCount()">
+                        <span class="people-avatar" style="background: hsl({{ u.id|divisibleby:7|yesno:'210,170,30,330,90,270,150' }}, 65%, 55%);">{{ u.username|make_list|first|upper }}</span>
+                        <span>
+                            <span class="people-name">{{ u.get_full_name|default:u.username }}</span>
+                            {% if u.email %}<span class="people-email">{{ u.email }}</span>{% endif %}
+                        </span>
+                    </label>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="selected-count" id="selectedCount">0 member(s) selected</div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="document.getElementById('createGroupModal').classList.remove('show');">Cancel</button>
+                <button type="submit" class="btn-modal btn-modal-group"><i class="fas fa-user-friends"></i> Create Group</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Close modals on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+    });
+
+    function filterPeople(q) {
+        q = q.toLowerCase();
+        document.querySelectorAll('#peoplePicker .people-item').forEach(item => {
+            const match = item.dataset.name.includes(q);
+            item.style.display = match ? 'flex' : 'none';
+        });
+    }
+
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('#peoplePicker input[type="checkbox"]:checked').length;
+        document.getElementById('selectedCount').textContent = count + ' member(s) selected';
+    }
+</script>
+{% endblock %}

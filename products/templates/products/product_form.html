@@ -1,808 +1,1641 @@
 {% extends 'products/base.html' %}
 {% block content %}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #0066cc;
-            --primary-dark: #004d99;
-            --primary-light: #e6f2ff;
-            --accent: #00b4d8;
-            --accent-gradient: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
-            --dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-light: #94a3b8;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
-            --shadow-lg: 0 20px 50px rgba(0,0,0,0.12);
-            --shadow-xl: 0 25px 60px rgba(0,0,0,0.15);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-primary);
-            font-size: 1rem;
-            background: var(--bg-main);
-            overflow-x: hidden;
-        }
-
-        .form-page {
-            min-height: 100vh;
-            padding-top: 70px;
-        }
-
-        /* Hero Section */
-        .form-hero {
-            background: var(--dark-gradient);
-            padding: 2.5rem 2rem 7rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .form-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
-        }
-
-        .hero-glow {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            pointer-events: none;
-        }
-
-        .hero-glow-1 {
-            background: var(--primary);
-            top: -150px;
-            right: -50px;
-        }
-
-        .hero-glow-2 {
-            background: var(--accent);
-            bottom: -200px;
-            left: -50px;
-        }
-
-        .hero-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-header {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .hero-icon {
-            width: 64px;
-            height: 64px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.75rem;
-        }
-
-        .hero-text h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .hero-text .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .hero-text .breadcrumb a {
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .hero-text .breadcrumb a:hover {
-            color: white;
-        }
-
-        .hero-text .breadcrumb i {
-            font-size: 0.65rem;
-        }
-
-        /* Main Content */
-        .form-content {
-            max-width: 1200px;
-            margin: -4.5rem auto 3rem;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        .form-card {
-            background: white;
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        .form-card-header {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .form-card-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .form-card-title i {
-            width: 40px;
-            height: 40px;
-            background: var(--accent-gradient);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .form-card-title span {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.25rem;
-            background: white;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .back-btn:hover {
-            background: var(--bg-main);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .form-card-body {
-            padding: 2rem;
-        }
-
-        /* Messages */
-        .alert-messages {
-            margin-bottom: 1.5rem;
-        }
-
-        .alert-message {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.25rem;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: var(--radius-md);
-            color: var(--danger);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .alert-message i {
-            font-size: 1rem;
-        }
-
-        /* Form Grid */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-
-        @media (max-width: 900px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .form-section-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-section-title i {
-            font-size: 0.85rem;
-            color: var(--primary);
-        }
-
-        /* Form Groups */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .form-group label .required {
-            color: var(--danger);
-            font-size: 0.9rem;
-        }
-
-        .form-group label .optional {
-            color: var(--text-light);
-            font-size: 0.75rem;
-            font-weight: 400;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-family: inherit;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            outline: none;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
-        }
-
-        .form-control::placeholder {
-            color: var(--text-light);
-        }
-
-        .form-control:disabled {
-            background: #f1f5f9;
-            color: var(--text-secondary);
-            cursor: not-allowed;
-        }
-
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        select.form-control {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 2.5rem;
-        }
-
-        /* File Input */
-        .file-upload-wrapper {
-            position: relative;
-        }
-
-        .file-upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 1.5rem;
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            background: var(--bg-main);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .file-upload-label:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .file-upload-label i {
-            font-size: 2rem;
-            color: var(--text-light);
-        }
-
-        .file-upload-label span {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .file-upload-label .browse-text {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .file-upload-wrapper input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        /* Conditional Fields */
-        .conditional-field {
-            padding: 1rem;
-            background: #fefce8;
-            border: 1px solid #fef08a;
-            border-radius: var(--radius-md);
-            margin-top: 0.5rem;
-        }
-
-        .conditional-field.issue {
-            background: #fef2f2;
-            border-color: #fecaca;
-        }
-
-        /* Submit Button */
-        .form-actions {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            padding: 1rem 2rem;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.25);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.35);
-        }
-
-        .btn-primary i {
-            transition: var(--transition);
-        }
-
-        .btn-primary:hover i {
-            transform: translateX(3px);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--text-secondary);
-            border: 2px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-main);
-            color: var(--text-primary);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .form-hero {
-                padding: 2rem 1rem 5rem;
-            }
-
-            .hero-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .hero-text h1 {
-                font-size: 1.5rem;
-            }
-
-            .form-content {
-                padding: 0 1rem;
-                margin-top: -3rem;
-            }
-
-            .form-card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .form-card-body {
-                padding: 1.5rem;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-
-        /* Info text */
-        .form-help {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-top: 0.25rem;
-        }
-
-        /* Category badge */
-        .category-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, var(--primary-light) 0%, #cce5ff 100%);
-            border: 1px solid #99caff;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-
-        .category-badge i {
-            font-size: 0.85rem;
-        }
-    </style>
-
-    <div class="form-page">
-        <!-- Hero Section -->
-        <section class="form-hero">
-            <div class="hero-glow hero-glow-1"></div>
-            <div class="hero-glow hero-glow-2"></div>
-            <div class="hero-content">
-                <div class="hero-header">
-                    <div class="hero-icon">
-                        <i class="fas {% if edit %}fa-edit{% else %}fa-plus-circle{% endif %}"></i>
-                    </div>
-                    <div class="hero-text">
-                        <div class="breadcrumb">
-                            <a href="/"><i class="fas fa-home"></i> Home</a>
-                            <i class="fas fa-chevron-right"></i>
-                            <a href="{% url 'product_list_stream' stream %}">{{ stream }}</a>
-                            <i class="fas fa-chevron-right"></i>
-                            <span>{% if edit %}Edit Product{% else %}Add Product{% endif %}</span>
-                        </div>
-                        <h1>{% if edit %}Edit Product{% else %}Add New Product{% endif %}</h1>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Form Content -->
-        <div class="form-content">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <div class="form-card-title">
-                        <i class="fas fa-box"></i>
-                        <span>Product Information</span>
-                    </div>
-                    <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="back-btn">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                </div>
-
-                <div class="form-card-body">
-                    {% if messages %}
-                        <div class="alert-messages">
-                            {% for message in messages %}
-                                <div class="alert-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="hidden" name="stream" value="{{ stream }}">
-
-                        <div class="form-grid">
-                            <!-- Left Column -->
-                            <div class="form-section">
-                                <div class="form-section-title">
-                                    <i class="fas fa-info-circle"></i>
-                                    Basic Information
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    {% if selected_category %}
-                                        <input type="hidden" name="category" value="{{ selected_category.id }}">
-                                        <div class="category-badge">
-                                            <i class="fas fa-folder"></i>
-                                            {{ selected_category.name }} ({{ selected_category.serial_number }})
-                                        </div>
-                                    {% elif product and product.category %}
-                                        <input type="hidden" name="category" value="{{ product.category.id }}">
-                                        <div class="category-badge">
-                                            <i class="fas fa-folder"></i>
-                                            {{ product.category.name }} ({{ product.category.serial_number }})
-                                        </div>
-                                    {% else %}
-                                        <div class="form-help" style="color: var(--warning);">
-                                            <i class="fas fa-exclamation-triangle"></i> No category selected. Please go back and select a category.
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="name">Product Name <span class="required">*</span></label>
-                                    <input type="text" id="name" name="name" class="form-control" required value="{{ product.name|default:'' }}" placeholder="Enter product name">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="serial_number">Product Number / ID <span class="required">*</span></label>
-                                    <input type="text" id="serial_number" name="serial_number" class="form-control" required value="{{ product.serial_number|default:next_serial }}" placeholder="Enter product number">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="status">Status <span class="required">*</span></label>
-                                    <select id="status" name="status" class="form-control" required onchange="toggleHandedOverFields(); toggleIssueField();">
-                                        <option value="Active" {% if product.status == 'Active' %}selected{% endif %}>Active</option>
-                                        <option value="Not Active" {% if product.status == 'Not Active' %}selected{% endif %}>Not Active</option>
-                                        <option value="Scraped" {% if product.status == 'Scraped' %}selected{% endif %}>Scraped</option>
-                                        <option value="Hand-Overed" {% if product.status == 'Hand-Overed' %}selected{% endif %}>Hand-Overed</option>
-                                        <option value="Issue" {% if product.status == 'Issue' %}selected{% endif %}>Issue in the System</option>
-                                    </select>
-                                </div>
-
-                                <div id="handedOverFields" style="display:none;">
-                                    <div class="conditional-field">
-                                        <div class="form-group">
-                                            <label for="handover_team_type">Assigning Team</label>
-                                            <select id="handover_team_type" name="handover_team_type" class="form-control" onchange="toggleExternalTeamField()">
-                                                <option value="Internal" {% if product and product.handover_team_type == 'Internal' %}selected{% endif %}>Internal (MoS)</option>
-                                                <option value="External" {% if product and product.handover_team_type == 'External' %}selected{% endif %}>External</option>
-                                            </select>
-                                        </div>
-                                        <div id="externalTeamField" style="display:none; margin-top:1rem;">
-                                            <div class="form-group">
-                                                <label for="handover_external_team">External Team Name</label>
-                                                <input type="text" id="handover_external_team" name="handover_external_team" class="form-control" value="{{ product.handover_external_team|default:'' }}" placeholder="Enter team name">
-                                            </div>
-                                        </div>
-                                        <div id="handoverOwnerField" style="display:none; margin-top:1rem;">
-                                            <div class="form-group">
-                                                <label id="handoverOwnerLabel" for="handover_owner">Name of the assignee / Owner</label>
-                                                <input type="text" id="handover_owner" name="handover_owner" class="form-control" value="{{ product.handover_owner|default:'' }}" placeholder="Enter assignee name">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="issueField" {% if product.status == 'Issue' %}style="display:block;"{% else %}style="display:none;"{% endif %}>
-                                    <div class="conditional-field issue">
-                                        <div class="form-group">
-                                            <label for="issue_description">Issue Description <span class="required">*</span></label>
-                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="4" {% if product.status == 'Issue' %}required{% endif %} placeholder="Describe the issue in detail">{{ product.issue_description|default:'' }}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right Column -->
-                            <div class="form-section">
-                                <div class="form-section-title">
-                                    <i class="fas fa-cog"></i>
-                                    Additional Details
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="location">Location <span class="required">*</span></label>
-                                    <select id="location" name="location" class="form-control" required>
-                                        <option value="">-- Select Location --</option>
-                                        {% for loc in locations %}
-                                            <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="twelve_nc">12NC Information <span class="optional">(Optional)</span></label>
-                                    <input type="text" id="twelve_nc" name="twelve_nc" class="form-control" value="{{ product.twelve_nc|default:'' }}" placeholder="Enter 12NC or related info">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="description">Description <span class="required">*</span></label>
-                                    <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Enter product description">{{ product.description|default:'' }}</textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Product Images <span class="optional">(Optional, multiple allowed)</span></label>
-                                    <div class="file-upload-wrapper">
-                                        <label class="file-upload-label">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <span><span class="browse-text">Browse</span> or drag files here</span>
-                                            <span style="font-size: 0.75rem; color: var(--text-light);">Supports: JPG, PNG, GIF</span>
-                                        </label>
-                                        <input type="file" id="images" name="images" accept="image/*" multiple>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <a href="{% url 'product_list_stream' stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                {% if edit %}<i class="fas fa-save"></i> Update Product{% else %}<i class="fas fa-plus"></i> Add Product{% endif %}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<style>
+/* ================================================================
+   PRODUCT FORM — Corporate Design System  (Add / Edit)
+   Consistent with sub_level_list, sub_level_tool_list, product_list
+   ================================================================ */
+
+/* ─── Design Tokens ─── */
+:root {
+  --pf-primary: #0066cc;
+  --pf-primary-dark: #004d99;
+  --pf-accent: #0891b2;
+  --pf-accent-dark: #0d9488;
+  --pf-gradient: linear-gradient(135deg, #0066cc 0%, #0891b2 50%, #0d9488 100%);
+  --pf-success: #10b981;
+  --pf-success-light: #d1fae5;
+  --pf-success-dark: #059669;
+  --pf-warning: #f59e0b;
+  --pf-warning-light: #fef3c7;
+  --pf-warning-dark: #d97706;
+  --pf-danger: #ef4444;
+  --pf-danger-light: #fee2e2;
+  --pf-danger-dark: #dc2626;
+  --pf-info: #06b6d4;
+  --pf-info-light: #cffafe;
+  --pf-text: #0f172a;
+  --pf-text-secondary: #475569;
+  --pf-text-muted: #94a3b8;
+  --pf-border: #e2e8f0;
+  --pf-border-medium: #cbd5e1;
+  --pf-bg: #f8fafc;
+  --pf-surface: #ffffff;
+  --pf-shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --pf-shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --pf-shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05);
+  --pf-shadow-lg: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.04);
+  --pf-shadow-xl: 0 20px 25px -5px rgba(0,0,0,.08), 0 8px 10px -6px rgba(0,0,0,.04);
+  --pf-radius-sm: 6px;
+  --pf-radius: 10px;
+  --pf-radius-lg: 14px;
+  --pf-radius-xl: 20px;
+  --pf-transition: .2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Animations ─── */
+@keyframes pfFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+@keyframes pfSlideUp { from { opacity:0; transform:translateY(24px) scale(.98) } to { opacity:1; transform:translateY(0) scale(1) } }
+@keyframes pfCheckPop { 0%{transform:scale(0)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+@keyframes pfShake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }
+@keyframes pfSpin { to { transform: rotate(360deg) } }
+
+/* ─── Reset / Page Wrapper ─── */
+*,*::before,*::after { box-sizing:border-box }
+.pf-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 3rem;
+  min-height: calc(100vh - 60px);
+  font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  color: var(--pf-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Breadcrumbs ─── */
+.pf-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+  font-size: .85rem;
+  color: var(--pf-text-muted);
+}
+.pf-breadcrumb a {
+  color: var(--pf-text-secondary);
+  text-decoration: none;
+  transition: color var(--pf-transition);
+}
+.pf-breadcrumb a:hover { color: var(--pf-primary); }
+.pf-breadcrumb .sep { font-size: .7rem; opacity: .5; }
+.pf-breadcrumb .bc-current { color: var(--pf-primary); font-weight: 600; }
+
+/* ─── Gradient Card Header ─── */
+.pf-header {
+  background: var(--pf-gradient);
+  border-radius: var(--pf-radius-xl);
+  padding: 2rem 2.5rem;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--pf-shadow-lg);
+  position: relative;
+  overflow: hidden;
+  min-height: 100px;
+  animation: pfFadeIn .5s ease both;
+}
+.pf-header, .pf-header h1, .pf-header .subtitle, .pf-header a {
+  color: #fff !important;
+}
+.pf-header::before {
+  content:'';
+  position:absolute;
+  top:-50%; right:-10%;
+  width:300px; height:300px;
+  background:rgba(255,255,255,.05);
+  border-radius:50%;
+  pointer-events:none;
+}
+.pf-header::after {
+  content:'';
+  position:absolute;
+  bottom:-40%; left:20%;
+  width:200px; height:200px;
+  background:rgba(255,255,255,.03);
+  border-radius:50%;
+  pointer-events:none;
+}
+.pf-header-left {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  position:relative;
+  z-index:2;
+}
+.pf-header-left h1 {
+  font-size:1.75rem;
+  font-weight:700;
+  margin:0;
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.pf-header-left .subtitle {
+  font-size:.92rem;
+  opacity:.85;
+  margin-top:.15rem;
+}
+.pf-header-left .pf-stream-tag {
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.2rem .65rem;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:9999px;
+  font-size:.7rem;
+  font-weight:600;
+  color:rgba(255,255,255,.9);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.pf-header-right {
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:2;
+}
+.pf-header-btn {
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  padding:.5rem 1.1rem;
+  border-radius:var(--pf-radius);
+  font-size:.88rem;
+  font-weight:500;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  transition:all var(--pf-transition);
+  font-family:inherit;
+}
+.pf-header-btn:hover { background:rgba(255,255,255,.28); color:#fff; text-decoration:none; }
+.pf-header-btn.primary {
+  background:#fff;
+  color:var(--pf-primary);
+  font-weight:700;
+  border:none;
+  box-shadow:var(--pf-shadow-md);
+}
+.pf-header-btn.primary:hover {
+  background:#f0f4ff;
+  transform:translateY(-2px);
+  box-shadow:var(--pf-shadow-lg);
+  color:var(--pf-primary);
+  text-decoration:none;
+}
+
+/* ─── Progress Steps (visual stepper) ─── */
+.pf-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 1.75rem;
+  animation: pfFadeIn .5s ease .1s both;
+}
+.pf-step {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .65rem 1.25rem;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--pf-text-muted);
+  cursor: pointer;
+  transition: all var(--pf-transition);
+  position: relative;
+  user-select: none;
+}
+.pf-step:first-child { border-radius: var(--pf-radius) 0 0 var(--pf-radius); }
+.pf-step:last-child { border-radius: 0 var(--pf-radius) var(--pf-radius) 0; }
+.pf-step + .pf-step { border-left: none; }
+.pf-step .pf-step-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--pf-border);
+  color: var(--pf-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all var(--pf-transition);
+}
+.pf-step.active {
+  background: rgba(0,102,204,.06);
+  border-color: var(--pf-primary);
+  color: var(--pf-primary);
+  font-weight: 600;
+  z-index: 1;
+}
+.pf-step.active .pf-step-num {
+  background: var(--pf-primary);
+  color: #fff;
+}
+.pf-step.completed {
+  color: var(--pf-success-dark);
+}
+.pf-step.completed .pf-step-num {
+  background: var(--pf-success);
+  color: #fff;
+}
+
+/* ─── Form Card ─── */
+.pf-card {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-xl);
+  box-shadow: var(--pf-shadow-md);
+  overflow: hidden;
+  animation: pfSlideUp .5s ease .15s both;
+}
+.pf-card-header {
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--pf-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--pf-bg);
+}
+.pf-card-title {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--pf-text);
+}
+.pf-card-title i {
+  width: 36px; height: 36px;
+  background: var(--pf-gradient);
+  border-radius: var(--pf-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: .9rem;
+}
+.pf-card-subtitle {
+  font-size: .8rem;
+  color: var(--pf-text-muted);
+  font-weight: 400;
+}
+.pf-card-body {
+  padding: 2rem;
+}
+
+/* ─── Alert Messages ─── */
+.pf-alerts { margin-bottom: 1.5rem; display:flex; flex-direction:column; gap:.5rem; }
+.pf-alert {
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  padding:.85rem 1.25rem;
+  border-radius:var(--pf-radius);
+  font-size:.88rem;
+  font-weight:500;
+  animation: pfShake .4s ease;
+}
+.pf-alert.error {
+  background:var(--pf-danger-light);
+  border:1px solid #fecaca;
+  color:var(--pf-danger-dark);
+}
+.pf-alert.warning {
+  background:var(--pf-warning-light);
+  border:1px solid #fde68a;
+  color:var(--pf-warning-dark);
+}
+.pf-alert.success {
+  background:var(--pf-success-light);
+  border:1px solid #a7f3d0;
+  color:var(--pf-success-dark);
+}
+.pf-alert i { font-size:1rem; flex-shrink:0; }
+
+/* ─── Section Panels ─── */
+.pf-section-panel {
+  display: none;
+}
+.pf-section-panel.active {
+  display: block;
+  animation: pfFadeIn .35s ease both;
+}
+
+/* ─── Form Grid ─── */
+.pf-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+.pf-form-grid.single { grid-template-columns: 1fr; }
+.pf-form-full { grid-column: 1 / -1; }
+
+/* ─── Section Title ─── */
+.pf-section-title {
+  grid-column: 1 / -1;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--pf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding-bottom: .65rem;
+  border-bottom: 1px solid var(--pf-border);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .25rem;
+}
+.pf-section-title i { color: var(--pf-primary); font-size: .85rem; }
+
+/* ─── Form Group ─── */
+.pf-group {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+.pf-group label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--pf-text);
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+.pf-group label .req { color: var(--pf-danger); font-size: .85rem; }
+.pf-group label .opt { color: var(--pf-text-muted); font-size: .72rem; font-weight: 400; }
+.pf-group .pf-hint {
+  font-size: .76rem;
+  color: var(--pf-text-muted);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.pf-group .pf-hint i { font-size: .7rem; }
+
+/* ─── Inputs ─── */
+.pf-input,
+.pf-select,
+.pf-textarea {
+  width: 100%;
+  padding: .75rem 1rem;
+  border: 1.5px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  font-size: .9rem;
+  font-family: inherit;
+  background: var(--pf-bg);
+  color: var(--pf-text);
+  transition: all var(--pf-transition);
+}
+.pf-page .pf-card-body input[type="text"].pf-input,
+.pf-page .pf-card-body input[type="number"].pf-input {
+  padding: .75rem 1rem !important;
+}
+.pf-input:focus,
+.pf-select:focus,
+.pf-textarea:focus {
+  border-color: var(--pf-primary);
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,102,204,.1);
+}
+.pf-input::placeholder,
+.pf-textarea::placeholder { color: var(--pf-text-muted); }
+.pf-input:disabled,
+.pf-select:disabled {
+  background: #f1f5f9;
+  color: var(--pf-text-secondary);
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+.pf-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.pf-textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* ─── Category Badge ─── */
+.pf-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .6rem 1.15rem;
+  background: linear-gradient(135deg, rgba(0,102,204,.08) 0%, rgba(8,145,178,.08) 100%);
+  border: 1px solid rgba(0,102,204,.2);
+  border-radius: var(--pf-radius);
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--pf-primary-dark);
+}
+.pf-category-badge i { font-size: .85rem; color: var(--pf-primary); }
+.pf-category-badge .cat-serial {
+  font-size: .75rem;
+  color: var(--pf-text-muted);
+  font-weight: 400;
+  margin-left: .15rem;
+}
+
+/* ─── Status Selector ─── */
+.pf-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .65rem;
+}
+.pf-status-option {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .7rem 1rem;
+  border: 1.5px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  cursor: pointer;
+  transition: all var(--pf-transition);
+  background: var(--pf-surface);
+  user-select: none;
+}
+.pf-status-option:hover { border-color: var(--pf-border-medium); background: var(--pf-bg); }
+.pf-status-option input[type="radio"] { display: none; }
+.pf-status-option .pf-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--pf-border-medium);
+  transition: all var(--pf-transition);
+  flex-shrink: 0;
+}
+.pf-status-option .pf-status-label {
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--pf-text-secondary);
+  transition: color var(--pf-transition);
+}
+.pf-status-option.selected {
+  border-color: var(--dot-color, var(--pf-primary));
+  background: var(--dot-bg, rgba(0,102,204,.04));
+}
+.pf-status-option.selected .pf-status-dot {
+  border-color: var(--dot-color, var(--pf-primary));
+  background: var(--dot-color, var(--pf-primary));
+  box-shadow: 0 0 0 3px var(--dot-bg, rgba(0,102,204,.15));
+}
+.pf-status-option.selected .pf-status-label {
+  color: var(--pf-text);
+  font-weight: 600;
+}
+
+/* Status colors */
+.pf-status-option[data-status="Active"]       { --dot-color: #10b981; --dot-bg: #ecfdf5; }
+.pf-status-option[data-status="Not Active"]   { --dot-color: #ef4444; --dot-bg: #fef2f2; }
+.pf-status-option[data-status="Scraped"]      { --dot-color: #f59e0b; --dot-bg: #fffbeb; }
+.pf-status-option[data-status="Hand-Overed"]  { --dot-color: #0B5FFF; --dot-bg: #eef4ff; }
+.pf-status-option[data-status="Issue"]        { --dot-color: #c82333; --dot-bg: #fff1f2; }
+
+/* ─── Conditional Panels ─── */
+.pf-cond-panel {
+  padding: 1.15rem 1.25rem;
+  border-radius: var(--pf-radius);
+  margin-top: .5rem;
+  animation: pfFadeIn .3s ease both;
+}
+.pf-cond-panel.handover {
+  background: #eef4ff;
+  border: 1px solid #ddd6fe;
+}
+.pf-cond-panel.issue {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+.pf-cond-panel .pf-cond-title {
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.pf-cond-panel.handover .pf-cond-title { color: #0044CC; }
+.pf-cond-panel.issue .pf-cond-title { color: #c82333; }
+
+/* ─── File Upload ─── */
+.pf-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  padding: 1.75rem;
+  border: 2px dashed var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  background: var(--pf-bg);
+  cursor: pointer;
+  transition: all var(--pf-transition);
+  position: relative;
+}
+.pf-upload-zone:hover {
+  border-color: var(--pf-primary);
+  background: rgba(0,102,204,.03);
+}
+.pf-upload-zone.dragover {
+  border-color: var(--pf-primary);
+  background: rgba(0,102,204,.06);
+  transform: scale(1.01);
+}
+.pf-upload-zone i.upload-icon { font-size: 2rem; color: var(--pf-text-muted); transition: color var(--pf-transition); }
+.pf-upload-zone:hover i.upload-icon { color: var(--pf-primary); }
+.pf-upload-zone .upload-text { font-size: .88rem; color: var(--pf-text-secondary); text-align: center; }
+.pf-upload-zone .upload-text .browse { color: var(--pf-primary); font-weight: 600; }
+.pf-upload-zone .upload-hint { font-size: .75rem; color: var(--pf-text-muted); }
+.pf-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* File preview list */
+.pf-file-previews {
+  margin-top: .75rem;
+}
+.pf-file-previews.active { display: block; }
+.pf-file-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+}
+.pf-file-count {
+  font-size: .8rem;
+  color: var(--pf-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.pf-file-count i { color: var(--pf-success); }
+.pf-clear-files {
+  font-size: .78rem;
+  color: var(--pf-danger);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  transition: all var(--pf-transition);
+  font-family: inherit;
+}
+.pf-clear-files:hover { text-decoration: underline; }
+.pf-file-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.pf-file-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+  position: relative;
+}
+.pf-file-item .thumb {
+  width: 90px; height: 90px;
+  border-radius: var(--pf-radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--pf-border);
+  position: relative;
+}
+.pf-file-item .thumb img { width:100%; height:100%; object-fit:cover; }
+.pf-file-item .fname {
+  font-size: .68rem;
+  color: var(--pf-text-secondary);
+  text-align: center;
+  margin-top: .2rem;
+  word-break: break-all;
+  line-height: 1.2;
+  max-height: 2.4em;
+  overflow: hidden;
+}
+.pf-file-item .remove-btn {
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--pf-danger);
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: .55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--pf-transition);
+  z-index: 2;
+}
+.pf-file-item .remove-btn:hover { transform:scale(1.15); box-shadow:0 2px 8px rgba(239,68,68,.4); }
+.pf-file-item .prog-bar {
+  width:100%; height:3px;
+  background:var(--pf-border);
+  border-radius:2px;
+  margin-top:.2rem;
+  overflow:hidden;
+}
+.pf-file-item .prog-fill {
+  height:100%; width:0%;
+  background:linear-gradient(90deg,var(--pf-primary),var(--pf-accent));
+  border-radius:2px;
+  transition:width .3s ease;
+}
+.pf-file-item .prog-fill.done { background:var(--pf-success); }
+
+/* Existing images */
+.pf-existing-images { margin-bottom: 1rem; }
+.pf-existing-label {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--pf-text-secondary);
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.pf-existing-label .hint { font-weight:400; font-size:.72rem; color:var(--pf-text-muted); margin-left:.5rem; }
+.pf-existing-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.pf-existing-thumb {
+  position: relative;
+  width: 90px; height: 90px;
+  border-radius: var(--pf-radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--pf-border);
+  transition: all var(--pf-transition);
+}
+.pf-existing-thumb:hover { border-color:var(--pf-primary); transform:scale(1.05); box-shadow:0 4px 12px rgba(0,0,0,.15); }
+.pf-existing-thumb img { width:100%; height:100%; object-fit:cover; }
+.pf-existing-thumb .overlay {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.5);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition: opacity var(--pf-transition);
+}
+.pf-existing-thumb:hover .overlay { opacity:1; }
+.pf-existing-thumb .overlay i { color:#fff; font-size:1.2rem; }
+.pf-existing-thumb .del-btn {
+  position:absolute; top:2px; right:2px;
+  width:22px; height:22px;
+  border-radius:50%;
+  background:var(--pf-danger); color:#fff;
+  border:2px solid #fff;
+  font-size:.6rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:all var(--pf-transition);
+  z-index:3;
+  opacity:0;
+}
+.pf-existing-thumb:hover .del-btn { opacity:1; }
+.pf-existing-thumb .del-btn:hover { transform:scale(1.15); box-shadow:0 2px 8px rgba(239,68,68,.4); }
+.pf-existing-thumb.marked-delete {
+  border-color:var(--pf-danger);
+  opacity:.45;
+  filter:grayscale(.6);
+}
+.pf-existing-thumb.marked-delete .del-btn { opacity:1; background:var(--pf-success); }
+
+/* ─── Form Actions ─── */
+.pf-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--pf-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.pf-actions-right { display:flex; gap:.75rem; align-items:center; }
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding: .75rem 1.75rem;
+  border-radius: var(--pf-radius);
+  font-size: .9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--pf-transition);
+  border: none;
+  text-decoration: none;
+}
+.pf-btn-primary {
+  background: var(--pf-gradient);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,102,204,.25);
+}
+.pf-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,102,204,.35);
+  color: #fff;
+  text-decoration: none;
+}
+.pf-btn-primary:active { transform: translateY(0); }
+.pf-btn-primary i { transition: transform var(--pf-transition); }
+.pf-btn-primary:hover i { transform: translateX(2px); }
+.pf-btn-secondary {
+  background: var(--pf-surface);
+  color: var(--pf-text-secondary);
+  border: 1.5px solid var(--pf-border);
+}
+.pf-btn-secondary:hover {
+  background: var(--pf-bg);
+  color: var(--pf-text);
+  border-color: var(--pf-border-medium);
+  text-decoration: none;
+}
+.pf-btn-draft {
+  background: var(--pf-warning-light);
+  color: var(--pf-warning-dark);
+  border: 1.5px solid var(--pf-warning);
+}
+.pf-btn-draft:hover {
+  background: var(--pf-warning);
+  color: #fff;
+  border-color: var(--pf-warning-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245,158,11,.3);
+}
+.pf-btn-draft:active { transform: translateY(0); }
+.pf-btn-draft i { transition: transform var(--pf-transition); }
+.pf-btn-outline-danger {
+  background: transparent;
+  color: var(--pf-danger);
+  border: 1.5px solid var(--pf-danger-light);
+}
+.pf-btn-outline-danger:hover {
+  background: var(--pf-danger-light);
+  border-color: var(--pf-danger);
+}
+
+/* ─── Summary sidebar (right column) ─── */
+.pf-summary-card {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--pf-shadow-sm);
+  position: sticky;
+  top: calc(60px + 2rem);
+}
+.pf-summary-title {
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--pf-text-muted);
+  margin-bottom: .85rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.pf-summary-title i { color: var(--pf-primary); }
+.pf-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--pf-border);
+  font-size: .82rem;
+}
+.pf-summary-row:last-child { border-bottom: none; }
+.pf-summary-row .label { color: var(--pf-text-muted); font-weight: 500; }
+.pf-summary-row .value { color: var(--pf-text); font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+.pf-summary-row .value.empty { color: var(--pf-text-muted); font-style: italic; font-weight: 400; }
+
+/* ─── Toast ─── */
+.pf-toast-container {
+  position:fixed; top:80px; right:1.5rem;
+  z-index:10000;
+  display:flex; flex-direction:column; gap:.5rem;
+}
+.pf-toast {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.75rem 1.25rem;
+  background:var(--pf-surface);
+  border:1px solid var(--pf-border);
+  border-radius:var(--pf-radius);
+  box-shadow:var(--pf-shadow-lg);
+  font-size:.85rem; font-weight:500;
+  color:var(--pf-text);
+  animation:pfFadeIn .3s ease both;
+  max-width:360px;
+}
+.pf-toast.error { border-left:4px solid var(--pf-danger); }
+.pf-toast.success { border-left:4px solid var(--pf-success); }
+.pf-toast.warning { border-left:4px solid var(--pf-warning); }
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .pf-page { padding-left: 1rem; padding-right: 1rem; }
+  .pf-form-grid { grid-template-columns: 1fr; }
+  .pf-header { padding: 1.5rem 1.5rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .pf-header-left h1 { font-size: 1.4rem; }
+  .pf-header-right { width: 100%; justify-content: flex-end; }
+  .pf-card-body { padding: 1.25rem; }
+  .pf-actions { flex-direction: column-reverse; align-items: stretch; }
+  .pf-actions-right { justify-content: stretch; }
+  .pf-actions-right .pf-btn { flex: 1; }
+  .pf-stepper { flex-wrap: wrap; gap: .5rem; }
+  .pf-step { flex: 1; min-width: 0; justify-content: center; border-radius: var(--pf-radius) !important; border-left: 1px solid var(--pf-border) !important; }
+  .pf-status-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .pf-status-grid { grid-template-columns: 1fr; }
+  .pf-header-left h1 { font-size: 1.2rem; flex-wrap: wrap; }
+}
+</style>
+
+<!-- ═══════════════════════ HTML ═══════════════════════ -->
+<div class="pf-page">
+
+  <!-- Gradient Card Header -->
+  <section class="pf-header">
+    <div class="pf-header-left">
+      <div>
+        <h1>
+          <i class="fas {% if edit %}fa-pen-to-square{% else %}fa-plus-circle{% endif %}"></i>
+          {% if edit %}Edit Product{% else %}Add New Product{% endif %}
+          <span class="pf-stream-tag"><i class="fas fa-stream"></i> {{ selected_stream }}</span>
+        </h1>
+        <div class="subtitle">
+          {% if edit %}
+            Update product details and specifications for <strong>{{ product.name }}</strong>
+          {% else %}
+            Fill in the details to register a new product in the inventory
+            {% if selected_category %}&mdash; <strong>{{ selected_category.name }}</strong>{% endif %}
+          {% endif %}
         </div>
+      </div>
     </div>
+    <div class="pf-header-right">
+      <a href="{% url 'product_list_stream' selected_stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="pf-header-btn">
+        <i class="fas fa-arrow-left"></i> Back to List
+      </a>
+    </div>
+  </section>
+
+  <!-- Progress Stepper -->
+  <div class="pf-stepper" id="pfStepper">
+    <div class="pf-step active" data-step="1" onclick="pfGoStep(1)">
+      <span class="pf-step-num">1</span>
+      <span>Basic Info</span>
+    </div>
+    <div class="pf-step" data-step="2" onclick="pfGoStep(2)">
+      <span class="pf-step-num">2</span>
+      <span>Details &amp; Location</span>
+    </div>
+    <div class="pf-step" data-step="3" onclick="pfGoStep(3)">
+      <span class="pf-step-num">3</span>
+      <span>Images &amp; Review</span>
+    </div>
+  </div>
+
+  <!-- Main Form Card -->
+  <div class="pf-card">
+    <div class="pf-card-body">
+
+      {% if form_error %}
+      <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+          <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+      </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" id="pfForm">
+        {% csrf_token %}
+        <input type="hidden" name="stream" value="{{ stream }}">
+        <input type="hidden" name="save_as_draft" id="pfSaveAsDraft" value="0">
+
+        <!-- ─── STEP 1: Basic Information ─── -->
+        <div class="pf-section-panel active" id="pfStep1">
+          <div class="pf-form-grid">
+            <div class="pf-section-title">
+              <i class="fas fa-info-circle"></i> Basic Information
+            </div>
+
+            <!-- Category -->
+            <div class="pf-group">
+              <label>Category</label>
+              {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category.id }}">
+                <div class="pf-category-badge">
+                  <i class="fas fa-folder-open"></i>
+                  {{ selected_category.name }}
+                  <span class="cat-serial">({{ selected_category.serial_number }})</span>
+                </div>
+              {% elif product and product.category %}
+                <input type="hidden" name="category" value="{{ product.category.id }}">
+                <div class="pf-category-badge">
+                  <i class="fas fa-folder-open"></i>
+                  {{ product.category.name }}
+                  <span class="cat-serial">({{ product.category.serial_number }})</span>
+                </div>
+              {% else %}
+                <div class="pf-hint" style="color:var(--pf-warning-dark);">
+                  <i class="fas fa-exclamation-triangle"></i> No category selected. Please go back and select a category.
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Product Name -->
+            <div class="pf-group">
+              <label for="pf-name">Product Name <span class="req">*</span></label>
+              <input type="text" id="pf-name" name="name" class="pf-input" required
+                     value="{{ product.name|default:'' }}"
+                     placeholder="e.g. Philips Hue Bridge 2.0"
+                     oninput="pfUpdateSummary()">
+              <div class="pf-hint"><i class="fas fa-lightbulb"></i> Enter a clear, descriptive product name</div>
+            </div>
+
+            <!-- Product Number -->
+            <div class="pf-group">
+              <label for="pf-serial">Product Number / ID <span class="req">*</span></label>
+              <input type="text" id="pf-serial" name="serial_number" class="pf-input" required
+                     value="{{ product.serial_number|default:next_serial }}"
+                     placeholder="e.g. PRD-001"
+                     oninput="pfUpdateSummary()">
+              {% if next_serial %}
+                <div class="pf-hint"><i class="fas fa-magic"></i> Auto-suggested: {{ next_serial }}</div>
+              {% else %}
+                <div class="pf-hint"><i class="fas fa-barcode"></i> Unique identifier for this product</div>
+              {% endif %}
+            </div>
+
+            <!-- Status -->
+            <div class="pf-group pf-form-full">
+              <label>Status <span class="req">*</span></label>
+              <input type="hidden" name="status" id="pf-status-hidden"
+                     value="{% if product.status %}{{ product.status }}{% else %}Active{% endif %}">
+              <div class="pf-status-grid" id="pfStatusGrid">
+                <label class="pf-status-option{% if product.status == 'Active' or not product.status %} selected{% endif %}" data-status="Active">
+                  <input type="radio" name="_status_radio" value="Active" {% if product.status == 'Active' or not product.status %}checked{% endif %}>
+                  <span class="pf-status-dot"></span>
+                  <span class="pf-status-label">Active</span>
+                </label>
+                <label class="pf-status-option{% if product.status == 'Not Active' %} selected{% endif %}" data-status="Not Active">
+                  <input type="radio" name="_status_radio" value="Not Active" {% if product.status == 'Not Active' %}checked{% endif %}>
+                  <span class="pf-status-dot"></span>
+                  <span class="pf-status-label">Not Active</span>
+                </label>
+                <label class="pf-status-option{% if product.status == 'Scraped' %} selected{% endif %}" data-status="Scraped">
+                  <input type="radio" name="_status_radio" value="Scraped" {% if product.status == 'Scraped' %}checked{% endif %}>
+                  <span class="pf-status-dot"></span>
+                  <span class="pf-status-label">Scraped</span>
+                </label>
+                <label class="pf-status-option{% if product.status == 'Hand-Overed' %} selected{% endif %}" data-status="Hand-Overed">
+                  <input type="radio" name="_status_radio" value="Hand-Overed" {% if product.status == 'Hand-Overed' %}checked{% endif %}>
+                  <span class="pf-status-dot"></span>
+                  <span class="pf-status-label">Hand-Overed</span>
+                </label>
+                <label class="pf-status-option{% if product.status == 'Issue' %} selected{% endif %}" data-status="Issue">
+                  <input type="radio" name="_status_radio" value="Issue" {% if product.status == 'Issue' %}checked{% endif %}>
+                  <span class="pf-status-dot"></span>
+                  <span class="pf-status-label">Issue</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Hand-Overed Conditional -->
+            <div class="pf-form-full" id="pfHandoverPanel" style="display:none;">
+              <div class="pf-cond-panel handover">
+                <div class="pf-cond-title"><i class="fas fa-hand-holding"></i> Handover Details</div>
+                <div class="pf-form-grid">
+                  <div class="pf-group">
+                    <label for="pf-handover-type">Assigning Team</label>
+                    <select id="pf-handover-type" name="handover_team_type" class="pf-select" onchange="pfToggleExternalTeam()">
+                      <option value="Internal" {% if product and product.handover_team_type == 'Internal' %}selected{% endif %}>Internal</option>
+                      <option value="External" {% if product and product.handover_team_type == 'External' %}selected{% endif %}>External</option>
+                    </select>
+                  </div>
+                  <div class="pf-group" id="pfHandoverStreamField" style="display:none;">
+                    <label for="pf-handover-stream">Handover to Stream <span class="req">*</span></label>
+                    <select id="pf-handover-stream" name="handover_stream" class="pf-select" onchange="pfToggleExternalTeam()">
+                      <option value="">-- Confirm Target Stream --</option>
+                      {% for s in all_streams %}
+                      <option value="{{ s.id }}" {% if product and product.handover_stream_id == s.id %}selected{% elif s.name == stream %}selected{% endif %}>
+                        {{ s.name }}{% if s.name == stream %} (Current){% endif %}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <small style="color:var(--pf-text3,#888); margin-top:0.25rem; display:block;">
+                      Select the stream this product will be handed over to
+                    </small>
+                  </div>
+                  <div class="pf-group" id="pfExternalTeamField" style="display:none;">
+                    <label for="pf-ext-team">External Team Name</label>
+                    <input type="text" id="pf-ext-team" name="handover_external_team" class="pf-input"
+                           value="{{ product.handover_external_team|default:'' }}"
+                           placeholder="Enter external team name">
+                  </div>
+                  <div class="pf-group" id="pfOwnerField" style="display:none; grid-column: 1 / -1; margin-top: -2rem;">
+                    <label id="pfOwnerLabel" for="pf-owner">Assignee / Owner</label>
+                    <input type="text" id="pf-owner" name="handover_owner" class="pf-input"
+                           value="{{ product.handover_owner|default:'' }}"
+                           placeholder="Enter assignee name">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Issue Conditional -->
+            <div class="pf-form-full" id="pfIssuePanel" style="display:none;">
+              <div class="pf-cond-panel issue">
+                <div class="pf-cond-title"><i class="fas fa-exclamation-triangle"></i> Issue Details</div>
+                <div class="pf-group">
+                  <label for="pf-issue-desc">Issue Description <span class="req">*</span></label>
+                  <textarea id="pf-issue-desc" name="issue_description" class="pf-textarea" rows="4"
+                            placeholder="Describe the issue in detail...">{{ product.issue_description|default:'' }}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1 Nav -->
+          <div class="pf-actions" style="border-top:none; margin-top:1.5rem; padding-top:0;">
+            <div></div>
+            <div class="pf-actions-right">
+              <button type="button" class="pf-btn pf-btn-draft" onclick="pfSaveDraft()">
+                <i class="fas fa-file-alt"></i> Save Draft
+              </button>
+              <button type="button" class="pf-btn pf-btn-primary" onclick="pfGoStep(2)">
+                Continue <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 2: Details & Location ─── -->
+        <div class="pf-section-panel" id="pfStep2">
+          <div class="pf-form-grid">
+            <div class="pf-section-title">
+              <i class="fas fa-cog"></i> Additional Details
+            </div>
+
+            <!-- Location -->
+            <div class="pf-group">
+              <label for="pf-location">Location <span class="req">*</span></label>
+              <select id="pf-location" name="location" class="pf-select" required onchange="pfUpdateSummary()">
+                <option value="">-- Select Location --</option>
+                {% for loc in locations %}
+                  <option value="{{ loc.id }}" {% if product.location and product.location.id == loc.id %}selected{% endif %}>{{ loc.name }}{% if loc.address %} ({{ loc.address }}){% endif %}</option>
+                {% endfor %}
+              </select>
+              <div class="pf-hint"><i class="fas fa-map-marker-alt"></i> Where is this product physically stored?</div>
+            </div>
+
+            <!-- 12NC -->
+            <div class="pf-group">
+              <label for="pf-twelve-nc">12NC Information <span class="opt">(Optional)</span></label>
+              <input type="text" id="pf-twelve-nc" name="twelve_nc" class="pf-input"
+                     value="{{ product.twelve_nc|default:'' }}"
+                     placeholder="e.g. 4322 234 12345"
+                     oninput="pfUpdateSummary()">
+              <div class="pf-hint"><i class="fas fa-hashtag"></i> Philips 12-digit Numeric Code</div>
+            </div>
+
+            <!-- Serial Number -->
+            <div class="pf-group">
+              <label for="pf-device-serial">Serial Number <span class="opt">(Optional)</span></label>
+              <input type="text" id="pf-device-serial" name="device_serial_number" class="pf-input"
+                     value="{{ product.device_serial_number|default:'' }}"
+                     placeholder="e.g. SN-20260306-001"
+                     oninput="pfUpdateSummary()">
+              <div class="pf-hint"><i class="fas fa-barcode"></i> Device / equipment serial number</div>
+            </div>
+
+            <!-- Description -->
+            <div class="pf-group pf-form-full">
+              <label for="pf-description">Description <span class="req">*</span></label>
+              <textarea id="pf-description" name="description" class="pf-textarea" rows="5" required
+                        placeholder="Enter a detailed product description including specifications, features, or notes..."
+                        oninput="pfUpdateSummary()">{{ product.description|default:'' }}</textarea>
+              <div class="pf-hint"><i class="fas fa-align-left"></i> Provide key details about the product</div>
+            </div>
+          </div>
+
+          <!-- Step 2 Nav -->
+          <div class="pf-actions" style="border-top:none; margin-top:1.5rem; padding-top:0;">
+            <button type="button" class="pf-btn pf-btn-secondary" onclick="pfGoStep(1)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div class="pf-actions-right">
+              <button type="button" class="pf-btn pf-btn-draft" onclick="pfSaveDraft()">
+                <i class="fas fa-file-alt"></i> Save Draft
+              </button>
+              <button type="button" class="pf-btn pf-btn-primary" onclick="pfGoStep(3)">
+                Continue <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STEP 3: Images & Review ─── -->
+        <div class="pf-section-panel" id="pfStep3">
+          <div class="pf-form-grid">
+            <div class="pf-section-title">
+              <i class="fas fa-images"></i> Product Images &amp; Final Review
+            </div>
+
+            <!-- Images Upload -->
+            <div class="pf-group pf-form-full">
+              <label>Product Images <span class="opt">(Optional, multiple allowed)</span></label>
+
+              {% if edit and product.images.all %}
+              <div class="pf-existing-images">
+                <div class="pf-existing-label">
+                  <i class="fas fa-images"></i> Current Images ({{ product.images.count }})
+                  <span class="hint">Click &times; to mark for removal</span>
+                </div>
+                <div class="pf-existing-grid">
+                  {% for img in product.images.all %}
+                  <div class="pf-existing-thumb" id="existing-img-{{ img.id }}">
+                    <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
+                    <a href="{{ img.image.url }}" target="_blank" class="overlay"><i class="fas fa-expand"></i></a>
+                    <input type="checkbox" name="delete_images" value="{{ img.id }}" id="del-img-{{ img.id }}" style="display:none;">
+                    <span class="del-btn" onclick="pfToggleDeleteImg({{ img.id }})" title="Remove"><i class="fas fa-times"></i></span>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="pf-upload-zone" id="pfUploadZone">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <div class="upload-text"><span class="browse">Browse</span> or drag files here</div>
+                <div class="upload-hint">Supports: JPG, PNG, GIF &middot; Max 10MB each</div>
+                <input type="file" id="pfImages" name="images" accept="image/*" multiple>
+              </div>
+
+              <div class="pf-file-previews" id="pfFilePreviews" style="display:none;">
+                <div class="pf-file-meta">
+                  <div class="pf-file-count" id="pfFileCount"></div>
+                  <button type="button" class="pf-clear-files" id="pfClearFiles"><i class="fas fa-trash-alt"></i> Clear All</button>
+                </div>
+                <div class="pf-file-grid" id="pfFileGrid"></div>
+              </div>
+            </div>
+
+            <!-- Review Summary -->
+            <div class="pf-form-full">
+              <div class="pf-summary-card" id="pfSummaryCard">
+                <div class="pf-summary-title"><i class="fas fa-clipboard-check"></i> Product Summary</div>
+                <div class="pf-summary-row">
+                  <span class="label">Category</span>
+                  <span class="value" id="sumCategory">
+                    {% if selected_category %}{{ selected_category.name }}{% elif product and product.category %}{{ product.category.name }}{% else %}<span class="empty">Not set</span>{% endif %}
+                  </span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Product Name</span>
+                  <span class="value" id="sumName"><span class="empty">Not entered</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Product Number</span>
+                  <span class="value" id="sumSerial"><span class="empty">Not entered</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Status</span>
+                  <span class="value" id="sumStatus">Active</span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Location</span>
+                  <span class="value" id="sumLocation"><span class="empty">Not selected</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">12NC</span>
+                  <span class="value" id="sum12NC"><span class="empty">Not entered</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Serial Number</span>
+                  <span class="value" id="sumDeviceSerial"><span class="empty">Not entered</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Description</span>
+                  <span class="value" id="sumDesc"><span class="empty">Not entered</span></span>
+                </div>
+                <div class="pf-summary-row">
+                  <span class="label">Images</span>
+                  <span class="value" id="sumImages">0 files</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 Nav / Submit -->
+          <div class="pf-actions">
+            <button type="button" class="pf-btn pf-btn-secondary" onclick="pfGoStep(2)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div class="pf-actions-right">
+              <a href="{% url 'product_list_stream' selected_stream %}{% if selected_category %}?category={{ selected_category.id }}{% elif product and product.category %}?category={{ product.category.id }}{% endif %}" class="pf-btn pf-btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+              </a>
+              <button type="button" class="pf-btn pf-btn-draft" id="pfDraftBtn" onclick="pfSaveDraft()">
+                <i class="fas fa-file-alt"></i> Save Draft
+              </button>
+              <button type="submit" class="pf-btn pf-btn-primary" id="pfSubmitBtn">
+                {% if edit %}<i class="fas fa-save"></i> Update Product{% else %}<i class="fas fa-plus"></i> Add Product{% endif %}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="pf-toast-container" id="pfToastContainer"></div>
 
 <script>
-    // Hand-Overed status logic
-    function toggleHandedOverFields() {
-      var status = document.getElementById('status').value;
-      var handoverFields = document.getElementById('handedOverFields');
-      var normalized = status.replace(/[-\s]/g, '').toLowerCase();
-      var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
-      if (isHandedOver) {
-        handoverFields.style.display = '';
-      } else {
-        handoverFields.style.display = 'none';
-      }
-      toggleExternalTeamField();
-    }
-    window.toggleHandedOverFields = toggleHandedOverFields;
+(function() {
+  'use strict';
 
-    function toggleExternalTeamField() {
-      var teamType = document.getElementById('handover_team_type');
-      var externalField = document.getElementById('externalTeamField');
-      var ownerField = document.getElementById('handoverOwnerField');
-      var ownerLabel = document.getElementById('handoverOwnerLabel');
-      var ownerInput = document.getElementById('handover_owner');
-      var status = document.getElementById('status') ? document.getElementById('status').value : '';
-      var normalized = status.replace(/[-\s]/g, '').toLowerCase();
-      var isHandedOver = (normalized === 'handovered' || normalized === 'handedover');
-      
-      if (!isHandedOver) {
-        if (ownerField) ownerField.style.display = 'none';
-        if (ownerInput) ownerInput.required = false;
+  /* ─── Helpers ─── */
+  var $ = function(sel, ctx) { return (ctx || document).querySelector(sel); };
+  var $$ = function(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); };
+
+  /* ─── Step Navigation ─── */
+  var currentStep = 1;
+
+  window.pfGoStep = function(step) {
+    // Validate before moving forward
+    if (step > currentStep) {
+      for (var s = currentStep; s < step; s++) {
+        if (!pfValidateStep(s)) return;
+      }
+    }
+    currentStep = step;
+    // Update panels
+    $$('.pf-section-panel').forEach(function(p) { p.classList.remove('active'); });
+    var panel = $('#pfStep' + step);
+    if (panel) panel.classList.add('active');
+    // Update stepper
+    $$('.pf-step').forEach(function(s) {
+      var sn = parseInt(s.dataset.step);
+      s.classList.remove('active','completed');
+      if (sn === step) s.classList.add('active');
+      else if (sn < step) s.classList.add('completed');
+    });
+    // Update summary on step 3
+    if (step === 3) pfUpdateSummary();
+    // Scroll to top of card
+    var card = $('.pf-card');
+    if (card) card.scrollIntoView({ behavior:'smooth', block:'start' });
+  };
+
+  function pfValidateStep(step) {
+    if (step === 1) {
+      var catInput = document.querySelector('input[name="category"]');
+      if (!catInput || !catInput.value) {
+        var catHint = document.querySelector('.pf-category-badge, .pf-hint');
+        if (catHint) pfShake(catHint);
+        alert('Please select a category before continuing.');
+        return false;
+      }
+      var name = $('#pf-name');
+      var serial = $('#pf-serial');
+      if (name && !name.value.trim()) { name.focus(); pfShake(name); return false; }
+      if (serial && !serial.value.trim()) { serial.focus(); pfShake(serial); return false; }
+      return true;
+    }
+    if (step === 2) {
+      var loc = $('#pf-location');
+      var desc = $('#pf-description');
+      if (loc && !loc.value) { loc.focus(); pfShake(loc); return false; }
+      if (desc && !desc.value.trim()) { desc.focus(); pfShake(desc); return false; }
+      return true;
+    }
+    return true;
+  }
+
+  function pfShake(el) {
+    el.style.animation = 'pfShake .4s ease';
+    el.style.borderColor = 'var(--pf-danger)';
+    setTimeout(function() {
+      el.style.animation = '';
+      el.style.borderColor = '';
+    }, 600);
+  }
+
+  /* ─── Status Radio Cards ─── */
+  var statusGrid = $('#pfStatusGrid');
+  var statusHidden = $('#pf-status-hidden');
+  if (statusGrid) {
+    $$('.pf-status-option', statusGrid).forEach(function(opt) {
+      opt.addEventListener('click', function() {
+        $$('.pf-status-option', statusGrid).forEach(function(o) { o.classList.remove('selected'); });
+        opt.classList.add('selected');
+        var radio = $('input[type="radio"]', opt);
+        if (radio) { radio.checked = true; statusHidden.value = radio.value; }
+        pfToggleConditionalPanels();
+        pfUpdateSummary();
+      });
+    });
+  }
+
+  function pfToggleConditionalPanels() {
+    var status = statusHidden ? statusHidden.value : 'Active';
+    var handoverPanel = $('#pfHandoverPanel');
+    var issuePanel = $('#pfIssuePanel');
+    var issueDesc = $('#pf-issue-desc');
+
+    var isHandover = status.replace(/[-\s]/g,'').toLowerCase() === 'handovered';
+    if (handoverPanel) handoverPanel.style.display = isHandover ? '' : 'none';
+    if (issuePanel) issuePanel.style.display = status === 'Issue' ? '' : 'none';
+    if (issueDesc) issueDesc.required = status === 'Issue';
+
+    if (isHandover) pfToggleExternalTeam();
+  }
+
+  window.pfToggleExternalTeam = function() {
+    var type = $('#pf-handover-type');
+    var extField = $('#pfExternalTeamField');
+    var streamField = $('#pfHandoverStreamField');
+    var ownerField = $('#pfOwnerField');
+    var ownerLabel = $('#pfOwnerLabel');
+    var ownerInput = $('#pf-owner');
+    var status = statusHidden ? statusHidden.value : '';
+    var isHandover = status.replace(/[-\s]/g,'').toLowerCase() === 'handovered';
+
+    if (!isHandover) {
+      if (ownerField) ownerField.style.display = 'none';
+      if (ownerInput) ownerInput.required = false;
+      if (streamField) streamField.style.display = 'none';
+      return;
+    }
+    if (type && type.value === 'External') {
+      if (extField) extField.style.display = '';
+      if (streamField) streamField.style.display = 'none';
+      if (ownerField) ownerField.style.display = '';
+      if (ownerLabel) ownerLabel.textContent = 'Assignee / Owner';
+      if (ownerInput) ownerInput.required = true;
+    } else {
+      if (extField) extField.style.display = 'none';
+      if (streamField) streamField.style.display = '';
+      if (ownerField) ownerField.style.display = '';
+      if (ownerLabel) ownerLabel.textContent = 'Assignee / Owner (default: Store)';
+      if (ownerInput) ownerInput.required = false;
+    }
+  };
+
+  /* ─── Update Summary ─── */
+  window.pfUpdateSummary = function() {
+    var setVal = function(id, val) {
+      var el = $('#' + id);
+      if (!el) return;
+      el.innerHTML = val ? '<span>' + escapeHtml(val) + '</span>' : '<span class="empty">Not entered</span>';
+    };
+    var nameEl = $('#pf-name');
+    var serialEl = $('#pf-serial');
+    var locEl = $('#pf-location');
+    var ncEl = $('#pf-twelve-nc');
+    var deviceSerialEl = $('#pf-device-serial');
+    var descEl = $('#pf-description');
+
+    setVal('sumName', nameEl ? nameEl.value.trim() : '');
+    setVal('sumSerial', serialEl ? serialEl.value.trim() : '');
+    setVal('sumStatus', statusHidden ? statusHidden.value : 'Active');
+    if (locEl && locEl.value) {
+      var opt = locEl.options[locEl.selectedIndex];
+      setVal('sumLocation', opt ? opt.text : '');
+    } else {
+      setVal('sumLocation', '');
+    }
+    setVal('sum12NC', ncEl ? ncEl.value.trim() : '');
+    setVal('sumDeviceSerial', deviceSerialEl ? deviceSerialEl.value.trim() : '');
+    var desc = descEl ? descEl.value.trim() : '';
+    setVal('sumDesc', desc.length > 100 ? desc.substring(0,100) + '...' : desc);
+
+    var fileCount = dt ? dt.files.length : 0;
+    var sumImg = $('#sumImages');
+    if (sumImg) sumImg.textContent = fileCount + ' file' + (fileCount !== 1 ? 's' : '') + ' selected';
+  };
+
+  /* ─── File Upload ─── */
+  var fileInput = $('#pfImages');
+  var previewArea = $('#pfFilePreviews');
+  var fileGrid = $('#pfFileGrid');
+  var fileCountEl = $('#pfFileCount');
+  var clearBtn = $('#pfClearFiles');
+  var uploadZone = $('#pfUploadZone');
+  var dt = new DataTransfer();
+
+  if (fileInput) {
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        dt = new DataTransfer();
+        fileInput.files = dt.files;
+        renderFiles();
+      });
+    }
+
+    fileInput.addEventListener('change', function() {
+      for (var i = 0; i < fileInput.files.length; i++) {
+        dt.items.add(fileInput.files[i]);
+      }
+      fileInput.files = dt.files;
+      renderFiles();
+    });
+
+    // Drag & drop
+    if (uploadZone) {
+      ['dragenter','dragover'].forEach(function(evt) {
+        uploadZone.addEventListener(evt, function(e) { e.preventDefault(); uploadZone.classList.add('dragover'); });
+      });
+      ['dragleave','drop'].forEach(function(evt) {
+        uploadZone.addEventListener(evt, function(e) { e.preventDefault(); uploadZone.classList.remove('dragover'); });
+      });
+      uploadZone.addEventListener('drop', function(e) {
+        var files = e.dataTransfer.files;
+        for (var i = 0; i < files.length; i++) {
+          if (files[i].type.startsWith('image/')) dt.items.add(files[i]);
+        }
+        fileInput.files = dt.files;
+        renderFiles();
+      });
+    }
+  }
+
+  function renderFiles() {
+    if (!fileGrid || !previewArea) return;
+    fileGrid.innerHTML = '';
+    var files = dt.files;
+    if (files.length === 0) {
+      previewArea.style.display = 'none';
+      pfUpdateSummary();
+      return;
+    }
+    previewArea.style.display = 'block';
+    if (fileCountEl) fileCountEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + files.length + ' file' + (files.length > 1 ? 's' : '') + ' selected';
+
+    for (var i = 0; i < files.length; i++) {
+      (function(idx) {
+        var file = files[idx];
+        var item = document.createElement('div');
+        item.className = 'pf-file-item';
+
+        var thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = function() { URL.revokeObjectURL(this.src); };
+        thumb.appendChild(img);
+
+        var rmBtn = document.createElement('span');
+        rmBtn.className = 'remove-btn';
+        rmBtn.innerHTML = '<i class="fas fa-times"></i>';
+        rmBtn.title = 'Remove';
+        rmBtn.addEventListener('click', function(e) {
+          e.preventDefault(); e.stopPropagation();
+          var newDt = new DataTransfer();
+          for (var j = 0; j < dt.files.length; j++) {
+            if (j !== idx) newDt.items.add(dt.files[j]);
+          }
+          dt = newDt;
+          fileInput.files = dt.files;
+          renderFiles();
+        });
+        item.appendChild(rmBtn);
+        item.appendChild(thumb);
+
+        var fname = document.createElement('div');
+        fname.className = 'fname';
+        fname.textContent = file.name.length > 15 ? file.name.substring(0,12) + '...' : file.name;
+        fname.title = file.name;
+        item.appendChild(fname);
+
+        var barWrap = document.createElement('div');
+        barWrap.className = 'prog-bar';
+        var barFill = document.createElement('div');
+        barFill.className = 'prog-fill';
+        barWrap.appendChild(barFill);
+        item.appendChild(barWrap);
+
+        fileGrid.appendChild(item);
+        animateProgress(barFill, file.size);
+      })(i);
+    }
+    pfUpdateSummary();
+  }
+
+  function animateProgress(fill, size) {
+    var p = 0;
+    var speed = Math.max(15, Math.min(80, 50 - size / 500000));
+    var iv = setInterval(function() {
+      p += Math.random() * speed;
+      if (p >= 100) { p = 100; fill.style.width = '100%'; fill.classList.add('done'); clearInterval(iv); }
+      else { fill.style.width = p + '%'; }
+    }, 60);
+  }
+
+  /* ─── Toggle Delete Existing Image ─── */
+  window.pfToggleDeleteImg = function(imgId) {
+    var thumb = $('#existing-img-' + imgId);
+    var cb = $('#del-img-' + imgId);
+    if (!thumb || !cb) return;
+    thumb.classList.toggle('marked-delete');
+    cb.checked = !cb.checked;
+  };
+
+  /* ─── Save as Draft ─── */
+  window.pfSaveDraft = function() {
+    var draftField = $('#pfSaveAsDraft');
+    if (draftField) draftField.value = '1';
+    // For drafts, only require name and serial
+    var name = $('#pf-name');
+    var serial = $('#pf-serial');
+    if (name && !name.value.trim()) {
+      pfGoStep(1);
+      setTimeout(function() { name.focus(); pfShake(name); }, 300);
+      return;
+    }
+    if (serial && !serial.value.trim()) {
+      pfGoStep(1);
+      setTimeout(function() { serial.focus(); pfShake(serial); }, 300);
+      return;
+    }
+    // Also require category
+    var catInput = document.querySelector('input[name="category"]');
+    if (!catInput || !catInput.value) {
+      pfGoStep(1);
+      alert('Please select a category before saving as draft.');
+      return;
+    }
+    // Submit the form
+    var draftBtn = $('#pfDraftBtn');
+    if (draftBtn) {
+      draftBtn.disabled = true;
+      draftBtn.innerHTML = '<i class="fas fa-spinner" style="animation:pfSpin 1s linear infinite"></i> Saving Draft...';
+    }
+    var form = $('#pfForm');
+    if (form) form.submit();
+  };
+
+  /* ─── Form Submit ─── */
+  var form = $('#pfForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      // Reset draft flag on normal submit
+      var draftField = $('#pfSaveAsDraft');
+      if (draftField && draftField.value !== '1') draftField.value = '0';
+      // Ensure we validate all steps (skip full validation for drafts)
+      if (draftField && draftField.value === '1') return;
+      if (!pfValidateStep(1) || !pfValidateStep(2)) {
+        e.preventDefault();
         return;
       }
-      if (teamType && teamType.value === 'External') {
-        externalField.style.display = '';
-        if (ownerField) ownerField.style.display = '';
-        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner';
-        if (ownerInput) ownerInput.required = true;
-      } else if (teamType && teamType.value === 'Internal') {
-        externalField.style.display = 'none';
-        if (ownerField) ownerField.style.display = '';
-        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner (default to Store)';
-        if (ownerInput) ownerInput.required = false;
-      } else {
-        externalField.style.display = 'none';
-        if (ownerField) ownerField.style.display = 'none';
-        if (ownerLabel) ownerLabel.textContent = 'Name of the assignee / Owner (default to Store)';
-        if (ownerInput) ownerInput.required = false;
-      }
-    }
-    window.toggleExternalTeamField = toggleExternalTeamField;
-
-    function toggleIssueField() {
-      var status = document.getElementById('status').value;
-      var issueField = document.getElementById('issueField');
-      if (status === 'Issue') {
-        issueField.style.display = '';
-        document.getElementById('issue_description').required = true;
-      } else {
-        issueField.style.display = 'none';
-        document.getElementById('issue_description').required = false;
-      }
-    }
-    window.toggleIssueField = toggleIssueField;
-
-    // Initial call on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      if (document.getElementById('status')) {
-        toggleHandedOverFields();
-        toggleIssueField();
-        document.getElementById('status').addEventListener('change', toggleHandedOverFields);
-        document.getElementById('status').addEventListener('change', toggleIssueField);
-      }
-      if (document.getElementById('handover_team_type')) {
-        document.getElementById('handover_team_type').addEventListener('change', toggleExternalTeamField);
+      // Show progress on bars
+      $$('.prog-fill').forEach(function(b) { b.style.transition='width 1.5s ease'; b.style.width='100%'; });
+      // Disable submit
+      var btn = $('#pfSubmitBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner" style="animation:pfSpin 1s linear infinite"></i> Saving...';
       }
     });
+  }
 
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-    });
+  /* ─── Init ─── */
+  pfToggleConditionalPanels();
+  pfUpdateSummary();
+
+})();
 </script>
 {% endblock %}

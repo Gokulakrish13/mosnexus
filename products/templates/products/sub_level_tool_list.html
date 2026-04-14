@@ -1,1860 +1,872 @@
 {% extends 'products/base.html' %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sub Tools Hub</title>
-    <link rel="stylesheet" href="/static/products/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        :root {
-            --tool-primary: #0369a1;
-            --tool-primary-dark: #075985;
-            --tool-primary-light: #e0f2fe;
-            --tool-secondary: #0284c7;
-            --tool-accent: #0891b2;
-            --success-color: #10b981;
-            --success-light: #d1fae5;
-            --warning-color: #f59e0b;
-            --warning-light: #fef3c7;
-            --danger-color: #ef4444;
-            --danger-light: #fee2e2;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --border-color: #e2e8f0;
-            --bg-light: #f8fafc;
-            --white: #fff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
-            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
-        }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.3); }
-            50% { box-shadow: 0 0 25px rgba(124, 58, 237, 0.5); }
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body, html {
-            color: var(--text-dark);
-            font-size: 1rem;
-            background: var(--white);
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-        }
-
-        .subleveltool-bg {
-            padding-top: 5rem;
-            min-height: 100vh;
-            background: #ffffff;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .subleveltool-bg::before,
-        .subleveltool-bg::after {
-            display: none;
-        }
-
-        .subleveltool-list-container {
-            max-width: 90rem;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Hero Header - Blue Gradient Theme */
-        .page-header {
-            background: linear-gradient(135deg, #0369a1 0%, #0284c7 40%, #0891b2 100%);
-            border-radius: 1.5rem;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-xl), 0 0 40px rgba(3, 105, 161, 0.2);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
-        }
-        
-        .page-header::after {
-            content: '🔧';
-            position: absolute;
-            top: 1rem;
-            right: 2rem;
-            font-size: 4rem;
-            opacity: 0.15;
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .header-content {
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .page-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            animation: slideInLeft 0.5s ease-out;
-        }
-
-        .title-icon {
-            width: 4rem;
-            height: 4rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.75rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .page-title {
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
-            font-weight: 800;
-            color: var(--white);
-            margin: 0;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            letter-spacing: -0.02em;
-        }
-        
-        .page-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-
-        .add-form {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: nowrap;
-            animation: scaleIn 0.5s ease-out;
-        }
-
-        .add-form .form-input {
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 0.75rem;
-            padding: 0 1.25rem;
-            font-size: 1rem;
-            width: 16rem;
-            height: 2.75rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .add-form .form-input:focus {
-            outline: none;
-            border-color: white;
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .add-form .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .add-form .btn {
-            background: var(--white);
-            color: var(--tool-primary);
-            border: none;
-            font-weight: 700;
-            padding: 0 1.25rem;
-            width: 16rem;
-            height: 2.75rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-        
-        .add-form .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Stats Cards - Horizontal Layout */
-        .stats-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.7s ease-out;
-        }
-        
-        .stat-pill {
-            flex: 1;
-            background: var(--white);
-            border-radius: 1rem;
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: var(--shadow-md);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-pill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-        }
-        
-        .stat-pill:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .stat-pill.total::before { background: linear-gradient(180deg, var(--tool-primary), var(--tool-secondary)); }
-        .stat-pill.stock::before { background: var(--success-color); }
-        .stat-pill.use::before { background: var(--warning-color); }
-        .stat-pill.scraped::before { background: var(--danger-color); }
-        
-        .stat-pill-icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        
-        .stat-pill.total .stat-pill-icon { background: var(--tool-primary-light); color: var(--tool-primary); }
-        .stat-pill.stock .stat-pill-icon { background: var(--success-light); color: var(--success-color); }
-        .stat-pill.use .stat-pill-icon { background: var(--warning-light); color: var(--warning-color); }
-        .stat-pill.scraped .stat-pill-icon { background: var(--danger-light); color: var(--danger-color); }
-        
-        .stat-pill-content {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .stat-pill-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            line-height: 1;
-        }
-        
-        .stat-pill-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-
-        /* Control Panel - Glass Effect */
-        .control-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 1.25rem;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(3, 105, 161, 0.1);
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .control-grid {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            align-items: flex-end;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-            min-width: 12rem;
-        }
-        
-        .control-group .form-input {
-            height: 3rem;
-        }
-        
-        .control-group .btn {
-            height: 3rem;
-        }
-
-        .control-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--tool-primary);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-input {
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            border: 2px solid var(--border-color);
-            font-size: 0.9375rem;
-            transition: all 0.3s ease;
-            outline: none;
-            background: var(--white);
-            width: 100%;
-            height: 3rem;
-        }
-
-        .form-input:focus {
-            border-color: var(--tool-primary);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
-        }
-
-        select.form-input {
-            background-image: none;
-            padding-right: 1rem;
-            cursor: pointer;
-        }
-
-        /* Bulk Actions - Blue Theme */
-        .bulk-actions-section {
-            background: linear-gradient(135deg, var(--tool-primary-light), rgba(8, 145, 178, 0.1));
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 2px solid var(--tool-primary);
-            position: relative;
-        }
-
-        .bulk-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .select-all-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .custom-checkbox {
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-            accent-color: var(--tool-primary);
-        }
-
-        .select-all-label {
-            font-weight: 600;
-            color: var(--text-dark);
-            cursor: pointer;
-        }
-
-        .bulk-actions-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        /* Buttons - Purple Theme */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.5s ease, height 0.5s ease;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--tool-primary), var(--tool-primary-dark));
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(3, 105, 161, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color), #059669);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger-color), #dc2626);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, var(--tool-accent), #0891b2);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Tool Cards - Unique Design */
-        .subleveltool-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .subleveltool-card {
-            background: var(--white);
-            border-radius: 1.25rem;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            border: 2px solid var(--border-color);
-            overflow: hidden;
-            animation: scaleIn 0.5s ease-out backwards;
-        }
-        
-        .subleveltool-card:nth-child(1) { animation-delay: 0.1s; }
-        .subleveltool-card:nth-child(2) { animation-delay: 0.15s; }
-        .subleveltool-card:nth-child(3) { animation-delay: 0.2s; }
-        .subleveltool-card:nth-child(4) { animation-delay: 0.25s; }
-        .subleveltool-card:nth-child(5) { animation-delay: 0.3s; }
-        .subleveltool-card:nth-child(6) { animation-delay: 0.35s; }
-        
-        .card-header {
-            background: linear-gradient(135deg, var(--tool-primary), var(--tool-secondary));
-            padding: 1.25rem;
-            position: relative;
-        }
-        
-        .card-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: var(--white);
-            border-radius: 1rem 1rem 0 0;
-            transform: translateY(10px);
-        }
-
-        .subleveltool-card:hover {
-            box-shadow: var(--shadow-xl), 0 0 30px rgba(3, 105, 161, 0.15);
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--tool-primary);
-        }
-
-        .card-checkbox-wrapper {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            z-index: 10;
-        }
-
-        .subleveltool-checkbox {
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-            accent-color: var(--white);
-        }
-
-        .card-actions {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            opacity: 0;
-            transition: all 0.3s ease;
-            transform: translateX(10px);
-            z-index: 10;
-        }
-
-        .subleveltool-card:hover .card-actions {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .action-btn {
-            width: 2.25rem;
-            height: 2.25rem;
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .action-btn:hover {
-            transform: scale(1.15);
-        }
-
-        .edit-btn:hover {
-            background: var(--tool-primary);
-            color: var(--white);
-        }
-
-        .delete-btn:hover {
-            background: var(--danger-color);
-            color: var(--white);
-        }
-
-        .subleveltool-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .subleveltool-icon-circle {
-            width: 4rem;
-            height: 4rem;
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .subleveltool-icon img {
-            height: 2.5rem;
-            width: auto;
-            object-fit: contain;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-            padding-top: 0.5rem;
-        }
-
-        .subleveltool-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--tool-primary);
-            margin-bottom: 1rem;
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        .status-badges {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .status-badge {
-            flex: 1;
-            padding: 0.6rem 0.5rem;
-            border-radius: 0.6rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .status-badge:hover {
-            transform: translateY(-2px);
-        }
-
-        .badge-label {
-            font-size: 0.65rem;
-            opacity: 0.8;
-            margin-bottom: 0.2rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .badge-stock {
-            background: linear-gradient(135deg, var(--success-light), #ecfdf5);
-            color: #047857;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .badge-use {
-            background: linear-gradient(135deg, var(--warning-light), #fffbeb);
-            color: #b45309;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
-        .badge-scraped {
-            background: linear-gradient(135deg, var(--danger-light), #fef2f2);
-            color: #dc2626;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .subleveltool-note {
-            width: 100%;
-            min-height: 3.5rem;
-            border-radius: 0.6rem;
-            border: 2px solid var(--border-color);
-            font-size: 0.85rem;
-            padding: 0.75rem;
-            resize: none;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            background: var(--bg-light);
-        }
-
-        .subleveltool-note:focus {
-            border-color: var(--tool-primary);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-            background: var(--white);
-        }
-
-        .subleveltool-note::placeholder {
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        /* Empty State */
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 5rem 2rem;
-            background: linear-gradient(135deg, var(--white), var(--tool-primary-light));
-            border-radius: 1.5rem;
-            border: 3px dashed var(--tool-primary);
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .empty-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .empty-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--tool-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-text {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--white);
-            border-radius: 1rem;
-            box-shadow: var(--shadow-md);
-            flex-wrap: wrap;
-        }
-
-        .pagination a {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--tool-primary), var(--tool-primary-dark));
-            color: var(--white);
-            text-decoration: none;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(3, 105, 161, 0.3);
-        }
-
-        .pagination a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(3, 105, 161, 0.4);
-        }
-
-        .page-info {
-            padding: 0.75rem 1.5rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            background: var(--bg-light);
-            border-radius: 0.75rem;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            min-width: min(400px, 95vw);
-            max-width: 95vw;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-            animation: scaleIn 0.3s ease-out;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--bg-light);
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.75rem;
-        }
-
-        .modal-close:hover {
-            background: var(--danger-color);
-            color: var(--white);
-            transform: rotate(90deg);
-        }
-
-        .modal-header {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .modal-icon {
-            width: 4rem;
-            height: 4rem;
-            background: var(--tool-primary-light);
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--tool-primary);
-            margin: 0;
-        }
-
-        .modal-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .status-input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            gap: 1rem;
-            border: 2px solid;
-        }
-
-        .status-input-label {
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-input {
-            width: 5rem;
-            padding: 0.625rem;
-            border-radius: 0.5rem;
-            border: 2px solid;
-            font-size: 1rem;
-            text-align: center;
-            font-weight: 700;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .status-input:focus {
-            transform: scale(1.05);
-        }
-
-        .stock-input-group {
-            background: var(--success-light);
-            border-color: var(--success-color);
-        }
-
-        .stock-input-label { color: #047857; }
-        .stock-input { border-color: var(--success-color); color: #047857; background: #f0fdf4; }
-
-        .use-input-group {
-            background: var(--warning-light);
-            border-color: var(--warning-color);
-        }
-
-        .use-input-label { color: #b45309; }
-        .use-input { border-color: var(--warning-color); color: #b45309; background: #fffbeb; }
-
-        .scraped-input-group {
-            background: var(--danger-light);
-            border-color: var(--danger-color);
-        }
-
-        .scraped-input-label { color: #dc2626; }
-        .scraped-input { border-color: var(--danger-color); color: #dc2626; background: #fef2f2; }
-
-        /* Responsive Design */
-        @media (max-width: 64rem) {
-            .stats-bar {
-                flex-wrap: wrap;
-            }
-            
-            .stat-pill {
-                min-width: calc(50% - 0.5rem);
-            }
-            
-            .control-grid {
-                flex-wrap: wrap;
-            }
-            
-            .control-group {
-                min-width: 10rem;
-            }
-        }
-
-        @media (max-width: 48rem) {
-            .subleveltool-list-container {
-                padding: 1rem;
-            }
-
-            .page-header {
-                padding: 1.5rem;
-            }
-
-            .header-content {
-                flex-wrap: wrap;
-            }
-
-            .add-form {
-                width: 100%;
-            }
-            
-            .add-form .form-input {
-                min-width: auto;
-                flex: 1;
-            }
-            
-            .stats-bar {
-                flex-direction: column;
-            }
-            
-            .stat-pill {
-                width: 100%;
-            }
-            
-            .control-grid {
-                flex-direction: column;
-            }
-            
-            .control-group {
-                width: 100%;
-            }
-
-            .bulk-actions-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .bulk-actions-buttons .btn {
-                width: 100%;
-            }
-
-            .subleveltool-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* ===== DESIGN TOKENS ===== */
+        :root{--st-primary:#0f172a;--st-primary-600:#1e293b;--st-accent:#3b82f6;--st-accent-dark:#2563eb;--st-accent-light:#dbeafe;--st-accent-glow:rgba(59,130,246,.18);--st-success:#10b981;--st-success-light:#d1fae5;--st-success-dark:#059669;--st-warning:#f59e0b;--st-warning-light:#fef3c7;--st-warning-dark:#d97706;--st-danger:#ef4444;--st-danger-light:#fee2e2;--st-danger-dark:#dc2626;--st-info:#06b6d4;--st-info-light:#cffafe;--st-text:#0f172a;--st-text-secondary:#475569;--st-text-muted:#94a3b8;--st-border:#e2e8f0;--st-bg:#f8fafc;--st-surface:#ffffff;--st-shadow-xs:0 1px 2px rgba(0,0,0,.04);--st-shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--st-shadow-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);--st-shadow-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -4px rgba(0,0,0,.04);--st-shadow-xl:0 20px 25px -5px rgba(0,0,0,.08),0 8px 10px -6px rgba(0,0,0,.04);--st-radius-sm:6px;--st-radius:10px;--st-radius-lg:14px;--st-radius-xl:20px;--st-transition:.2s cubic-bezier(.4,0,.2,1)}
+
+        @keyframes stFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes stSlideUp{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes stCountUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes stModalIn{from{opacity:0;transform:translateY(-20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes stOverlayIn{from{opacity:0}to{opacity:1}}
+        @keyframes stCheckPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+        @keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+        .st-page *,.st-page *::before,.st-page *::after{box-sizing:border-box;margin:0;padding:0}
+
+        /* ===== PAGE WRAPPER ===== */
+        .st-page{padding-top:1.25rem;max-width:1900px;margin:0 auto;padding-left:2rem;padding-right:2rem;padding-bottom:3rem;min-height:calc(100vh - 106px)}
+
+        /* ===== BREADCRUMBS ===== */
+        .st-breadcrumb{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.85rem;color:var(--st-text-muted)}
+        .st-breadcrumb a{color:var(--st-text-secondary);text-decoration:none;transition:color var(--st-transition)}
+        .st-breadcrumb a:hover{color:var(--st-accent)}
+        .st-breadcrumb .sep{font-size:.7rem;opacity:.5}
+        .st-breadcrumb .bc-current{color:var(--st-accent);font-weight:600}
+
+        /* ===== GRADIENT HEADER ===== */
+        .st-header{background:linear-gradient(135deg,#0066cc 0%,#0891b2 50%,#0d9488 100%);border-radius:var(--st-radius-xl);padding:2rem 2.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;box-shadow:var(--st-shadow-lg);position:relative;overflow:hidden;min-height:100px}
+        .st-header::before{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:rgba(255,255,255,.05);border-radius:50%}
+        .st-header::after{content:'';position:absolute;bottom:-40%;left:20%;width:200px;height:200px;background:rgba(255,255,255,.03);border-radius:50%}
+        .st-header-left{display:flex;align-items:center;gap:1rem;position:relative;z-index:2}
+        .st-header-left h1{font-size:1.75rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.75rem;color:#fff !important}
+        .st-header-left .subtitle{font-size:.92rem;opacity:.85;margin-top:.15rem}
+        .st-header-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;position:relative;z-index:2}
+        .st-header-btn{background:rgba(255,255,255,.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:#fff;padding:.45rem 1rem;border-radius:var(--st-radius);font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.45rem;transition:all var(--st-transition);font-family:inherit}
+        .st-header-btn:hover{background:rgba(255,255,255,.28);color:#fff;text-decoration:none}
+        .st-header-btn.primary{background:#fff;color:var(--st-primary);font-weight:700;border:none;box-shadow:var(--st-shadow-md)}
+        .st-header-btn.primary:hover{background:#f0f4ff;transform:translateY(-2px);box-shadow:var(--st-shadow-lg)}
+
+        /* ===== STATS ===== */
+        .st-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;position:relative;z-index:10;animation:stFadeIn .6s ease .1s both}
+        .st-stat-card{background:var(--st-surface);border-radius:var(--st-radius-lg);padding:1.25rem 1.35rem;box-shadow:var(--st-shadow-md);border:1px solid var(--st-border);display:flex;align-items:center;gap:1rem;position:relative;overflow:hidden;transition:all var(--st-transition)}
+        .st-stat-card:hover{transform:translateY(-3px);box-shadow:var(--st-shadow-lg)}
+        .st-stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--st-radius-lg) var(--st-radius-lg)}
+        .st-stat-card.stat-total::after{background:var(--st-accent)}
+        .st-stat-card.stat-stock::after{background:var(--st-success)}
+        .st-stat-card.stat-use::after{background:var(--st-warning)}
+        .st-stat-card.stat-scraped::after{background:var(--st-danger)}
+        .st-stat-icon{width:48px;height:48px;border-radius:var(--st-radius);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+        .stat-total .st-stat-icon{background:var(--st-accent-light);color:var(--st-accent)}
+        .stat-stock .st-stat-icon{background:var(--st-success-light);color:var(--st-success)}
+        .stat-use .st-stat-icon{background:var(--st-warning-light);color:var(--st-warning)}
+        .stat-scraped .st-stat-icon{background:var(--st-danger-light);color:var(--st-danger)}
+        .st-stat-info{flex:1;min-width:0}
+        .st-stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--st-text-muted);font-weight:600;margin-bottom:.15rem}
+        .st-stat-value{font-size:1.65rem;font-weight:800;color:var(--st-text);line-height:1;animation:stCountUp .5s ease both}
+        .st-stat-sub{font-size:.72rem;color:var(--st-text-muted);margin-top:.25rem}
+
+        /* ===== WORKSPACE ===== */
+        .st-workspace{animation:stFadeIn .6s ease .2s both}
+
+        /* ===== TOOLBAR ===== */
+        .st-toolbar{background:var(--st-surface);border:1px solid var(--st-border);border-radius:var(--st-radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;box-shadow:var(--st-shadow-xs);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+        .st-search-box{flex:1;min-width:220px;position:relative;display:flex;align-items:center}
+        .st-search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--st-text-muted);font-size:14px;pointer-events:none;z-index:2;width:16px;text-align:center;line-height:1}
+        .st-search-box input[type="text"].st-search-input{width:100%;padding:10px 14px 10px 38px !important;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:14px;font-family:inherit;color:var(--st-text);background:var(--st-bg);transition:all var(--st-transition);outline:none;box-sizing:border-box}
+        .st-search-box input[type="text"].st-search-input:focus{border-color:var(--st-accent);box-shadow:0 0 0 3px var(--st-accent-glow);background:#fff}
+        .st-search-box input[type="text"].st-search-input::placeholder{color:var(--st-text-muted)}
+        .st-toolbar-select{padding:.6rem .85rem;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:.85rem;font-family:inherit;color:var(--st-text);background:var(--st-bg);outline:none;cursor:pointer;transition:all var(--st-transition);min-width:160px}
+        .st-toolbar-select:focus{border-color:var(--st-accent);box-shadow:0 0 0 3px var(--st-accent-glow)}
+        .st-toolbar-divider{width:1px;height:28px;background:var(--st-border);flex-shrink:0}
+        .st-toolbar-btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem .9rem;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer;background:var(--st-surface);color:var(--st-text-secondary);transition:all var(--st-transition);white-space:nowrap}
+        .st-toolbar-btn:hover{border-color:var(--st-accent);color:var(--st-accent);background:var(--st-accent-light)}
+        .st-toolbar-btn.active{border-color:var(--st-accent);color:var(--st-accent);background:var(--st-accent-light)}
+        .st-toolbar-btn i{font-size:.8rem}
+        .st-toolbar-count{font-size:.78rem;color:var(--st-text-muted);font-weight:500;margin-left:auto;white-space:nowrap}
+        .st-toolbar-count strong{color:var(--st-text);font-weight:700}
+
+        /* ===== BULK BAR ===== */
+        .st-bulk-bar{background:var(--st-primary);color:#fff;border-radius:var(--st-radius-lg);padding:.75rem 1.25rem;margin-bottom:1.25rem;display:none;align-items:center;gap:1rem;box-shadow:var(--st-shadow-lg);animation:stSlideUp .25s ease}
+        .st-bulk-bar.visible{display:flex}
+        .st-bulk-bar-count{font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:.4rem}
+        .st-bulk-bar-count .count-num{background:var(--st-accent);color:#fff;padding:.1rem .55rem;border-radius:12px;font-size:.82rem;font-weight:700}
+        .st-bulk-bar-actions{display:flex;gap:.5rem;margin-left:auto}
+        .st-bulk-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .85rem;border:1.5px solid rgba(255,255,255,.2);border-radius:var(--st-radius);font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.08);color:#fff;transition:all var(--st-transition)}
+        .st-bulk-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35)}
+        .st-bulk-btn.danger:hover{background:var(--st-danger);border-color:var(--st-danger)}
+        .st-bulk-btn.info:hover{background:var(--st-accent);border-color:var(--st-accent)}
+        .st-bulk-btn i{font-size:.78rem}
+        .st-bulk-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;padding:.25rem;transition:color var(--st-transition)}
+        .st-bulk-close:hover{color:#fff}
+
+        /* ===== ADD INLINE ===== */
+        .st-add-inline{display:none;background:var(--st-surface);border:1.5px solid var(--st-accent);border-radius:var(--st-radius-lg);padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 0 0 4px var(--st-accent-glow),var(--st-shadow-md);animation:stSlideUp .25s ease}
+        .st-add-inline.open{display:block}
+        .st-add-inline-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+        .st-add-inline-title{font-size:.95rem;font-weight:800;color:var(--st-text);display:flex;align-items:center;gap:.4rem}
+        .st-add-inline-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--st-bg);color:var(--st-text-muted);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--st-transition)}
+        .st-add-inline-close:hover{background:var(--st-danger-light);color:var(--st-danger)}
+        .st-add-form-row{display:flex;gap:.65rem}
+        .st-add-form-row .st-form-input{flex:1}
+
+        /* ===== CARD GRID ===== */
+        .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+
+        /* ===== TABLE VIEW ===== */
+        .st-table-wrapper{display:none;background:var(--st-surface);border:1px solid var(--st-border);border-radius:var(--st-radius-lg);overflow:hidden;box-shadow:var(--st-shadow-sm)}
+        .st-table-wrapper.active{display:block}
+        .st-table{width:100%;border-collapse:collapse;font-size:.85rem}
+        .st-table thead{background:var(--st-bg)}
+        .st-table th{padding:.75rem 1rem;text-align:left;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--st-text-muted);border-bottom:2px solid var(--st-border);white-space:nowrap}
+        .st-table td{padding:.7rem 1rem;border-bottom:1px solid var(--st-border);color:var(--st-text);vertical-align:middle}
+        .st-table tbody tr{transition:background var(--st-transition)}
+        .st-table tbody tr:hover{background:var(--st-bg)}
+        .st-table tbody tr:last-child td{border-bottom:none}
+        .st-table .tbl-name{font-weight:700;color:var(--st-text);cursor:pointer}
+        .st-table .tbl-name:hover{color:var(--st-accent)}
+        .st-table .tbl-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:6px;font-size:.75rem;font-weight:700}
+        .st-table .tbl-badge.stock{background:var(--st-success-light);color:var(--st-success-dark)}
+        .st-table .tbl-badge.use{background:var(--st-warning-light);color:var(--st-warning-dark)}
+        .st-table .tbl-badge.scraped{background:var(--st-danger-light);color:var(--st-danger-dark)}
+        .st-table .tbl-actions{display:flex;gap:.35rem}
+        .st-table .tbl-action-btn{width:30px;height:30px;border-radius:var(--st-radius-sm);border:1px solid var(--st-border);background:var(--st-surface);color:var(--st-text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all var(--st-transition)}
+        .st-table .tbl-action-btn:hover{background:var(--st-accent-light);color:var(--st-accent);border-color:var(--st-accent)}
+        .st-table .tbl-action-btn.danger:hover{background:var(--st-danger-light);color:var(--st-danger);border-color:var(--st-danger)}
+        .st-table .tbl-checkbox-cell{width:40px;text-align:center}
+
+        /* ===== CARD ===== */
+        .st-card{background:var(--st-surface);border:1px solid var(--st-border);border-radius:var(--st-radius-lg);padding:0;position:relative;overflow:hidden;transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer;animation:stFadeIn .4s ease both}
+        .st-card:hover{border-color:var(--st-accent);box-shadow:0 8px 25px -5px var(--st-accent-glow),var(--st-shadow-md);transform:translateY(-4px)}
+        .st-card-header{background:var(--st-bg);padding:.85rem 1rem;display:flex;align-items:center;gap:.65rem;border-bottom:1px solid var(--st-border);position:relative}
+        .st-card-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--st-border);cursor:pointer;appearance:none;-webkit-appearance:none;position:relative;flex-shrink:0;transition:all var(--st-transition);background:#fff}
+        .st-card-checkbox:checked{background:var(--st-accent);border-color:var(--st-accent)}
+        .st-card-checkbox:checked::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.6rem;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:stCheckPop .2s ease}
+        .st-card-icon{width:36px;height:36px;border-radius:var(--st-radius);background:linear-gradient(135deg,var(--st-accent-light),#eff6ff);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .st-card-icon img{width:22px;height:22px;object-fit:contain}
+        .st-card-title{font-size:.88rem;font-weight:700;color:var(--st-text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .st-card-menu{display:flex;gap:.25rem;flex-shrink:0}
+        .st-card-menu-btn{width:28px;height:28px;border-radius:var(--st-radius-sm);border:none;background:transparent;color:var(--st-text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all var(--st-transition)}
+        .st-card-menu-btn:hover{background:var(--st-accent-light);color:var(--st-accent)}
+        .st-card-menu-btn.danger:hover{background:var(--st-danger-light);color:var(--st-danger)}
+        .st-card-body{padding:1rem}
+        .st-card-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem}
+        .st-metric{text-align:center;padding:.55rem .35rem;border-radius:var(--st-radius);position:relative}
+        .st-metric.stock{background:var(--st-success-light)}
+        .st-metric.use{background:var(--st-warning-light)}
+        .st-metric.scraped{background:var(--st-danger-light)}
+        .st-metric-value{font-size:1.25rem;font-weight:800;line-height:1}
+        .st-metric.stock .st-metric-value{color:var(--st-success-dark)}
+        .st-metric.use .st-metric-value{color:var(--st-warning-dark)}
+        .st-metric.scraped .st-metric-value{color:var(--st-danger-dark)}
+        .st-metric-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.2rem}
+        .st-metric.stock .st-metric-label{color:var(--st-success)}
+        .st-metric.use .st-metric-label{color:var(--st-warning-dark)}
+        .st-metric.scraped .st-metric-label{color:var(--st-danger)}
+        .st-card-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--st-bg);margin-bottom:.75rem}
+        .st-card-bar-seg{transition:width .4s ease;min-width:2px}
+        .st-card-bar-seg.stock{background:var(--st-success)}
+        .st-card-bar-seg.use{background:var(--st-warning)}
+        .st-card-bar-seg.scraped{background:var(--st-danger)}
+        .st-card-note{width:100%;min-height:52px;max-height:100px;padding:.5rem .65rem;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:.78rem;font-family:inherit;color:var(--st-text);background:var(--st-bg);resize:vertical;outline:none;transition:all var(--st-transition)}
+        .st-card-note:focus{border-color:var(--st-accent);background:#fff;box-shadow:0 0 0 3px var(--st-accent-glow)}
+        .st-card-note::placeholder{color:var(--st-text-muted);font-style:italic}
+        .st-card-footer{background:var(--st-bg);padding:.55rem 1rem;border-top:1px solid var(--st-border);display:flex;align-items:center;justify-content:space-between}
+        .st-card-total{font-size:.72rem;color:var(--st-text-muted);font-weight:500}
+        .st-card-total strong{color:var(--st-text);font-weight:700}
+        .st-card-history-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .55rem;background:transparent;border:1px solid var(--st-border);border-radius:var(--st-radius-sm);color:var(--st-text-muted);font-size:.7rem;font-family:inherit;font-weight:600;cursor:pointer;transition:all var(--st-transition)}
+        .st-card-history-btn:hover{background:var(--st-accent-light);color:var(--st-accent);border-color:var(--st-accent)}
+
+        /* ===== EMPTY STATE ===== */
+        .st-empty{grid-column:1/-1;text-align:center;padding:4rem 2rem;background:var(--st-surface);border:2px dashed var(--st-border);border-radius:var(--st-radius-xl)}
+        .st-empty-icon{font-size:3rem;color:var(--st-text-muted);margin-bottom:1rem;animation:stFloat 3s ease-in-out infinite}
+        .st-empty h3{font-size:1.2rem;font-weight:700;color:var(--st-text);margin-bottom:.4rem}
+        .st-empty p{font-size:.9rem;color:var(--st-text-muted)}
+
+        /* ===== MODALS ===== */
+        .st-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem;animation:stOverlayIn .2s ease}
+        .st-overlay.open{display:flex}
+        .st-modal{background:var(--st-surface);border-radius:var(--st-radius-xl);box-shadow:var(--st-shadow-xl);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:stModalIn .3s cubic-bezier(.16,1,.3,1);position:relative}
+        .st-modal.wide{max-width:720px}
+        .st-modal-close{position:absolute;top:.85rem;right:.85rem;width:32px;height:32px;border-radius:50%;border:none;background:var(--st-bg);color:var(--st-text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--st-transition);z-index:10}
+        .st-modal-close:hover{background:var(--st-danger-light);color:var(--st-danger)}
+        .st-modal-head{padding:1.5rem 1.5rem 0;text-align:center}
+        .st-modal-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.3rem}
+        .st-modal-icon.primary{background:var(--st-accent-light);color:var(--st-accent)}
+        .st-modal-icon.danger{background:var(--st-danger-light);color:var(--st-danger)}
+        .st-modal-icon.success{background:var(--st-success-light);color:var(--st-success)}
+        .st-modal-icon.info{background:var(--st-info-light);color:var(--st-info)}
+        .st-modal-title{font-size:1.15rem;font-weight:800;color:var(--st-text);margin-bottom:.3rem}
+        .st-modal-desc{font-size:.85rem;color:var(--st-text-muted)}
+        .st-modal-body{padding:1.25rem 1.5rem 1.5rem}
+
+        /* ===== FORM ELEMENTS ===== */
+        .st-form-group{margin-bottom:1rem}
+        .st-form-label{display:flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--st-text-secondary);margin-bottom:.4rem}
+        .st-form-label i{font-size:.72rem}
+        .st-form-input{width:100%;padding:.65rem .85rem;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:.9rem;font-family:inherit;color:var(--st-text);background:var(--st-bg);outline:none;transition:all var(--st-transition)}
+        .st-form-input:focus{border-color:var(--st-accent);box-shadow:0 0 0 3px var(--st-accent-glow);background:#fff}
+        .st-metric-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
+        .st-metric-input-card{text-align:center;padding:.85rem .5rem;border-radius:var(--st-radius);border:1.5px solid var(--st-border);transition:all var(--st-transition);overflow:hidden;box-sizing:border-box}
+        .st-metric-input-card:focus-within{border-color:var(--st-accent);box-shadow:0 0 0 3px var(--st-accent-glow)}
+        .st-metric-input-card.stock{background:var(--st-success-light);border-color:rgba(16,185,129,.2)}
+        .st-metric-input-card.use{background:var(--st-warning-light);border-color:rgba(245,158,11,.2)}
+        .st-metric-input-card.scraped{background:var(--st-danger-light);border-color:rgba(239,68,68,.2)}
+        .st-metric-input-card.stock:focus-within{border-color:var(--st-success);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+        .st-metric-input-card.use:focus-within{border-color:var(--st-warning);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+        .st-metric-input-card.scraped:focus-within{border-color:var(--st-danger);box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+        .st-metric-input-icon{font-size:.85rem;margin-bottom:.35rem}
+        .st-metric-input-card.stock .st-metric-input-icon{color:var(--st-success-dark)}
+        .st-metric-input-card.use .st-metric-input-icon{color:var(--st-warning-dark)}
+        .st-metric-input-card.scraped .st-metric-input-icon{color:var(--st-danger-dark)}
+        .st-metric-input-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+        .st-metric-input-card.stock .st-metric-input-label{color:var(--st-success-dark)}
+        .st-metric-input-card.use .st-metric-input-label{color:var(--st-warning-dark)}
+        .st-metric-input-card.scraped .st-metric-input-label{color:var(--st-danger-dark)}
+        .st-metric-number-input{width:100%;max-width:100%;text-align:center;padding:.45rem .25rem;border:1.5px solid transparent;border-radius:var(--st-radius-sm);font-size:1.3rem;font-weight:800;font-family:inherit;background:rgba(255,255,255,.7);color:var(--st-text);outline:none;transition:all var(--st-transition);box-sizing:border-box;-moz-appearance:textfield}
+        .st-metric-number-input::-webkit-outer-spin-button,.st-metric-number-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+        .st-metric-number-input:focus{background:#fff;border-color:var(--st-accent)}
+
+        /* ===== BUTTONS ===== */
+        .st-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.65rem 1.25rem;border:none;border-radius:var(--st-radius);font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all var(--st-transition);position:relative;overflow:hidden}
+        .st-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.1);opacity:0;transition:opacity var(--st-transition)}
+        .st-btn:hover::after{opacity:1}
+        .st-btn-primary{background:var(--st-accent);color:#fff}
+        .st-btn-primary:hover{background:var(--st-accent-dark);transform:translateY(-1px);box-shadow:var(--st-shadow-md)}
+        .st-btn-danger{background:var(--st-danger);color:#fff}
+        .st-btn-danger:hover{background:var(--st-danger-dark);transform:translateY(-1px);box-shadow:var(--st-shadow-md)}
+        .st-btn-ghost{background:var(--st-bg);color:var(--st-text-secondary);border:1.5px solid var(--st-border)}
+        .st-btn-ghost:hover{background:var(--st-surface);border-color:var(--st-text-muted)}
+        .st-btn-block{width:100%}
+        .st-btn i{font-size:.8rem}
+
+        /* ===== HISTORY ===== */
+        .st-history-list{max-height:350px;overflow-y:auto;padding-right:.5rem}
+        .st-history-list::-webkit-scrollbar{width:5px}
+        .st-history-list::-webkit-scrollbar-track{background:var(--st-bg);border-radius:3px}
+        .st-history-list::-webkit-scrollbar-thumb{background:var(--st-border);border-radius:3px}
+        .st-history-entry{display:flex;gap:.75rem;padding:.75rem;border-radius:var(--st-radius);margin-bottom:.5rem;background:var(--st-bg);transition:background var(--st-transition)}
+        .st-history-entry:hover{background:#f1f5f9}
+        .st-history-dot{width:8px;height:8px;border-radius:50%;background:var(--st-accent);margin-top:.4rem;flex-shrink:0}
+        .st-history-entry.created .st-history-dot{background:var(--st-success)}
+        .st-history-entry.edited .st-history-dot{background:var(--st-warning)}
+        .st-history-entry.deleted .st-history-dot{background:var(--st-danger)}
+        .st-history-content{flex:1;min-width:0}
+        .st-history-action{font-size:.8rem;font-weight:700;color:var(--st-text);margin-bottom:.15rem}
+        .st-history-meta{font-size:.72rem;color:var(--st-text-muted)}
+        .st-history-meta strong{color:var(--st-accent)}
+        .st-history-details{font-size:.78rem;color:var(--st-text-secondary);margin-top:.25rem}
+        .st-graph-wrap{background:var(--st-bg);border-radius:var(--st-radius);padding:1rem;margin-bottom:1rem;display:flex;justify-content:center}
+        .st-graph-wrap canvas{cursor:zoom-in}
+        .st-history-filters{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+        .st-history-filters select{flex:1;min-width:130px;padding:.45rem .65rem;border:1.5px solid var(--st-border);border-radius:var(--st-radius);font-size:.8rem;font-family:inherit;color:var(--st-text);background:var(--st-bg);outline:none}
+
+        /* ===== TOAST ===== */
+        .st-toast{position:fixed;top:80px;right:1.5rem;background:var(--st-surface);border:1px solid var(--st-border);border-left:4px solid var(--st-danger);border-radius:var(--st-radius);padding:1rem 1.25rem;box-shadow:var(--st-shadow-lg);z-index:3000;display:none;align-items:center;gap:.75rem;max-width:400px;animation:stSlideUp .3s ease}
+        .st-toast.visible{display:flex}
+        .st-toast-icon{font-size:1.2rem;color:var(--st-danger);flex-shrink:0}
+        .st-toast-msg{font-size:.85rem;color:var(--st-text);font-weight:500}
+        .st-toast-close{background:none;border:none;color:var(--st-text-muted);cursor:pointer;font-size:1rem;padding:.25rem;flex-shrink:0}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:1024px){.st-stats{grid-template-columns:repeat(2,1fr)}.st-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.st-page{padding-left:1rem;padding-right:1rem}.st-header{padding:1.25rem 1.5rem;flex-direction:column;gap:.75rem;align-items:flex-start}}
+        @media(max-width:768px){.st-stats{gap:.65rem}.st-toolbar{flex-direction:column;align-items:stretch}.st-search-box{min-width:100%}.st-bulk-bar{flex-wrap:wrap}.st-metric-inputs{grid-template-columns:1fr}.st-header-right{display:none}}
+        @media(max-width:640px){.st-stats{grid-template-columns:repeat(2,1fr)}.st-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <!-- Error Messages Modal -->
-    {% if messages %}
-    <div id="errorModal" class="modal-overlay" style="display: flex;">
-        <div class="modal-content">
-            <button onclick="closeErrorModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon" style="background: var(--danger-light);">
-                    <i class="fas fa-exclamation-circle" style="color: var(--danger-color);"></i>
-                </div>
-                <h3 class="modal-title" style="color: var(--danger-color);">Error</h3>
+
+    <div class="st-page">
+    <!-- Gradient Header -->
+    <header class="st-header">
+        <div class="st-header-left">
+            <div>
+                <h1><i class="fas fa-wrench"></i> {{ selected_stream }} Sub Tools</h1>
+                <div class="subtitle">Manage sub-level tools, track inventory counts, and monitor tool lifecycle</div>
             </div>
-            <div id="errorModalMsg" style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
-                {% for message in messages %}
-                    {% if 'already exists' in message or message.tags == 'error' %}
-                        {{ message }}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <button onclick="closeErrorModal()" class="btn btn-danger" style="width: 100%;">
-                <i class="fas fa-check"></i> OK
-            </button>
         </div>
+        <div class="st-header-right">
+            <button class="st-header-btn" id="restartTourBtn" title="Page Tour"><i class="fas fa-question-circle"></i></button>
+            <button class="st-header-btn primary" id="addToolToggle" type="button"><i class="fas fa-plus"></i> Add Tool</button>
+            <button class="st-header-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="st-stats">
+        <div class="st-stat-card stat-total"><div class="st-stat-icon"><i class="fas fa-tools"></i></div><div class="st-stat-info"><div class="st-stat-label">Total Tools</div><div class="st-stat-value" id="statTotal">{{ subtools|length }}</div><div class="st-stat-sub">All sub-level tools</div></div></div>
+        <div class="st-stat-card stat-stock"><div class="st-stat-icon"><i class="fas fa-warehouse"></i></div><div class="st-stat-info"><div class="st-stat-label">In Stock</div><div class="st-stat-value" id="statStock">{{ total_in_stock }}</div><div class="st-stat-sub">Available units</div></div></div>
+        <div class="st-stat-card stat-use"><div class="st-stat-icon"><i class="fas fa-cogs"></i></div><div class="st-stat-info"><div class="st-stat-label">In Use</div><div class="st-stat-value" id="statUse">{{ total_in_use }}</div><div class="st-stat-sub">Currently deployed</div></div></div>
+        <div class="st-stat-card stat-scraped"><div class="st-stat-icon"><i class="fas fa-recycle"></i></div><div class="st-stat-info"><div class="st-stat-label">Scraped</div><div class="st-stat-value" id="statScraped">{{ total_scraped }}</div><div class="st-stat-sub">Decommissioned</div></div></div>
     </div>
-    {% endif %}
 
-    <div class="subleveltool-bg">
-        <div class="subleveltool-list-container">
-            <!-- Page Header -->
-            <div class="page-header">
-                <div class="header-content">
-                    <div class="page-title-wrapper">
-                        <div class="title-icon">
-                            <i class="fas fa-wrench"></i>
-                        </div>
-                        <div>
-                            <h1 class="page-title">Sub Tools Hub</h1>
-                        </div>
-                    </div>
-                    <form method="post" class="add-form">
-                        {% csrf_token %}
-                        <input type="text" name="subtool_name" placeholder="Enter new sub tool name..." class="form-input" required>
-                        <button type="submit" class="btn btn-primary" style="margin-top: -0.1rem;">
-                            <i class="fas fa-plus"></i>
-                            <span>Add Tool</span>
-                        </button>
-                    </form>
-                </div>
+    <div class="st-workspace">
+        <!-- Add Inline Panel -->
+        <div class="st-add-inline" id="addToolPanel">
+            <div class="st-add-inline-head">
+                <div class="st-add-inline-title"><i class="fas fa-plus-circle" style="color:var(--st-accent);"></i> Add New Sub Tool</div>
+                <button class="st-add-inline-close" id="addToolClose" type="button">&times;</button>
             </div>
-            
-            <!-- Stats Bar -->
-            <div class="stats-bar">
-                <div class="stat-pill total">
-                    <div class="stat-pill-icon">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <div class="stat-pill-content">
-                        <div class="stat-pill-value">{{ subtools|length }}</div>
-                        <div class="stat-pill-label">Total Tools</div>
-                    </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="st-add-form-row">
+                    <input type="text" name="subtool_name" class="st-form-input" placeholder="Enter sub tool name..." required autocomplete="off">
+                    <button type="submit" class="st-btn st-btn-primary"><i class="fas fa-plus"></i> Add</button>
                 </div>
-                <div class="stat-pill stock">
-                    <div class="stat-pill-icon">
-                        <i class="fas fa-box-open"></i>
-                    </div>
-                    <div class="stat-pill-content">
-                        <div class="stat-pill-value">{% widthratio total_in_stock 1 1 %}</div>
-                        <div class="stat-pill-label">In Stock</div>
-                    </div>
-                </div>
-                <div class="stat-pill use">
-                    <div class="stat-pill-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="stat-pill-content">
-                        <div class="stat-pill-value">{% widthratio total_in_use 1 1 %}</div>
-                        <div class="stat-pill-label">In Use</div>
-                    </div>
-                </div>
-                <div class="stat-pill scraped">
-                    <div class="stat-pill-icon">
-                        <i class="fas fa-recycle"></i>
-                    </div>
-                    <div class="stat-pill-content">
-                        <div class="stat-pill-value">{% widthratio total_scraped 1 1 %}</div>
-                        <div class="stat-pill-label">Scraped</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="control-grid">
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-search"></i> Search</label>
-                        <input type="text" id="subleveltool-search-input" placeholder="Search sub tools..." class="form-input">
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-sort-amount-down"></i> Sort By</label>
-                        <select id="subleveltool-sort-select" class="form-input">
-                            <option value="name">Name (A-Z)</option>
-                            <option value="in_stock">In Stock (High to Low)</option>
-                            <option value="in_use">In Use (High to Low)</option>
-                            <option value="scraped">Scraped (High to Low)</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-file-export"></i> Export</label>
-                        <button id="export-subleveltools-btn" class="btn btn-success" style="width: 100%;">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Export CSV</span>
-                        </button>
-                    </div>
-                </div>
-
-            <!-- Bulk Actions -->
-            <div class="bulk-actions-section">
-                <div class="bulk-header">
-                    <div class="select-all-wrapper">
-                        <input type="checkbox" id="select-all-subleveltools" class="custom-checkbox">
-                        <label for="select-all-subleveltools" class="select-all-label">Select All Tools</label>
-                    </div>
-                </div>
-                <div class="bulk-actions-buttons">
-                    <button id="bulk-delete-subleveltools-btn" class="btn btn-danger" disabled>
-                        <i class="fas fa-trash-alt"></i>
-                        <span>Bulk Delete</span>
-                    </button>
-                    <button id="bulk-update-subleveltools-btn" class="btn btn-info" disabled>
-                        <i class="fas fa-edit"></i>
-                        <span>Update Comments</span>
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
 
-        <!-- Items Grid -->
-        <div class="subleveltool-grid" id="subleveltool-grid">
+        <!-- Toolbar -->
+        <div class="st-toolbar">
+            <div class="st-search-box"><i class="fas fa-search"></i><input type="text" class="st-search-input" id="stSearch" placeholder="Search sub tools by name..."></div>
+            <select class="st-toolbar-select" id="stSort">
+                <option value="name">Sort: Name A-Z</option>
+                <option value="name_desc">Sort: Name Z-A</option>
+                <option value="in_stock">Sort: Stock (High)</option>
+                <option value="in_use">Sort: In Use (High)</option>
+                <option value="scraped">Sort: Scraped (High)</option>
+                <option value="total">Sort: Total (High)</option>
+            </select>
+            <div class="st-toolbar-divider"></div>
+            <button class="st-toolbar-btn active" id="viewGrid" title="Grid View"><i class="fas fa-th-large"></i></button>
+            <button class="st-toolbar-btn" id="viewTable" title="Table View"><i class="fas fa-list"></i></button>
+            <div class="st-toolbar-divider"></div>
+            <button class="st-toolbar-btn" id="selectAllToggle" title="Select All"><i class="far fa-check-square"></i> Select</button>
+            <button class="st-toolbar-btn" id="exportBtn" title="Export CSV"><i class="fas fa-download"></i> Export</button>
+            <div class="st-toolbar-divider"></div>
+            <button class="st-toolbar-btn" id="saveAllNotesBtn" title="Save all notes" style="background:var(--st-accent-light);color:var(--st-accent);border-color:var(--st-accent);font-weight:700"><i class="fas fa-save"></i> Save Notes</button>
+            <span class="st-toolbar-count">Showing <strong id="visibleCount">{{ subtools|length }}</strong> of <strong>{{ subtools|length }}</strong> tools</span>
+        </div>
+
+        <!-- Bulk Bar -->
+        <div class="st-bulk-bar" id="bulkBar">
+            <div class="st-bulk-bar-count"><span class="count-num" id="bulkCount">0</span> tools selected</div>
+            <div class="st-bulk-bar-actions">
+                <button class="st-bulk-btn info" id="bulkUpdateBtn"><i class="fas fa-save"></i> Save Notes</button>
+                <button class="st-bulk-btn danger" id="bulkDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+            </div>
+            <button class="st-bulk-close" id="bulkClearBtn" title="Clear selection">&times;</button>
+        </div>
+
+        <!-- Card Grid -->
+        <div class="st-grid" id="stGrid">
             {% for subtool in subtools %}
-            <div class="subleveltool-card" data-name="{{ subtool.name|lower }}" data-id="{{ subtool.id }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
-                <div class="card-header">
-                    <div class="card-checkbox-wrapper">
-                        <input type="checkbox" class="subleveltool-checkbox" value="{{ subtool.id }}">
-                    </div>
-                    
-                    <div class="card-actions" onclick="event.stopPropagation();">
-                        <button type="button" onclick="event.stopPropagation(); editsubleveltool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Edit" class="action-btn edit-btn"><i class="fas fa-pen"></i></button>
-                        <button type="button" onclick="event.stopPropagation(); openDeletesubleveltool({{ subtool.id }});" class="action-btn delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                    
-                    <div class="subleveltool-icon">
-                        <div class="subleveltool-icon-circle">
-                            <img src="/static/products/philips.png" alt="Tool Icon">
-                        </div>
+            <div class="st-card" data-id="{{ subtool.id }}" data-name="{{ subtool.name|lower }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
+                <div class="st-card-header">
+                    <input type="checkbox" class="st-card-checkbox st-item-check" value="{{ subtool.id }}">
+                    <div class="st-card-icon"><img src="/static/products/philips.png" alt="Logo"></div>
+                    <div class="st-card-title" title="{{ subtool.name }}">{{ subtool.name }}</div>
+                    <div class="st-card-menu" onclick="event.stopPropagation();">
+                        <button type="button" class="st-card-menu-btn" onclick="event.stopPropagation(); stEditTool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Rename"><i class="fas fa-pen"></i></button>
+                        <button type="button" class="st-card-menu-btn danger" onclick="event.stopPropagation(); stDeleteTool({{ subtool.id }}, '{{ subtool.name|escapejs }}');" title="Delete"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-                
-                <div class="card-body">
-                    <div class="subleveltool-name">{{ subtool.name }}</div>
-                    
-                    <div class="status-badges">
-                        <div class="status-badge badge-stock">
-                            <div class="badge-label">Stock</div>
-                            <div>{{ subtool.in_stock }}</div>
-                        </div>
-                        <div class="status-badge badge-use">
-                            <div class="badge-label">In Use</div>
-                            <div>{{ subtool.in_use }}</div>
-                        </div>
-                        <div class="status-badge badge-scraped">
-                            <div class="badge-label">Scraped</div>
-                            <div>{{ subtool.scraped }}</div>
-                        </div>
+                <div class="st-card-body">
+                    <div class="st-card-metrics">
+                        <div class="st-metric stock"><div class="st-metric-value">{{ subtool.in_stock|default_if_none:0 }}</div><div class="st-metric-label">In Stock</div></div>
+                        <div class="st-metric use"><div class="st-metric-value">{{ subtool.in_use|default_if_none:0 }}</div><div class="st-metric-label">In Use</div></div>
+                        <div class="st-metric scraped"><div class="st-metric-value">{{ subtool.scraped|default_if_none:0 }}</div><div class="st-metric-label">Scraped</div></div>
                     </div>
-                    
-                    <textarea class="subleveltool-note" data-id="{{ subtool.id }}" placeholder="Add a note...">{{ subtool.note|default_if_none:'' }}</textarea>
+                    <div class="st-card-bar"><div class="st-card-bar-seg stock"></div><div class="st-card-bar-seg use"></div><div class="st-card-bar-seg scraped"></div></div>
+                    <textarea class="st-card-note" data-id="{{ subtool.id }}" placeholder="Add a note..." onclick="event.stopPropagation();">{{ subtool.note|default_if_none:'' }}</textarea>
+                </div>
+                <div class="st-card-footer">
+                    <span class="st-card-total">Total: <strong>{{ subtool.in_stock|default_if_none:0|add:subtool.in_use|add:subtool.scraped }}</strong></span>
+                    <button class="st-card-history-btn" onclick="event.stopPropagation(); stShowHistory({{ subtool.id }}, '{{ subtool.name|escapejs }}');" type="button"><i class="fas fa-clock-rotate-left"></i> History</button>
                 </div>
             </div>
             {% empty %}
-            <div class="empty-state">
-                <div class="empty-icon">🔧</div>
-                <h3 class="empty-title">No Sub Tools Found</h3>
-                <p class="empty-text">Start by adding your first sub tool using the form above!</p>
-            </div>
+            <div class="st-empty"><div class="st-empty-icon"><i class="fas fa-wrench"></i></div><h3>No Sub Tools Found</h3><p>Get started by adding your first sub tool using the button above.</p></div>
             {% endfor %}
         </div>
 
-        <!-- Pagination -->
-        {% if page_obj %}
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
-                ← Previous
-            </a>
-            {% endif %}
-            <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
-                Next →
-            </a>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Subtool Popup Modal -->
-    <div id="subleveltoolPopup" class="modal-overlay">
-        <div class="modal-content" style="max-width: min(28rem, 95vw);">
-            <button onclick="closesubleveltoolPopup()" class="modal-close">&times;</button>
-            <button type="button" onclick="showsubleveltoolInfo()" title="View History" style="position: absolute; top: 1rem; left: 1rem; background: var(--tool-primary-light); border: 2px solid var(--tool-primary); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--tool-primary); cursor: pointer; transition: all 0.3s ease;"><i class="fas fa-history"></i></button>
-            
-            <div class="modal-header">
-                <div class="modal-icon">
-                    <i class="fas fa-wrench" style="color: var(--tool-primary);"></i>
-                </div>
-                <h2 id="popupsubleveltoolName" class="modal-title"></h2>
-            </div>
-            
-            <form id="subleveltoolCountForm" method="post" class="modal-form">
-                {% csrf_token %}
-                <input type="hidden" name="subleveltool_id" id="popupsubleveltoolId">
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; width: 100%;">
-                    <div class="status-input-group stock-input-group">
-                        <label for="popupInStock" class="status-input-label stock-input-label"><i class="fas fa-box-open"></i> In Stock</label>
-                        <input type="number" name="in_stock" id="popupInStock" min="0" class="status-input stock-input">
-                    </div>
-                    <div class="status-input-group use-input-group">
-                        <label for="popupInUse" class="status-input-label use-input-label"><i class="fas fa-cogs"></i> In Use</label>
-                        <input type="number" name="in_use" id="popupInUse" min="0" class="status-input use-input">
-                    </div>
-                    <div class="status-input-group scraped-input-group">
-                        <label for="popupScraped" class="status-input-label scraped-input-label"><i class="fas fa-recycle"></i> Scraped</label>
-                        <input type="number" name="scraped" id="popupScraped" min="0" class="status-input scraped-input">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem; font-size: 1.1rem;">
-                    <i class="fas fa-save"></i>
-                    <span>Save Changes</span>
-                </button>
-            </form>
+        <!-- Table View -->
+        <div class="st-table-wrapper" id="stTableWrapper">
+            <table class="st-table">
+                <thead><tr>
+                    <th class="tbl-checkbox-cell"><input type="checkbox" class="st-card-checkbox" id="tblSelectAll"></th>
+                    <th>Name</th><th>In Stock</th><th>In Use</th><th>Scraped</th><th>Total</th><th>Note</th><th style="width:100px;">Actions</th>
+                </tr></thead>
+                <tbody id="stTableBody">
+                    {% for subtool in subtools %}
+                    <tr data-id="{{ subtool.id }}" data-name="{{ subtool.name|lower }}" data-in-stock="{{ subtool.in_stock|default_if_none:0 }}" data-in-use="{{ subtool.in_use|default_if_none:0 }}" data-scraped="{{ subtool.scraped|default_if_none:0 }}">
+                        <td class="tbl-checkbox-cell"><input type="checkbox" class="st-item-check" value="{{ subtool.id }}"></td>
+                        <td><span class="tbl-name" onclick="stOpenPopup({{ subtool.id }},'{{ subtool.name|escapejs }}',{{ subtool.in_stock|default_if_none:0 }},{{ subtool.in_use|default_if_none:0 }},{{ subtool.scraped|default_if_none:0 }})">{{ subtool.name }}</span></td>
+                        <td><span class="tbl-badge stock"><i class="fas fa-warehouse"></i> {{ subtool.in_stock|default_if_none:0 }}</span></td>
+                        <td><span class="tbl-badge use"><i class="fas fa-cogs"></i> {{ subtool.in_use|default_if_none:0 }}</span></td>
+                        <td><span class="tbl-badge scraped"><i class="fas fa-recycle"></i> {{ subtool.scraped|default_if_none:0 }}</span></td>
+                        <td><strong>{{ subtool.in_stock|default_if_none:0|add:subtool.in_use|add:subtool.scraped }}</strong></td>
+                        <td><span style="font-size:.8rem;color:var(--st-text-muted);">{{ subtool.note|default_if_none:"\u2014"|truncatewords:8 }}</span></td>
+                        <td><div class="tbl-actions">
+                            <button class="tbl-action-btn" onclick="stOpenPopup({{ subtool.id }},'{{ subtool.name|escapejs }}',{{ subtool.in_stock|default_if_none:0 }},{{ subtool.in_use|default_if_none:0 }},{{ subtool.scraped|default_if_none:0 }})" title="Update Counts"><i class="fas fa-sliders-h"></i></button>
+                            <button class="tbl-action-btn" onclick="stEditTool({{ subtool.id }},'{{ subtool.name|escapejs }}')" title="Rename"><i class="fas fa-pen"></i></button>
+                            <button class="tbl-action-btn danger" onclick="stDeleteTool({{ subtool.id }},'{{ subtool.name|escapejs }}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Edit Sub Tool Modal -->
-    <div id="editsubtoolModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: min(25rem, 95vw);">
-            <button onclick="closeEditsubtoolModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon" style="background: rgba(6, 182, 212, 0.1);">
-                    <i class="fas fa-edit" style="color: var(--tool-accent);"></i>
-                </div>
-                <h3 class="modal-title">Edit Sub Tool</h3>
+    </div><!-- /.st-page -->
+
+    <!-- COUNTS MODAL -->
+    <div class="st-overlay" id="countsModal">
+        <div class="st-modal">
+            <button class="st-modal-close" onclick="stCloseModal('countsModal')">&times;</button>
+            <div class="st-modal-head">
+                <div class="st-modal-icon primary"><img src="/static/products/Philips_NoBG.png" alt="Logo" style="height:1.8rem;width:auto;"></div>
+                <div class="st-modal-title" id="countsName"></div>
+                <div class="st-modal-desc">Update inventory counts for this sub tool</div>
             </div>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Editing: <strong id="editsubtoolTitle" style="color: var(--tool-primary);"></strong>
-            </p>
-            <form id="editsubtoolForm" class="modal-form">
-                <input type="hidden" name="edit_id" id="editsubtoolId">
-                <input type="text" name="new_name" id="editsubtoolName" class="form-input" placeholder="Enter new name..." style="margin-bottom: 1.5rem; width: 100%;" required>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-save"></i>
-                    <span>Save Changes</span>
-                </button>
-            </form>
+            <div class="st-modal-body">
+                <form method="post" id="countsForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="subleveltool_id" id="countsId">
+                    <div class="st-metric-inputs">
+                        <div class="st-metric-input-card stock"><div class="st-metric-input-icon"><i class="fas fa-warehouse"></i></div><div class="st-metric-input-label">In Stock</div><input type="number" name="in_stock" id="countsStock" min="0" class="st-metric-number-input"></div>
+                        <div class="st-metric-input-card use"><div class="st-metric-input-icon"><i class="fas fa-cogs"></i></div><div class="st-metric-input-label">In Use</div><input type="number" name="in_use" id="countsUse" min="0" class="st-metric-number-input"></div>
+                        <div class="st-metric-input-card scraped"><div class="st-metric-input-icon"><i class="fas fa-recycle"></i></div><div class="st-metric-input-label">Scraped</div><input type="number" name="scraped" id="countsScraped" min="0" class="st-metric-number-input"></div>
+                    </div>
+                    <div style="margin-top:1.25rem;display:flex;gap:.65rem;">
+                        <button type="button" class="st-btn st-btn-ghost" style="flex:1;" onclick="stShowHistory(document.getElementById('countsId').value,document.getElementById('countsName').textContent)"><i class="fas fa-clock-rotate-left"></i> History</button>
+                        <button type="submit" class="st-btn st-btn-primary" style="flex:2;"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Delete Sub Tool Modal -->
-    <div id="deletesubtoolModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: min(25rem, 95vw);">
-            <button onclick="closeDeletesubtoolModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon" style="background: var(--danger-light);">
-                    <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
-                </div>
-                <h3 class="modal-title" style="color: var(--danger-color);">Delete Sub Tool</h3>
+    <!-- EDIT MODAL -->
+    <div class="st-overlay" id="editModal">
+        <div class="st-modal">
+            <button class="st-modal-close" onclick="stCloseModal('editModal')">&times;</button>
+            <div class="st-modal-head">
+                <div class="st-modal-icon primary"><i class="fas fa-pen-to-square"></i></div>
+                <div class="st-modal-title">Rename Sub Tool</div>
+                <div class="st-modal-desc">Editing: <strong id="editCurrentName"></strong></div>
             </div>
-            <p style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
-                Are you sure you want to delete <strong id="deletesubtoolName" style="color: var(--danger-color);"></strong>?
-            </p>
-            <form id="deletesubtoolForm" method="post" action="/stream/{{ selected_stream }}/subleveltooltools/" class="modal-form">
-                {% csrf_token %}
-                <input type="hidden" name="delete_id" id="deletesubtoolId">
-                <button type="submit" class="btn btn-danger" style="width: 100%;">
-                    <i class="fas fa-trash-alt"></i>
-                    <span>Delete Tool</span>
-                </button>
-            </form>
+            <div class="st-modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <div class="st-form-group"><label class="st-form-label"><i class="fas fa-tag"></i> New Name</label><input type="text" id="editName" class="st-form-input" placeholder="Enter new name..." required></div>
+                    <button type="submit" class="st-btn st-btn-primary st-btn-block"><i class="fas fa-check"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE MODAL -->
+    <div class="st-overlay" id="deleteModal">
+        <div class="st-modal">
+            <button class="st-modal-close" onclick="stCloseModal('deleteModal')">&times;</button>
+            <div class="st-modal-head">
+                <div class="st-modal-icon danger"><i class="fas fa-trash-alt"></i></div>
+                <div class="st-modal-title" style="color:var(--st-danger);">Delete Sub Tool</div>
+                <div class="st-modal-desc">Are you sure you want to delete <strong id="deleteName"></strong>? This action cannot be undone.</div>
+            </div>
+            <div class="st-modal-body">
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_id" id="deleteId">
+                    <div style="display:flex;gap:.65rem;">
+                        <button type="button" class="st-btn st-btn-ghost" style="flex:1;" onclick="stCloseModal('deleteModal')"><i class="fas fa-times"></i> Cancel</button>
+                        <button type="submit" class="st-btn st-btn-danger" style="flex:1;"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div class="st-overlay" id="historyModal">
+        <div class="st-modal wide">
+            <button class="st-modal-close" onclick="stCloseModal('historyModal')">&times;</button>
+            <div class="st-modal-head">
+                <div class="st-modal-icon info"><i class="fas fa-clock-rotate-left"></i></div>
+                <div class="st-modal-title" id="historyTitle">Change History</div>
+                <div class="st-modal-desc" id="historySubtitle"></div>
+            </div>
+            <div class="st-modal-body">
+                <div class="st-history-filters" id="historyFilters"></div>
+                <div class="st-graph-wrap" id="historyGraphWrap"><canvas id="historyCanvas" width="400" height="140"></canvas></div>
+                <div class="st-history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRAPH MODAL -->
+    <div class="st-overlay" id="graphModal">
+        <div class="st-modal wide" style="max-width:900px;">
+            <button class="st-modal-close" onclick="stCloseModal('graphModal')">&times;</button>
+            <div class="st-modal-head">
+                <div class="st-modal-icon info"><i class="fas fa-chart-line"></i></div>
+                <div class="st-modal-title">Tool History Trends</div>
+            </div>
+            <div class="st-modal-body">
+                <div class="st-graph-wrap"><canvas id="graphMaxCanvas" width="800" height="350"></canvas></div>
+                <div style="text-align:center;"><button class="st-btn st-btn-ghost" onclick="stCloseModal('graphModal')"><i class="fas fa-times"></i> Close</button></div>
+            </div>
         </div>
     </div>
 
     <script>
-    // Core functions for popup management
-    function opensubleveltoolPopup(id, name, inStock, inUse, scraped) {
-      document.getElementById('subleveltoolPopup').style.display = 'flex';
-      document.getElementById('popupsubleveltoolName').textContent = name;
-      document.getElementById('popupsubleveltoolId').value = id;
-      document.getElementById('popupInStock').value = inStock || 0;
-      document.getElementById('popupInUse').value = inUse || 0;
-      document.getElementById('popupScraped').value = scraped || 0;
-    }
-
-    function closesubleveltoolPopup() {
-      document.getElementById('subleveltoolPopup').style.display = 'none';
-    }
-
-    function openDeletesubleveltool(id, name) {
-        event.stopPropagation();
-        document.getElementById('deletesubtoolId').value = id;
-        document.getElementById('deletesubtoolName').textContent = name;
-        document.getElementById('editsubtoolTitle').textContent = name; // Set the title
-        document.getElementById('deletesubtoolModal').style.display = 'flex';
-    }
-
-    function editsubleveltool(id, name) {
-      event.stopPropagation();
-      document.getElementById('editsubtoolId').value = id;
-      document.getElementById('editsubtoolName').value = name;
-      document.getElementById('editsubtoolTitle').textContent = name;
-      document.getElementById('editsubtoolModal').style.display = 'flex';
-      setTimeout(() => {
-        document.getElementById('editsubtoolName').focus();
-      }, 100);
-    }
-
-    function closeEditsubtoolModal() {
-      document.getElementById('editsubtoolModal').style.display = 'none';
-    }
-
-    function openDeletesubleveltool(id) {
-      event.stopPropagation();
-      const card = document.querySelector('.subleveltool-card[data-id="' + id + '"]');
-      const name = card ? card.querySelector('.subleveltool-name').textContent : '';
-      document.getElementById('deletesubtoolId').value = id;
-      document.getElementById('deletesubtoolName').textContent = name;
-      document.getElementById('deletesubtoolModal').style.display = 'flex';
-    }
-
-    function closeDeletesubtoolModal() {
-      document.getElementById('deletesubtoolModal').style.display = 'none';
-    }
-
-    function closeErrorModal() {
-      document.getElementById('errorModal').style.display = 'none';
-    }
-
-    function showsubleveltoolInfo() {
-      var subleveltoolId = document.getElementById('popupsubleveltoolId').value;
-      var history = (window.subleveltoolHistoryData && window.subleveltoolHistoryData[subleveltoolId]) || [];
-      let html = '<div style="font-size:1.25rem; font-weight:700; color:var(--tool-primary); margin-bottom:1rem; text-align:center;"><i class="fas fa-chart-line"></i> Tool History</div>';
-      
-      // Week filter
-      function getISOWeek(d) {
-        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        var dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        var weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-        return {week: weekNum, year: d.getUTCFullYear()};
-      }
-      
-      let weekSet = new Set();
-      for (const h of history) {
-        let d = new Date(h.at);
-        let w = getISOWeek(d);
-        weekSet.add(`W${w.week}, ${w.year}`);
-        h._week = `W${w.week}, ${w.year}`;
-      }
-      
-      let weekList = Array.from(weekSet).sort((a,b)=>{
-        let [wa, ya] = a.match(/W(\d+), (\d+)/).slice(1).map(Number);
-        let [wb, yb] = b.match(/W(\d+), (\d+)/).slice(1).map(Number);
-        return yb-ya || wb-wa;
-      });
-      
-      html += '<div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;">';
-      html += '<select id="historyWeekFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Weeks</option>';
-      for (const w of weekList) html += `<option value="${w}">${w}</option>`;
-      html += '</select>';
-      
-      // User filter
-      let users = Array.from(new Set(history.map(h => h.by)));
-      if (users.length > 1) {
-        html += '<select id="historyUserFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Users</option>';
-        for (const u of users) html += `<option value="${u}">${u}</option>`;
-        html += '</select>';
-      }
-      html += '</div>';
-      
-      // Graph
-      html += '<div style="display:flex; justify-content:center; margin-bottom:1.5rem; background:var(--bg-light); padding:1rem; border-radius:0.75rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
-      
-      if (history.length === 0) {
-        html += '<div style="text-align:center; color:var(--text-muted); padding:2rem; background:var(--bg-light); border-radius:0.75rem;"><i class="fas fa-inbox" style="font-size:2rem; opacity:0.5; display:block; margin-bottom:0.5rem;"></i> No history found.</div>';
-      } else {
-        html += '<div style="max-height:15rem; overflow-y:auto; background:var(--bg-light); border-radius:0.75rem; padding:1rem;"><ul id="historyList" style="list-style:none; padding:0; margin:0;">';
-        for (const entry of history.slice().reverse()) {
-          const dateStr = new Date(entry.at).toLocaleString();
-          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:1rem; padding:0.75rem; background:var(--white); border-radius:0.5rem; border-left:0.25rem solid var(--tool-primary);">
-            <div style="font-weight:700; color:var(--tool-primary); margin-bottom:0.25rem;">${entry.action}</div>
-            <div style="font-size:0.875rem; color:var(--text-muted);">by <strong style="color:var(--tool-primary);">${entry.by}</strong> • ${dateStr}</div>
-            <div style="font-size:0.9rem; color:var(--text-dark); margin-top:0.375rem;">${entry.details}</div>
-          </li>`;
-        }
-        html += '</ul></div>';
-      }
-      
-      const popup = document.createElement('div');
-      popup.className = 'modal-overlay';
-      popup.style.display = 'flex';
-      popup.style.zIndex = '3000';
-      popup.style.position = 'fixed';
-      popup.style.width = '100vw';
-      popup.style.height = '100vh';
-      
-      const content = document.createElement('div');
-      content.className = 'modal-content';
-      content.style.maxWidth = '40rem';
-      content.style.position = 'relative';
-      
-      // Add close button
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'modal-close';
-      closeBtn.innerHTML = '&times;';
-      closeBtn.onclick = function() { closeInfoPopup(this); };
-      content.appendChild(closeBtn);
-      
-      // Add content
-      const contentWrapper = document.createElement('div');
-      contentWrapper.innerHTML = html;
-      content.appendChild(contentWrapper);
-      
-      popup.appendChild(content);
-      document.body.appendChild(popup);
-
-      // Add filter logic
-      const weekFilter = content.querySelector('#historyWeekFilter');
-      const userFilter = content.querySelector('#historyUserFilter');
-      function applyFilters() {
-        const weekVal = weekFilter ? weekFilter.value : '';
-        const userVal = userFilter ? userFilter.value : '';
-        content.querySelectorAll('#historyList li').forEach(li => {
-          let show = true;
-          if (weekVal && li.getAttribute('data-week') !== weekVal) show = false;
-          if (userVal && li.getAttribute('data-by') !== userVal) show = false;
-          li.style.display = show ? '' : 'none';
-        });
-      }
-      if (weekFilter) weekFilter.addEventListener('change', applyFilters);
-      if (userFilter) userFilter.addEventListener('change', applyFilters);
-      // Draw advanced graph (date x-axis, 3 y-series, hover tooltip)
-      const canvas = content.querySelector('#historyGraph');
-      const ctx = canvas.getContext('2d');
-      // Parse progress from details
-      let points = [];
-      let last = {in_stock: null, in_use: null, scraped: null};
-      for (const entry of history) {
-        let m = entry.details.match(/In Stock from (\d+) to (\d+)/);
-        if (m) last.in_stock = +m[2];
-        m = entry.details.match(/In Use from (\d+) to (\d+)/);
-        if (m) last.in_use = +m[2];
-        m = entry.details.match(/Scraped from (\d+) to (\d+)/);
-        if (m) last.scraped = +m[2];
-        points.push({t: new Date(entry.at), ...last});
-      }
-      // Only plot if we have at least 2 points
-      if (points.length > 1) {
-        // Show only last 5 transactions
-        if (points.length > 5) points = points.slice(-5);
-        // Find min/max for y, and min/max for x (date)
-        let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
-        let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
-        if (min === Infinity) min = 0;
-        if (max === -Infinity) max = 1;
-        const t0 = points[0].t.getTime();
-        const t1 = points[points.length-1].t.getTime();
-        function tx(t) { return 50 + 220 * (t.getTime()-t0)/(t1-t0||1); }
-        function ty(val) { return 100 - 80 * ((val-min)/(max-min||1)); }
-        ctx.clearRect(0,0,320,120);
-        // Axes (remove Y axis/date)
-        ctx.strokeStyle = '#bbb'; ctx.beginPath(); ctx.moveTo(50,10); ctx.lineTo(50,110); ctx.lineTo(300,110); ctx.stroke();
-        // Y axis labels removed
-        // X axis labels (dates)
-        ctx.font = '11px sans-serif'; ctx.fillStyle = '#888';
-        ctx.textAlign = 'center';
-        let step = Math.max(1, Math.floor(points.length/4));
-        for (let i=0; i<points.length; i+=step) {
-          let d = points[i].t;
-          ctx.fillText(d.toLocaleDateString(), tx(d), 122);
-        }
-        // Draw lines
-        function drawLine(key, color) {
-          ctx.strokeStyle = color; ctx.beginPath();
-          let started = false;
-          for (const p of points) {
-            if (p[key] == null) continue;
-            const x = tx(p.t), y = ty(p[key]);
-            if (!started) { ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
-          }
-          ctx.stroke();
-        }
-        drawLine('in_stock', '#1a7f37');
-        drawLine('in_use', '#b59f00');
-        drawLine('scraped', '#dc3545');
-        // Draw points for hover
-        let dots = [];
-        function drawDots(key, color) {
-          for (const p of points) {
-            if (p[key] == null) continue;
-            const x = tx(p.t), y = ty(p[key]);
-            ctx.beginPath(); ctx.arc(x, y, 4, 0, 2*Math.PI);
-            ctx.fillStyle = color; ctx.fill();
-            dots.push({x, y, key, val: p[key], date: p.t});
-          }
-        }
-        drawDots('in_stock', '#1a7f37');
-        drawDots('in_use', '#b59f00');
-        drawDots('scraped', '#dc3545');
-        // Legend
-        ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
-        ctx.fillStyle = '#1a7f37'; ctx.fillText('In Stock', 220, 22);
-        ctx.fillStyle = '#b59f00'; ctx.fillText('In Use', 220, 38);
-        ctx.fillStyle = '#dc3545'; ctx.fillText('Scraped', 220, 54);
-        // Tooltip on hover (always above graph)
-        let tooltip = document.getElementById('historyGraphTooltip');
-        if (!tooltip) {
-          tooltip = document.createElement('div');
-          tooltip.id = 'historyGraphTooltip';
-          tooltip.style.position = 'fixed';
-          tooltip.style.pointerEvents = 'none';
-          tooltip.style.background = '#fff';
-          tooltip.style.border = '1px solid #bbb';
-          tooltip.style.borderRadius = '6px';
-          tooltip.style.padding = '4px 10px';
-          tooltip.style.fontSize = '13px';
-          tooltip.style.color = '#222';
-          tooltip.style.boxShadow = '0 2px 8px #e0e3e7';
-          tooltip.style.display = 'none';
-          tooltip.style.zIndex = '9999';
-          document.body.appendChild(tooltip);
-        }
-        canvas.onmousemove = function(e) {
-          const rect = canvas.getBoundingClientRect();
-          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-          let found = null;
-          for (const d of dots) {
-            if (Math.abs(d.x-mx)<7 && Math.abs(d.y-my)<7) { found = d; break; }
-          }
-          if (found) {
-            tooltip.style.display = 'block';
-            tooltip.textContent = `${found.key.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}: ${found.val} on ${found.date.toLocaleDateString()}`;
-            // Always above the graph
-            tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
-            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
-          } else {
-            tooltip.style.display = 'none';
-          }
-        };
-        canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
-        // Maximize on click
-        canvas.onclick = function() {
-          maximizeSubToolGraph(points, min, max, t0, t1);
-        };
-      } else if (ctx) {
-        ctx.clearRect(0,0,320,120);
-        ctx.font = '14px sans-serif';
-        ctx.fillStyle = '#888';
-        ctx.fillText('Not enough data for graph', 60, 65);
-      }
-    }
-
-    function closeInfoPopup(btn) {
-      // Remove the entire overlay popup (the parent of the content div)
-      let overlay = btn.closest('div');
-      // Traverse up to find the overlay (the one with fixed position and 100vw/100vh)
-      while (overlay && overlay.parentNode && overlay !== document.body) {
-        if (
-          overlay.style &&
-          overlay.style.position === 'fixed' &&
-          overlay.style.width === '100vw' &&
-          overlay.style.height === '100vh'
-        ) {
-          break;
-        }
-        overlay = overlay.parentNode;
-      }
-      if (overlay && overlay.parentNode === document.body) {
-        document.body.removeChild(overlay);
-      }
-      // Re-show the main subleveltool popup if it was hidden (ensure it's visible)
-      document.getElementById('subleveltoolPopup').style.display = 'flex';
-    }
-
-    function maximizeSubToolGraph(points, min, max, t0, t1) {
-      const graphPopup = document.createElement('div');
-      graphPopup.className = 'modal-overlay';
-      graphPopup.style.display = 'flex';
-      graphPopup.style.zIndex = '4000';
-      graphPopup.style.position = 'fixed';
-      graphPopup.style.width = '100vw';
-      graphPopup.style.height = '100vh';
-      
-      const graphContent = document.createElement('div');
-      graphContent.className = 'modal-content';
-      graphContent.style.maxWidth = 'min(70rem, 95vw)';
-      graphContent.innerHTML = `
-        <button onclick="this.closest('.modal-overlay').remove()" class="modal-close">&times;</button>
-        <div class="modal-header">
-          <div class="modal-icon">
-            <i class="fas fa-chart-area" style="color: var(--tool-primary);"></i>
-          </div>
-          <h3 class="modal-title">Tool History Trends</h3>
-        </div>
-        <div style="display:flex; justify-content:center; background:var(--bg-light); padding:2rem; border-radius:0.75rem;">
-          <canvas id="maximizedSubToolGraph" width="800" height="400"></canvas>
-        </div>
-        <div style="text-align:center; margin-top:1.5rem;">
-          <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-primary"><i class="fas fa-times"></i> Close</button>
-        </div>
-      `;
-      graphPopup.appendChild(graphContent);
-      document.body.appendChild(graphPopup);
-      
-      // Draw maximized graph
-      const maxCanvas = graphContent.querySelector('#maximizedSubToolGraph');
-      const maxCtx = maxCanvas.getContext('2d');
-      
-      function tx(t) { return 80 + 640 * (t.getTime()-t0)/(t1-t0||1); }
-      function ty(val) { return 350 - 280 * ((val-min)/(max-min||1)); }
-      
-      maxCtx.clearRect(0,0,800,400);
-      maxCtx.strokeStyle = '#ddd'; 
-      maxCtx.lineWidth = 2;
-      maxCtx.beginPath(); 
-      maxCtx.moveTo(80,50); 
-      maxCtx.lineTo(80,360); 
-      maxCtx.lineTo(740,360); 
-      maxCtx.stroke();
-      
-      // Y axis labels
-      maxCtx.font = '14px sans-serif';
-      maxCtx.fillStyle = '#666';
-      maxCtx.textAlign = 'right';
-      for (let i = 0; i <= 5; i++) {
-        const val = min + (max - min) * i / 5;
-        const y = 350 - 280 * i / 5;
-        maxCtx.fillText(Math.round(val), 70, y + 5);
-        maxCtx.strokeStyle = '#eee';
-        maxCtx.beginPath();
-        maxCtx.moveTo(80, y);
-        maxCtx.lineTo(740, y);
-        maxCtx.stroke();
-      }
-      
-      // X axis dates
-      maxCtx.font = '14px sans-serif'; 
-      maxCtx.fillStyle = '#666';
-      maxCtx.textAlign = 'center';
-      let step = Math.max(1, Math.floor(points.length/8));
-      for (let i=0; i<points.length; i+=step) {
-        let d = points[i].t;
-        maxCtx.fillText(d.toLocaleDateString(), tx(d), 380);
-      }
-      
-      // Draw lines
-      function drawLine(key, color) {
-        maxCtx.strokeStyle = color; 
-        maxCtx.lineWidth = 3;
-        maxCtx.beginPath();
-        let started = false;
-        for (const p of points) {
-          if (p[key] == null) continue;
-          const x = tx(p.t), y = ty(p[key]);
-          if (!started) { maxCtx.moveTo(x,y); started=true; } else maxCtx.lineTo(x,y);
-        }
-        maxCtx.stroke();
-        
-        // Draw points
-        maxCtx.fillStyle = color;
-        for (const p of points) {
-          if (p[key] == null) continue;
-          const x = tx(p.t), y = ty(p[key]);
-          maxCtx.beginPath();
-          maxCtx.arc(x, y, 5, 0, 2 * Math.PI);
-          maxCtx.fill();
-        }
-      }
-      drawLine('in_stock', '#1a7f37');
-      drawLine('in_use', '#856404');
-      drawLine('scraped', '#dc3545');
-      
-      // Legend
-      maxCtx.font = '16px sans-serif'; 
-      maxCtx.textAlign = 'left';
-      maxCtx.fillStyle = '#1a7f37'; 
-      maxCtx.fillText('● In Stock', 600, 40);
-      maxCtx.fillStyle = '#856404'; 
-      maxCtx.fillText('● In Use', 600, 65);
-      maxCtx.fillStyle = '#dc3545'; 
-      maxCtx.fillText('● Scraped', 600, 90);
-    }
-
-    // Prepare subleveltool history data for JS
-    window.subleveltoolHistoryData = {};
+    /* ===== HISTORY DATA ===== */
+    window.stHistoryData={};
     {% for sub in subtools %}
-    window.subleveltoolHistoryData['{{ sub.id }}'] = JSON.parse(`[
-      {% for h in sub.history_list %}
-        {"action": "{{ h.action|escapejs }}", "by": "{{ h.by|escapejs }}", "at": "{{ h.at|date:'c' }}", "details": "{{ h.details|escapejs }}"}{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    ]`);
+    window.stHistoryData['{{ sub.id }}']=JSON.parse(`[{% for h in sub.history_list %}{"action":"{{ h.action|escapejs }}","by":"{{ h.by|escapejs }}","at":"{{ h.at|date:'c' }}","details":"{{ h.details|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]`);
     {% endfor %}
-    document.addEventListener('contextmenu', function (e) {
-      e.preventDefault();
-    });
 
-    // Form submissions
-    document.getElementById('editsubtoolForm').onsubmit = function(e) {
-      e.preventDefault();
-      var id = document.getElementById('editsubtoolId').value;
-      var newName = document.getElementById('editsubtoolName').value.trim();
-      if (newName) {
-        window.location.href = `/stream/{{ selected_stream }}/subleveltooltools/?edit_id=${id}&new_name=${encodeURIComponent(newName)}`;
-      }
-    };
+    /* ===== HELPERS ===== */
+    const $=id=>document.getElementById(id);
+    const $$=sel=>document.querySelectorAll(sel);
+    function stOpenModal(id){$(id).classList.add('open')}
+    function stCloseModal(id){$(id).classList.remove('open')}
+    document.addEventListener('click',function(e){if(e.target.classList.contains('st-overlay')&&e.target.classList.contains('open'))e.target.classList.remove('open')});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')$$('.st-overlay.open').forEach(m=>m.classList.remove('open'))});
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', function() {
-      var errorModal = document.getElementById('errorModal');
-      var errorMsg = document.getElementById('errorModalMsg');
-      if (errorModal && errorMsg && errorMsg.textContent.trim().length > 0) {
-        errorModal.style.display = 'flex';
-      }
-
-      // Add click handlers to cards
-      document.querySelectorAll('.subleveltool-card').forEach(card => {
-        card.addEventListener('click', function(e) {
-          if (e.target.classList.contains('card-checkbox') || 
-              e.target.classList.contains('subleveltool-checkbox') ||
-              e.target.closest('.card-actions') || 
-              e.target.classList.contains('subleveltool-note')) {
-            return;
-          }
-          const id = this.dataset.id;
-          const name = this.querySelector('.subleveltool-name').textContent;
-          const inStock = this.dataset.inStock;
-          const inUse = this.dataset.inUse;
-          const scraped = this.dataset.scraped;
-          opensubleveltoolPopup(id, name, inStock, inUse, scraped);
-        });
-      });
-    });
-
-    // Search functionality
-    document.getElementById('subleveltool-search-input').addEventListener('input', function() {
-      const q = this.value.trim().toLowerCase();
-      document.querySelectorAll('#subleveltool-grid .subleveltool-card').forEach(card => {
-        const name = card.dataset.name || '';
-        card.style.display = (!q || name.includes(q)) ? '' : 'none';
-      });
-    });
-
-    // Sort functionality
-    document.getElementById('subleveltool-sort-select').addEventListener('change', function() {
-      const sortBy = this.value;
-      const grid = document.getElementById('subleveltool-grid');
-      const cards = Array.from(grid.children).filter(el => el.classList.contains('subleveltool-card'));
-      // Map select values to dataset keys
-      const keyMap = {
-        name: 'name',
-        in_stock: 'inStock',
-        in_use: 'inUse',
-        scraped: 'scraped'
-      };
-      const dataKey = keyMap[sortBy] || 'name';
-      cards.sort((a, b) => {
-        if (dataKey === 'name') {
-          return a.dataset.name.localeCompare(b.dataset.name);
-        } else {
-          return parseInt(b.dataset[dataKey]) - parseInt(a.dataset[dataKey]);
-        }
-      });
-      cards.forEach(card => grid.appendChild(card));
-    });
-
-    // Bulk selection
-    document.getElementById('select-all-subleveltools').addEventListener('change', function() {
-      const checked = this.checked;
-      document.querySelectorAll('.subleveltool-checkbox').forEach(cb => {
-        if (cb !== this) cb.checked = checked;
-      });
-      updateBulkState();
-    });
-
-    function updateBulkState() {
-      const checkboxes = document.querySelectorAll('.subleveltool-checkbox');
-      // Only count checked checkboxes with a non-empty value
-      const checked = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).filter(cb => cb.value);
-      document.getElementById('bulk-delete-subleveltools-btn').disabled = checked.length === 0;
-      document.getElementById('bulk-update-subleveltools-btn').disabled = checked.length === 0;
+    /* ===== STATS ===== */
+    function stComputeStats(){
+        let tS=0,tU=0,tR=0,vis=0;
+        $$('#stGrid .st-card').forEach(c=>{if(c.style.display!=='none')vis++;tS+=parseInt(c.dataset.inStock)||0;tU+=parseInt(c.dataset.inUse)||0;tR+=parseInt(c.dataset.scraped)||0});
+        $('statStock').textContent=tS;$('statUse').textContent=tU;$('statScraped').textContent=tR;
+        if($('visibleCount'))$('visibleCount').textContent=vis;
+    }
+    function stUpdateBars(){
+        $$('.st-card-bar').forEach(bar=>{const c=bar.closest('.st-card');const s=parseInt(c.dataset.inStock)||0;const u=parseInt(c.dataset.inUse)||0;const r=parseInt(c.dataset.scraped)||0;const t=s+u+r||1;bar.querySelector('.stock').style.width=(s/t*100)+'%';bar.querySelector('.use').style.width=(u/t*100)+'%';bar.querySelector('.scraped').style.width=(r/t*100)+'%'});
     }
 
-    document.querySelectorAll('.subleveltool-checkbox').forEach(cb => {
-      cb.addEventListener('change', updateBulkState);
+    /* ===== ADD TOOL PANEL ===== */
+    $('addToolToggle').addEventListener('click',()=>{const p=$('addToolPanel');p.classList.toggle('open');if(p.classList.contains('open'))p.querySelector('input[name="subtool_name"]').focus()});
+    $('addToolClose').addEventListener('click',()=>$('addToolPanel').classList.remove('open'));
+
+    /* ===== SEARCH ===== */
+    $('stSearch').addEventListener('input',function(){const q=this.value.trim().toLowerCase();let vis=0;$$('#stGrid .st-card').forEach(c=>{const m=!q||c.dataset.name.includes(q);c.style.display=m?'':'none';if(m)vis++});$$('#stTableBody tr').forEach(r=>{const m=!q||r.dataset.name.includes(q);r.style.display=m?'':'none'});if($('visibleCount'))$('visibleCount').textContent=vis});
+
+    /* ===== SORT ===== */
+    $('stSort').addEventListener('change',function(){
+        const s=this.value;const g=$('stGrid');const cards=Array.from(g.querySelectorAll('.st-card'));const tb=$('stTableBody');const rows=Array.from(tb.querySelectorAll('tr'));
+        function cmp(a,b){if(s==='name')return(a.dataset.name||'').localeCompare(b.dataset.name||'');if(s==='name_desc')return(b.dataset.name||'').localeCompare(a.dataset.name||'');if(s==='total'){const tA=(parseInt(a.dataset.inStock)||0)+(parseInt(a.dataset.inUse)||0)+(parseInt(a.dataset.scraped)||0);const tB=(parseInt(b.dataset.inStock)||0)+(parseInt(b.dataset.inUse)||0)+(parseInt(b.dataset.scraped)||0);return tB-tA}const k={in_stock:'inStock',in_use:'inUse',scraped:'scraped'}[s]||'inStock';return(parseInt(b.dataset[k])||0)-(parseInt(a.dataset[k])||0)}
+        cards.sort(cmp).forEach(c=>g.appendChild(c));rows.sort(cmp).forEach(r=>tb.appendChild(r))
     });
 
-    // Bulk operations
-    document.getElementById('bulk-delete-subleveltools-btn').addEventListener('click', function() {
-      // Only collect checked checkboxes with a non-empty value
-      const ids = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).map(cb => cb.value).filter(id => id);
-      if (!ids.length || !confirm('Delete selected Sub Tools?')) return;
-      
-      fetch('/stream/{{ selected_stream }}/subleveltools/bulk-delete/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({ids: ids})
-      }).then(r => r.json()).then(data => {
-        if (data.success) {
-          ids.forEach(id => {
-            const card = document.querySelector('.subleveltool-card[data-id="'+id+'"]');
-            if (card) card.remove();
-          });
-          alert('Deleted ' + data.deleted + ' Sub Tools.');
-        } else {
-          alert('Error: ' + (data.error || 'Unable to delete'));
-        }
-      }).catch(() => alert('Request failed'));
+    /* ===== VIEW TOGGLE ===== */
+    $('viewGrid').addEventListener('click',function(){$('stGrid').style.display='grid';$('stTableWrapper').classList.remove('active');this.classList.add('active');$('viewTable').classList.remove('active')});
+    $('viewTable').addEventListener('click',function(){$('stGrid').style.display='none';$('stTableWrapper').classList.add('active');this.classList.add('active');$('viewGrid').classList.remove('active')});
+
+    /* ===== BULK SELECTION ===== */
+    function stUpdateBulk(){const ch=Array.from($$('.st-item-check:checked')).map(cb=>cb.value).filter(Boolean);const bar=$('bulkBar');if(ch.length>0){bar.classList.add('visible');$('bulkCount').textContent=ch.length}else{bar.classList.remove('visible')}}
+    $('selectAllToggle').addEventListener('click',function(){const all=$$('.st-item-check');const allC=Array.from(all).every(cb=>cb.checked);all.forEach(cb=>cb.checked=!allC);stUpdateBulk()});
+    if($('tblSelectAll')){$('tblSelectAll').addEventListener('change',function(){$$('#stTableBody .st-item-check').forEach(cb=>cb.checked=this.checked);$$('#stGrid .st-item-check').forEach(cb=>{const t=document.querySelector('#stTableBody .st-item-check[value="'+cb.value+'"]');if(t)cb.checked=t.checked});stUpdateBulk()})}
+    document.addEventListener('change',function(e){if(e.target.classList.contains('st-item-check')){const v=e.target.value;$$('.st-item-check[value="'+v+'"]').forEach(cb=>cb.checked=e.target.checked);stUpdateBulk()}});
+    $('bulkClearBtn').addEventListener('click',function(){$$('.st-item-check').forEach(cb=>cb.checked=false);if($('tblSelectAll'))$('tblSelectAll').checked=false;stUpdateBulk()});
+
+    /* ===== BULK DELETE ===== */
+    $('bulkDeleteBtn').addEventListener('click',function(){
+        const ids=Array.from($$('.st-item-check:checked')).map(cb=>cb.value).filter(Boolean);
+        if(!ids.length||!confirm('Delete '+ids.length+' selected sub tool(s)? This cannot be undone.'))return;
+        fetch(_buPrefix + '/stream/{{ selected_stream }}/subleveltools/bulk-delete/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({ids})}).then(r=>r.json()).then(data=>{if(data.success){ids.forEach(id=>{const c=document.querySelector('.st-card[data-id="'+id+'"]');if(c)c.remove();const r=document.querySelector('#stTableBody tr[data-id="'+id+'"]');if(r)r.remove()});stComputeStats();stUpdateBulk();$('statTotal').textContent=$$('#stGrid .st-card').length}else{console.error('Delete failed:',data.error);alert('Unable to delete.')}}).catch(()=>alert('Request failed.'));
     });
 
-    document.getElementById('bulk-update-subleveltools-btn').addEventListener('click', function() {
-      const ids = Array.from(document.querySelectorAll('.subleveltool-checkbox:checked')).map(cb => cb.value).filter(id => id);
-      const notes = {};
-      ids.forEach(id => {
-        const note = document.querySelector('.subleveltool-note[data-id="'+id+'"]');
-        if (note) notes[id] = note.value;
-      });
-      
-      fetch('/stream/{{ selected_stream }}/subleveltools/bulk-update/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({notes: notes})
-      }).then(r => r.json()).then(data => {
-        if (data.success) {
-          alert('Updated notes for selected Sub Tools.');
-        } else {
-          alert('Error: ' + (data.error || 'Unable to update'));
-        }
-      }).catch(() => alert('Request failed'));
+    /* ===== BULK UPDATE NOTES ===== */
+    $('bulkUpdateBtn').addEventListener('click',function(){
+        const ids=Array.from($$('.st-item-check:checked')).map(cb=>cb.value).filter(Boolean);const notes={};ids.forEach(id=>{const n=document.querySelector('.st-card-note[data-id="'+id+'"]');if(n)notes[id]=n.value});
+        fetch(_buPrefix + '/stream/{{ selected_stream }}/subleveltools/bulk-update/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({notes})}).then(r=>r.json()).then(data=>{if(data.success){alert('Notes updated successfully.');$$('.st-item-check').forEach(cb=>cb.checked=false);stUpdateBulk()}else{console.error('Update failed:',data.error);alert('Unable to update.')}}).catch(()=>alert('Request failed.'));
     });
 
-    // Export functionality
-    document.getElementById('export-subleveltools-btn').addEventListener('click', function() {
-      window.location.href = '/stream/{{ selected_stream }}/subleveltools/export/';
+    /* ===== SAVE ALL NOTES ===== */
+    $('saveAllNotesBtn').addEventListener('click',function(){
+        const notes={};$$('.st-card-note').forEach(n=>{const id=n.dataset.id;if(id)notes[id]=n.value});
+        if(!Object.keys(notes).length){alert('No notes to save.');return;}
+        const btn=$('saveAllNotesBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+        fetch(_buPrefix + '/stream/{{ selected_stream }}/subleveltools/bulk-update/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({notes})}).then(r=>r.json()).then(data=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Notes';if(data.success){btn.innerHTML='<i class="fas fa-check"></i> Saved!';btn.style.background='var(--st-success-light)';btn.style.color='var(--st-success)';btn.style.borderColor='var(--st-success)';setTimeout(()=>{btn.innerHTML='<i class="fas fa-save"></i> Save Notes';btn.style.background='var(--st-accent-light)';btn.style.color='var(--st-accent)';btn.style.borderColor='var(--st-accent)'},2000)}else{console.error('Save failed:',data.error);alert('Unable to save.')}}).catch(()=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Notes';alert('Request failed.')});
     });
 
-    // Disable context menu
-    // document.addEventListener('contextmenu', function (e) {
-    //   e.preventDefault();
-    // });
+    /* ===== EXPORT ===== */
+    $('exportBtn').addEventListener('click',()=>{window.location.href='/stream/{{ selected_stream }}/subleveltools/export/'});
+
+    /* ===== CARD CLICK -> COUNTS POPUP ===== */
+    document.addEventListener('click',function(e){const card=e.target.closest('.st-card');if(!card)return;if(e.target.classList.contains('st-item-check')||e.target.closest('.st-card-menu')||e.target.classList.contains('st-card-note')||e.target.closest('.st-card-footer')||e.target.closest('.st-card-checkbox'))return;const id=card.dataset.id;const name=card.querySelector('.st-card-title').textContent.trim();stOpenPopup(id,name,card.dataset.inStock,card.dataset.inUse,card.dataset.scraped)});
+
+    function stOpenPopup(id,name,stock,use,scraped){$('countsName').textContent=name;$('countsId').value=id;$('countsStock').value=stock||0;$('countsUse').value=use||0;$('countsScraped').value=scraped||0;stOpenModal('countsModal');setTimeout(()=>$('countsStock').focus(),150)}
+
+    /* ===== EDIT ===== */
+    function stEditTool(id,name){$('editId').value=id;$('editName').value=name;$('editCurrentName').textContent=name;stOpenModal('editModal');setTimeout(()=>{$('editName').focus();$('editName').select()},150)}
+    $('editForm').addEventListener('submit',function(e){e.preventDefault();const id=$('editId').value;const n=$('editName').value.trim();if(n)window.location.href='/stream/{{ selected_stream }}/subleveltools/?edit_id='+id+'&new_name='+encodeURIComponent(n)});
+
+    /* ===== DELETE ===== */
+    function stDeleteTool(id,name){$('deleteId').value=id;$('deleteName').textContent=name;stOpenModal('deleteModal')}
+
+    /* ===== HISTORY ===== */
+    function stShowHistory(id,name){
+        stCloseModal('countsModal');$('historyTitle').textContent='Change History';$('historySubtitle').textContent=name;
+        const history=(window.stHistoryData&&window.stHistoryData[String(id)])||[];
+        function getISOWeek(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-dn);const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));const wn=Math.ceil(((d-ys)/86400000+1)/7);return{week:wn,year:d.getUTCFullYear()}}
+        const wSet=new Set(),uSet=new Set();
+        history.forEach(h=>{const d=new Date(h.at);const w=getISOWeek(d);h._week='W'+w.week+', '+w.year;wSet.add(h._week);uSet.add(h.by)});
+        const wList=Array.from(wSet).sort((a,b)=>{const[wa,ya]=a.match(/W(\d+), (\d+)/).slice(1).map(Number);const[wb,yb]=b.match(/W(\d+), (\d+)/).slice(1).map(Number);return yb-ya||wb-wa});
+        let fH='<select id="hFilterWeek"><option value="">All Weeks</option>';wList.forEach(w=>fH+='<option value="'+w+'">'+w+'</option>');fH+='</select>';
+        if(uSet.size>1){fH+='<select id="hFilterUser"><option value="">All Users</option>';uSet.forEach(u=>fH+='<option value="'+u+'">'+u+'</option>');fH+='</select>'}
+        $('historyFilters').innerHTML=fH;
+        if(history.length===0){$('historyList').innerHTML='<div style="text-align:center;padding:2rem;color:var(--st-text-muted);"><i class="fas fa-inbox" style="font-size:2rem;margin-bottom:.5rem;display:block;"></i>No history available</div>';$('historyGraphWrap').style.display='none'}
+        else{let lH='';history.slice().reverse().forEach(entry=>{const ds=new Date(entry.at).toLocaleString();const cls=entry.action.toLowerCase().includes('creat')?'created':entry.action.toLowerCase().includes('delet')?'deleted':'edited';lH+='<div class="st-history-entry '+cls+'" data-week="'+escapeHtml(entry._week)+'" data-by="'+escapeHtml(entry.by)+'"><div class="st-history-dot"></div><div class="st-history-content"><div class="st-history-action">'+escapeHtml(entry.action)+'</div><div class="st-history-meta">by <strong>'+escapeHtml(entry.by)+'</strong> &bull; '+ds+'</div><div class="st-history-details">'+escapeHtml(entry.details)+'</div></div></div>'});$('historyList').innerHTML=lH;$('historyGraphWrap').style.display='flex';stDrawGraph($('historyCanvas'),history,400,140)}
+        const wf=document.querySelector('#hFilterWeek'),uf=document.querySelector('#hFilterUser');
+        function af(){const wv=wf?wf.value:'';const uv=uf?uf.value:'';$$('#historyList .st-history-entry').forEach(el=>{let s=true;if(wv&&el.dataset.week!==wv)s=false;if(uv&&el.dataset.by!==uv)s=false;el.style.display=s?'':'none'})}
+        if(wf)wf.addEventListener('change',af);if(uf)uf.addEventListener('change',af);
+        $('historyCanvas').onclick=()=>{if(history.length>1){stCloseModal('historyModal');stDrawGraph($('graphMaxCanvas'),history,800,350,true);stOpenModal('graphModal')}};
+        stOpenModal('historyModal');
+    }
+
+    /* ===== GRAPH DRAWING ===== */
+    function stDrawGraph(canvas,history,w,h,big){
+        const ctx=canvas.getContext('2d');canvas.width=w;canvas.height=h;ctx.clearRect(0,0,w,h);
+        let pts=[];let last={in_stock:null,in_use:null,scraped:null};
+        history.forEach(e=>{let m=e.details.match(/In Stock from (\d+) to (\d+)/);if(m)last.in_stock=+m[2];m=e.details.match(/In Use from (\d+) to (\d+)/);if(m)last.in_use=+m[2];m=e.details.match(/Scraped from (\d+) to (\d+)/);if(m)last.scraped=+m[2];pts.push({t:new Date(e.at),...last})});
+        if(pts.length<2){ctx.font=(big?16:13)+'px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.fillText('Insufficient data for graph',w/2,h/2);return}
+        if(!big&&pts.length>8)pts=pts.slice(-8);
+        const pad={l:big?70:45,r:big?30:15,t:big?50:20,b:big?45:25};const pw=w-pad.l-pad.r;const ph=h-pad.t-pad.b;
+        const vals=pts.flatMap(p=>[p.in_stock,p.in_use,p.scraped].filter(v=>v!==null));let mn=Math.min(...vals),mx=Math.max(...vals);if(mn===mx){mn-=1;mx+=1}const rn=mx-mn;const t0=pts[0].t.getTime(),t1=pts[pts.length-1].t.getTime();
+        const tx=t=>pad.l+pw*(t.getTime()-t0)/(t1-t0||1);const ty=v=>pad.t+ph*(1-(v-mn)/rn);
+        ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;const gc=big?5:3;
+        for(let i=0;i<=gc;i++){const y=pad.t+ph*i/gc;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();if(big){ctx.font='12px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='right';ctx.fillText(Math.round(mx-rn*i/gc),pad.l-8,y+4)}}
+        ctx.font=(big?12:10)+'px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';const step=Math.max(1,Math.floor(pts.length/(big?8:4)));
+        for(let i=0;i<pts.length;i+=step)ctx.fillText(pts[i].t.toLocaleDateString(),tx(pts[i].t),h-(big?10:5));
+        const colors={in_stock:'#10b981',in_use:'#f59e0b',scraped:'#ef4444'};
+        Object.entries(colors).forEach(([key,color])=>{ctx.strokeStyle=color;ctx.lineWidth=big?3:2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();let st=false;pts.forEach(p=>{if(p[key]===null)return;const x=tx(p.t),y=ty(p[key]);if(!st){ctx.moveTo(x,y);st=true}else ctx.lineTo(x,y)});ctx.stroke();if(big){ctx.fillStyle=color;pts.forEach(p=>{if(p[key]===null)return;ctx.beginPath();ctx.arc(tx(p.t),ty(p[key]),4,0,Math.PI*2);ctx.fill()})}});
+        const lY=big?25:12;const lX=big?w-200:w-150;ctx.font=(big?13:10)+'px Inter,sans-serif';ctx.textAlign='left';
+        [['In Stock','#10b981'],['In Use','#f59e0b'],['Scraped','#ef4444']].forEach(([l,c],i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(lX+i*(big?80:55),lY,big?5:3,0,Math.PI*2);ctx.fill();ctx.fillText(l,lX+(big?10:6)+i*(big?80:55),lY+(big?5:3))});
+    }
+
+    /* ===== INIT ===== */
+    setTimeout(()=>{const t=$('stToast');if(t)t.classList.remove('visible')},5000);
+    window.addEventListener('DOMContentLoaded',function(){stComputeStats();stUpdateBars()});
     </script>
-  </body>
+
+<!-- ═══════════ ONBOARDING TOUR ═══════════ -->
+<style>
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10010;display:none;pointer-events:none;transition:opacity .3s}.tour-backdrop.active{opacity:1}
+.tour-highlight{position:fixed;z-index:10011;border-radius:12px;box-shadow:0 0 0 4000px rgba(0,0,0,.5),0 0 0 3px #0066cc,0 0 20px rgba(0,102,204,.4);pointer-events:none;transition:all .35s ease;display:none}
+.tour-tooltip{position:fixed;z-index:10012;width:370px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:0;display:none;opacity:0;transform:translateY(10px);font-family:'Inter','Segoe UI',sans-serif}.tour-tooltip.visible{opacity:1;transform:translateY(0);transition:all .3s ease}
+.tour-tooltip-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:1rem 1.25rem;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:.75rem}
+.tour-tooltip-icon{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem}
+.tour-tooltip-title{color:#fff;font-size:1rem;font-weight:700;flex:1}.tour-tooltip-step{color:rgba(255,255,255,.8);font-size:.75rem;font-weight:500}
+.tour-tooltip-body{padding:1.25rem}.tour-tooltip-desc{font-size:.9rem;color:#334155;line-height:1.6}
+.tour-tooltip-footer{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem 1.25rem;gap:.5rem}
+.tour-progress-dots{display:flex;gap:6px;align-items:center}.tour-progress-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:all .3s}.tour-progress-dot.active{background:#0066cc;transform:scale(1.3)}.tour-progress-dot.completed{background:#0d9488}
+.tour-btn{padding:.55rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:.4rem;transition:all .2s}
+.tour-btn-next{background:linear-gradient(135deg,#0066cc,#0052a3);color:#fff}.tour-btn-next:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,102,204,.4)}
+.tour-btn-prev{background:#f1f5f9;color:#475569}.tour-btn-prev:hover{background:#e2e8f0}
+.tour-btn-skip{background:transparent;color:#94a3b8;font-weight:500}.tour-btn-skip:hover{color:#64748b}
+.tour-welcome-modal{position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .3s}.tour-welcome-modal.active{opacity:1;pointer-events:auto}
+.tour-welcome-card{background:#fff;border-radius:20px;overflow:hidden;width:440px;max-width:92vw;box-shadow:0 25px 60px rgba(0,0,0,.3);transform:scale(.9);transition:transform .3s ease}.tour-welcome-modal.active .tour-welcome-card{transform:scale(1)}
+.tour-welcome-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:2rem;text-align:center;color:#fff}.tour-welcome-header i{font-size:2.5rem;margin-bottom:.75rem;display:block}
+.tour-welcome-header h2{margin:0;font-size:1.5rem;font-weight:700}.tour-welcome-header p{margin:.5rem 0 0;opacity:.9;font-size:.95rem}
+.tour-welcome-body{padding:1.5rem 2rem 2rem}
+.tour-welcome-features{list-style:none;padding:0;margin:0 0 1.5rem}.tour-welcome-features li{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-size:.9rem;color:#334155}
+.tour-welcome-features li i{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;background:rgba(0,102,204,.1);color:#0066cc}
+.tour-welcome-actions{display:flex;gap:.75rem;justify-content:flex-end}
+.tour-confetti-container{position:fixed;inset:0;z-index:10025;pointer-events:none;overflow:hidden}
+.tour-confetti{position:absolute;width:8px;height:8px;animation:confettiFall 3s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+
+<div class="tour-backdrop" id="tourBackdrop"></div>
+<div class="tour-highlight" id="tourHighlight"></div>
+<div class="tour-tooltip" id="tourTooltip">
+    <div class="tour-tooltip-header">
+        <div class="tour-tooltip-icon" id="tourStepIcon"></div>
+        <div class="tour-tooltip-title" id="tourStepTitle"></div>
+        <div class="tour-tooltip-step" id="tourStepLabel"></div>
+    </div>
+    <div class="tour-tooltip-body"><div class="tour-tooltip-desc" id="tourStepDesc"></div></div>
+    <div class="tour-tooltip-footer">
+        <div class="tour-progress-dots" id="tourProgressDots"></div>
+        <div style="display:flex;gap:.5rem">
+            <button class="tour-btn tour-btn-skip" id="tourSkipBtn">Skip</button>
+            <button class="tour-btn tour-btn-prev" id="tourPrevBtn" style="display:none"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="tour-btn tour-btn-next" id="tourNextBtn">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourWelcomeModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header">
+            <i class="fas fa-wrench"></i>
+            <h2>Sub Tools Inventory</h2>
+            <p>Let's explore how to manage sub-level tools</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-tools"></i> Track tool stock, usage, and lifecycle</li>
+                <li><i class="fas fa-search"></i> Search, sort, and filter tools</li>
+                <li><i class="fas fa-th-large"></i> Grid and table view modes</li>
+                <li><i class="fas fa-download"></i> Export and bulk operations</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-skip" id="tourWelcomeSkip">Skip Tour</button>
+                <button class="tour-btn tour-btn-next" id="tourWelcomeStart"><i class="fas fa-play"></i> Start Tour</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourCompleteModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header" style="background:linear-gradient(135deg,#059669 0%,#0d9488 100%)">
+            <i class="fas fa-check-circle"></i>
+            <h2>Tour Complete!</h2>
+            <p>You're ready to manage sub-level tools</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-plus" style="background:rgba(5,150,105,.1);color:#059669"></i> Add tools with the <strong>Add Tool</strong> button</li>
+                <li><i class="fas fa-mouse-pointer" style="background:rgba(5,150,105,.1);color:#059669"></i> Click any card to update counts</li>
+                <li><i class="fas fa-question-circle" style="background:rgba(0,102,204,.1);color:#0066cc"></i> Click <strong>?</strong> to replay this tour</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-next" id="tourCompleteDone" style="background:linear-gradient(135deg,#059669,#0d9488)"><i class="fas fa-thumbs-up"></i> Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-confetti-container" id="tourConfetti"></div>
+
+<script>
+(function() {
+    'use strict';
+    var TOUR_KEY = 'sub_level_tools';
+    var _buPrefix = window.location.pathname.substring(0, window.location.pathname.indexOf('/stream/'));
+    var TOUR_STEPS = [
+        { target: '.st-header', icon: 'fas fa-wrench', title: 'Page Header', desc: 'Welcome to Sub Tools! This page manages sub-level tools for the current stream — track stock, usage, and lifecycle.', position: 'bottom', padding: 8 },
+        { target: '.st-stats', icon: 'fas fa-chart-bar', title: 'Tool Inventory Stats', desc: 'These stat cards summarize your tool counts: <strong>Total Tools</strong>, <strong>In Stock</strong>, <strong>In Use</strong>, and <strong>Scraped</strong>.', position: 'bottom', padding: 8 },
+        { target: '#addToolToggle', icon: 'fas fa-plus', title: 'Add New Tools', desc: 'Click to expand the inline form and add a new tool to this stream instantly.', position: 'bottom', padding: 4 },
+        { target: '.st-toolbar', icon: 'fas fa-sliders-h', title: 'Search, Sort & View', desc: 'Filter tools by name, sort by any metric, or switch between <strong>grid</strong> and <strong>table</strong> views. Export to CSV with one click.', position: 'bottom', padding: 8 },
+        { target: '.st-grid .st-card:first-child', icon: 'fas fa-toolbox', title: 'Tool Cards', desc: 'Each card shows inventory counts with a distribution bar. Click to update counts, rename, or delete.', position: 'bottom', padding: 6, optional: true },
+        { target: '#saveAllNotesBtn', icon: 'fas fa-save', title: 'Save All Notes', desc: 'Add notes to tool cards and <strong>save them all in one click</strong>.', position: 'top', padding: 4 }
+    ];
+
+    var currentStep = 0, activeSteps = [], tourActive = false;
+    var backdrop = document.getElementById('tourBackdrop');
+    var highlight = document.getElementById('tourHighlight');
+    var tooltip = document.getElementById('tourTooltip');
+    var stepIcon = document.getElementById('tourStepIcon');
+    var stepTitle = document.getElementById('tourStepTitle');
+    var stepLabel = document.getElementById('tourStepLabel');
+    var stepDesc = document.getElementById('tourStepDesc');
+    var progressDots = document.getElementById('tourProgressDots');
+    var nextBtn = document.getElementById('tourNextBtn');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var skipBtn = document.getElementById('tourSkipBtn');
+    var welcomeModal = document.getElementById('tourWelcomeModal');
+    var completeModal = document.getElementById('tourCompleteModal');
+    var confettiEl = document.getElementById('tourConfetti');
+
+    var CSRF_TOKEN = '{{ csrf_token }}';
+    var LS_KEY = 'tour_done_' + TOUR_KEY;
+    function markComplete() {
+        try { localStorage.setItem(LS_KEY, '1'); } catch(e) {}
+        fetch(_buPrefix + '/api/onboarding/complete/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({ tour_key: TOUR_KEY })
+        }).catch(function(){});
+    }
+    function filterSteps() { activeSteps = TOUR_STEPS.filter(function(s) { return !!document.querySelector(s.target); }); }
+    function buildDots() {
+        var h = '';
+        for (var i = 0; i < activeSteps.length; i++) {
+            var c = i < currentStep ? 'completed' : (i === currentStep ? 'active' : '');
+            h += '<div class="tour-progress-dot ' + c + '"></div>';
+        }
+        progressDots.innerHTML = h;
+    }
+    function positionTooltip(el, pos) {
+        var r = el.getBoundingClientRect(), tw = 370, th = tooltip.offsetHeight || 220, m = 16, t, l;
+        if (pos === 'right') { t = r.top + r.height/2 - th/2; l = r.right + m; if (l + tw > window.innerWidth) l = r.left - tw - m; }
+        else if (pos === 'left') { t = r.top + r.height/2 - th/2; l = r.left - tw - m; if (l < 0) l = r.right + m; }
+        else if (pos === 'top') { t = r.top - th - m; l = r.left + r.width/2 - tw/2; if (t < 0) t = r.bottom + m; }
+        else { t = r.bottom + m; l = r.left + r.width/2 - tw/2; if (t + th > window.innerHeight) t = r.top - th - m; }
+        if (l < 8) l = 8; if (l + tw > window.innerWidth - 8) l = window.innerWidth - tw - 8;
+        if (t < 8) t = 8; if (t + th > window.innerHeight - 8) t = window.innerHeight - th - 8;
+        tooltip.style.top = t + 'px'; tooltip.style.left = l + 'px';
+    }
+    function showStep(idx) {
+        currentStep = idx;
+        var step = activeSteps[idx], el = document.querySelector(step.target);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() {
+            var r = el.getBoundingClientRect(), pad = step.padding || 0;
+            highlight.style.display = 'block';
+            highlight.style.top = (r.top - pad) + 'px'; highlight.style.left = (r.left - pad) + 'px';
+            highlight.style.width = (r.width + pad*2) + 'px'; highlight.style.height = (r.height + pad*2) + 'px';
+            stepIcon.innerHTML = '<i class="' + step.icon + '"></i>';
+            stepTitle.textContent = step.title;
+            stepLabel.textContent = 'Step ' + (idx+1) + ' of ' + activeSteps.length;
+            stepDesc.innerHTML = step.desc;
+            buildDots();
+            prevBtn.style.display = idx > 0 ? 'inline-flex' : 'none';
+            nextBtn.innerHTML = idx === activeSteps.length - 1 ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+            tooltip.style.display = 'block'; tooltip.classList.remove('visible');
+            positionTooltip(el, step.position);
+            requestAnimationFrame(function() { tooltip.classList.add('visible'); });
+        }, 350);
+    }
+    function startTour() {
+        welcomeModal.classList.remove('active');
+        filterSteps(); if (!activeSteps.length) return;
+        tourActive = true; currentStep = 0;
+        backdrop.style.display = 'block'; backdrop.style.pointerEvents = 'auto'; backdrop.classList.add('active');
+        showStep(0);
+    }
+    function endTour(completed) {
+        tourActive = false; backdrop.classList.remove('active');
+        highlight.style.display = 'none'; tooltip.style.display = 'none'; tooltip.classList.remove('visible');
+        backdrop.style.display = 'none'; backdrop.style.pointerEvents = 'none';
+        if (completed) { markComplete(); fireConfetti(); completeModal.classList.add('active'); }
+    }
+    function fireConfetti() {
+        var colors = ['#0066cc','#0d9488','#0891b2','#059669','#FFD200','#dc3545','#0B5FFF'];
+        for (var i = 0; i < 80; i++) {
+            var p = document.createElement('div'); p.className = 'tour-confetti';
+            p.style.left = Math.random()*100+'%'; p.style.top = '-10px';
+            p.style.width = (Math.random()*8+5)+'px'; p.style.height = (Math.random()*8+5)+'px';
+            p.style.background = colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1)+'s';
+            p.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+            confettiEl.appendChild(p);
+        }
+        setTimeout(function() { confettiEl.innerHTML = ''; }, 5000);
+    }
+
+    nextBtn.addEventListener('click', function() { if (currentStep < activeSteps.length - 1) showStep(currentStep+1); else endTour(true); });
+    prevBtn.addEventListener('click', function() { if (currentStep > 0) showStep(currentStep-1); });
+    skipBtn.addEventListener('click', function() { markComplete(); endTour(false); });
+    document.getElementById('tourWelcomeStart').addEventListener('click', startTour);
+    document.getElementById('tourWelcomeSkip').addEventListener('click', function() { welcomeModal.classList.remove('active'); markComplete(); });
+    document.getElementById('tourCompleteDone').addEventListener('click', function() { completeModal.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (tourActive) { markComplete(); endTour(false); }
+            else if (welcomeModal.classList.contains('active')) { welcomeModal.classList.remove('active'); markComplete(); }
+            else if (completeModal.classList.contains('active')) { completeModal.classList.remove('active'); }
+        }
+    });
+    window.addEventListener('resize', function() { if (tourActive && activeSteps[currentStep]) showStep(currentStep); });
+
+    var restartBtn = document.getElementById('restartTourBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function() {
+            try { localStorage.removeItem(LS_KEY); } catch(e) {}
+            fetch(_buPrefix + '/api/onboarding/reset/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify({ tour_key: TOUR_KEY })
+            }).then(function(){ welcomeModal.classList.add('active'); })
+              .catch(function(){ welcomeModal.classList.add('active'); });
+        });
+    }
+
+    {% if show_onboarding_tour %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var alreadyDone = false;
+        try { alreadyDone = localStorage.getItem(LS_KEY) === '1'; } catch(e) {}
+        if (!alreadyDone) {
+            setTimeout(function() { welcomeModal.classList.add('active'); }, 1200);
+        }
+    });
+    {% endif %}
+})();
+</script>
+</body>
 </html>
 {% endblock %}

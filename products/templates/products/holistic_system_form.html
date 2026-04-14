@@ -479,8 +479,8 @@
         .priority-option.medium .priority-label { color: #f59e0b; }
         .priority-option.medium input:checked + .priority-label { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
 
-        .priority-option.high .priority-label { color: #f97316; }
-        .priority-option.high input:checked + .priority-label { border-color: #f97316; background: rgba(249, 115, 22, 0.1); }
+        .priority-option.high .priority-label { color: #d48806; }
+        .priority-option.high input:checked + .priority-label { border-color: #d48806; background: rgba(249, 115, 22, 0.1); }
 
         .priority-option.critical .priority-label { color: #ef4444; }
         .priority-option.critical input:checked + .priority-label { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
@@ -546,8 +546,8 @@
         .status-option.offline .status-label { color: #ef4444; }
         .status-option.offline input:checked + .status-label { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
 
-        .status-option.reserved .status-label { color: #8b5cf6; }
-        .status-option.reserved input:checked + .status-label { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+        .status-option.reserved .status-label { color: #0B5FFF; }
+        .status-option.reserved input:checked + .status-label { border-color: #0B5FFF; background: rgba(139, 92, 246, 0.1); }
 
         /* Responsive */
         @media (max-width: 992px) {
@@ -630,7 +630,7 @@
             <a href="{% url 'holistic_dashboard' %}" class="nav-btn" title="Back to Dashboard">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <a href="/dashboard/" class="nav-btn" title="Go to Home">
+            <a href="{% url 'dashboard' %}" class="nav-btn" title="Go to Home">
                 <i class="fas fa-home"></i>
             </a>
         </div>
@@ -655,6 +655,11 @@
             <!-- Form Body -->
             <form method="post">
                 {% csrf_token %}
+                {% if form_error %}
+                <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+                    <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+                </div>
+                {% endif %}
                 <div class="form-body">
                     <!-- Core Information Section -->
                     <div class="form-section">
@@ -860,6 +865,43 @@
                                 <label class="form-label">Notes</label>
                                 <textarea class="form-control" name="notes" rows="4"
                                           placeholder="Enter additional notes...">{{ system.notes }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allocation Period Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon" style="background:rgba(111,66,193,0.12);color:#6F42C1">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="section-title">Allocation Period</div>
+                                <div class="section-subtitle">Optional — define when this system is allocated to a project</div>
+                            </div>
+                        </div>
+
+                        <div class="field-grid two-col">
+                            <div class="form-group">
+                                <label class="form-label">Allocation Start Date</label>
+                                <input type="date" class="form-control" name="allocation_start_date"
+                                       value="{{ system.allocation_start_date|date:'Y-m-d' }}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Allocation End Date</label>
+                                <input type="date" class="form-control" name="allocation_end_date"
+                                       value="{{ system.allocation_end_date|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        <div class="field-grid one-col" style="margin-top:0.75rem">
+                            <div class="form-group">
+                                <label class="form-label">Allocated Project</label>
+                                <select class="form-control" name="allocation_project">
+                                    <option value="">No project allocated</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}" {% if system.allocation_project_id == project.id %}selected{% endif %}>{{ project.name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>

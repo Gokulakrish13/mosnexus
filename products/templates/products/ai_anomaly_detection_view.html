@@ -1,0 +1,211 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Anomaly Report | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --text: #1e293b; --text2: #64748b; --border: #e2e8f0; }
+    .page-container { max-width: 1900px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #e53e3e 0%, #9b2c2c 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline-w { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline-w:hover { background: rgba(255,255,255,0.1); }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .risk-gauge { text-align: center; margin-bottom: 1.5rem; }
+    .risk-circle { width: 160px; height: 160px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1rem; position: relative; }
+    .risk-circle::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #fff; }
+    .risk-circle > * { position: relative; z-index: 1; }
+    .risk-score { font-size: 2.2rem; font-weight: 900; }
+    .risk-grade { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .risk-label { font-size: 1rem; font-weight: 600; color: var(--text); }
+
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-box { padding: 1.25rem; background: linear-gradient(135deg, #f8fafc, #fff); border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 1.6rem; font-weight: 800; }
+    .stat-label { font-size: 0.72rem; font-weight: 600; color: var(--text2); text-transform: uppercase; margin-top: 0.25rem; }
+
+    .section { margin-bottom: 2rem; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+    .issue-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .issue-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border-left: 4px solid var(--border); background: #fafbfc; }
+    .issue-item.critical { border-left-color: var(--danger); }
+    .issue-item.warning { border-left-color: var(--warning); }
+    .issue-item.info { border-left-color: var(--primary); }
+    .issue-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 0.9rem; }
+    .issue-icon.critical { background: var(--danger); }
+    .issue-icon.warning { background: var(--warning); }
+    .issue-icon.info { background: var(--primary); }
+    .issue-body h4 { font-size: 0.88rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
+    .issue-body p { font-size: 0.8rem; color: var(--text2); margin: 0; line-height: 1.5; }
+    .severity-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 0.5rem; }
+
+    .dup-group { border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+    .dup-group-title { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 0.75rem; }
+    .dup-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 6px; font-size: 0.82rem; margin-bottom: 0.4rem; }
+    .dup-sim { font-size: 0.72rem; font-weight: 700; color: var(--danger); background: #fef2f2; padding: 2px 6px; border-radius: 4px; }
+
+    .dq-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .dq-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; }
+    .dq-item.pass { background: #f0fdf4; color: #166534; }
+    .dq-item.fail { background: #fef2f2; color: #991b1b; }
+    .dq-item.warning { background: #fffbeb; color: #92400e; }
+
+    .empty-ok { text-align: center; padding: 1.5rem; color: var(--success); font-weight: 600; }
+    .empty-ok i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+    .meta-info { font-size: 0.8rem; color: rgba(255,255,255,0.8); display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .meta-info span { display: flex; align-items: center; gap: 0.4rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-shield-alt"></i> Anomaly Detection Report</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Scan from {{ report.scanned_at|date:"M d, Y H:i" }}</div>
+            <div class="meta-info">
+                <span><i class="fas fa-calendar"></i> {{ report.scan_period_days }}-day lookback</span>
+                <span><i class="fas fa-user"></i> By {{ report.scanned_by.username|default:"System" }}</span>
+            </div>
+        </div>
+        <a href="{% url 'ai_anomaly_detection' stream=stream %}" class="btn btn-outline-w"><i class="fas fa-arrow-left"></i> Back to Scanner</a>
+    </div>
+
+    <!-- Risk Gauge -->
+    <div class="card">
+        <div class="risk-gauge" id="riskGauge">
+            <!-- Server-side fallback -->
+            <div class="risk-circle" style="background: conic-gradient({% if report.risk_score >= 90 %}#10b981{% elif report.risk_score >= 75 %}#0B5FFF{% elif report.risk_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %} {{ risk_degrees }}deg, #e2e8f0 0deg);">
+                <div class="risk-score" style="color: {% if report.risk_score >= 90 %}#10b981{% elif report.risk_score >= 75 %}#0B5FFF{% elif report.risk_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">{{ report.risk_score }}</div>
+                <div class="risk-grade" style="color: {% if report.risk_score >= 90 %}#10b981{% elif report.risk_score >= 75 %}#0B5FFF{% elif report.risk_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %};">Grade {{ report.risk_grade }}</div>
+            </div>
+            <div class="risk-label">Data Health Score</div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" style="color:{% if report.duplicate_groups > 0 %}var(--danger){% else %}var(--success){% endif %};">{{ report.duplicate_groups }}</div><div class="stat-label">Duplicate Groups</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:{% if report.serial_issues > 0 %}var(--danger){% else %}var(--success){% endif %};">{{ report.serial_issues }}</div><div class="stat-label">Serial Issues</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:{% if report.inventory_anomalies_count > 0 %}var(--warning){% else %}var(--success){% endif %};">{{ report.inventory_anomalies_count }}</div><div class="stat-label">Inventory Anomalies</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:{% if report.data_quality_score >= 80 %}var(--success){% elif report.data_quality_score >= 60 %}var(--warning){% else %}var(--danger){% endif %};">{{ report.data_quality_score }}/100</div><div class="stat-label">Data Quality</div></div>
+    </div>
+
+    <!-- Sections rendered from report_data -->
+    <div id="reportContent"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const data = JSON.parse('{{ data_json|escapejs }}');
+    const risk = data.risk_score || {};
+    const dupes = data.duplicate_products || {};
+    const serials = data.serial_anomalies || {};
+    const inv = data.inventory_anomalies || {};
+    const audit = data.audit_anomalies || {};
+    const dq = data.data_quality || {};
+
+    // Risk gauge
+    const score = risk.overall || 0;
+    const color = score >= 90 ? '#10b981' : score >= 75 ? '#0B5FFF' : score >= 60 ? '#f59e0b' : '#ef4444';
+    document.getElementById('riskGauge').innerHTML = `
+        <div class="risk-circle" style="background: conic-gradient(${color} ${score * 3.6}deg, #e2e8f0 0deg);">
+            <div class="risk-score" style="color: ${color};">${score}</div>
+            <div class="risk-grade" style="color: ${color};">Grade ${risk.grade || '?'}</div>
+        </div>
+        <div class="risk-label">${escapeHtml(risk.label || 'Data Health Score')}</div>
+    `;
+
+    let html = '';
+
+    // Duplicates
+    html += '<div class="section"><div class="section-title"><i class="fas fa-clone" style="color:var(--danger)"></i> Duplicate Products</div>';
+    const groups = dupes.groups || [];
+    if (groups.length === 0) {
+        html += '<div class="empty-ok"><i class="fas fa-check-circle"></i> No duplicates detected</div>';
+    } else {
+        groups.forEach(g => {
+            html += `<div class="dup-group"><div class="dup-group-title"><i class="fas fa-clone"></i> ${g.count} similar products</div>`;
+            html += `<div class="dup-item"><strong>Anchor:</strong> ${escapeHtml(g.anchor.name)} <span style="color:var(--text2);font-size:0.75rem">SN: ${escapeHtml(g.anchor.serial_number || '—')} | 12NC: ${escapeHtml(g.anchor.twelve_nc || '—')}</span></div>`;
+            g.matches.forEach(m => {
+                html += `<div class="dup-item">${escapeHtml(m.name)} <span style="color:var(--text2);font-size:0.75rem">SN: ${escapeHtml(m.serial_number || '—')}</span> <span class="dup-sim">${m.similarity}% match</span></div>`;
+            });
+            html += '</div>';
+        });
+    }
+    html += '</div>';
+
+    // Serial Issues
+    html += '<div class="section"><div class="section-title"><i class="fas fa-barcode" style="color:var(--warning)"></i> Serial Number Issues</div>';
+    const serialIssues = serials.issues || [];
+    if (serialIssues.length === 0) {
+        html += '<div class="empty-ok"><i class="fas fa-check-circle"></i> No serial issues</div>';
+    } else {
+        html += '<div class="issue-list">';
+        serialIssues.forEach(iss => {
+            const sev = iss.severity || 'info';
+            const icon = sev === 'critical' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
+            const sevColor = sev === 'critical' ? '#ef4444' : '#f59e0b';
+            html += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas ${icon}"></i></div><div class="issue-body"><h4>${escapeHtml(iss.product_name || iss.serial_number || 'Issue')} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(iss.detail)}</p></div></div>`;
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // Inventory Anomalies
+    html += '<div class="section"><div class="section-title"><i class="fas fa-box" style="color:var(--warning)"></i> Inventory Anomalies</div>';
+    const invAnomalies = inv.anomalies || [];
+    if (invAnomalies.length === 0) {
+        html += '<div class="empty-ok"><i class="fas fa-check-circle"></i> No anomalies</div>';
+    } else {
+        html += '<div class="issue-list">';
+        invAnomalies.forEach(a => {
+            const sev = a.severity || 'info';
+            const icon = sev === 'critical' ? 'fa-exclamation-triangle' : sev === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            const sevColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#0B5FFF';
+            html += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas ${icon}"></i></div><div class="issue-body"><h4>${escapeHtml(a.product_name || a.anomaly_type)} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(a.detail)}</p></div></div>`;
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // Audit Anomalies
+    html += '<div class="section"><div class="section-title"><i class="fas fa-user-secret" style="color:var(--primary)"></i> Audit Anomalies</div>';
+    const auditAnomalies = audit.anomalies || [];
+    if (auditAnomalies.length === 0) {
+        html += '<div class="empty-ok"><i class="fas fa-check-circle"></i> No audit anomalies</div>';
+    } else {
+        html += '<div class="issue-list">';
+        auditAnomalies.forEach(a => {
+            const sev = a.severity || 'info';
+            const sevColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#0B5FFF';
+            html += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas fa-user-secret"></i></div><div class="issue-body"><h4>${escapeHtml(a.username || a.anomaly_type)} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(a.detail)}</p></div></div>`;
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // Data Quality
+    html += '<div class="section"><div class="section-title"><i class="fas fa-check-double" style="color:var(--success)"></i> Data Quality Checks</div><div class="dq-list">';
+    const checks = dq.checks || [];
+    checks.forEach(c => {
+        const icon = c.status === 'pass' ? 'fa-check-circle' : c.status === 'fail' ? 'fa-times-circle' : 'fa-exclamation-circle';
+        html += `<div class="dq-item ${c.status}"><i class="fas ${icon}"></i> ${escapeHtml(c.detail)}</div>`;
+    });
+    html += '</div></div>';
+
+    document.getElementById('reportContent').innerHTML = html;
+});
+</script>
+{% endblock %}

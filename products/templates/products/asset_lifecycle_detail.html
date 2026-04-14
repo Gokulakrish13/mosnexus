@@ -1,0 +1,570 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ record.product.name }} - Lifecycle Detail{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0044CC;
+        --primary-dark: #003399;
+        --primary-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+    }
+
+    .detail-container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0044CC 0%, #003399 50%, #002266 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(118, 75, 162, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        background: rgba(255,255,255,0.2);
+        padding: 0.6rem;
+        border-radius: 12px;
+    }
+
+    .page-header .meta { font-size: 0.9rem; opacity: 0.85; margin-top: 0.5rem; }
+
+    .header-actions { display: flex; gap: 0.75rem; position: relative; z-index: 1; flex-wrap: wrap; }
+
+    .header-actions .btn {
+        padding: 0.6rem 1.1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        background: rgba(255,255,255,0.1);
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .header-actions .btn:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-1px);
+    }
+
+    /* Stage Pipeline */
+    .stage-pipeline {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        overflow-x: auto;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .pipeline-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        min-width: 80px;
+        text-align: center;
+        opacity: 0.4;
+        transition: all 0.3s;
+    }
+
+    .pipeline-stage.active {
+        opacity: 1;
+        background: var(--primary-light);
+        box-shadow: 0 2px 8px rgba(118, 75, 162, 0.2);
+    }
+
+    .pipeline-stage.completed {
+        opacity: 0.7;
+    }
+
+    .pipeline-stage i { font-size: 1.25rem; }
+
+    .pipeline-stage .stage-name { font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+
+    .pipeline-arrow { color: var(--border-color); font-size: 0.8rem; }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .info-card-header {
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        font-size: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-light);
+    }
+
+    .info-card-header i { color: var(--primary); }
+
+    .info-card-body { padding: 1.25rem 1.5rem; }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+
+    .info-value { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); text-align: right; }
+
+    .warranty-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .warranty-active { background: #dcfce7; color: #166534; }
+    .warranty-expiring_soon { background: #fef3c7; color: #92400e; }
+    .warranty-expired { background: #fde2e2; color: #c53030; }
+    .warranty-no_warranty { background: #f1f5f9; color: #64748b; }
+
+    /* Transition Section */
+    .transition-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .transition-header {
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-light);
+    }
+
+    .transition-form {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .transition-form select, .transition-form input, .transition-form textarea {
+        padding: 0.5rem 0.75rem;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.85rem;
+        background: var(--bg-light);
+    }
+
+    .transition-form select:focus { border-color: var(--primary); outline: none; }
+
+    .btn-transition {
+        padding: 0.5rem 1.25rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-transition:hover { background: var(--primary-dark); }
+
+    /* Timeline */
+    .timeline-container { padding: 1.5rem; }
+
+    .timeline-item {
+        display: flex;
+        gap: 1rem;
+        padding-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 17px;
+        top: 35px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+    }
+
+    .timeline-item:last-child::before { display: none; }
+
+    .timeline-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: white;
+        flex-shrink: 0;
+        z-index: 1;
+    }
+
+    .timeline-content { flex: 1; }
+
+    .timeline-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .timeline-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem; }
+
+    .timeline-note {
+        background: var(--bg-light);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: 0.4rem;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* Messages */
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .alert-error { background: #fde2e2; color: #c53030; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-info { background: #dbeafe; color: #1e40af; }
+    .alert-warning { background: #fef3c7; color: #92400e; }
+
+    @media (max-width: 768px) {
+        .info-grid { grid-template-columns: 1fr; }
+        .stage-pipeline { overflow-x: auto; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-recycle"></i>
+                {{ record.product.name }}
+            </h1>
+            <div class="meta">
+                {% if record.product.serial_number %}SN: {{ record.product.serial_number }} &middot; {% endif %}
+                Category: {{ record.product.category.name|default:"Uncategorized" }} &middot;
+                Created {{ record.created_at|date:"M d, Y" }}
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'product_detail_stream' stream record.product.pk %}" class="btn">
+                <i class="fas fa-box"></i> Product
+            </a>
+            <a href="{% url 'asset_lifecycle_edit' stream=stream pk=record.pk %}" class="btn">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'asset_lifecycle_list' stream=stream %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if not record.purchase_cost and not record.vendor and not record.warranty_end_date %}
+    <!-- Incomplete Record Banner -->
+    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fas fa-info-circle" style="font-size: 1.25rem; color: #92400e;"></i>
+            <div>
+                <strong style="color: #92400e;">Lifecycle record needs details</strong>
+                <p style="margin: 0.15rem 0 0; font-size: 0.85rem; color: #78350f;">Add procurement, warranty, and financial information to fully track this asset.</p>
+            </div>
+        </div>
+        <a href="{% url 'asset_lifecycle_edit' stream=stream pk=record.pk %}" style="background: #92400e; color: white; padding: 0.5rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
+            <i class="fas fa-edit"></i> Fill in Details
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Stage Pipeline -->
+    <div class="stage-pipeline">
+        {% for stage in stages %}
+            {% if not forloop.first %}
+            <span class="pipeline-arrow"><i class="fas fa-chevron-right"></i></span>
+            {% endif %}
+            <div class="pipeline-stage {% if record.current_stage.id == stage.id %}active{% elif stage.order < record.current_stage.order %}completed{% endif %}">
+                <i class="{{ stage.icon_class }}" style="color: {{ stage.color }};"></i>
+                <span class="stage-name">{{ stage.name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+        <!-- Procurement Info -->
+        <div class="info-card">
+            <div class="info-card-header"><i class="fas fa-shopping-cart"></i> Procurement</div>
+            <div class="info-card-body">
+                <div class="info-row">
+                    <span class="info-label">Purchase Date</span>
+                    <span class="info-value">{{ record.purchase_date|date:"M d, Y"|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Purchase Cost</span>
+                    <span class="info-value">{% if record.purchase_cost %}${{ record.purchase_cost|floatformat:2 }}{% else %}—{% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Vendor</span>
+                    <span class="info-value">
+                        {% if record.vendor_link %}
+                        <a href="{% url 'vendor_detail' stream=stream pk=record.vendor_link.pk %}" style="color:#0044CC;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:0.3rem;">
+                            <i class="fas fa-building" style="font-size:0.75rem;"></i> {{ record.vendor_link.name }}
+                            <i class="fas fa-external-link-alt" style="font-size:0.6rem;opacity:0.6;"></i>
+                        </a>
+                        {% elif record.vendor %}
+                        {{ record.vendor }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">PO Number</span>
+                    <span class="info-value">{{ record.purchase_order_number|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Invoice</span>
+                    <span class="info-value">{{ record.invoice_number|default:"—" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warranty Info -->
+        <div class="info-card">
+            <div class="info-card-header"><i class="fas fa-shield-alt"></i> Warranty</div>
+            <div class="info-card-body">
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="info-value">
+                        {% if record.warranty_end_date %}
+                        <span class="warranty-badge warranty-{{ record.warranty_status }}">
+                            {{ record.warranty_status|title }}
+                        </span>
+                        {% else %}
+                        <span class="warranty-badge warranty-no_warranty">Not Set</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Start Date</span>
+                    <span class="info-value">{{ record.warranty_start_date|date:"M d, Y"|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">End Date</span>
+                    <span class="info-value">{{ record.warranty_end_date|date:"M d, Y"|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Provider</span>
+                    <span class="info-value">{{ record.warranty_provider|default:"—" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Info -->
+        <div class="info-card">
+            <div class="info-card-header"><i class="fas fa-chart-line"></i> Financial</div>
+            <div class="info-card-body">
+                <div class="info-row">
+                    <span class="info-label">Book Value</span>
+                    <span class="info-value" style="color: var(--primary); font-weight: 700;">{% if record.current_book_value %}${{ record.current_book_value|floatformat:2 }}{% else %}—{% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Salvage Value</span>
+                    <span class="info-value">{% if record.salvage_value %}${{ record.salvage_value|floatformat:2 }}{% else %}—{% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Depreciation</span>
+                    <span class="info-value">{{ record.get_depreciation_method_display|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expected Lifespan</span>
+                    <span class="info-value">{% if record.expected_lifespan_years %}{{ record.expected_lifespan_years }} years{% else %}—{% endif %}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Maintenance Cost</span>
+                    <span class="info-value">{% if record.total_maintenance_cost %}${{ record.total_maintenance_cost|floatformat:2 }}{% else %}$0.00{% endif %}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Condition & Status -->
+        <div class="info-card">
+            <div class="info-card-header"><i class="fas fa-heartbeat"></i> Status</div>
+            <div class="info-card-body">
+                <div class="info-row">
+                    <span class="info-label">Current Stage</span>
+                    <span class="info-value" style="color: {{ record.current_stage.color }};">
+                        <i class="{{ record.current_stage.icon_class }}"></i>
+                        {{ record.current_stage.name }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Condition</span>
+                    <span class="info-value">{{ record.get_condition_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Next Maintenance</span>
+                    <span class="info-value">{{ record.next_maintenance_due|date:"M d, Y"|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Insurance Policy</span>
+                    <span class="info-value">{{ record.insurance_policy|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Insured Value</span>
+                    <span class="info-value">{% if record.insured_value %}${{ record.insured_value|floatformat:2 }}{% else %}—{% endif %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transition Section -->
+    <div class="transition-section">
+        <div class="transition-header">
+            <span><i class="fas fa-exchange-alt" style="color: var(--primary);"></i> Stage Transition</span>
+        </div>
+        <form method="post" action="{% url 'asset_lifecycle_transition' stream=stream pk=record.pk %}" class="transition-form">
+            {% csrf_token %}
+            <div style="display:flex;flex-direction:column;gap:0.25rem;">
+                <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">NEW STAGE</label>
+                <select name="new_stage" required>
+                    <option value="">Select New Stage</option>
+                    {% for stage in stages %}
+                        {% if stage.id != record.current_stage.id %}
+                        <option value="{{ stage.id }}">{{ stage.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.25rem;flex:1;">
+                <label style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">NOTE</label>
+                <input type="text" name="note" placeholder="Reason for transition..." style="min-width:250px;">
+            </div>
+            <button type="submit" class="btn-transition"><i class="fas fa-arrow-right"></i> Transition</button>
+        </form>
+    </div>
+
+    <!-- Transition History -->
+    <div class="transition-section">
+        <div class="transition-header">
+            <span><i class="fas fa-history" style="color: var(--primary);"></i> Transition History</span>
+            <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ transitions|length }} transition{{ transitions|length|pluralize }}</span>
+        </div>
+        <div class="timeline-container">
+            {% for t in transitions %}
+            <div class="timeline-item">
+                <div class="timeline-dot" style="background: {{ t.to_stage.color }};">
+                    <i class="{{ t.to_stage.icon_class }}"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-title">
+                        {{ t.from_stage.name }} → {{ t.to_stage.name }}
+                    </div>
+                    <div class="timeline-meta">
+                        {{ t.transitioned_by.get_full_name|default:t.transitioned_by.username }} &middot;
+                        {{ t.transitioned_at|date:"M d, Y H:i" }}
+                        {% if t.approved_by %} &middot; Approved by {{ t.approved_by.get_full_name|default:t.approved_by.username }}{% endif %}
+                    </div>
+                    {% if t.note %}
+                    <div class="timeline-note">{{ t.note }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:2rem;color:var(--text-secondary);">
+                <i class="fas fa-clock" style="font-size:1.5rem;opacity:0.3;"></i>
+                <p>No transitions recorded yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

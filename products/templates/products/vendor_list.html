@@ -1,0 +1,793 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Vendors — {{ stream }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --danger: #EF4444;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+        --shadow-xl: 0 20px 40px -5px rgba(0,0,0,0.12);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+    }
+    body {
+        background: var(--bg-primary); min-height: 100vh;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .vendor-page { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+    /* Page Header */
+    .page-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header-left { display: flex; align-items: center; gap: 1rem; }
+    .page-header-left .icon-wrap {
+        width: 48px; height: 48px; background: var(--gradient-primary); border-radius: var(--radius-md);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(11, 95, 255, 0.25);
+    }
+    .page-header-left .icon-wrap i { color: #fff; font-size: 1.2rem; }
+    .page-title { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.025em; color: var(--text-primary); }
+    .page-subtitle { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin-top: 0.1rem; }
+
+    .header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-ph {
+        padding: 0.55rem 1.25rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+        border: none; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: inherit;
+    }
+    .btn-primary {
+        background: var(--gradient-primary); color: #fff;
+        box-shadow: 0 2px 8px rgba(11, 95, 255, 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11, 95, 255, 0.35); }
+    .btn-outline {
+        background: var(--surface); border: 1.5px solid var(--border-color); color: var(--text-secondary);
+    }
+    .btn-outline:hover { border-color: var(--philips-blue); color: var(--philips-blue); background: rgba(11, 95, 255, 0.04); }
+
+    /* Filters */
+    .filters-bar {
+        display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;
+        background: var(--surface); padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+    }
+    .filters-bar input, .filters-bar select {
+        padding: 0.5rem 0.85rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+        font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary);
+        font-family: inherit; transition: border-color 0.2s;
+    }
+    .filters-bar input:focus, .filters-bar select:focus { border-color: var(--philips-blue); outline: none; }
+    .filters-bar input[type="text"] { min-width: 200px; }
+    .btn-search {
+        background: var(--philips-blue); color: #fff; padding: 0.5rem 0.85rem; border-radius: var(--radius-sm);
+        border: none; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
+    }
+    .btn-search:hover { background: var(--philips-blue-dark); }
+    .btn-clear {
+        background: var(--bg-secondary); color: var(--text-secondary); padding: 0.5rem 0.85rem;
+        border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 0.85rem;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;
+        transition: all 0.2s;
+    }
+    .btn-clear:hover { background: var(--border-color); }
+
+    /* Table */
+    .table-wrapper {
+        background: var(--surface); border-radius: var(--radius-lg); overflow: hidden;
+        box-shadow: var(--shadow-md); border: 1px solid var(--border-color);
+    }
+    .vendor-table { width: 100%; border-collapse: collapse; }
+    .vendor-table th {
+        background: var(--bg-secondary); font-weight: 700; font-size: 0.72rem;
+        text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary);
+        padding: 0.85rem 1rem; text-align: left; border-bottom: 2px solid var(--border-color);
+    }
+    .vendor-table td {
+        padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem; color: var(--text-primary); vertical-align: middle;
+    }
+    .vendor-table tr { transition: background 0.15s; }
+    .vendor-table tbody tr:hover { background: rgba(11, 95, 255, 0.02); }
+    .vendor-table tbody tr:last-child td { border-bottom: none; }
+
+    .vendor-name-link {
+        color: var(--philips-blue); text-decoration: none; font-weight: 700;
+        transition: color 0.2s;
+    }
+    .vendor-name-link:hover { color: var(--philips-blue-dark); text-decoration: underline; }
+
+    .vendor-code {
+        font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.78rem;
+        background: var(--bg-secondary); padding: 0.2rem 0.5rem; border-radius: 4px;
+        color: var(--text-secondary); font-weight: 500;
+    }
+    .vendor-contact-sub { color: var(--text-tertiary); font-size: 0.78rem; margin-top: 0.15rem; }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 0.72rem;
+        font-weight: 700; letter-spacing: 0.02em; text-transform: capitalize;
+        display: inline-block;
+    }
+    .status-active { background: #DCFCE7; color: #166534; }
+    .status-inactive { background: var(--bg-secondary); color: var(--text-tertiary); }
+    .status-blacklisted { background: #FEE2E2; color: #991B1B; }
+    .status-pending { background: #FEF3C7; color: #92400E; }
+
+    .rating-stars { color: var(--warning); letter-spacing: 1px; font-size: 0.85rem; }
+
+    /* Action icons */
+    .action-icons { display: flex; gap: 0.5rem; }
+    .action-icon {
+        width: 32px; height: 32px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-tertiary); transition: all 0.2s; text-decoration: none; font-size: 0.85rem;
+    }
+    .action-icon:hover { background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); }
+    .action-icon.edit:hover { background: rgba(11, 95, 255, 0.08); color: var(--philips-blue); }
+
+    /* Empty State */
+    .empty-table {
+        text-align: center; padding: 4rem 2rem; color: var(--text-secondary);
+    }
+    .empty-table .empty-icon {
+        width: 72px; height: 72px; border-radius: 50%; background: var(--bg-secondary);
+        display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+    }
+    .empty-table .empty-icon i { font-size: 1.8rem; color: var(--text-tertiary); }
+    .empty-table h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem; }
+    .empty-table p { font-size: 0.875rem; }
+
+    /* Results count */
+    .results-count {
+        font-size: 0.8rem; color: var(--text-secondary); padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color); font-weight: 500;
+    }
+    .results-count strong { color: var(--text-primary); }
+
+    @media (max-width: 768px) {
+        .vendor-page { padding: 1.25rem; }
+        .page-header { flex-direction: column; align-items: flex-start; }
+        .filters-bar { flex-direction: column; }
+        .filters-bar input[type="text"] { min-width: auto; width: 100%; }
+        .table-wrapper { overflow-x: auto; }
+    }
+
+    /* ── Analytics Modal ── */
+    .analytics-overlay {
+        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px);
+        z-index: 9999; display: none; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    }
+    .analytics-overlay.show { display: flex; opacity: 1; }
+    .analytics-modal {
+        background: var(--surface); border-radius: var(--radius-xl); width: 92vw; max-width: 1320px;
+        max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-color); animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlideUp {
+        from { transform: translateY(30px) scale(0.97); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .analytics-modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color);
+        position: sticky; top: 0; background: var(--surface); z-index: 2;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+    .analytics-modal-header h2 {
+        font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 0.6rem;
+    }
+    .analytics-modal-header h2 .hdr-icon {
+        width: 40px; height: 40px; border-radius: var(--radius-md);
+        background: var(--gradient-primary); display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(11, 95, 255, 0.25);
+    }
+    .analytics-modal-header h2 .hdr-icon i { color: #fff; font-size: 1rem; }
+    .analytics-close {
+        width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-color);
+        background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: var(--text-secondary); font-size: 1.1rem; transition: all 0.2s;
+    }
+    .analytics-close:hover { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+
+    .analytics-body { padding: 1.5rem 2rem 2rem; }
+
+    /* KPI Cards Row */
+    .kpi-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 0.75rem;
+        margin-bottom: 1.75rem;
+    }
+    .kpi-card {
+        background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1rem 1.1rem; position: relative; overflow: hidden; transition: all 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--philips-blue); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-card .kpi-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.3rem; }
+    .kpi-card .kpi-value { font-size: 1.55rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+    .kpi-card .kpi-sub { font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.25rem; font-weight: 500; }
+    .kpi-card .kpi-icon {
+        position: absolute; top: 0.75rem; right: 0.75rem; width: 32px; height: 32px;
+        border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem;
+    }
+    .kpi-icon.blue { background: rgba(11, 95, 255, 0.1); color: var(--philips-blue); }
+    .kpi-icon.green { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+    .kpi-icon.amber { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+    .kpi-icon.red { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+    .kpi-icon.teal { background: rgba(0, 196, 180, 0.1); color: var(--philips-teal); }
+    .kpi-icon.purple { background: rgba(124, 58, 237, 0.1); color: #0044CC; }
+
+    /* Chart Grid */
+    .charts-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .chart-card {
+        background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1rem 1.25rem; height: 260px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .chart-card-title {
+        font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0;
+    }
+    .chart-card-title i { color: var(--philips-blue); font-size: 0.9rem; }
+    .chart-card canvas { flex: 1; min-height: 0; }
+    @media (max-width: 1100px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    /* Top Vendors Table */
+    .top-vendors-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .top-vendors-table th {
+        background: var(--bg-secondary); font-weight: 700; font-size: 0.7rem; text-transform: uppercase;
+        letter-spacing: 0.04em; color: var(--text-secondary); padding: 0.6rem 0.75rem; text-align: left;
+        border-bottom: 1.5px solid var(--border-color);
+    }
+    .top-vendors-table td {
+        padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    .top-vendors-table tbody tr:last-child td { border-bottom: none; }
+    .rank-badge {
+        width: 22px; height: 22px; border-radius: 50%; background: var(--gradient-primary);
+        color: #fff; font-size: 0.65rem; font-weight: 800; display: inline-flex;
+        align-items: center; justify-content: center;
+    }
+
+    /* Delivery Progress */
+    .delivery-progress-bar {
+        height: 10px; background: var(--bg-secondary); border-radius: 99px; overflow: hidden;
+    }
+    .delivery-progress-fill {
+        height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .analytics-loading {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 4rem 2rem; color: var(--text-secondary);
+    }
+    .analytics-loading .spinner {
+        width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--philips-blue);
+        border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .analytics-modal::-webkit-scrollbar { width: 6px; }
+    .analytics-modal::-webkit-scrollbar-track { background: transparent; }
+    .analytics-modal::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 99px; }
+    .analytics-modal::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+    .btn-analytics {
+        background: linear-gradient(135deg, #0044CC 0%, #0B5FFF 100%); color: #fff;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+    }
+    .btn-analytics:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); }
+
+    /* Toast messages */
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
+    .toast-msg { padding: 14px 22px; border-radius: 10px; color: #fff; font-weight: 600; font-size: .9rem; box-shadow: 0 4px 16px rgba(0,0,0,.15); animation: toastIn .4s ease; display: flex; align-items: center; gap: 10px; max-width: 420px; }
+    .toast-msg.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .toast-msg.error   { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .toast-msg.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .toast-msg.info    { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+
+{% if messages %}
+<div class="toast-container">
+    {% for message in messages %}
+    <div class="toast-msg {{ message.tags }}" onclick="this.remove()">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-times-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+<script>
+    setTimeout(function() {
+        document.querySelectorAll('.toast-msg').forEach(function(el) {
+            el.style.transition = 'opacity .5s ease';
+            el.style.opacity = '0';
+            setTimeout(function() { el.remove(); }, 500);
+        });
+    }, 5000);
+</script>
+{% endif %}
+
+<div class="vendor-page">
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="icon-wrap"><i class="fas fa-truck"></i></div>
+            <div>
+                <div class="page-title">{{ stream }} Vendors</div>
+                <div class="page-subtitle">Manage vendor relationships & contracts</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button onclick="openAnalytics()" class="btn-ph btn-analytics"><i class="fas fa-chart-pie"></i> Analytics</button>
+            {% if is_admin %}
+            <a href="{% url 'vendor_create' stream=stream %}" class="btn-ph btn-primary"><i class="fas fa-plus"></i> Add Vendor</a>
+            {% endif %}
+            <a href="{% url 'vendor_export' stream=stream %}" class="btn-ph btn-outline"><i class="fas fa-file-excel"></i> Export</a>
+            <a href="{% url 'vendor_hub' %}" class="btn-ph btn-outline"><i class="fas fa-arrow-left"></i> Hub</a>
+        </div>
+    </div>
+
+    <form method="get" class="filters-bar">
+        <input type="text" name="q" value="{{ search_q }}" placeholder="Search vendors by name, code, contact...">
+        <select name="status" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+            <option value="blacklisted" {% if status_filter == 'blacklisted' %}selected{% endif %}>Blacklisted</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        </select>
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-search"><i class="fas fa-search"></i></button>
+        {% if search_q or status_filter or category_filter %}
+        <a href="{% url 'vendor_list' stream=stream %}" class="btn-clear"><i class="fas fa-times"></i> Clear</a>
+        {% endif %}
+    </form>
+
+    {% if vendors %}
+    <div class="table-wrapper">
+        <div class="results-count"><strong>{{ vendors|length }}</strong> vendor{{ vendors|length|pluralize }} found</div>
+        <table class="vendor-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Vendor Name</th>
+                    <th>Category</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Rating</th>
+                    <th>Contracts</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr>
+                    <td><span class="vendor-code">{{ vendor.code }}</span></td>
+                    <td><a href="{% url 'vendor_detail' stream=stream pk=vendor.pk %}" class="vendor-name-link">{{ vendor.name }}</a></td>
+                    <td>{{ vendor.category|default:"-" }}</td>
+                    <td>
+                        {{ vendor.contact_person|default:"-" }}
+                        {% if vendor.email %}<div class="vendor-contact-sub">{{ vendor.email }}</div>{% endif %}
+                    </td>
+                    <td><span class="status-badge status-{{ vendor.status }}">{{ vendor.get_status_display }}</span></td>
+                    <td>
+                        {% if vendor.rating %}
+                        <span class="rating-stars">{% for i in "12345" %}{% if forloop.counter <= vendor.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span>
+                        {% else %}<span style="color:var(--text-tertiary);">-</span>{% endif %}
+                    </td>
+                    <td>
+                        <span style="font-weight:700;">{{ vendor.contracts.count }}</span>
+                    </td>
+                    <td>
+                        <div class="action-icons">
+                            <a href="{% url 'vendor_detail' stream=stream pk=vendor.pk %}" class="action-icon" title="View Details"><i class="fas fa-eye"></i></a>
+                            {% if is_admin %}
+                            <a href="{% url 'vendor_edit' stream=stream pk=vendor.pk %}" class="action-icon edit" title="Edit"><i class="fas fa-pen"></i></a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-wrapper">
+        <div class="empty-table">
+            <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+            <h3>No vendors found</h3>
+            <p>{% if search_q or status_filter or category_filter %}Try adjusting your search or filters.{% else %}Add your first vendor to get started.{% endif %}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Analytics Modal Overlay -->
+<div class="analytics-overlay" id="analyticsOverlay" onclick="if(event.target===this)closeAnalytics()">
+    <div class="analytics-modal">
+        <div class="analytics-modal-header">
+            <h2><span class="hdr-icon"><i class="fas fa-chart-pie"></i></span> Vendor Analytics — {{ stream }}</h2>
+            <button class="analytics-close" onclick="closeAnalytics()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="analytics-body" id="analyticsBody">
+            <div class="analytics-loading" id="analyticsLoading">
+                <div class="spinner"></div>
+                <span style="font-weight:600;">Loading analytics...</span>
+            </div>
+            <div id="analyticsContent" style="display:none;">
+                <!-- KPI Cards -->
+                <div class="kpi-grid" id="kpiGrid"></div>
+
+                <!-- Charts Row 1: 4 columns -->
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem;">
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-circle-half-stroke"></i> Vendor Status</div>
+                        <canvas id="chartVendorStatus"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-file-invoice-dollar"></i> PO Status</div>
+                        <canvas id="chartPOStatus"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-file-contract"></i> Contract Health</div>
+                        <canvas id="chartContractStatus"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-exclamation-triangle"></i> PO Priority</div>
+                        <canvas id="chartPOPriority"></canvas>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2: mixed -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-tags"></i> Categories</div>
+                        <canvas id="chartCategory"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-star"></i> Ratings</div>
+                        <canvas id="chartRating"></canvas>
+                    </div>
+                    <div class="chart-card" style="grid-column:span 2;">
+                        <div class="chart-card-title"><i class="fas fa-chart-line"></i> Monthly Spending Trend</div>
+                        <canvas id="chartSpending"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 3: Delivery + Top Vendors + Category Spending -->
+                <div style="display:grid;grid-template-columns:1fr 1.5fr 1.5fr;gap:1rem;">
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-truck-fast"></i> Delivery</div>
+                        <div id="deliveryStats" style="overflow-y:auto;flex:1;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-trophy"></i> Top Vendors by PO Value</div>
+                        <div id="topVendorsTable" style="overflow-y:auto;flex:1;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-title"><i class="fas fa-chart-bar"></i> Spending by Category</div>
+                        <canvas id="chartCategorySpending"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const ANALYTICS_URL = "{% url 'vendor_analytics_api' stream=stream %}";
+let chartInstances = {};
+
+function destroyCharts() {
+    Object.values(chartInstances).forEach(c => c.destroy());
+    chartInstances = {};
+}
+
+const CHART_COLORS = {
+    blue: '#0B5FFF', teal: '#00C4B4', purple: '#0044CC', amber: '#F59E0B',
+    red: '#EF4444', green: '#10B981', indigo: '#0B5FFF', pink: '#0B5FFF',
+    cyan: '#06B6D4', lime: '#84CC16', orange: '#d48806', slate: '#64748B',
+};
+const PALETTE = Object.values(CHART_COLORS);
+const STATUS_COLORS = { active: '#10B981', inactive: '#94A3B8', blacklisted: '#EF4444', pending: '#F59E0B' };
+const PO_STATUS_COLORS = {
+    draft: '#94A3B8', submitted: '#3B82F6', acknowledged: '#0B5FFF', in_progress: '#0B5FFF',
+    partially_delivered: '#F59E0B', delivered: '#10B981', cancelled: '#EF4444', closed: '#64748B',
+};
+const PRIORITY_COLORS = { low: '#94A3B8', normal: '#3B82F6', high: '#F59E0B', urgent: '#EF4444' };
+const CONTRACT_COLORS = { draft: '#94A3B8', active: '#10B981', expired: '#EF4444', terminated: '#64748B' };
+
+function chartDefaults() {
+    Chart.defaults.font.family = "'Plus Jakarta Sans','Inter',sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#64748B';
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.padding = 12;
+}
+
+function fmt(n) { return new Intl.NumberFormat('en-US', {maximumFractionDigits: 0}).format(n); }
+function fmtCurrency(n, cur) { return new Intl.NumberFormat('en-US', {style:'currency', currency: cur||'EUR', maximumFractionDigits: 0}).format(n); }
+function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+
+function renderKPIs(s, cur) {
+    const grid = document.getElementById('kpiGrid');
+    const kpis = [
+        { label:'Total Vendors', value: s.total_vendors, sub: `${s.active_vendors} active`, icon:'fas fa-building', cls:'blue' },
+        { label:'Avg Rating', value: s.avg_rating ? s.avg_rating + ' ★' : 'N/A', sub: 'Out of 5.0', icon:'fas fa-star', cls:'amber' },
+        { label:'Active Contracts', value: s.active_contracts, sub: fmtCurrency(s.total_contract_value, cur) + ' value', icon:'fas fa-file-contract', cls:'green' },
+        { label:'Expiring Soon', value: s.expiring_contracts, sub: 'Next 90 days', icon:'fas fa-clock', cls:'amber' },
+        { label:'Total POs', value: s.total_pos, sub: fmtCurrency(s.total_po_value, cur) + ' total', icon:'fas fa-receipt', cls:'purple' },
+        { label:'Overdue POs', value: s.overdue_pos, sub: s.overdue_pos > 0 ? 'Needs attention' : 'All on track', icon:'fas fa-exclamation-circle', cls: s.overdue_pos > 0 ? 'red' : 'green' },
+        { label:'On-Time Delivery', value: s.on_time_delivery_pct + '%', sub: 'From perf. logs', icon:'fas fa-truck', cls: s.on_time_delivery_pct >= 80 ? 'green' : 'red' },
+        { label:'Quality Pass', value: s.quality_ok_pct + '%', sub: 'From perf. logs', icon:'fas fa-check-circle', cls: s.quality_ok_pct >= 80 ? 'green' : 'red' },
+    ];
+    grid.innerHTML = kpis.map(k => `
+        <div class="kpi-card">
+            <div class="kpi-icon ${k.cls}"><i class="${k.icon}"></i></div>
+            <div class="kpi-label">${escapeHtml(k.label)}</div>
+            <div class="kpi-value">${escapeHtml(String(k.value))}</div>
+            <div class="kpi-sub">${escapeHtml(k.sub)}</div>
+        </div>
+    `).join('');
+}
+
+function makeDoughnut(id, labels, values, colors) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    chartInstances[id] = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 } } },
+                tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed} (${pct(ctx.parsed, values.reduce((a,b)=>a+b,0))}%)` } }
+            }
+        }
+    });
+}
+
+function makeBar(id, labels, values, colors, horizontal, currencyFmt, cur) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    chartInstances[id] = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 6, maxBarThickness: 36 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: ctx => currencyFmt ? fmtCurrency(ctx.parsed[horizontal?'x':'y'], cur) : fmt(ctx.parsed[horizontal?'x':'y']) } }
+            },
+            scales: {
+                x: { grid: { display: !horizontal }, ticks: { callback: v => currencyFmt ? fmtCurrency(v, cur) : v } },
+                y: { grid: { display: horizontal } }
+            }
+        }
+    });
+}
+
+function makeLine(id, labels, values, cur) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    chartInstances[id] = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{
+            data: values, borderColor: CHART_COLORS.blue, backgroundColor: 'rgba(11,95,255,0.08)',
+            fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: CHART_COLORS.blue, borderWidth: 2.5,
+        }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: ctx => fmtCurrency(ctx.parsed.y, cur) } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { ticks: { callback: v => fmtCurrency(v, cur) }, grid: { color: 'rgba(0,0,0,0.04)' } }
+            }
+        }
+    });
+}
+
+function renderDelivery(d, s) {
+    const el = document.getElementById('deliveryStats');
+    const pctReceived = pct(d.total_received, d.total_ordered);
+    const pctItems = pct(d.fully_received_items, d.total_items);
+    const barColor = pctReceived >= 80 ? '#10B981' : pctReceived >= 50 ? '#F59E0B' : '#EF4444';
+    el.innerHTML = `
+        <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;">
+                <span style="font-weight:700;font-size:0.82rem;color:var(--text-primary);">Quantity Fulfilment</span>
+                <span style="font-weight:700;font-size:0.82rem;color:${barColor};">${fmt(d.total_received)} / ${fmt(d.total_ordered)} (${pctReceived}%)</span>
+            </div>
+            <div class="delivery-progress-bar"><div class="delivery-progress-fill" style="width:${pctReceived}%;background:${barColor};"></div></div>
+        </div>
+        <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;">
+                <span style="font-weight:700;font-size:0.82rem;color:var(--text-primary);">Items Fully Received</span>
+                <span style="font-weight:700;font-size:0.82rem;color:var(--philips-blue);">${d.fully_received_items} / ${d.total_items} items (${pctItems}%)</span>
+            </div>
+            <div class="delivery-progress-bar"><div class="delivery-progress-fill" style="width:${pctItems}%;background:var(--philips-blue);"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:1rem;">
+            <div style="background:var(--surface);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:0.85rem;text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:#10B981;">${s.on_time_delivery_pct}%</div>
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;">On-Time Rate</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:0.85rem;text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--philips-blue);">${s.quality_ok_pct}%</div>
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;">Quality Pass</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderTopVendors(vendors, cur) {
+    const el = document.getElementById('topVendorsTable');
+    if (!vendors.length) {
+        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-tertiary);font-size:0.85rem;">No purchase order data yet</div>';
+        return;
+    }
+    let rows = vendors.map((v, i) => `
+        <tr>
+            <td><span class="rank-badge">${i + 1}</span></td>
+            <td style="font-weight:700;">${escapeHtml(v.name)}</td>
+            <td>${v.po_count} POs</td>
+            <td style="font-weight:700;color:var(--philips-blue);">${fmtCurrency(v.po_total, cur)}</td>
+        </tr>
+    `).join('');
+    el.innerHTML = `
+        <table class="top-vendors-table">
+            <thead><tr><th>#</th><th>Vendor</th><th>PO Count</th><th>Total Value</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+}
+
+async function loadAnalytics() {
+    chartDefaults();
+    destroyCharts();
+    document.getElementById('analyticsLoading').style.display = 'flex';
+    document.getElementById('analyticsContent').style.display = 'none';
+
+    try {
+        const resp = await fetch(ANALYTICS_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const data = await resp.json();
+        if (data.error) { console.error('Analytics error:', data.error); alert('Failed to load analytics.'); closeAnalytics(); return; }
+
+        const s = data.summary;
+        const cur = data.currency || 'EUR';
+
+        // KPIs
+        renderKPIs(s, cur);
+
+        // Vendor Status Doughnut
+        if (data.vendor_status.length) {
+            const labels = data.vendor_status.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1));
+            const values = data.vendor_status.map(d => d.count);
+            const colors = data.vendor_status.map(d => STATUS_COLORS[d.status] || '#94A3B8');
+            makeDoughnut('chartVendorStatus', labels, values, colors);
+        }
+
+        // Category Breakdown
+        if (data.vendor_categories.length) {
+            const labels = data.vendor_categories.map(d => d.category);
+            const values = data.vendor_categories.map(d => d.count);
+            makeBar('chartCategory', labels, values, PALETTE.slice(0, labels.length), true);
+        }
+
+        // Rating Distribution
+        if (data.rating_distribution.length) {
+            const labels = data.rating_distribution.map(d => d.rating + ' ★');
+            const values = data.rating_distribution.map(d => d.count);
+            const colors = ['#EF4444', '#d48806', '#F59E0B', '#84CC16', '#10B981'];
+            makeBar('chartRating', labels, values, data.rating_distribution.map(d => colors[d.rating - 1] || '#94A3B8'));
+        }
+
+        // PO Status Pipeline
+        if (data.po_status.length) {
+            const labels = data.po_status.map(d => d.status.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()));
+            const values = data.po_status.map(d => d.count);
+            const colors = data.po_status.map(d => PO_STATUS_COLORS[d.status] || '#94A3B8');
+            makeDoughnut('chartPOStatus', labels, values, colors);
+        }
+
+        // Monthly Spending
+        if (data.monthly_spending.labels.length) {
+            const shortLabels = data.monthly_spending.labels.map(l => {
+                const [y, m] = l.split('-');
+                return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1] + "'" + y.slice(2);
+            });
+            makeLine('chartSpending', shortLabels, data.monthly_spending.values, cur);
+        }
+
+        // Contract Status
+        if (data.contract_status.length) {
+            const labels = data.contract_status.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1));
+            const values = data.contract_status.map(d => d.count);
+            const colors = data.contract_status.map(d => CONTRACT_COLORS[d.status] || '#94A3B8');
+            makeDoughnut('chartContractStatus', labels, values, colors);
+        }
+
+        // Delivery
+        renderDelivery(data.delivery, s);
+
+        // Top Vendors
+        renderTopVendors(data.top_vendors, cur);
+
+        // Category Spending
+        if (data.category_spending.length) {
+            const labels = data.category_spending.map(d => d.category);
+            const values = data.category_spending.map(d => d.total);
+            makeBar('chartCategorySpending', labels, values, PALETTE.slice(0, labels.length), false, true, cur);
+        }
+
+        // PO Priority
+        if (data.po_priority.length) {
+            const labels = data.po_priority.map(d => d.priority.charAt(0).toUpperCase() + d.priority.slice(1));
+            const values = data.po_priority.map(d => d.count);
+            const colors = data.po_priority.map(d => PRIORITY_COLORS[d.priority] || '#94A3B8');
+            makeDoughnut('chartPOPriority', labels, values, colors);
+        }
+
+        document.getElementById('analyticsLoading').style.display = 'none';
+        document.getElementById('analyticsContent').style.display = 'block';
+    } catch (err) {
+        console.error('Analytics error:', err);
+        document.getElementById('analyticsLoading').innerHTML = '<div style="color:#EF4444;font-weight:600;"><i class="fas fa-exclamation-triangle"></i> Failed to load analytics</div>';
+    }
+}
+
+function openAnalytics() {
+    document.getElementById('analyticsOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    loadAnalytics();
+}
+
+function closeAnalytics() {
+    document.getElementById('analyticsOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    destroyCharts();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAnalytics(); });
+</script>
+{% endblock %}

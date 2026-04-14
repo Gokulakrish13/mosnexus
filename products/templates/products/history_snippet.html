@@ -1,84 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        /* Removed forced font-family styling. Only keep color, font-size, and .top-bar style. */
-        body, html {
-            margin: 0;
-            background: #fff;
-            color: #222;
-            font-size: 1rem;
-        }
-        
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 60px;
-        }
-        .history-list > li {
-            padding: 10px;
-            border-bottom: 1px solid #e0e3e7;
-            line-height: 1.5;
-        }
-        .history-action {
-            color: #1976d2;
-            font-weight: 500;
-        }
-        .history-user {
-            color: #2e7d32;
-            font-weight: 500;
-        }
-        .history-time {
-            color: #666;
-            font-size: 0.9em;
-        }
-    </style>
-</head>
-<body>
+<style>
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.history-list > li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light, #e2e8f0);
+    line-height: 1.6;
+    font-size: 0.88rem;
+    color: var(--text-primary, #1e293b);
+}
+.history-list > li:last-child {
+    border-bottom: none;
+}
+.history-action {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: rgba(11,95,255,0.08);
+    color: #0B5FFF;
+}
+.history-action-created { background: rgba(16,185,129,0.1); color: #059669; }
+.history-action-edited  { background: rgba(245,158,11,0.1); color: #D97706; }
+.history-action-deleted { background: rgba(239,68,68,0.1);  color: #DC2626; }
+.history-user {
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+}
+.history-time {
+    color: var(--text-muted, #94a3b8);
+    font-size: 0.8rem;
+}
+.history-changes {
+    margin-top: 0.4rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(11,95,255,0.15);
+    font-size: 0.82rem;
+    color: var(--text-secondary, #475569);
+}
+.history-changes div {
+    padding: 0.15rem 0;
+}
+.history-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted, #94a3b8);
+}
+.history-empty i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    opacity: 0.5;
+}
+</style>
 
-<ul class="history-list" style="max-height:540px;overflow-y:auto;padding-right:8px;margin-top:0;">
+<ul class="history-list">
     {% for h in history %}
     <li>
-        <span class="history-action">{{ h.action|title }}</span>
+        <span class="history-action history-action-{{ h.action }}">{{ h.action|title }}</span>
         by <span class="history-user">{{ h.user.username }}</span>
-        <span class="history-time">at {{ h.timestamp|date:'Y-m-d H:i:s' }}</span>
-        <br>        {% if h.action == "edited" and h.changes %}
-            <div style="margin-top: 5px;">
+        <span class="history-time">&mdash; {{ h.timestamp|date:'M d, Y H:i' }}</span>
+        {% if h.action == "edited" and h.changes %}
+            <div class="history-changes">
             {% for change in h.changes %}
-                {% if change.old != change.new %}                    {% if change.field == "location" %}
-                        <div>Moved to location: {{ change.new }}</div>
+                {% if change.old != change.new %}
+                    {% if change.field == "location" %}
+                        <div><i class="fas fa-map-marker-alt" style="width:14px;opacity:0.5;"></i> Moved to location: <strong>{{ change.new }}</strong></div>
                     {% elif change.field == "status" %}
-                        <div>Status changed from "{{ change.old }}" to "{% if change.new == 'Issue' %}Issue in the system{% else %}{{ change.new }}{% endif %}"</div>
+                        <div><i class="fas fa-exchange-alt" style="width:14px;opacity:0.5;"></i> Status: "{{ change.old }}" &rarr; "{% if change.new == 'Issue' %}Issue in the system{% else %}{{ change.new }}{% endif %}"</div>
                     {% elif change.field == "description" %}
-                        <div>Description changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                        <div><i class="fas fa-align-left" style="width:14px;opacity:0.5;"></i> Description updated</div>
                     {% elif change.field == "issue_description" %}
-                        <div>Issue Description changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                        <div><i class="fas fa-exclamation-triangle" style="width:14px;opacity:0.5;"></i> Issue description updated</div>
                     {% else %}
-                        <div>{{ change.field|title }} changed from "{{ change.old }}" to "{{ change.new }}"</div>
+                        <div><i class="fas fa-pen" style="width:14px;opacity:0.5;"></i> {{ change.field|title }}: "{{ change.old }}" &rarr; "{{ change.new }}"</div>
                     {% endif %}
                 {% endif %}
             {% endfor %}
             </div>
-        {% elif h.action == "created" %}
-            <span>{{ h.details }}</span>
-        {% else %}
-            <span>{{ h.details }}</span>
+        {% elif h.details %}
+            <div class="history-changes">
+                <div>{{ h.details }}</div>
+            </div>
         {% endif %}
     </li>
     {% empty %}
-    <li>No history available.</li>
+    <li class="history-empty">
+        <i class="fas fa-clock"></i>
+        No history available for this product.
+    </li>
     {% endfor %}
 </ul>
-
-<!-- This template is only for AJAX partial rendering. All stream-aware links should be handled in the parent template/view. -->
-
-<script>
-      document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-      });
-    </script>
-  </body>
-</html>

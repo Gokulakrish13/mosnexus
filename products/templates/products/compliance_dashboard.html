@@ -1,0 +1,1220 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}Compliance Dashboard - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --teal: #0d9488;
+        --teal-dark: #0f766e;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 500px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--emerald);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f0fdf4;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    /* Compliance Score Section */
+    .score-section {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }    .score-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--emerald), var(--teal), var(--success-green));
+    }
+
+    .score-circle-wrapper {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .score-circle {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: conic-gradient(from -90deg, #059669 0deg, #0d9488 0deg, #e2e8f0 0deg, #e2e8f0 360deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.2);
+        transition: background 0.1s linear;
+    }
+
+    .score-inner {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        z-index: 1;
+        position: relative;
+    }    .score-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--emerald), var(--teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .score-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        margin-top: 0.35rem;
+    }
+
+    .score-title {
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .score-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+
+    .score-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .score-description {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .score-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+
+    .score-status.excellent { background: #d1fae5; color: #047857; }
+    .score-status.good { background: #ccfbf1; color: #0d9488; }
+    .score-status.warning { background: #fef3c7; color: #b45309; }
+    .score-status.critical { background: #fee2e2; color: #b91c1c; }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.emerald { background: #d1fae5; color: var(--emerald); }
+    .stat-icon.blue { background: #dbeafe; color: var(--primary-blue); }
+    .stat-icon.orange { background: #fef3c7; color: var(--warning-orange); }
+    .stat-icon.red { background: #fee2e2; color: var(--danger-red); }
+    .stat-icon.teal { background: #ccfbf1; color: var(--teal); }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-content p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Main Dashboard Grid */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--emerald);
+    }
+
+    .card-header-link {
+        font-size: 0.85rem;
+        color: var(--emerald);
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+    }
+
+    .card-header-link:hover {
+        color: var(--emerald-dark);
+        gap: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Requirements List */
+    .requirements-list {
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .requirement-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .requirement-item:hover {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .requirement-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .req-status {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+
+    .req-status.compliant { background: #d1fae5; color: var(--emerald); }
+    .req-status.partial { background: #fef3c7; color: var(--warning-orange); }
+    .req-status.non_compliant { background: #fee2e2; color: var(--danger-red); }
+
+    .req-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .req-info h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .req-info p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .req-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .req-badge.compliant { background: #d1fae5; color: #047857; }
+    .req-badge.partial { background: #fef3c7; color: #b45309; }
+    .req-badge.non_compliant { background: #fee2e2; color: #b91c1c; }
+
+    /* Quick Actions */
+    .quick-links {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        background: var(--bg-light);
+        border-radius: 14px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .quick-link:hover {
+        background: linear-gradient(135deg, var(--emerald), var(--teal));
+        color: white;
+        border-color: transparent;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.25);
+    }
+
+    .quick-link-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--emerald);
+        transition: all 0.3s ease;
+    }
+
+    .quick-link:hover .quick-link-icon {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .quick-link span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        height: 220px;
+        position: relative;
+    }
+
+    /* Alerts Section */
+    .alerts-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-header h2 i {
+        color: var(--warning-orange);
+    }
+
+    .alerts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1rem;
+    }
+
+    .alert-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 1.25rem;
+        border-left: 4px solid var(--warning-orange);
+        transition: all 0.2s ease;
+        border-top: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .alert-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .alert-card.critical {
+        border-left-color: var(--danger-red);
+    }
+
+    .alert-card.info {
+        border-left-color: var(--primary-blue);
+    }
+
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .alert-card h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .alert-badge {
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .alert-badge.critical { background: #fee2e2; color: #b91c1c; }
+    .alert-badge.warning { background: #fef3c7; color: #b45309; }
+    .alert-badge.info { background: #dbeafe; color: #1d4ed8; }
+
+    .alert-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0 0 0.75rem 0;
+        line-height: 1.4;
+    }
+
+    .alert-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .alert-meta i {
+        color: var(--emerald);
+    }
+
+    /* Documents Review Section */
+    .review-section {
+        margin-bottom: 2rem;
+    }
+
+    .review-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 1.25rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+        border-color: var(--emerald);
+    }
+
+    .review-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .review-card h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .review-type {
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: var(--bg-light);
+        color: var(--text-secondary);
+    }
+
+    .review-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0 0 0.75rem 0;
+    }
+
+    .review-date {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .review-date.critical {
+        color: var(--danger-red);
+    }
+
+    .review-date.warning {
+        color: var(--warning-orange);
+    }
+
+    .review-date.normal {
+        color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-state-icon i {
+        font-size: 2rem;
+        color: var(--emerald);
+    }
+
+    .empty-state h3 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 1rem;
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-message {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-message.success {
+        background: var(--success-green-light);
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .alert-message.error {
+        background: var(--danger-red-light);
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .score-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-links {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message {{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-shield-alt"></i> Compliance Dashboard</h1>
+            <p class="subtitle">Track regulatory compliance, manage documents, and ensure adherence for {{ stream }} stream</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'calibration_dashboard' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-tools"></i> Calibration
+            </a>
+            <a href="{% url 'compliance_export_report' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-file-export"></i> Export Report
+            </a>
+            <a href="{% url 'compliance_documents_list' stream=stream %}" class="btn btn-primary">
+                <i class="fas fa-folder-open"></i> Documents
+            </a>
+        </div>
+    </div>
+
+    <!-- Compliance Score Section -->
+    <div class="score-section">
+        <div class="score-card">
+            <div class="score-circle-wrapper">
+                <div class="score-circle" id="scoreCircle">
+                    <div class="score-inner">
+                        <div class="score-value" id="scoreValue">0%</div>
+                        <div class="score-label">Compliance</div>
+                    </div>
+                </div>
+            </div>
+            <div class="score-title">Overall Compliance Score</div>
+            <div class="score-description">
+                {% if compliance_score >= 90 %}
+                    Excellent! All major compliance requirements are met.
+                {% elif compliance_score >= 70 %}
+                    Good standing with minor areas for improvement.
+                {% elif compliance_score >= 50 %}
+                    Attention needed on several compliance items.
+                {% else %}
+                    Critical action required to achieve compliance.
+                {% endif %}
+            </div>
+            <div class="score-status {% if compliance_score >= 90 %}excellent{% elif compliance_score >= 70 %}good{% elif compliance_score >= 50 %}warning{% else %}critical{% endif %}">
+                <i class="fas {% if compliance_score >= 70 %}fa-check-circle{% elif compliance_score >= 50 %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
+                {% if compliance_score >= 90 %}Excellent{% elif compliance_score >= 70 %}Good{% elif compliance_score >= 50 %}Needs Attention{% else %}Critical{% endif %}
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon emerald">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.compliant_items|default:0 }}</h3>
+                    <p>Compliant Items</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.pending_items|default:0 }}</h3>
+                    <p>Pending Review</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.non_compliant|default:0 }}</h3>
+                    <p>Non-Compliant</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_documents|default:0 }}</h3>
+                    <p>Total Documents</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon teal">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_requirements|default:0 }}</h3>
+                    <p>Requirements</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon emerald">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_checklists|default:0 }}</h3>
+                    <p>Checklists</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.active_alerts|default:0 }}</h3>
+                    <p>Active Alerts</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.approved_docs|default:0 }}</h3>
+                    <p>Approved Docs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="main-grid">
+        <!-- Requirements Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-list-check"></i> Regulatory Requirements</h3>
+                <a href="{% url 'regulatory_requirements_list' stream=stream %}" class="card-header-link">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body requirements-list">
+                {% if requirements %}
+                    {% for req in requirements|slice:":8" %}
+                    <div class="requirement-item">
+                        <div class="req-status {{ req.compliance_status }}">
+                            <i class="fas {% if req.compliance_status == 'compliant' %}fa-check{% elif req.compliance_status == 'partial' %}fa-exclamation{% else %}fa-times{% endif %}"></i>
+                        </div>
+                        <div class="req-info">
+                            <h4>{{ req.title }}</h4>
+                            <p>{{ req.regulatory_body|default:"N/A" }} {% if req.regulation_name %}- {{ req.regulation_name }}{% endif %}</p>
+                        </div>
+                        <span class="req-badge {{ req.compliance_status }}">
+                            {{ req.get_compliance_status_display|default:req.compliance_status|title }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h3>No Requirements Defined</h3>
+                        <p>Start by adding regulatory requirements to track compliance.</p>
+                        <a href="{% url 'regulatory_requirement_create' stream=stream %}" class="btn btn-primary" style="background: var(--emerald); color: white;">
+                            <i class="fas fa-plus"></i> Add Requirement
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div>
+            <!-- Quick Actions Card -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="quick-links">
+                        <a href="{% url 'compliance_document_create' stream=stream %}" class="quick-link">
+                            <div class="quick-link-icon">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <span>Upload Document</span>
+                        </a>
+                        <a href="{% url 'regulatory_checklists_list' stream=stream %}" class="quick-link">
+                            <div class="quick-link-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Checklists</span>
+                        </a>
+                        <a href="{% url 'compliance_alerts_list' stream=stream %}" class="quick-link">
+                            <div class="quick-link-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span>View Alerts</span>
+                        </a>
+                        <a href="{% url 'regulatory_requirement_create' stream=stream %}" class="quick-link">
+                            <div class="quick-link-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <span>Add Requirement</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance Chart Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Compliance Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="complianceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Alerts Section -->
+    {% if active_alerts %}
+    <div class="alerts-section">
+        <div class="section-header">
+            <h2><i class="fas fa-bell"></i> Active Alerts</h2>
+            <a href="{% url 'compliance_alerts_list' stream=stream %}" class="card-header-link">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="alerts-grid">
+            {% for alert in active_alerts|slice:":6" %}
+            <div class="alert-card {% if alert.severity == 'critical' %}critical{% elif alert.severity == 'info' %}info{% endif %}">
+                <div class="alert-header">
+                    <h4>{{ alert.title }}</h4>
+                    <span class="alert-badge {% if alert.severity == 'critical' %}critical{% elif alert.severity == 'high' %}warning{% else %}info{% endif %}">
+                        {{ alert.severity|title }}
+                    </span>
+                </div>
+                <p>{{ alert.message|truncatechars:100 }}</p>
+                <div class="alert-meta">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ alert.created_at|timesince }} ago</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Documents Needing Review Section -->
+    <div class="review-section">
+        <div class="section-header">
+            <h2><i class="fas fa-file-alt"></i> Documents Needing Review</h2>
+            <a href="{% url 'compliance_documents_list' stream=stream %}" class="card-header-link">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="review-grid">
+            {% if docs_needing_review %}
+                {% for doc in docs_needing_review %}
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <h4>{{ doc.title|truncatechars:35 }}</h4>
+                        <span class="review-type">{{ doc.get_document_type_display|default:"Document" }}</span>
+                    </div>
+                    <p>Version {{ doc.version|default:"1.0" }} {% if doc.document_id %}- ID: {{ doc.document_id }}{% endif %}</p>
+                    <div class="review-date {% if doc.review_date < today %}critical{% else %}warning{% endif %}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Review by {{ doc.review_date|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="review-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                    <div class="empty-state-icon" style="margin: 0 auto 1rem;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">All Documents Up to Date</h4>
+                    <p style="color: var(--text-secondary); margin: 0;">No documents require review in the next 30 days</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Upcoming Audits Section -->
+    {% if upcoming_audits %}
+    <div class="review-section">
+        <div class="section-header">
+            <h2><i class="fas fa-calendar-check"></i> Upcoming Audits</h2>
+        </div>
+        <div class="review-grid">
+            {% for audit in upcoming_audits %}
+            <div class="review-card">
+                <div class="review-card-header">
+                    <h4>{{ audit.title|truncatechars:35 }}</h4>
+                    <span class="review-type">{{ audit.regulatory_body|default:"Audit" }}</span>
+                </div>
+                <p>{{ audit.regulation_name|default:"Scheduled audit" }}</p>
+                <div class="review-date {% if audit.next_audit_date|timesince_days <= 7 %}critical{% elif audit.next_audit_date|timesince_days <= 30 %}warning{% else %}normal{% endif %}">
+                    <i class="fas fa-gavel"></i>
+                    <span>{{ audit.next_audit_date|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<script>
+// Compliance Score Animation
+document.addEventListener('DOMContentLoaded', function() {
+    const targetScore = {{ compliance_score|default:0 }};
+    const scoreCircle = document.getElementById('scoreCircle');
+    const scoreValue = document.getElementById('scoreValue');
+    
+    if (scoreCircle && scoreValue) {
+        // Animate the circular progress
+        const targetDeg = (targetScore / 100) * 360;
+        let currentDeg = 0;
+        let currentValue = 0;
+        const duration = 1500;
+        const startTime = performance.now();
+        
+        function animateScore(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function (ease-out)
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            
+            currentDeg = targetDeg * easeOut;
+            currentValue = Math.round(targetScore * easeOut);
+            
+            // Update the conic gradient
+            scoreCircle.style.background = `conic-gradient(from -90deg, #059669 0deg, #0d9488 ${currentDeg}deg, #e2e8f0 ${currentDeg}deg, #e2e8f0 360deg)`;
+            scoreValue.textContent = currentValue + '%';
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScore);
+            }
+        }
+        
+        // Start animation after a brief delay
+        setTimeout(function() {
+            requestAnimationFrame(animateScore);
+        }, 300);
+    }
+
+    // Compliance Overview Chart
+    const ctx = document.getElementById('complianceChart');
+    if (ctx) {
+        new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Compliant', 'Partial', 'Non-Compliant'],
+                datasets: [{
+                    data: [
+                        {{ requirements_summary.compliant|default:0 }}, 
+                        {{ requirements_summary.partial|default:0 }}, 
+                        {{ requirements_summary.non_compliant|default:0 }}
+                    ],
+                    backgroundColor: ['#059669', '#f59e0b', '#ef4444'],
+                    borderWidth: 0,
+                    borderRadius: 4,
+                    spacing: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    }
+
+    // Auto-close alerts
+    const alerts = document.querySelectorAll('.alert-message');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

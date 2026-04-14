@@ -1,0 +1,764 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Regulatory Requirements - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --teal: #0d9488;
+        --purple: #0B5FFF;
+        --purple-light: #e8f0fe;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 500px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--emerald);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f0fdf4;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        color: var(--emerald-dark);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Layout */
+    .report-layout {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Sidebar */
+    .sidebar-panel {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-header {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .sidebar-header h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .sidebar-header i { font-size: 1.1rem; }
+    .sidebar-body { padding: 1.5rem; }
+
+    .filter-group { margin-bottom: 1.5rem; }
+    .filter-group:last-child { margin-bottom: 0; }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .search-wrapper { position: relative; }
+    .search-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        z-index: 1;
+    }
+    .search-input { padding-left: 2.5rem; }
+
+    .filter-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-filter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-clear {
+        background: var(--bg-light);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-clear:hover { background: var(--border-color); }
+
+    /* Main Panel */
+    .main-panel {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .panel-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .panel-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .panel-header h3 i { color: var(--emerald); }
+    .panel-body { padding: 1.5rem; }
+
+    .results-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: var(--emerald-light);
+        color: var(--emerald-dark);
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Stats */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-light);
+        border-radius: 14px;
+        padding: 1.25rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .stat-icon.emerald { background: #d1fae5; color: var(--emerald); }
+    .stat-icon.blue { background: #dbeafe; color: var(--primary-blue); }
+    .stat-icon.orange { background: #fef3c7; color: var(--warning-orange); }
+    .stat-icon.red { background: #fee2e2; color: var(--danger-red); }
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+
+    .stat-number { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+    .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+    /* Table */
+    .table-container { overflow-x: auto; }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table th {
+        background: var(--bg-light);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .data-table tr:hover td { background: var(--bg-light); }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .status-compliant { background: #d1fae5; color: #047857; }
+    .status-partial { background: #fef3c7; color: #b45309; }
+    .status-non_compliant { background: #fee2e2; color: #b91c1c; }
+    .status-not_applicable { background: #e5e7eb; color: #4b5563; }
+    .status-under_review { background: #dbeafe; color: #1e40af; }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .priority-critical { background: #fecaca; color: #b91c1c; }
+    .priority-high { background: #fed7aa; color: #c2410c; }
+    .priority-medium { background: #fef3c7; color: #b45309; }
+    .priority-low { background: #d1fae5; color: #047857; }
+
+    /* Title Cell */
+    .req-title-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .req-title-text {
+        font-weight: 600;
+        color: var(--text-primary);
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .req-description {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Actions */
+    .action-group {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+
+    .action-btn:hover { transform: scale(1.1); }
+    .action-btn.view { background: #dbeafe; color: #1e40af; }
+    .action-btn.edit { background: #fef3c7; color: #92400e; }
+    .action-btn.delete { background: #fee2e2; color: #b91c1c; }
+
+    /* Deadline styling */
+    .deadline-overdue { color: var(--danger-red); font-weight: 600; }
+    .deadline-soon { color: var(--warning-orange); font-weight: 600; }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #d1fae5 0%, #ccfbf1 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-state-icon i { font-size: 2rem; color: var(--emerald); }
+
+    .empty-state h4 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state .btn-empty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        margin-top: 1rem;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+    }
+
+    .empty-state .btn-empty:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .report-layout { grid-template-columns: 1fr; }
+        .sidebar-panel { position: static; }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        .header-actions { width: 100%; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-balance-scale"></i> Regulatory Requirements</h1>
+            <p class="subtitle">Track and manage regulatory compliance requirements for {{ stream }} stream</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'compliance_dashboard' stream=stream %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{% url 'regulatory_requirement_create' stream %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Requirement
+            </a>
+        </div>
+    </div>
+
+    <form method="GET" id="filterForm">
+    <div class="report-layout">
+        <!-- Sidebar Filters -->
+        <div class="sidebar-panel">
+            <div class="sidebar-header">
+                <i class="fas fa-sliders-h"></i>
+                <h3>Filters & Search</h3>
+            </div>
+            <div class="sidebar-body">
+                <div class="filter-group">
+                    <label><i class="fas fa-search" style="margin-right:0.35rem; color:var(--text-secondary);"></i> Search Requirements</label>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="q" class="form-control search-input" placeholder="Title, ID, or regulation..." value="{{ search_query }}">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fas fa-flag" style="margin-right:0.35rem; color:var(--text-secondary);"></i> Compliance Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        {% for value, label in compliance_statuses %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fas fa-exclamation-circle" style="margin-right:0.35rem; color:var(--text-secondary);"></i> Priority</label>
+                    <select name="priority" class="form-control">
+                        <option value="">All Priorities</option>
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter btn-apply">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'regulatory_requirements_list' stream %}" class="btn-filter btn-clear" style="text-align:center; text-decoration:none;">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-panel">
+            <div class="panel-header">
+                <h3>
+                    <i class="fas fa-balance-scale"></i> Requirements Register
+                </h3>
+                <span class="results-count">
+                    <i class="fas fa-list"></i> {{ requirements|length }} requirement{{ requirements|length|pluralize }}
+                </span>
+            </div>
+
+            <div class="panel-body">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon emerald">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-number">{{ total_count|default:0 }}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number">{{ compliant_count|default:0 }}</div>
+                        <div class="stat-label">Compliant</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-number">{{ partial_count|default:0 }}</div>
+                        <div class="stat-label">Partial</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-number">{{ non_compliant_count|default:0 }}</div>
+                        <div class="stat-label">Non-Compliant</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number">{{ under_review_count|default:0 }}</div>
+                        <div class="stat-label">Under Review</div>
+                    </div>
+                </div>
+
+                <!-- Requirements Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Requirement ID</th>
+                                <th>Title</th>
+                                <th>Regulatory Body</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Deadline</th>
+                                <th>Responsible</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requirements %}
+                            <tr>
+                                <td><strong>{{ req.requirement_id }}</strong></td>
+                                <td>
+                                    <div class="req-title-cell">
+                                        <span class="req-title-text" title="{{ req.title }}">{{ req.title }}</span>
+                                        <span class="req-description" title="{{ req.regulation_name }}">{{ req.regulation_name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ req.regulatory_body }}</td>
+                                <td><span class="status-badge status-{{ req.compliance_status }}">{{ req.get_compliance_status_display }}</span></td>
+                                <td><span class="priority-badge priority-{{ req.priority }}">{{ req.get_priority_display }}</span></td>
+                                <td>
+                                    {% if req.compliance_deadline %}
+                                        {% if req.compliance_deadline < today %}
+                                            <span class="deadline-overdue"><i class="fas fa-exclamation-triangle"></i> {{ req.compliance_deadline|date:"M d, Y" }}</span>
+                                        {% else %}
+                                            {{ req.compliance_deadline|date:"M d, Y" }}
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: var(--text-secondary);">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if req.responsible_person %}
+                                        {{ req.responsible_person.get_full_name|default:req.responsible_person.username }}
+                                    {% else %}
+                                        <span style="color: var(--text-secondary);">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-group">
+                                        <a href="{% url 'regulatory_requirement_detail' stream req.pk %}" class="action-btn view" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'regulatory_requirement_edit' stream req.pk %}" class="action-btn edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'regulatory_requirement_delete' stream req.pk %}" class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <h4>No Requirements Found</h4>
+                                        <p>
+                                            {% if search_query or status_filter or priority_filter %}
+                                                No requirements match your criteria. Try adjusting your filters.
+                                            {% else %}
+                                                Start tracking regulatory compliance by adding your first requirement.
+                                            {% endif %}
+                                        </p>
+                                        {% if not search_query and not status_filter and not priority_filter %}
+                                        <a href="{% url 'regulatory_requirement_create' stream %}" class="btn-empty">
+                                            <i class="fas fa-plus"></i> Add First Requirement
+                                        </a>
+                                        {% else %}
+                                        <a href="{% url 'regulatory_requirements_list' stream %}" class="btn-empty" style="background: var(--bg-light); color: var(--text-primary); border: 2px solid var(--border-color);">
+                                            <i class="fas fa-times"></i> Clear Filters
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar-panel select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Usage Analytics Report | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root { --primary: #0B5FFF; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --text: #1e293b; --text2: #64748b; --border: #e2e8f0; }
+    .page-container { max-width: 1900px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #0B5FFF 0%, #0044CC 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline-w { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline-w:hover { background: rgba(255,255,255,0.1); }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-box { padding: 1.25rem; background: linear-gradient(135deg, #f8fafc, #fff); border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text2); text-transform: uppercase; margin-top: 0.25rem; }
+
+    .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .chart-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.5rem; }
+    .chart-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+    canvas { max-height: 300px; }
+
+    .util-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .util-item { display: flex; align-items: center; gap: 1rem; }
+    .util-name { font-size: 0.85rem; font-weight: 600; color: var(--text); min-width: 120px; }
+    .util-bar-wrap { flex: 1; height: 18px; background: #f1f5f9; border-radius: 9px; overflow: hidden; }
+    .util-bar { height: 100%; border-radius: 9px; }
+    .util-pct { font-size: 0.8rem; font-weight: 700; min-width: 48px; text-align: right; }
+
+    .rec-list { display: flex; flex-direction: column; gap: 1rem; }
+    .rec-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid var(--border); background: #fafbfc; }
+    .rec-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 1.1rem; }
+    .rec-icon.high { background: var(--danger); }
+    .rec-icon.medium { background: var(--warning); }
+    .rec-icon.low { background: var(--success); }
+    .rec-body h4 { font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0 0 0.25rem; }
+    .rec-body p { font-size: 0.82rem; color: var(--text2); margin: 0; line-height: 1.5; }
+    .priority-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; color: #fff; }
+    .meta-info { font-size: 0.8rem; color: var(--text2); display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .meta-info span { display: flex; align-items: center; gap: 0.4rem; }
+
+    @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-chart-area"></i> Usage Analytics Report</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Generated {{ report.generated_at|date:"M d, Y H:i" }}</div>
+            <div class="meta-info" style="color: rgba(255,255,255,0.8);">
+                <span><i class="fas fa-calendar"></i> {{ report.analysis_period_days }}-day period</span>
+                <span><i class="fas fa-user"></i> By {{ report.generated_by.username|default:"System" }}</span>
+            </div>
+        </div>
+        <a href="{% url 'ai_usage_analytics' stream=stream %}" class="btn btn-outline-w"><i class="fas fa-arrow-left"></i> Back to Analytics</a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-row">
+        <div class="stat-box"><div class="stat-val">{{ report.peak_hour|default:"—" }}</div><div class="stat-label">Peak Hour</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.total_bookings }}</div><div class="stat-label">Total Bookings</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.avg_utilization|floatformat:1 }}%</div><div class="stat-label">Avg Utilization</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.underutilized_count }}</div><div class="stat-label">Underutilized</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.overutilized_count }}</div><div class="stat-label">Overutilized</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.conflict_rate|floatformat:1 }}%</div><div class="stat-label">Conflict Rate</div></div>
+        <div class="stat-box"><div class="stat-val">{{ report.recommendation_count }}</div><div class="stat-label">Recommendations</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-row">
+        <div class="chart-card">
+            <h3><i class="fas fa-clock" style="color: var(--primary);"></i> Hourly Distribution</h3>
+            <canvas id="hourlyChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-calendar-week" style="color: var(--primary);"></i> Daily Distribution</h3>
+            <canvas id="dailyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- System Utilization -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-server"></i> System Utilization</div>
+        <div class="util-list" id="utilList"></div>
+    </div>
+
+    <!-- Booking Charts -->
+    <div class="chart-row">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie" style="color: var(--primary);"></i> Duration Distribution</h3>
+            <canvas id="durationChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-line" style="color: var(--primary);"></i> Weekly Trend</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-lightbulb"></i> AI Recommendations</div>
+        <div class="rec-list" id="recList"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportData = JSON.parse('{{ data_json|escapejs }}');
+    const peak = reportData.peak_hours || {};
+    const util = reportData.system_utilization || {};
+    const booking = reportData.booking_patterns || {};
+    const recs = reportData.recommendations || [];
+
+    // Hourly
+    const hourlyData = peak.hourly_distribution || {};
+    new Chart(document.getElementById('hourlyChart'), {
+        type: 'bar',
+        data: { labels: Object.keys(hourlyData), datasets: [{ label: 'Bookings', data: Object.values(hourlyData), backgroundColor: Object.values(hourlyData).map(v => v > 5 ? '#ef444488' : v > 2 ? '#f59e0b88' : '#10b98188'), borderRadius: 4 }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Daily
+    const dailyData = peak.daily_distribution || {};
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: { labels: Object.keys(dailyData), datasets: [{ label: 'Bookings', data: Object.values(dailyData), backgroundColor: '#0B5FFF88', borderRadius: 4 }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Utilization bars
+    const systems = util.systems || [];
+    let utilHtml = '';
+    systems.forEach(s => {
+        const color = s.utilization_pct > 85 ? 'var(--danger)' : s.utilization_pct > 40 ? 'var(--success)' : 'var(--warning)';
+        utilHtml += `<div class="util-item"><span class="util-name">${escapeHtml(s.system_name)}</span><div class="util-bar-wrap"><div class="util-bar" style="width:${s.utilization_pct}%;background:${color};"></div></div><span class="util-pct" style="color:${color}">${s.utilization_pct}%</span></div>`;
+    });
+    document.getElementById('utilList').innerHTML = utilHtml || '<p style="color:#94a3b8;text-align:center;">No systems.</p>';
+
+    // Duration
+    const durData = booking.duration_distribution || {};
+    new Chart(document.getElementById('durationChart'), {
+        type: 'doughnut',
+        data: { labels: Object.keys(durData), datasets: [{ data: Object.values(durData), backgroundColor: ['#0B5FFF', '#10b981', '#f59e0b', '#ef4444'] }] },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Trend
+    const trend = booking.weekly_trend || [];
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: { labels: trend.map(t => t.week), datasets: [{ label: 'Bookings/Week', data: trend.map(t => t.count), borderColor: '#0B5FFF', backgroundColor: '#0B5FFF22', fill: true, tension: 0.3 }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Recommendations
+    let recHtml = '';
+    recs.forEach(rec => {
+        const prio = rec.priority || 'low';
+        const prioColor = prio === 'high' ? '#ef4444' : prio === 'medium' ? '#f59e0b' : '#10b981';
+        recHtml += `<div class="rec-item"><div class="rec-icon ${prio}"><i class="fas ${rec.icon || 'fa-lightbulb'}"></i></div><div class="rec-body"><h4>${escapeHtml(rec.title)} <span class="priority-badge" style="background:${prioColor}">${prio}</span></h4><p>${escapeHtml(rec.detail)}</p></div></div>`;
+    });
+    document.getElementById('recList').innerHTML = recHtml || '<p style="color:#94a3b8;text-align:center;">No recommendations.</p>';
+});
+</script>
+{% endblock %}

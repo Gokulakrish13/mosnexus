@@ -1,0 +1,759 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Shift Handover — {{ stream_name }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0B5FFF; --primary-light: #e8f0fe;
+        --philips-blue: #0B5FFF; --philips-blue-dark: #0047AB;
+        --philips-teal: #00C4B4;
+        --blue: #0B5FFF; --blue-light: #e8f0fe;
+        --green: #10b981; --green-light: #d1fae5;
+        --orange: #f59e0b; --orange-light: #fef3c7;
+        --red: #ef4444; --red-light: #fee2e2;
+        --text-primary: #1e293b; --text-secondary: #64748b;
+        --border: #e2e8f0; --bg: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        --gradient-primary: linear-gradient(135deg, #0B5FFF, #00C4B4);
+    }
+    body { background: linear-gradient(135deg, #f8fafc, #e2e8f0); min-height: 100vh; }
+    .page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        color: var(--text-secondary); text-decoration: none; margin-bottom: 1.5rem;
+        padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;
+    }
+    .back-link:hover { background: white; color: var(--primary); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem; }
+    .page-header h1 i { color: var(--primary); }
+
+    .header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn {
+        padding: 0.625rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.875rem;
+        border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;
+        transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #0047AB; transform: translateY(-1px); }
+    .btn-outline { background: white; color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-success { background: var(--green); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+        background: white; border-radius: 12px; padding: 1rem 1.25rem;
+        box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 0.75rem;
+    }
+    .stat-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .stat-icon.purple { background: rgba(11,95,255,0.1); color: var(--philips-blue); }
+    .stat-icon.orange { background: var(--orange-light); color: var(--orange); }
+    .stat-icon.green { background: var(--green-light); color: var(--green); }
+    .stat-icon.blue { background: var(--blue-light); color: var(--blue); }
+    .stat-val { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
+    .stat-lbl { font-size: 0.75rem; color: var(--text-secondary); }
+
+    /* Filter bar */
+    .filter-bar {
+        display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .filter-bar select, .filter-bar input {
+        padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+        font-size: 0.875rem; background: white;
+    }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--primary); }
+
+    /* Handover cards */
+    .handover-list { display: flex; flex-direction: column; gap: 1rem; }
+    .handover-card {
+        background: white; border-radius: 14px; padding: 1.5rem;
+        box-shadow: var(--card-shadow); border-left: 4px solid var(--border);
+        transition: all 0.2s; cursor: pointer;
+    }
+    .handover-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .handover-card.status-draft { border-left-color: var(--text-secondary); }
+    .handover-card.status-submitted { border-left-color: var(--orange); }
+    .handover-card.status-acknowledged { border-left-color: var(--green); }
+    .handover-card.priority-high { border-left-color: var(--orange); }
+    .handover-card.priority-critical { border-left-color: var(--red); }
+
+    .handover-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .handover-title { display: flex; align-items: center; gap: 0.75rem; }
+    .handover-title h3 { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+    .badge {
+        padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem;
+        font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-draft { background: #f1f5f9; color: var(--text-secondary); }
+    .badge-submitted { background: var(--orange-light); color: #92400e; }
+    .badge-acknowledged { background: var(--green-light); color: #065f46; }
+    .badge-normal { background: var(--blue-light); color: var(--blue); }
+    .badge-high { background: var(--orange-light); color: #92400e; }
+    .badge-critical { background: var(--red-light); color: #991b1b; }
+
+    .handover-meta { display: flex; gap: 1rem; font-size: 0.8125rem; color: var(--text-secondary); flex-wrap: wrap; }
+    .handover-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .handover-sections { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.75rem; }
+    .section-pill {
+        display: flex; align-items: center; gap: 0.4rem;
+        font-size: 0.75rem; color: var(--text-secondary);
+        background: var(--bg); padding: 0.3rem 0.6rem; border-radius: 6px;
+    }
+    .section-pill i { font-size: 0.65rem; }
+    .section-pill.filled { color: var(--primary); background: var(--primary-light); font-weight: 600; }
+    .section-pill.critical { color: var(--red); background: var(--red-light); font-weight: 600; }
+
+    .handover-actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 9999; display: none;
+        align-items: center; justify-content: center; padding: 2rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: white; border-radius: 20px; width: 100%; max-width: 800px;
+        max-height: 90vh; overflow-y: auto; padding: 2rem;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-header h2 { font-size: 1.375rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; padding: 0.25rem; }
+    .modal-close:hover { color: var(--red); }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 0.375rem; }
+    .form-group label i { margin-right: 0.3rem; color: var(--primary); }
+    .form-control {
+        width: 100%; padding: 0.625rem 1rem; border-radius: 8px;
+        border: 1px solid var(--border); font-size: 0.875rem;
+        transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(11,95,255,0.1); }
+    textarea.form-control { min-height: 80px; resize: vertical; font-family: inherit; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+    .section-label {
+        display: flex; align-items: center; gap: 0.5rem; font-weight: 600;
+        font-size: 0.9375rem; color: var(--text-primary); margin: 1.25rem 0 0.75rem;
+        padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .section-label i { color: var(--primary); }
+
+    /* View modal */
+    .detail-section { margin-bottom: 1rem; }
+    .detail-section h4 {
+        font-size: 0.8125rem; font-weight: 700; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.375rem;
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .detail-section h4 i { color: var(--primary); font-size: 0.75rem; }
+    .detail-content {
+        background: var(--bg); border-radius: 8px; padding: 0.75rem 1rem;
+        font-size: 0.875rem; color: var(--text-primary); white-space: pre-wrap; line-height: 1.6;
+    }
+    .detail-content.empty { color: var(--text-secondary); font-style: italic; }
+
+    .comment-box { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .comment-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .comment-item { background: var(--bg); border-radius: 8px; padding: 0.625rem 0.75rem; }
+    .comment-meta { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+    .comment-meta strong { color: var(--text-primary); }
+    .comment-text { font-size: 0.875rem; color: var(--text-primary); }
+    .comment-input-row { display: flex; gap: 0.5rem; }
+    .comment-input-row input { flex: 1; }
+
+    .empty-list { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+    .empty-list i { font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.4; display: block; }
+
+    @media (max-width: 992px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .handover-sections { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .stats-row { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } .handover-sections { grid-template-columns: 1fr; } .page-header { flex-direction: column; align-items: flex-start; } }
+</style>
+
+<div class="page-container">
+
+    <a href="{% url 'shift_handover_hub' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Handover Hub</a>
+
+    <div class="page-header">
+        <h1><i class="fas fa-exchange-alt"></i> {{ stream_name }} — Shift Handovers</h1>
+        {% if can_manage %}
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="openShiftTypeModal()"><i class="fas fa-cog"></i> Manage Shifts</button>
+            <button class="btn btn-primary" onclick="openCreateModal()"><i class="fas fa-plus"></i> New Handover</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="fas fa-clipboard-list"></i></div>
+            <div><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="fas fa-paper-plane"></i></div>
+            <div><div class="stat-val">{{ submitted }}</div><div class="stat-lbl">Submitted</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-check-double"></i></div>
+            <div><div class="stat-val">{{ acknowledged }}</div><div class="stat-lbl">Acknowledged</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-pencil-alt"></i></div>
+            <div><div class="stat-val">{{ drafts }}</div><div class="stat-lbl">Drafts</div></div>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <form method="get" class="filter-bar">
+        <select name="status" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+            <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+            <option value="acknowledged" {% if status_filter == 'acknowledged' %}selected{% endif %}>Acknowledged</option>
+        </select>
+        <input type="text" name="q" placeholder="Search handovers..." value="{{ search_q }}" style="min-width: 220px;">
+        <button type="submit" class="btn btn-outline btn-sm"><i class="fas fa-search"></i> Search</button>
+        {% if status_filter or search_q %}
+        <a href="{% url 'shift_handover_stream' stream %}" class="btn btn-outline btn-sm"><i class="fas fa-times"></i> Clear</a>
+        {% endif %}
+    </form>
+
+    <!-- Handover list -->
+    <div class="handover-list">
+        {% for h in handovers %}
+        <div class="handover-card status-{{ h.status }} priority-{{ h.priority }}" onclick="viewHandover({{ h.id }})">
+            <div class="handover-header">
+                <div class="handover-title">
+                    <h3>{{ h.handover_number }}</h3>
+                    <span class="badge badge-{{ h.status }}">{{ h.get_status_display }}</span>
+                    {% if h.priority != 'normal' %}
+                    <span class="badge badge-{{ h.priority }}">{{ h.get_priority_display }}</span>
+                    {% endif %}
+                </div>
+                {% if can_manage %}
+                <div class="handover-actions-row" onclick="event.stopPropagation()">
+                    {% if h.status == 'draft' %}
+                    <button class="btn btn-success btn-sm" onclick="submitHandover({{ h.id }})" title="Submit"><i class="fas fa-paper-plane"></i></button>
+                    <button class="btn btn-outline btn-sm" onclick="openEditModal({{ h.id }})" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteHandover({{ h.id }})" title="Delete"><i class="fas fa-trash"></i></button>
+                    {% elif h.status == 'submitted' %}
+                    <button class="btn btn-success btn-sm" onclick="openAcknowledgeModal({{ h.id }})" title="Acknowledge"><i class="fas fa-check-double"></i> Acknowledge</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="handover-meta">
+                <span><i class="fas fa-calendar"></i> {{ h.shift_date }}</span>
+                {% if h.shift_type %}<span><i class="fas fa-clock"></i> {{ h.shift_type.name }}</span>{% endif %}
+                <span><i class="fas fa-user"></i> {{ h.outgoing_lead|default:"—" }}</span>
+                {% if h.stream %}<span><i class="fas fa-code-branch"></i> {{ h.stream.name }}</span>{% endif %}
+                {% if h.acknowledged_by %}<span><i class="fas fa-check-circle" style="color:var(--green)"></i> Ack'd by {{ h.acknowledged_by }}</span>{% endif %}
+            </div>
+            <div class="handover-sections">
+                <div class="section-pill {% if h.systems_running %}filled{% endif %}"><i class="fas fa-server"></i> Systems Running</div>
+                <div class="section-pill {% if h.pending_actions %}filled{% endif %}"><i class="fas fa-tasks"></i> Pending Actions</div>
+                <div class="section-pill {% if h.blockers_issues %}critical{% endif %}"><i class="fas fa-exclamation-triangle"></i> Blockers</div>
+                <div class="section-pill {% if h.safety_notes %}critical{% endif %}"><i class="fas fa-shield-alt"></i> Safety Notes</div>
+                <div class="section-pill {% if h.bookings_handoff %}filled{% endif %}"><i class="fas fa-calendar-check"></i> Bookings</div>
+                <div class="section-pill {% if h.general_notes %}filled{% endif %}"><i class="fas fa-sticky-note"></i> General</div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-list">
+            <i class="fas fa-exchange-alt"></i>
+            <h3>No Handover Logs Yet</h3>
+            <p>Create the first shift handover log to start tracking shift transitions.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  CREATE / EDIT MODAL                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2><i class="fas fa-plus-circle"></i> <span id="formTitle">New Handover Log</span></h2>
+            <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
+        </div>
+        <form id="handoverForm" onsubmit="return saveHandover(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Shift Date *</label>
+                    <input type="date" class="form-control" id="f_shift_date" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Shift Type</label>
+                    <select class="form-control" id="f_shift_type">
+                        <option value="">— Select Shift —</option>
+                        {% for st in shift_types %}
+                        <option value="{{ st.id }}">{{ st.name }} ({{ st.start_time|time:"H:i" }}–{{ st.end_time|time:"H:i" }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-code-branch"></i> Stream *</label>
+                    <select class="form-control" id="f_stream" required>
+                        {% for s in streams %}
+                        <option value="{{ s.name }}" {% if stream_obj and s.name == stream_obj.name %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-flag"></i> Priority</label>
+                    <select class="form-control" id="f_priority">
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-server"></i> Systems Running</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_systems_running" placeholder="What systems are currently running tests? ETA? Special observations..."></textarea>
+                <div class="form-hint">Describe any actively running systems, tests, or processes the next shift should monitor.</div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-tasks"></i> Pending Actions</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_pending_actions" placeholder="Tasks started but not completed..."></textarea>
+                <div class="form-hint">List tasks that need follow-up or completion by the incoming shift.</div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-exclamation-triangle"></i> Blockers / Issues</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_blockers_issues" placeholder="Equipment down, parts on order, escalations..."></textarea>
+                <div class="form-hint">Blocked items, equipment failures, pending part orders, or escalations.</div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-shield-alt"></i> Safety Notes</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_safety_notes" placeholder="Safety incidents, spills, hazards, PPE alerts..."></textarea>
+                <div class="form-hint">Any safety-related incidents, hazards, or alerts for the incoming team.</div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-calendar-check"></i> Bookings Handoff</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_bookings_handoff" placeholder="Upcoming bookings the next shift should prep for..."></textarea>
+                <div class="form-hint">System bookings, reservations, or scheduled activities coming up next shift.</div>
+            </div>
+
+            <div class="section-label"><i class="fas fa-sticky-note"></i> General Notes</div>
+            <div class="form-group">
+                <textarea class="form-control" id="f_general_notes" placeholder="Visitor schedules, audit info, anything else..."></textarea>
+            </div>
+
+            <input type="hidden" id="f_edit_id" value="">
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem;">
+                <button type="button" class="btn btn-outline" onclick="closeModal('createModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="formSubmitBtn"><i class="fas fa-save"></i> Create Handover</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  VIEW DETAIL MODAL                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2><i class="fas fa-file-alt"></i> <span id="viewTitle">Handover Detail</span></h2>
+            <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
+        </div>
+        <div id="viewContent">Loading...</div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  ACKNOWLEDGE MODAL                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="ackModal">
+    <div class="modal-box" style="max-width:500px;">
+        <div class="modal-header">
+            <h2><i class="fas fa-check-double"></i> Acknowledge Handover</h2>
+            <button class="modal-close" onclick="closeModal('ackModal')">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Acknowledgement Notes (optional)</label>
+            <textarea class="form-control" id="ack_notes" placeholder="Any notes from the incoming shift..."></textarea>
+        </div>
+        <input type="hidden" id="ack_id">
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1rem;">
+            <button class="btn btn-outline" onclick="closeModal('ackModal')">Cancel</button>
+            <button class="btn btn-success" onclick="acknowledgeHandover()"><i class="fas fa-check-double"></i> Confirm Acknowledgement</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  SHIFT TYPES MODAL                                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="shiftTypeModal">
+    <div class="modal-box" style="max-width:600px;">
+        <div class="modal-header">
+            <h2><i class="fas fa-cog"></i> Manage Shift Types</h2>
+            <button class="modal-close" onclick="closeModal('shiftTypeModal')">&times;</button>
+        </div>
+        <div id="shiftTypeList" style="margin-bottom:1rem;">Loading...</div>
+        <div class="section-label"><i class="fas fa-plus"></i> Add New Shift Type</div>
+        <div class="form-row">
+            <div class="form-group"><label>Name *</label><input class="form-control" id="st_name" placeholder="Morning Shift"></div>
+            <div class="form-group"><label>Code *</label><input class="form-control" id="st_code" placeholder="morning"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Start Time *</label><input type="time" class="form-control" id="st_start"></div>
+            <div class="form-group"><label>End Time *</label><input type="time" class="form-control" id="st_end"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Color</label><input type="color" class="form-control" id="st_color" value="#0B5FFF" style="height:40px;padding:4px;"></div>
+            <div class="form-group"><label>Icon Class</label><input class="form-control" id="st_icon" value="fas fa-sun" placeholder="fas fa-sun"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveShiftType()" style="margin-top:0.5rem;"><i class="fas fa-save"></i> Save Shift Type</button>
+    </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+const _buPrefix = (function(){ const p = window.location.pathname; const i = p.indexOf('/shift-handover'); return i > 0 ? p.substring(0, i) : ''; })();
+const API = {
+    create: `${_buPrefix}/api/shift-handover/create/`,
+    detail: (pk) => `${_buPrefix}/api/shift-handover/${pk}/`,
+    update: (pk) => `${_buPrefix}/api/shift-handover/${pk}/update/`,
+    del: (pk) => `${_buPrefix}/api/shift-handover/${pk}/delete/`,
+    submit: (pk) => `${_buPrefix}/api/shift-handover/${pk}/submit/`,
+    ack: (pk) => `${_buPrefix}/api/shift-handover/${pk}/acknowledge/`,
+    comment: (pk) => `${_buPrefix}/api/shift-handover/${pk}/comment/`,
+    stats: `${_buPrefix}/api/shift-handover/stats/?stream={{ stream }}`,
+    shiftTypes: `${_buPrefix}/api/shift-types/`,
+};
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ── Refresh shift-type <select> dropdown dynamically ──
+async function refreshShiftTypeDropdown() {
+    try {
+        const res = await fetch(API.shiftTypes, {headers: {'X-CSRFToken': csrfToken}});
+        const data = await res.json();
+        if (!data.success) return;
+        const sel = document.getElementById('f_shift_type');
+        const curVal = sel.value;
+        sel.innerHTML = '<option value="">— Select Shift —</option>';
+        data.shift_types.forEach(st => {
+            const opt = document.createElement('option');
+            opt.value = st.id;
+            opt.textContent = `${st.name} (${st.start_time}–${st.end_time})`;
+            sel.appendChild(opt);
+        });
+        sel.value = curVal; // preserve selection if still valid
+    } catch(e) { console.error('refreshShiftTypeDropdown:', e); }
+}
+
+// ── Refresh the handover list + stats dynamically ──
+async function refreshPage() {
+    try { window.location.reload(); } catch(e) { console.error('reload failed:', e); }
+}
+
+async function openCreateModal() {
+    document.getElementById('formTitle').textContent = 'New Handover Log';
+    document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Create Handover';
+    document.getElementById('f_edit_id').value = '';
+    document.getElementById('f_shift_date').value = new Date().toISOString().split('T')[0];
+    ['f_shift_type','f_priority','f_systems_running','f_pending_actions','f_blockers_issues','f_safety_notes','f_bookings_handoff','f_general_notes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+    });
+    await refreshShiftTypeDropdown();
+    openModal('createModal');
+}
+
+async function openEditModal(pk) {
+    await refreshShiftTypeDropdown();
+    const res = await fetch(API.detail(pk), {headers: {'X-CSRFToken': csrfToken}});
+    const data = await res.json();
+    if (!data.success) { alert(data.error); return; }
+    const h = data.handover;
+    document.getElementById('formTitle').textContent = 'Edit ' + h.handover_number;
+    document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Handover';
+    document.getElementById('f_edit_id').value = pk;
+    document.getElementById('f_shift_date').value = h.shift_date;
+    document.getElementById('f_shift_type').value = h.shift_type ? h.shift_type.id : '';
+    document.getElementById('f_stream').value = h.stream;
+    document.getElementById('f_priority').value = h.priority;
+    document.getElementById('f_systems_running').value = h.systems_running;
+    document.getElementById('f_pending_actions').value = h.pending_actions;
+    document.getElementById('f_blockers_issues').value = h.blockers_issues;
+    document.getElementById('f_safety_notes').value = h.safety_notes;
+    document.getElementById('f_bookings_handoff').value = h.bookings_handoff;
+    document.getElementById('f_general_notes').value = h.general_notes;
+    openModal('createModal');
+}
+
+async function saveHandover(e) {
+    e.preventDefault();
+    try {
+        const editId = document.getElementById('f_edit_id').value;
+        const payload = {
+            stream: document.getElementById('f_stream').value,
+            shift_date: document.getElementById('f_shift_date').value,
+            shift_type_id: document.getElementById('f_shift_type').value || null,
+            priority: document.getElementById('f_priority').value,
+            systems_running: document.getElementById('f_systems_running').value,
+            pending_actions: document.getElementById('f_pending_actions').value,
+            blockers_issues: document.getElementById('f_blockers_issues').value,
+            safety_notes: document.getElementById('f_safety_notes').value,
+            bookings_handoff: document.getElementById('f_bookings_handoff').value,
+            general_notes: document.getElementById('f_general_notes').value,
+        };
+        const url = editId ? API.update(editId) : API.create;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) { closeModal('createModal'); refreshPage(); }
+        else alert(data.error || 'Failed to save');
+    } catch(err) { console.error('saveHandover:', err); alert('Error saving handover. Check console.'); }
+    return false;
+}
+
+async function submitHandover(pk) {
+    if (!confirm('Submit this handover for acknowledgement?')) return;
+    try {
+        const res = await fetch(API.submit(pk), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: '{}',
+        });
+        const data = await res.json();
+        if (data.success) refreshPage();
+        else alert(data.error || 'Failed to submit');
+    } catch(err) { console.error('submitHandover:', err); alert('Error submitting. Check console.'); }
+}
+
+async function deleteHandover(pk) {
+    if (!confirm('Delete this handover log permanently?')) return;
+    try {
+        const res = await fetch(API.del(pk), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: '{}',
+        });
+        const data = await res.json();
+        if (data.success) refreshPage();
+        else alert(data.error || 'Failed to delete');
+    } catch(err) { console.error('deleteHandover:', err); alert('Error deleting. Check console.'); }
+}
+
+function openAcknowledgeModal(pk) {
+    document.getElementById('ack_id').value = pk;
+    document.getElementById('ack_notes').value = '';
+    openModal('ackModal');
+}
+
+async function acknowledgeHandover() {
+    try {
+        const pk = document.getElementById('ack_id').value;
+        const notes = document.getElementById('ack_notes').value;
+        const res = await fetch(API.ack(pk), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify({notes}),
+        });
+        const data = await res.json();
+        if (data.success) { closeModal('ackModal'); refreshPage(); }
+        else alert(data.error || 'Failed to acknowledge');
+    } catch(err) { console.error('acknowledgeHandover:', err); alert('Error acknowledging. Check console.'); }
+}
+
+async function viewHandover(pk) {
+    document.getElementById('viewContent').innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-secondary)"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+    openModal('viewModal');
+    const res = await fetch(API.detail(pk), {headers: {'X-CSRFToken': csrfToken}});
+    const data = await res.json();
+    if (!data.success) { document.getElementById('viewContent').innerHTML = '<p>Error loading handover.</p>'; return; }
+    const h = data.handover;
+    document.getElementById('viewTitle').textContent = h.handover_number;
+
+    const sections = [
+        {icon: 'fa-server', label: 'Systems Running', val: h.systems_running},
+        {icon: 'fa-tasks', label: 'Pending Actions', val: h.pending_actions},
+        {icon: 'fa-exclamation-triangle', label: 'Blockers / Issues', val: h.blockers_issues, critical: true},
+        {icon: 'fa-shield-alt', label: 'Safety Notes', val: h.safety_notes, critical: true},
+        {icon: 'fa-calendar-check', label: 'Bookings Handoff', val: h.bookings_handoff},
+        {icon: 'fa-sticky-note', label: 'General Notes', val: h.general_notes},
+    ];
+
+    let html = `
+        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+            <span class="badge badge-${h.status}">${h.status_display}</span>
+            <span class="badge badge-${h.priority}">${h.priority_display}</span>
+            <span style="font-size:0.8125rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-calendar"></i> ${h.shift_date}</span>
+            ${h.shift_type ? `<span style="font-size:0.8125rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-clock"></i> ${h.shift_type.name}</span>` : ''}
+            <span style="font-size:0.8125rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-user"></i> ${h.outgoing_lead || '—'}</span>
+            <span style="font-size:0.8125rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-code-branch"></i> ${h.stream}</span>
+        </div>`;
+
+    if (h.acknowledged_by) {
+        html += `<div style="background:var(--green-light);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.875rem;">
+            <strong><i class="fas fa-check-double" style="color:var(--green)"></i> Acknowledged by ${h.acknowledged_by}</strong> on ${h.acknowledged_at}
+            ${h.acknowledgement_notes ? `<div style="margin-top:0.375rem;color:var(--text-secondary);">${h.acknowledgement_notes}</div>` : ''}
+        </div>`;
+    }
+
+    sections.forEach(s => {
+        const content = s.val && s.val.trim() ? s.val : '';
+        html += `<div class="detail-section">
+            <h4><i class="fas ${s.icon}"></i> ${s.label}</h4>
+            <div class="detail-content ${!content ? 'empty' : ''}">${content || 'No information provided'}</div>
+        </div>`;
+    });
+
+    // Comments
+    html += `<div class="comment-box"><h4 style="margin-bottom:0.75rem;"><i class="fas fa-comments" style="color:var(--primary)"></i> Comments</h4>`;
+    html += `<div class="comment-list" id="commentList_${pk}">`;
+    if (h.comments && h.comments.length) {
+        h.comments.forEach(c => {
+            html += `<div class="comment-item"><div class="comment-meta"><strong>${c.author}</strong> &middot; ${c.created_at}</div><div class="comment-text">${c.content}</div></div>`;
+        });
+    } else {
+        html += `<div style="font-size:0.8125rem;color:var(--text-secondary);font-style:italic;">No comments yet.</div>`;
+    }
+    html += `</div>`;
+    html += `<div class="comment-input-row">
+        <input class="form-control" id="commentInput_${pk}" placeholder="Add a comment...">
+        <button class="btn btn-primary btn-sm" onclick="addComment(${pk})"><i class="fas fa-paper-plane"></i></button>
+    </div></div>`;
+
+    // Audit trail
+    if (h.audit_logs && h.audit_logs.length) {
+        html += `<div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
+            <h4 style="margin-bottom:0.5rem;"><i class="fas fa-history" style="color:var(--primary)"></i> Audit Trail</h4>`;
+        h.audit_logs.forEach(a => {
+            html += `<div style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.25rem;"><strong>${a.action}</strong> — ${a.performed_by} (${a.performed_at}) ${a.details ? '— ' + a.details : ''}</div>`;
+        });
+        html += `</div>`;
+    }
+
+    document.getElementById('viewContent').innerHTML = html;
+}
+
+async function addComment(pk) {
+    const input = document.getElementById(`commentInput_${pk}`);
+    const content = input.value.trim();
+    if (!content) return;
+    const res = await fetch(API.comment(pk), {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({content}),
+    });
+    const data = await res.json();
+    if (data.success) {
+        input.value = '';
+        viewHandover(pk); // refresh
+    } else alert(data.error);
+}
+
+// ── Shift Type management ──────────────────────────────────────
+async function openShiftTypeModal() {
+    openModal('shiftTypeModal');
+    await loadShiftTypes();
+}
+
+async function loadShiftTypes() {
+    const res = await fetch(API.shiftTypes, {headers: {'X-CSRFToken': csrfToken}});
+    const data = await res.json();
+    if (!data.success) { document.getElementById('shiftTypeList').innerHTML = '<p>Error loading.</p>'; return; }
+    if (!data.shift_types.length) {
+        document.getElementById('shiftTypeList').innerHTML = '<p style="color:var(--text-secondary);font-style:italic;">No shift types defined yet.</p>';
+        return;
+    }
+    let html = '<div style="display:flex;flex-direction:column;gap:0.5rem;">';
+    data.shift_types.forEach(st => {
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:8px;padding:0.5rem 0.75rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="width:12px;height:12px;border-radius:50%;background:${st.color};display:inline-block;"></span>
+                <strong>${st.name}</strong> <span style="color:var(--text-secondary);font-size:0.8125rem;">${st.start_time}–${st.end_time}</span>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="deleteShiftType(${st.id})"><i class="fas fa-trash"></i></button>
+        </div>`;
+    });
+    html += '</div>';
+    document.getElementById('shiftTypeList').innerHTML = html;
+}
+
+async function saveShiftType() {
+    const payload = {
+        name: document.getElementById('st_name').value,
+        code: document.getElementById('st_code').value,
+        start_time: document.getElementById('st_start').value,
+        end_time: document.getElementById('st_end').value,
+        color: document.getElementById('st_color').value,
+        icon_class: document.getElementById('st_icon').value,
+    };
+    if (!payload.name || !payload.code || !payload.start_time || !payload.end_time) {
+        alert('Please fill in Name, Code, Start Time, and End Time.');
+        return;
+    }
+    try {
+        const res = await fetch(API.shiftTypes, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+            ['st_name','st_code','st_start','st_end'].forEach(id => document.getElementById(id).value = '');
+            await loadShiftTypes();
+            await refreshShiftTypeDropdown();
+        } else {
+            alert(data.error || 'Failed to save shift type');
+        }
+    } catch (err) {
+        console.error('saveShiftType error:', err);
+        alert('Network error — please check the console for details.');
+    }
+}
+
+async function deleteShiftType(pk) {
+    if (!confirm('Deactivate this shift type?')) return;
+    const res = await fetch(API.shiftTypes.replace(/\/$/, '') + '/' + pk + '/delete/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: '{}',
+    });
+    const data = await res.json();
+    if (data.success) { await loadShiftTypes(); await refreshShiftTypeDropdown(); }
+    else alert(data.error || 'Failed');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('active'); });
+});
+</script>
+{% endblock %}

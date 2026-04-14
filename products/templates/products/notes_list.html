@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoS Notes - IGT MoS Inventory</title>
+    <title>Notes - {{ BU_TITLE|default:'NexusOps' }}</title>
     {% load static %}
     <link rel="icon" type="image/png" href="{% static 'products/Philips_NoBG.png' %}" />
     
     <!-- Modern CSS Framework and Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     
     <style>
         :root {
@@ -136,42 +136,7 @@
             padding: 1.5rem;
         }
 
-        /* ===== BREADCRUMB ===== */
-        .breadcrumb-container {
-            margin-bottom: 1.25rem;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin: 0;
-            padding: 0;
-            background: none;
-        }
-
-        .breadcrumb a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-        }
-
-        .breadcrumb a:hover {
-            color: var(--primary);
-        }
-
-        .breadcrumb-separator {
-            color: var(--text-muted);
-        }
-
-        .breadcrumb-current {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
+        
 
         /* ===== PAGE HEADER ===== */
         .page-header {
@@ -550,6 +515,10 @@
             background: var(--warning);
         }
 
+        .note-card.stream .note-card-indicator {
+            background: var(--info);
+        }
+
         .note-card-header {
             padding: 1.25rem 1.25rem 0 1.25rem;
             display: flex;
@@ -602,6 +571,95 @@
         .note-badge.private {
             background: var(--warning-light);
             color: var(--warning);
+        }
+
+        .note-badge.stream {
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        /* Tag Pill Styles */
+        .note-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .note-tag-pill .tag-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .note-tag-pill:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .note-tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag-filter-dropdown .dropdown-menu {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .tag-filter-dropdown .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+        }
+
+        .tag-filter-dropdown .dropdown-item .tag-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .tag-filter-dropdown .dropdown-item .tag-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .active-tag-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-subtle);
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .active-tag-filter-bar .clear-tag-filter {
+            margin-left: auto;
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .active-tag-filter-bar .clear-tag-filter:hover {
+            color: var(--danger);
+            text-decoration: underline;
         }
 
         .note-card-body {
@@ -1097,35 +1155,60 @@
     </style>
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <nav class="top-navbar">
-        <a href="/dashboard/" class="navbar-brand">
-            <img src="{% static 'products/Philips_NoBG.png' %}" alt="Philips Logo">
-            <span class="navbar-title">IGT MoS Inventory</span>
+    <!-- Page Navigation Toolbar (Breadcrumbs) -->
+    {% if user.is_authenticated and page_nav_breadcrumbs %}
+    <div class="pnav-bar" id="pnavBarNotes">
+        <a href="{% url 'page_nav_action' %}?action=back"
+           class="pnav-btn {% if not page_nav_can_back %}pnav-disabled{% endif %}"
+           title="Go Back">
+            <i class="fas fa-arrow-left"></i>
         </a>
-        <div class="navbar-actions">
-            <a href="/dashboard/" class="nav-btn nav-btn-ghost">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
+        <a href="{% url 'page_nav_action' %}?action=forward"
+           class="pnav-btn {% if not page_nav_can_forward %}pnav-disabled{% endif %}"
+           title="Go Forward">
+            <i class="fas fa-arrow-right"></i>
+        </a>
+        <a href="{% url 'dashboard' %}" class="pnav-btn" title="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <span class="pnav-sep"></span>
+        <div class="pnav-crumbs">
+            {% for crumb in page_nav_breadcrumbs %}
+                {% if crumb.active %}
+                    <span class="pnav-crumb pnav-active">
+                        {% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}
+                    </span>
+                {% else %}
+                    <a href="{{ crumb.url }}" class="pnav-crumb">
+                        {% if crumb.icon %}<i class="fas {{ crumb.icon }}"></i> {% endif %}{{ crumb.label }}
+                    </a>
+                    <span class="pnav-chevron"><i class="fas fa-chevron-right"></i></span>
+                {% endif %}
+            {% endfor %}
         </div>
-    </nav>
+    </div>
+    <style>
+        .pnav-bar{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:.35rem;padding:.4rem 1.25rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.85rem;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow-x:auto}
+        .pnav-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#334155;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.8rem}
+        .pnav-btn:hover:not(.pnav-disabled){background:#e0f2fe;color:#0066cc;border-color:#0066cc}
+        .pnav-disabled{opacity:.3;pointer-events:none}
+        .pnav-sep{width:1px;height:20px;background:#e2e8f0;margin:0 .2rem;flex-shrink:0}
+        .pnav-crumbs{display:flex;align-items:center;gap:.2rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+        .pnav-crumbs::-webkit-scrollbar{display:none}
+        .pnav-crumb{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .55rem;border-radius:5px;color:#0066cc;text-decoration:none;font-weight:500;white-space:nowrap;transition:background .15s;font-size:.82rem}
+        .pnav-crumb:hover:not(.pnav-active){background:#e0f2fe}
+        .pnav-active{background:#0066cc;color:#fff;cursor:default;font-weight:600}
+        .pnav-chevron{color:#94a3b8;font-size:.6rem;flex-shrink:0;user-select:none}
+    </style>
+    {% endif %}
+    <!-- End Page Navigation Toolbar -->
 
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb-container">
-            <nav class="breadcrumb">
-                <a href="/dashboard/"><i class="fas fa-home"></i>Home</a>
-                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
-                <span class="breadcrumb-current">Notes</span>
-            </nav>
-        </div>
-
         <!-- Page Header -->
         <div class="page-header">
             <div class="page-header-content">
-                <h1><i class="fas fa-sticky-note me-2" style="color: var(--primary);"></i>MoS Notes</h1>
+                <h1><i class="fas fa-sticky-note me-2" style="color: var(--primary);"></i>Notes</h1>
                 <p>Manage and organize your notes efficiently. Create, edit, and share notes with your team.</p>
             </div>
             <div class="header-actions">
@@ -1175,6 +1258,15 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon info">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="streamNotes">0</div>
+                    <div class="stat-label">Stream Notes</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon info">
                     <i class="fas fa-user-edit"></i>
                 </div>
                 <div class="stat-content">
@@ -1200,6 +1292,15 @@
                     <div class="stat-label">This Week</div>
                 </div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="taggedNotes">0</div>
+                    <div class="stat-label">Tagged Notes</div>
+                </div>
+            </div>
         </div>
 
         <!-- Controls Bar -->
@@ -1222,6 +1323,44 @@
                     <button class="filter-btn" data-filter="private">
                         <i class="fas fa-lock"></i> Private
                     </button>
+                    <button class="filter-btn" data-filter="stream">
+                        <i class="fas fa-sitemap"></i> Stream
+                    </button>
+                    {% if accessible_streams %}
+                    <div class="sort-dropdown dropdown">
+                        <button class="filter-btn dropdown-toggle" data-bs-toggle="dropdown" id="streamFilterBtn">
+                            <i class="fas fa-filter"></i> Filter by Stream
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-stream-filter="all">
+                                <i class="fas fa-layer-group"></i> All Streams</a>
+                            </li>
+                            {% for s in accessible_streams %}
+                            <li><a class="dropdown-item" href="#" data-stream-filter="{{ s.id }}">
+                                <i class="fas fa-code-branch"></i> {{ s.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if all_tags %}
+                    <div class="sort-dropdown dropdown tag-filter-dropdown">
+                        <button class="filter-btn dropdown-toggle {% if active_tag_filter %}active{% endif %}" data-bs-toggle="dropdown" id="tagFilterBtn">
+                            <i class="fas fa-tags"></i> {% if active_tag_filter %}{{ active_tag_filter.name }}{% else %}Filter by Tag{% endif %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-tag-filter="all">
+                                <i class="fas fa-layer-group"></i> All Tags</a>
+                            </li>
+                            {% for tag in all_tags %}
+                            <li><a class="dropdown-item {% if active_tag_filter and active_tag_filter.id == tag.id %}active{% endif %}" href="#" data-tag-filter="{{ tag.id }}" data-tag-color="{{ tag.color }}">
+                                <span class="tag-dot" style="background: {{ tag.color }}"></span> {{ tag.name }}
+                                <span class="tag-count">{{ tag.notes.count }}</span></a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                     <button class="filter-btn" data-filter="myNotes">
                         <i class="fas fa-user"></i> My Notes
                     </button>
@@ -1295,17 +1434,35 @@
         </div>
         {% endif %}
 
+        {% if active_tag_filter %}
+        <div class="active-tag-filter-bar">
+            <i class="fas fa-filter"></i>
+            Filtering by tag:
+            <span class="note-tag-pill" style="background: {{ active_tag_filter.color }}22; color: {{ active_tag_filter.color }};">
+                <span class="tag-dot" style="background: {{ active_tag_filter.color }}"></span>
+                {{ active_tag_filter.name }}
+            </span>
+            <a href="{% url 'notes_list' %}" class="clear-tag-filter">
+                <i class="fas fa-times"></i> Clear Filter
+            </a>
+        </div>
+        {% endif %}
+
         <!-- Notes Grid -->
         {% if notes %}
         <div class="notes-grid" id="notesContainer">
             {% for note in notes %}
-            <div class="note-card {% if note.is_public %}public{% else %}private{% endif %}"
-                 data-filter="{% if note.is_public %}public{% else %}private{% endif %}{% if note.created_by == request.user %} myNotes{% endif %}"
+            <div class="note-card {% if note.visibility == 'stream' %}stream{% elif note.is_public %}public{% else %}private{% endif %}"
+                 data-filter="{% if note.visibility == 'stream' %}stream{% elif note.is_public %}public{% else %}private{% endif %}{% if note.created_by == request.user %} myNotes{% endif %}"
                  data-date="{{ note.created_at|date:'Y-m-d' }}"
                  data-author="{{ note.created_by.username }}"
                  data-title="{{ note.title|lower }}"
                  data-content="{{ note.content|lower }}"
-                 data-note-id="{{ note.pk }}">
+                 data-note-id="{{ note.pk }}"
+                 data-stream-id="{% if note.stream %}{{ note.stream.id }}{% endif %}"
+                 data-stream-name="{% if note.stream %}{{ note.stream.name }}{% endif %}"
+                 data-tags="{% for t in note.tags.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                 data-tag-names="{% for t in note.tags.all %}{{ t.name }}{% if not forloop.last %},{% endif %}{% endfor %}">
                 
                 <div class="note-card-indicator"></div>
                 
@@ -1316,9 +1473,9 @@
                             <a href="{% url 'note_detail' note.pk %}">{{ note.title }}</a>
                         </h3>
                     </div>
-                    <span class="note-badge {% if note.is_public %}public{% else %}private{% endif %}">
-                        <i class="fas fa-{% if note.is_public %}globe{% else %}lock{% endif %}"></i>
-                        {% if note.is_public %}Public{% else %}Private{% endif %}
+                    <span class="note-badge {% if note.visibility == 'stream' %}stream{% elif note.is_public %}public{% else %}private{% endif %}">
+                        <i class="fas fa-{% if note.visibility == 'stream' %}sitemap{% elif note.is_public %}globe{% else %}lock{% endif %}"></i>
+                        {% if note.visibility == 'stream' %}{{ note.stream.name }}{% elif note.is_public %}Public{% else %}Private{% endif %}
                     </span>
                 </div>
                 
@@ -1335,6 +1492,17 @@
                             {{ note.created_at|timesince }} ago
                         </span>
                     </div>
+                    
+                    {% if note.tags.all %}
+                    <div class="note-tags-row">
+                        {% for tag in note.tags.all %}
+                        <a href="?tag={{ tag.id }}" class="note-tag-pill" style="background: {{ tag.color }}22; color: {{ tag.color }};" title="Filter by {{ tag.name }}">
+                            <span class="tag-dot" style="background: {{ tag.color }}"></span>
+                            {{ tag.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     
                     {% if note.attachments.count > 0 %}
                     <div class="note-attachments">
@@ -1360,7 +1528,7 @@
                         <a href="{% url 'note_detail' note.pk %}" class="action-btn view" title="View">
                             <i class="fas fa-eye"></i>
                         </a>
-                        {% if note.is_public or note.created_by == request.user %}
+                    {% if note.is_public or note.created_by == request.user or note.visibility == 'stream' %}
                         <a href="{% url 'share_note' note.pk %}" class="action-btn share" title="Share">
                             <i class="fas fa-share-alt"></i>
                         </a>
@@ -1404,9 +1572,10 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <script>
+  const _buPrefix = (function(){ const p=window.location.pathname; const i=p.indexOf('/notes'); if(i>0) return p.substring(0,i); return ''; })();
     document.addEventListener('DOMContentLoaded', function() {
         // DOM Elements
         const searchInput = document.getElementById('searchInput');
@@ -1419,6 +1588,8 @@
         
         // State
         let currentFilter = 'all';
+        let currentStreamFilter = 'all';
+        let currentTagFilter = 'all';
         let bulkMode = false;
         
         // Initialize
@@ -1440,6 +1611,50 @@
                 this.classList.add('active');
                 
                 currentFilter = this.getAttribute('data-filter');
+                filterNotes();
+            });
+        });
+
+        // Stream-specific filter dropdown
+        document.querySelectorAll('[data-stream-filter]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('[data-stream-filter]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentStreamFilter = this.getAttribute('data-stream-filter');
+                
+                // Update the dropdown button text
+                const streamFilterBtn = document.getElementById('streamFilterBtn');
+                if (streamFilterBtn) {
+                    if (currentStreamFilter === 'all') {
+                        streamFilterBtn.innerHTML = '<i class="fas fa-filter"></i> Filter by Stream';
+                    } else {
+                        streamFilterBtn.innerHTML = '<i class="fas fa-filter"></i> ' + this.textContent.trim();
+                        streamFilterBtn.classList.add('active');
+                    }
+                }
+                filterNotes();
+            });
+        });
+
+        // Tag-specific filter dropdown
+        document.querySelectorAll('[data-tag-filter]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('[data-tag-filter]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTagFilter = this.getAttribute('data-tag-filter');
+                
+                const tagFilterBtn = document.getElementById('tagFilterBtn');
+                if (tagFilterBtn) {
+                    if (currentTagFilter === 'all') {
+                        tagFilterBtn.innerHTML = '<i class="fas fa-tags"></i> Filter by Tag';
+                        tagFilterBtn.classList.remove('active');
+                    } else {
+                        tagFilterBtn.innerHTML = '<i class="fas fa-tags"></i> ' + this.textContent.trim().replace(/\d+$/, '').trim();
+                        tagFilterBtn.classList.add('active');
+                    }
+                }
                 filterNotes();
             });
         });
@@ -1497,21 +1712,37 @@
             notes.forEach(note => {
                 let shouldShow = true;
                 
-                // Apply filter
+                // Apply visibility filter
                 if (currentFilter !== 'all') {
                     const filters = note.getAttribute('data-filter')?.split(' ') || [];
                     shouldShow = filters.includes(currentFilter);
                 }
+
+                // Apply stream-specific filter
+                if (shouldShow && currentStreamFilter !== 'all') {
+                    const noteStreamId = note.getAttribute('data-stream-id') || '';
+                    shouldShow = (noteStreamId === currentStreamFilter);
+                }
+
+                // Apply tag filter
+                if (shouldShow && currentTagFilter !== 'all') {
+                    const noteTags = (note.getAttribute('data-tags') || '').split(',').filter(t => t);
+                    shouldShow = noteTags.includes(currentTagFilter);
+                }
                 
-                // Apply search
+                // Apply search (also searches tag names)
                 if (shouldShow && searchTerm) {
                     const title = note.getAttribute('data-title') || '';
                     const content = note.getAttribute('data-content') || '';
                     const author = note.getAttribute('data-author')?.toLowerCase() || '';
+                    const streamName = note.getAttribute('data-stream-name')?.toLowerCase() || '';
+                    const tagNames = note.getAttribute('data-tag-names')?.toLowerCase() || '';
                     
                     shouldShow = title.includes(searchTerm) || 
                                 content.includes(searchTerm) || 
-                                author.includes(searchTerm);
+                                author.includes(searchTerm) ||
+                                streamName.includes(searchTerm) ||
+                                tagNames.includes(searchTerm);
                 }
                 
                 note.style.display = shouldShow ? '' : 'none';
@@ -1521,7 +1752,7 @@
         // Update statistics
         function updateStatistics() {
             const notes = document.querySelectorAll('.note-card');
-            let publicCount = 0, privateCount = 0, myNotesCount = 0, recentCount = 0;
+            let publicCount = 0, privateCount = 0, myNotesCount = 0, recentCount = 0, streamCount = 0, taggedCount = 0;
             
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -1531,7 +1762,11 @@
                 
                 if (filters.includes('public')) publicCount++;
                 if (filters.includes('private')) privateCount++;
+                if (filters.includes('stream')) streamCount++;
                 if (filters.includes('myNotes')) myNotesCount++;
+                
+                const noteTags = (note.getAttribute('data-tags') || '').trim();
+                if (noteTags) taggedCount++;
                 
                 const noteDate = new Date(note.getAttribute('data-date'));
                 if (noteDate >= oneWeekAgo) recentCount++;
@@ -1540,8 +1775,11 @@
             document.getElementById('totalNotes').textContent = notes.length;
             document.getElementById('publicNotes').textContent = publicCount;
             document.getElementById('privateNotes').textContent = privateCount;
+            document.getElementById('streamNotes').textContent = streamCount;
             document.getElementById('myNotes').textContent = myNotesCount;
             document.getElementById('recentNotes').textContent = recentCount;
+            const taggedEl = document.getElementById('taggedNotes');
+            if (taggedEl) taggedEl.textContent = taggedCount;
         }
 
         // Update all count badge
@@ -1678,24 +1916,33 @@
             let failedCount = 0;
             
             const deletePromises = noteIds.map(noteId => {
-                return fetch(`/notes/${noteId}/delete/`, {
+                return fetch(`${_buPrefix}/notes/${noteId}/delete/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
+                    redirect: 'manual',
                 })
                 .then(response => {
-                    if (response.ok || response.redirected) {
+                    if (response.type === 'opaqueredirect') {
+                        // Server returned a redirect (302) — means it processed the POST and deleted
                         deletedCount++;
-                        // Remove the note card from DOM
                         const noteCard = document.querySelector(`.note-card[data-note-id="${noteId}"]`);
-                        if (noteCard) {
-                            noteCard.remove();
-                        }
-                    } else {
-                        failedCount++;
+                        if (noteCard) noteCard.remove();
+                        return;
                     }
+                    return response.json().then(data => {
+                        if (data.success) {
+                            deletedCount++;
+                            const noteCard = document.querySelector(`.note-card[data-note-id="${noteId}"]`);
+                            if (noteCard) noteCard.remove();
+                        } else {
+                            failedCount++;
+                            console.error('Delete failed:', data.error);
+                        }
+                    });
                 })
                 .catch(error => {
                     console.error('Error deleting note:', error);
@@ -1833,7 +2080,7 @@
             `;
             
             const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-            toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            toast.innerHTML = `<i class="fas ${icon}"></i> ${escapeHtml(message)}`;
             
             document.body.appendChild(toast);
             

@@ -1,0 +1,878 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Maintenance Calendar{% if stream %} - {{ stream }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary: #0B5FFF;
+        --primary-dark: #0747A6;
+        --primary-light: #deebff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .calendar-container { max-width: 1700px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #0747A6 50%, #003380 100%);
+        color: white; padding: 2.5rem 2rem; border-radius: 20px;
+        margin-bottom: 2rem; display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 1.5rem;
+        position: relative; overflow: hidden;
+        box-shadow: 0 10px 40px rgba(11, 95, 255, 0.3);
+    }
+
+    .page-header::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem; background: rgba(255,255,255,0.2);
+        padding: 0.75rem; border-radius: 14px;
+    }
+
+    .page-header .subtitle { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
+
+    .header-actions { display: flex; gap: 0.75rem; position: relative; z-index: 1; flex-wrap: wrap; }
+
+    .header-actions .btn {
+        padding: 0.65rem 1.25rem; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3); color: white;
+        background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;
+        text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .header-actions .btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .header-actions .btn-create { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: white; border-radius: 16px; padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem; box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        display: flex; gap: 0.75rem; align-items: center; flex-wrap: nowrap;
+    }
+
+    .filter-bar select {
+        padding: 0.45rem 0.75rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.85rem; background: var(--bg-light);
+        flex: 1 1 0; min-width: 0; max-width: 220px;
+    }
+
+    .filter-bar select:focus { border-color: var(--primary); outline: none; }
+
+    .filter-label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+
+    @media (max-width: 600px) {
+        .filter-bar { flex-wrap: wrap; }
+        .filter-bar select { max-width: none; flex: 1 1 100%; }
+    }
+
+    /* Calendar Card */
+    .calendar-card {
+        background: white; border-radius: 16px;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        padding: 1.5rem; overflow: hidden;
+    }
+
+    /* FullCalendar Overrides */
+    .fc {
+        font-family: 'Inter', -apple-system, sans-serif !important;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+    }
+
+    .fc .fc-button {
+        background: var(--bg-light) !important;
+        border: 1.5px solid var(--border-color) !important;
+        color: var(--text-secondary) !important;
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+        border-radius: 8px !important;
+        padding: 0.4rem 0.75rem !important;
+        text-transform: capitalize !important;
+    }
+
+    .fc .fc-button:hover {
+        background: var(--primary-light) !important;
+        color: var(--primary) !important;
+        border-color: var(--primary) !important;
+    }
+
+    .fc .fc-button-active {
+        background: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary) !important;
+    }
+
+    .fc .fc-daygrid-day-number {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+    .fc .fc-day-today {
+        background: var(--primary-light) !important;
+    }
+
+    .fc .fc-event {
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        border: none !important;
+        cursor: pointer;
+    }
+
+    .fc .fc-col-header-cell-cushion {
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+
+    .fc .fc-scrollgrid { border: 1px solid var(--border-color) !important; border-radius: 12px; overflow: hidden; }
+    .fc td, .fc th { border-color: #f1f5f9 !important; }
+
+    /* Legend */
+    .legend {
+        display: flex; gap: 1rem; flex-wrap: wrap;
+        margin-top: 1.25rem; padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .legend-item {
+        display: flex; align-items: center; gap: 0.4rem;
+        font-size: 0.8rem; color: var(--text-secondary);
+    }
+
+    .legend-dot {
+        width: 12px; height: 12px; border-radius: 4px;
+    }
+
+    /* Event Modal */
+    .modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+        z-index: 10000; align-items: center; justify-content: center;
+        animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+        background: #ffffff; border-radius: 20px;
+        width: 94%; max-width: 900px; max-height: 92vh; overflow-y: auto;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05);
+        animation: slideUp 0.25s ease;
+    }
+
+    .modal-box::-webkit-scrollbar { width: 6px; }
+    .modal-box::-webkit-scrollbar-track { background: transparent; }
+    .modal-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .modal-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #0747A6 100%);
+        color: white; padding: 1.5rem 2rem; border-radius: 20px 20px 0 0;
+        display: flex; justify-content: space-between; align-items: center;
+        position: sticky; top: 0; z-index: 2;
+    }
+
+    .modal-header h3 {
+        font-size: 1.15rem; font-weight: 700; color: white; margin: 0;
+        display: flex; align-items: center; gap: 0.6rem;
+    }
+
+    .modal-header h3 i {
+        font-size: 1rem; background: rgba(255,255,255,0.2);
+        padding: 0.5rem; border-radius: 10px;
+    }
+
+    .modal-close {
+        background: rgba(255,255,255,0.15); border: none; font-size: 1.2rem;
+        color: white; cursor: pointer; padding: 0.4rem 0.65rem;
+        border-radius: 10px; transition: all 0.2s; line-height: 1;
+    }
+
+    .modal-close:hover { background: rgba(255,255,255,0.3); }
+
+    .modal-body { padding: 1.75rem 2rem 1rem; }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 1.25rem; padding: 1.25rem;
+        border-radius: 14px; border: 1.5px solid var(--border-color);
+        background: var(--bg-light); position: relative;
+    }
+
+    .form-section::before {
+        content: ''; position: absolute; top: 0; left: 0;
+        width: 4px; height: 100%; border-radius: 14px 0 0 14px;
+    }
+
+    .form-section.section-basic::before { background: var(--primary); }
+    .form-section.section-schedule::before { background: #f59e0b; }
+    .form-section.section-assignment::before { background: #0B5FFF; }
+    .form-section.section-details::before { background: #10b981; }
+
+    .form-section-title {
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.06em; margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .form-section.section-basic .form-section-title { color: var(--primary); }
+    .form-section.section-schedule .form-section-title { color: #d97706; }
+    .form-section.section-assignment .form-section-title { color: #0044CC; }
+    .form-section.section-details .form-section-title { color: #059669; }
+
+    .form-section-title i { font-size: 0.85rem; }
+
+    .modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem 1.25rem; }
+    .modal-form-grid .full { grid-column: 1 / -1; }
+
+    .modal-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .modal-group label {
+        font-size: 0.73rem; font-weight: 600; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.04em;
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+
+    .modal-group label i { font-size: 0.7rem; opacity: 0.7; }
+    .modal-group label .req { color: #ef4444; font-weight: 700; }
+
+    .modal-group input, .modal-group select, .modal-group textarea {
+        padding: 0.6rem 0.85rem; border: 1.5px solid #e2e8f0;
+        border-radius: 10px; font-size: 0.88rem; background: #ffffff;
+        font-family: inherit; transition: all 0.2s;
+        color: var(--text-primary);
+    }
+
+    .modal-group input:hover, .modal-group select:hover, .modal-group textarea:hover {
+        border-color: #cbd5e1;
+    }
+
+    .modal-group input:focus, .modal-group select:focus, .modal-group textarea:focus {
+        border-color: var(--primary); outline: none;
+        box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.1);
+    }
+
+    .modal-group textarea { min-height: 72px; resize: vertical; }
+
+    /* Color field with swatch */
+    .color-field-wrap {
+        display: flex; align-items: center; gap: 0.6rem;
+    }
+
+    .color-field-wrap select { flex: 1; }
+
+    .color-swatch {
+        width: 32px; height: 32px; border-radius: 8px;
+        border: 2px solid #e2e8f0; flex-shrink: 0;
+        transition: background 0.2s;
+    }
+
+    .modal-actions {
+        display: flex; gap: 0.75rem; justify-content: flex-end;
+        padding: 1.25rem 2rem; border-top: 1.5px solid var(--border-color);
+        background: var(--bg-light); border-radius: 0 0 20px 20px;
+        position: sticky; bottom: 0; z-index: 2;
+    }
+
+    .modal-btn {
+        padding: 0.65rem 1.4rem; border-radius: 12px; font-weight: 600;
+        font-size: 0.88rem; border: none; cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; gap: 0.45rem;
+    }
+
+    .modal-btn:hover { transform: translateY(-1px); }
+
+    .modal-btn-primary {
+        background: linear-gradient(135deg, #0B5FFF, #0747A6); color: white;
+        box-shadow: 0 4px 12px rgba(11, 95, 255, 0.3);
+    }
+    .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(11, 95, 255, 0.4); }
+    .modal-btn-cancel {
+        background: white; color: var(--text-secondary);
+        border: 1.5px solid var(--border-color);
+    }
+    .modal-btn-cancel:hover { background: #f1f5f9; }
+    .modal-btn-delete {
+        background: linear-gradient(135deg, #ef4444, #dc2626); color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .modal-btn-delete:hover { box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
+    .modal-btn-complete {
+        background: linear-gradient(135deg, #10b981, #059669); color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .modal-btn-complete:hover { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+
+    /* Event Detail Modal */
+    .detail-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    }
+
+    .event-detail-row {
+        display: flex; flex-direction: column; gap: 0.2rem;
+        padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9;
+    }
+
+    .event-detail-row:last-child { border-bottom: none; }
+    .event-detail-label { font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .event-detail-value { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+
+    .detail-description {
+        margin-top: 1rem; padding: 1rem 1.25rem;
+        background: var(--bg-light); border-radius: 12px;
+        font-size: 0.9rem; color: var(--text-primary); line-height: 1.6;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* Messages */
+    .alert-msg { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-weight: 500; }
+    .alert-msg-success { background: #dcfce7; color: #166534; }
+    .alert-msg-error { background: #fde2e2; color: #c53030; }
+
+    @media (max-width: 768px) {
+        .modal-form-grid { grid-template-columns: 1fr; }
+        .modal-form-grid .full { grid-column: 1; }
+        .modal-body { padding: 1.25rem 1rem 0.75rem; }
+        .modal-actions { padding: 1rem; }
+        .detail-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-container">
+    {% for message in messages %}
+    <div class="alert-msg alert-msg-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-calendar-alt"></i> Maintenance Calendar</h1>
+            <p class="subtitle">Schedule, track, and manage all maintenance activities{% if stream %} in {{ stream }}{% endif %}</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-create" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i> New Event
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="filterStream" onchange="refreshCalendar()">
+            <option value="">All Streams</option>
+            {% for s in streams %}
+            <option value="{{ s.name }}" {% if selected_stream == s.name %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+        <select id="filterType" onchange="refreshCalendar()">
+            <option value="">All Types</option>
+            {% for val, label in event_types %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select id="filterStatus" onchange="refreshCalendar()">
+            <option value="">All Statuses</option>
+            {% for val, label in status_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-card">
+        <div id="calendar"></div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#0B5FFF;"></div> Scheduled</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d4a017;"></div> In Progress</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div> Completed</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#dc3545;"></div> Overdue</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#0B5FFF;"></div> Build Server</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e74c3c;"></div> Calibration</div>
+        </div>
+    </div>
+</div>
+
+<!-- Create / Edit Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-calendar-plus"></i> <span id="modalTitle">New Maintenance Event</span></h3>
+            <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Section: Basic Info -->
+            <div class="form-section section-basic">
+                <div class="form-section-title"><i class="fas fa-info-circle"></i> Basic Information</div>
+                <div class="modal-form-grid">
+                    <div class="modal-group full">
+                        <label><i class="fas fa-heading"></i> Title <span class="req">*</span></label>
+                        <input type="text" id="eventTitle" placeholder="e.g., Quarterly Server Maintenance">
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-tag"></i> Event Type</label>
+                        <select id="eventType">
+                            {% for val, label in event_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-flag"></i> Priority</label>
+                        <select id="eventPriority">
+                            {% for val, label in priority_choices %}
+                            <option value="{{ val }}" {% if val == 'normal' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-palette"></i> Color</label>
+                        <div class="color-field-wrap">
+                            <select id="eventColor" onchange="document.getElementById('colorSwatch').style.background=this.value">
+                                {% for val, label in color_choices %}
+                                <option value="{{ val }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="color-swatch" id="colorSwatch" style="background:#0B5FFF;"></div>
+                        </div>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-spinner"></i> Status</label>
+                        <select id="eventStatus">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Schedule -->
+            <div class="form-section section-schedule">
+                <div class="form-section-title"><i class="fas fa-clock"></i> Schedule</div>
+                <div class="modal-form-grid">
+                    <div class="modal-group">
+                        <label><i class="fas fa-play"></i> Start Date/Time <span class="req">*</span></label>
+                        <input type="datetime-local" id="eventStart">
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-stop"></i> End Date/Time</label>
+                        <input type="datetime-local" id="eventEnd">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Assignment -->
+            <div class="form-section section-assignment">
+                <div class="form-section-title"><i class="fas fa-users-cog"></i> Assignment & Linking</div>
+                <div class="modal-form-grid">
+                    <div class="modal-group">
+                        <label><i class="fas fa-sitemap"></i> Stream</label>
+                        <select id="eventStream">
+                            <option value="">None</option>
+                            {% for s in streams %}
+                            <option value="{{ s.name }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-user"></i> Assigned To</label>
+                        <select id="eventAssignee">
+                            <option value="">Unassigned</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-server"></i> Build Server</label>
+                        <select id="eventBuildServer">
+                            <option value="">None</option>
+                            {% for bs in build_servers %}
+                            <option value="{{ bs.id }}">{{ bs.hostname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label><i class="fas fa-microchip"></i> System</label>
+                        <select id="eventSystem">
+                            <option value="">None</option>
+                            {% for sys in systems %}
+                            <option value="{{ sys.id }}">{{ sys.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Details -->
+            <div class="form-section section-details">
+                <div class="form-section-title"><i class="fas fa-align-left"></i> Details</div>
+                <div class="modal-form-grid">
+                    <div class="modal-group full">
+                        <label><i class="fas fa-file-alt"></i> Description</label>
+                        <textarea id="eventDescription" placeholder="Details about the maintenance task..."></textarea>
+                    </div>
+                    <div class="modal-group full">
+                        <label><i class="fas fa-sticky-note"></i> Notes</label>
+                        <textarea id="eventNotes" placeholder="Internal notes..." style="min-height:56px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('createModal')">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="modal-btn modal-btn-delete" id="btnDelete" style="display:none;" onclick="deleteEvent()">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <button class="modal-btn modal-btn-complete" id="btnComplete" style="display:none;" onclick="completeEvent()">
+                <i class="fas fa-check-circle"></i> Complete
+            </button>
+            <button class="modal-btn modal-btn-primary" onclick="saveEvent()">
+                <i class="fas fa-save"></i> <span id="btnSaveText">Create Event</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> <span id="detailTitle">Event Details</span></h3>
+            <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="detailContent"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('detailModal')">
+                <i class="fas fa-times"></i> Close
+            </button>
+            <button class="modal-btn modal-btn-primary" id="btnEditDetail" onclick="editFromDetail()">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+<script>
+    let calendar;
+    let currentEventId = null;
+    let isEditing = false;
+
+    const csrfToken = '{{ csrf_token }}';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            },
+            height: 'auto',
+            editable: true,
+            selectable: true,
+            selectMirror: true,
+            dayMaxEvents: 4,
+            nowIndicator: true,
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            },
+            events: function(info, successCallback, failureCallback) {
+                const params = new URLSearchParams({
+                    start: info.startStr,
+                    end: info.endStr,
+                    stream: document.getElementById('filterStream').value,
+                    event_type: document.getElementById('filterType').value,
+                    status: document.getElementById('filterStatus').value,
+                });
+                fetch(`{% url 'maintenance_calendar_events_api' %}?${params}`)
+                    .then(r => r.json())
+                    .then(data => successCallback(data))
+                    .catch(err => failureCallback(err));
+            },
+            select: function(info) {
+                resetForm();
+                document.getElementById('eventStart').value = formatDateForInput(info.start);
+                if (info.end) {
+                    document.getElementById('eventEnd').value = formatDateForInput(info.end);
+                }
+                openCreateModal();
+            },
+            eventClick: function(info) {
+                const ep = info.event.extendedProps;
+                if (ep.is_auto) {
+                    showDetailModal(info.event);
+                } else {
+                    editEvent(info.event);
+                }
+            },
+            eventDrop: function(info) {
+                if (info.event.extendedProps.is_auto) {
+                    info.revert();
+                    return;
+                }
+                updateEventDates(info.event);
+            },
+            eventResize: function(info) {
+                if (info.event.extendedProps.is_auto) {
+                    info.revert();
+                    return;
+                }
+                updateEventDates(info.event);
+            },
+        });
+        calendar.render();
+    });
+
+    function refreshCalendar() {
+        calendar.refetchEvents();
+    }
+
+    function formatDateForInput(d) {
+        const dt = new Date(d);
+        const pad = n => String(n).padStart(2, '0');
+        return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    }
+
+    function resetForm() {
+        currentEventId = null;
+        isEditing = false;
+        document.getElementById('modalTitle').textContent = 'New Maintenance Event';
+        document.getElementById('btnSaveText').textContent = 'Create Event';
+        document.getElementById('btnDelete').style.display = 'none';
+        document.getElementById('btnComplete').style.display = 'none';
+        ['eventTitle', 'eventDescription', 'eventNotes', 'eventStart', 'eventEnd'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('eventType').value = 'custom';
+        document.getElementById('eventPriority').value = 'normal';
+        document.getElementById('eventColor').value = '#0B5FFF';
+        document.getElementById('colorSwatch').style.background = '#0B5FFF';
+        document.getElementById('eventStatus').value = 'scheduled';
+        document.getElementById('eventStream').value = '{% if stream %}{{ stream }}{% endif %}';
+        document.getElementById('eventAssignee').value = '';
+        document.getElementById('eventBuildServer').value = '';
+        document.getElementById('eventSystem').value = '';
+    }
+
+    function openCreateModal() {
+        document.getElementById('createModal').classList.add('show');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    function editEvent(event) {
+        currentEventId = event.id;
+        isEditing = true;
+        const ep = event.extendedProps;
+
+        document.getElementById('modalTitle').textContent = 'Edit Event';
+        document.getElementById('btnSaveText').textContent = 'Update Event';
+        document.getElementById('btnDelete').style.display = 'inline-flex';
+        document.getElementById('btnComplete').style.display = ep.status !== 'completed' ? 'inline-flex' : 'none';
+
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventStart').value = event.start ? formatDateForInput(event.start) : '';
+        document.getElementById('eventEnd').value = event.end ? formatDateForInput(event.end) : '';
+        document.getElementById('eventType').value = ep.event_type || 'custom';
+        document.getElementById('eventPriority').value = ep.priority || 'normal';
+        const colorVal = event.backgroundColor || '#0B5FFF';
+        document.getElementById('eventColor').value = colorVal;
+        document.getElementById('colorSwatch').style.background = colorVal;
+        document.getElementById('eventStatus').value = ep.status || 'scheduled';
+        document.getElementById('eventDescription').value = ep.description || '';
+        document.getElementById('eventNotes').value = ep.notes || '';
+        document.getElementById('eventStream').value = ep.stream || '';
+        document.getElementById('eventAssignee').value = ep.assigned_to_id || '';
+        document.getElementById('eventBuildServer').value = ep.build_server_id || '';
+        document.getElementById('eventSystem').value = ep.system_id || '';
+
+        openCreateModal();
+    }
+
+    function showDetailModal(event) {
+        const ep = event.extendedProps;
+        document.getElementById('detailTitle').textContent = event.title;
+        document.getElementById('btnEditDetail').style.display = ep.is_auto ? 'none' : 'inline-flex';
+
+        let html = '<div class="detail-grid">';
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-tag" style="margin-right:4px;"></i> Type</span><span class="event-detail-value">${ep.event_type || '-'}</span></div>`;
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-spinner" style="margin-right:4px;"></i> Status</span><span class="event-detail-value">${ep.status || '-'}</span></div>`;
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-flag" style="margin-right:4px;"></i> Priority</span><span class="event-detail-value">${ep.priority || '-'}</span></div>`;
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-sitemap" style="margin-right:4px;"></i> Stream</span><span class="event-detail-value">${ep.stream || '-'}</span></div>`;
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-play" style="margin-right:4px;"></i> Start</span><span class="event-detail-value">${event.start ? event.start.toLocaleString() : '-'}</span></div>`;
+        html += `<div class="event-detail-row"><span class="event-detail-label"><i class="fas fa-stop" style="margin-right:4px;"></i> End</span><span class="event-detail-value">${event.end ? event.end.toLocaleString() : '-'}</span></div>`;
+        if (ep.linked_object && ep.linked_object !== '\u2014') {
+            html += `<div class="event-detail-row" style="grid-column:1/-1;"><span class="event-detail-label"><i class="fas fa-link" style="margin-right:4px;"></i> Linked To</span><span class="event-detail-value">${ep.linked_object}</span></div>`;
+        }
+        html += '</div>';
+        if (ep.description) {
+            html += `<div class="detail-description">${ep.description}</div>`;
+        }
+
+        document.getElementById('detailContent').innerHTML = html;
+        document.getElementById('detailModal').classList.add('show');
+    }
+
+    function editFromDetail() {
+        closeModal('detailModal');
+    }
+
+    async function saveEvent() {
+        const title = document.getElementById('eventTitle').value.trim();
+        if (!title) { alert('Title is required'); return; }
+
+        const startVal = document.getElementById('eventStart').value;
+        if (!startVal) { alert('Start date is required'); return; }
+
+        const body = {
+            title: title,
+            description: document.getElementById('eventDescription').value.trim(),
+            event_type: document.getElementById('eventType').value,
+            priority: document.getElementById('eventPriority').value,
+            color: document.getElementById('eventColor').value,
+            status: document.getElementById('eventStatus').value,
+            start_datetime: startVal,
+            end_datetime: document.getElementById('eventEnd').value || startVal,
+            stream: document.getElementById('eventStream').value,
+            assigned_to_id: document.getElementById('eventAssignee').value || null,
+            build_server_id: document.getElementById('eventBuildServer').value || null,
+            system_id: document.getElementById('eventSystem').value || null,
+            notes: document.getElementById('eventNotes').value.trim(),
+        };
+
+        let url = isEditing
+            ? `{% url 'maintenance_event_update_api' pk=0 %}`.replace('/0/', `/${currentEventId}/`)
+            : `{% url 'maintenance_event_create_api' %}`;
+
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify(body),
+            });
+            const data = await resp.json();
+            if (data.success) {
+                closeModal('createModal');
+                calendar.refetchEvents();
+            } else {
+                console.error('Event save failed:', data.error);
+                alert('Failed to save event.');
+            }
+        } catch (err) {
+            console.error('Network error:', err);
+            alert('A network error occurred.');
+        }
+    }
+
+    async function deleteEvent() {
+        if (!confirm('Delete this event?')) return;
+
+        try {
+            const resp = await fetch(`{% url 'maintenance_event_delete_api' pk=0 %}`.replace('/0/', `/${currentEventId}/`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({}),
+            });
+            const data = await resp.json();
+            if (data.success) {
+                closeModal('createModal');
+                calendar.refetchEvents();
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Failed to delete event.');
+        }
+    }
+
+    async function completeEvent() {
+        const notes = prompt('Completion notes (optional):');
+
+        try {
+            const resp = await fetch(`{% url 'maintenance_event_complete_api' pk=0 %}`.replace('/0/', `/${currentEventId}/`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ completion_notes: notes || '' }),
+            });
+            const data = await resp.json();
+            if (data.success) {
+                closeModal('createModal');
+                calendar.refetchEvents();
+            }
+        } catch (err) {
+            console.error('Complete error:', err);
+            alert('Failed to complete event.');
+        }
+    }
+
+    async function updateEventDates(event) {
+        try {
+            await fetch(`{% url 'maintenance_event_update_api' pk=0 %}`.replace('/0/', `/${event.id}/`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({
+                    start_datetime: event.start.toISOString(),
+                    end_datetime: event.end ? event.end.toISOString() : event.start.toISOString(),
+                }),
+            });
+        } catch (err) {
+            console.error('Failed to update event dates:', err);
+        }
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal(this.id);
+        });
+    });
+</script>
+{% endblock %}

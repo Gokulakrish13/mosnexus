@@ -55,20 +55,6 @@
         }
         
         /* Dark Theme - Professional Dark */
-        [data-theme="dark"] {
-            --bg-color: #1a1d21;
-            --bg-secondary: #212529;
-            --text-color: #f8f9fa;
-            --text-secondary: #adb5bd;
-            --text-muted: #6c757d;
-            --card-bg: #2d3238;
-            --column-bg: #252930;
-            --border-color: #3d4349;
-            --border-light: #343a40;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
-        }
         
         * {
             margin: 0;
@@ -169,24 +155,7 @@
             height: 18px;
         }
         
-        /* Theme Toggle */
-        #theme-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all var(--transition);
-            font-size: 16px;
-        }
         
-        #theme-toggle:hover {
-            border-color: var(--philips-blue);
-        }
 
         /* Summary Stats Bar */
         .stats-bar {
@@ -711,6 +680,19 @@
             border-top: 1px solid var(--border-color);
             background: var(--bg-color);
         }
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-danger:hover { background: #dc2626; }
+        .modal-footer .delete-spacer { margin-right: auto; }
 
         /* Statistics Dashboard */
         .stats-overlay {
@@ -1060,16 +1042,12 @@
         <header>
             <div class="header-left">
                 <img src="{% static 'products/philips.png' %}" alt="Philips" class="philips-logo">
-                <h1 class="app-title">Personal Trackboard</h1>
             </div>
             <div class="header-right">
                 <div class="user-info">
                     <span id="current-date"></span>
                 </div>
-                <button id="theme-toggle" title="Toggle theme">
-                    <span id="theme-icon">🌙</span>
-                </button>
-                <a href="/dashboard/" class="home-btn" title="Dashboard">
+                <a href="{% url 'dashboard' %}" class="home-btn" title="Dashboard">
                     <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/house-door-fill.svg" alt="Home">
                 </a>
             </div>
@@ -1315,7 +1293,7 @@
     
     <!-- Task Modal -->
     <div class="modal" id="task-modal">
-        <div class="modal-content" style="width: 700px;">
+        <div class="modal-content" style="width: 900px; max-width: 95vw;">
             <div class="modal-header">
                 <h2 class="modal-title" id="modal-title">New Task</h2>
                 <button class="modal-close" id="close-modal">×</button>
@@ -1383,6 +1361,9 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-danger delete-spacer" id="delete-task-btn" style="display:none;" title="Delete this task">
+                    <i class="fas fa-trash-alt" style="margin-right:4px"></i> Delete
+                </button>
                 <button class="btn btn-secondary" id="cancel-task">Cancel</button>
                 <button class="btn btn-primary" id="save-task">Save Task</button>
             </div>
@@ -1412,11 +1393,6 @@
 
     
     <script>
-
-         document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        });
-        
         // Global variables
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let currentTaskId = null;
@@ -1460,7 +1436,6 @@
         
         // Initialize the app
         function init() {
-            initializeTheme();
             renderTasks();
             updateTaskCounts();
             updateTagFilterOptions();
@@ -1597,13 +1572,6 @@
             document.getElementById('toggle-compact').addEventListener('click', toggleCompactView);
         }
 
-        // Initialize theme based on user's preference
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
-        }
-        
         // Display current date
         function showCurrentDate() {
             const now = new Date();
@@ -1621,6 +1589,14 @@
             // Close modal
             closeModalBtn.addEventListener('click', closeModal);
             cancelTaskBtn.addEventListener('click', closeModal);
+
+            // Delete task from modal
+            document.getElementById('delete-task-btn').addEventListener('click', function() {
+                if (currentTaskId && confirm('Are you sure you want to delete this task?')) {
+                    deleteTask(currentTaskId);
+                    closeModal();
+                }
+            });
             
             // Save task
             saveTaskBtn.addEventListener('click', saveTask);
@@ -1639,8 +1615,6 @@
             document.getElementById('sort-by').addEventListener('change', applyFilters);
             document.getElementById('sort-direction').addEventListener('click', toggleSortDirection);
             
-            // Theme toggle
-            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
             
             // Statistics dashboard toggle
             document.getElementById('toggle-stats').addEventListener('click', toggleStatsDashboard);
@@ -1648,20 +1622,9 @@
             document.getElementById('stats-overlay').addEventListener('click', toggleStatsDashboard);
         }
         
-        // Toggle between light and dark themes
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Update the icon
-            document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
-        }
-        
         // Open modal in add or edit mode
         function openModal(mode, taskId = null) {
+            const deleteBtn = document.getElementById('delete-task-btn');
             if (mode === 'add') {
                 modalTitleEl.textContent = 'Add New Task';
                 taskForm.reset();
@@ -1674,11 +1637,13 @@
                 taskPendingTimeMinutesInput.value = '';
                 taskCommentsInput.value = '';
                 currentTaskId = null;
+                deleteBtn.style.display = 'none';
                 
                 // Update dependency options (excluding the current task)
                 updateDependencyOptions();
             } else {
                 modalTitleEl.textContent = 'Edit Task';
+                deleteBtn.style.display = 'inline-flex';
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
                     taskTitleInput.value = task.title;
@@ -2932,6 +2897,14 @@
             // Close modal
             closeModalBtn.addEventListener('click', closeModal);
             cancelTaskBtn.addEventListener('click', closeModal);
+
+            // Delete task from modal
+            document.getElementById('delete-task-btn').addEventListener('click', function() {
+                if (currentTaskId && confirm('Are you sure you want to delete this task?')) {
+                    deleteTask(currentTaskId);
+                    closeModal();
+                }
+            });
             
             // Save task
             saveTaskBtn.addEventListener('click', saveTask);
@@ -2950,8 +2923,6 @@
             document.getElementById('sort-by').addEventListener('change', applyFilters);
             document.getElementById('sort-direction').addEventListener('click', toggleSortDirection);
             
-            // Theme toggle
-            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
             
             // Statistics dashboard toggle
             document.getElementById('toggle-stats').addEventListener('click', toggleStatsDashboard);

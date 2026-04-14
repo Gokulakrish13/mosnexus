@@ -1,0 +1,840 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}{{ schedule.title }} - Calibration Schedule{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-blue: #0066cc;
+        --primary-blue-light: #e6f2ff;
+        --success-green: #10b981;
+        --success-green-light: #d1fae5;
+        --warning-orange: #f59e0b;
+        --warning-orange-light: #fef3c7;
+        --danger-red: #ef4444;
+        --danger-red-light: #fee2e2;
+        --purple: #0B5FFF;
+        --indigo: #0B5FFF;
+        --indigo-dark: #0044CC;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-dark) 50%, #003399 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .breadcrumb a {
+        color: white;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+
+    .breadcrumb a:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .header-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        background: rgba(255,255,255,0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        height: 44px;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+
+    .btn i {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--indigo);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+        background: #f8f5ff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger:hover {
+        background: var(--danger-red);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-success {
+        background: rgba(16, 185, 129, 0.9);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-success:hover {
+        background: var(--success-green);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-success:hover {
+        background: #059669;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.375rem;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    .detail-value.large {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-badge.scheduled {
+        background: #e8f0fe;
+        color: #003399;
+    }
+
+    .status-badge.in_progress {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-badge.completed {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-badge.overdue {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-badge.due {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .priority-badge.critical {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .priority-badge.high {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .priority-badge.normal {
+        background: #e8f0fe;
+        color: #003399;
+    }
+
+    .priority-badge.low {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .due-date-card {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .due-date-card.overdue {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    }
+
+    .due-date-card.completed {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    }
+
+    .due-date-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #92400e;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .due-date-card.overdue .due-date-label {
+        color: #b91c1c;
+    }
+
+    .due-date-card.completed .due-date-label {
+        color: #047857;
+    }
+
+    .due-date-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #78350f;
+    }
+
+    .due-date-card.overdue .due-date-value {
+        color: #991b1b;
+    }
+
+    .due-date-card.completed .due-date-value {
+        color: #065f46;
+    }
+
+    .due-date-relative {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        color: #b45309;
+    }
+
+    .due-date-card.overdue .due-date-relative {
+        color: #dc2626;
+    }
+
+    .equipment-card {
+        background: var(--bg-light);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .equipment-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--indigo);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .equipment-info h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .equipment-info p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .history-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-item:last-child {
+        border-bottom: none;
+    }
+
+    .history-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .history-icon.completed {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .history-icon.scheduled {
+        background: #e8f0fe;
+        color: #003399;
+    }
+
+    .history-content {
+        flex: 1;
+    }
+
+    .history-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .history-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .section-divider {
+        border: none;
+        height: 1px;
+        background: var(--border-color);
+        margin: 1.5rem 0;
+    }
+
+    .info-box {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .info-box h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--indigo);
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-box p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <!-- Messages Container -->
+    {% if messages %}
+    <div class="messages-container" style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem; {% if message.tags == 'success' %}background: var(--success-green-light); color: #065f46; border: 1px solid #a7f3d0;{% elif message.tags == 'error' %}background: var(--danger-red-light); color: #991b1b; border: 1px solid #fecaca;{% elif message.tags == 'warning' %}background: var(--warning-orange-light); color: #92400e; border: 1px solid #fde68a;{% else %}background: var(--primary-blue-light); color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="{% url 'calibration_dashboard' stream %}">Calibration</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <a href="{% url 'calibration_schedule_list' stream %}">Schedules</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <span>{{ schedule.title }}</span>
+            </div>
+    
+            <h1><i class="fas fa-calendar-check"></i> {{ schedule.title }}</h1>
+    
+            <div class="header-meta">
+                <div class="meta-item">
+                    <i class="fas fa-server"></i>
+                    <span>{{ schedule.get_equipment_name }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-tag"></i>
+                    <span>{{ schedule.get_calibration_type_display }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Every {{ schedule.calibration_interval }} {{ schedule.get_interval_unit_display }}</span>
+                </div>
+            </div>
+    
+            <div class="header-actions">
+                <a href="{% url 'calibration_schedule_edit' stream schedule.pk %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Schedule
+                </a>
+                {% if schedule.status != 'completed' %}
+                <form method="POST" action="{% url 'calibration_record_complete' stream schedule.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Mark Complete
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'calibration_schedule_delete' stream schedule.pk %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+<div class="content-grid">
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle"></i> Schedule Details</h2>
+                <span class="status-badge {{ schedule.status }}">
+                    <i class="fas fa-{% if schedule.status == 'completed' %}check{% elif schedule.status == 'overdue' %}exclamation{% elif schedule.status == 'in_progress' %}spinner{% else %}clock{% endif %}"></i>
+                    {{ schedule.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="equipment-card">
+                    <div class="equipment-icon">
+                        <i class="fas fa-{% if schedule.system %}server{% elif schedule.product %}box{% else %}desktop{% endif %}"></i>
+                    </div>
+                    <div class="equipment-info">
+                        <h4>{{ schedule.get_equipment_name }}</h4>
+                        <p>{{ schedule.get_calibration_type_display }} Calibration</p>
+                    </div>
+                </div>
+                
+                <hr class="section-divider">
+                
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Calibration Type</span>
+                        <span class="detail-value">{{ schedule.get_calibration_type_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Priority</span>
+                        <span class="priority-badge {{ schedule.priority }}">{{ schedule.get_priority_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Calibration Interval</span>
+                        <span class="detail-value">Every {{ schedule.calibration_interval }} {{ schedule.get_interval_unit_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Calibration</span>
+                        <span class="detail-value">{% if schedule.last_calibration_date %}{{ schedule.last_calibration_date|date:"M d, Y" }}{% else %}Not recorded{% endif %}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Responsible Person</span>
+                        <span class="detail-value">{% if schedule.responsible_person %}{{ schedule.responsible_person.get_full_name|default:schedule.responsible_person.username }}{% else %}Not assigned{% endif %}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Backup Contact</span>
+                        <span class="detail-value">{% if schedule.backup_person %}{{ schedule.backup_person.get_full_name|default:schedule.backup_person.username }}{% else %}Not assigned{% endif %}</span>
+                    </div>
+                </div>
+                
+                {% if schedule.description %}
+                <hr class="section-divider">
+                <div class="detail-item">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">{{ schedule.description }}</span>
+                </div>
+                {% endif %}
+                
+                {% if schedule.parameters %}
+                <div class="info-box">
+                    <h4><i class="fas fa-sliders-h"></i> Calibration Parameters</h4>
+                    <p>{{ schedule.parameters }}</p>
+                </div>
+                {% endif %}
+                
+                {% if schedule.procedures %}
+                <div class="info-box">
+                    <h4><i class="fas fa-list-ol"></i> Procedures</h4>
+                    <p>{{ schedule.procedures|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if schedule.service_provider %}
+                <hr class="section-divider">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Service Provider</span>
+                        <span class="detail-value">{{ schedule.service_provider }}</span>
+                    </div>
+                    {% if schedule.service_provider_contact %}
+                    <div class="detail-item">
+                        <span class="detail-label">Contact</span>
+                        <span class="detail-value">{{ schedule.service_provider_contact }}</span>
+                    </div>
+                    {% endif %}
+                    {% if schedule.estimated_cost %}
+                    <div class="detail-item">
+                        <span class="detail-label">Estimated Cost</span>
+                        <span class="detail-value">${{ schedule.estimated_cost }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Calibration History -->
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Calibration History</h2>
+                <a href="{% url 'calibration_record_create' stream schedule.pk %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                    <i class="fas fa-plus"></i> Add Record
+                </a>
+            </div>
+            <div class="card-body">
+                {% if records %}
+                    {% for record in records %}
+                    <div class="history-item">
+                        <div class="history-icon {% if record.result == 'pass' %}completed{% else %}scheduled{% endif %}">
+                            <i class="fas fa-{% if record.result == 'pass' %}check{% else %}times{% endif %}"></i>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-title">
+                                {{ record.get_result_display|default:"Calibration Performed" }}
+                                {% if record.certificate %}
+                                    <span style="color: var(--success-green); font-size: 0.8rem;"><i class="fas fa-certificate"></i> Certificate</span>
+                                {% endif %}
+                            </div>
+                            <div class="history-date">
+                                {{ record.calibration_date|date:"M d, Y" }} 
+                                {% if record.performed_by %}- by {{ record.performed_by }}{% endif %}
+                            </div>
+                            {% if record.notes %}
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">{{ record.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.5; margin-bottom: 0.5rem;"></i>
+                        <p>No calibration records yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <!-- Due Date Card -->
+        <div class="due-date-card {% if schedule.is_overdue %}overdue{% elif schedule.status == 'completed' %}completed{% endif %}">
+            <div class="due-date-label">
+                {% if schedule.status == 'completed' %}
+                    Completed
+                {% elif schedule.is_overdue %}
+                    Overdue
+                {% else %}
+                    Next Calibration Due
+                {% endif %}
+            </div>
+            <div class="due-date-value">
+                {{ schedule.next_calibration_date|date:"M d, Y" }}
+            </div>
+            {% if schedule.status != 'completed' %}
+            <div class="due-date-relative">
+                {% with days_left=schedule.days_until_due %}
+                    {% if days_left < 0 %}
+                        {{ days_left|abs_value }} days overdue
+                    {% elif days_left == 0 %}
+                        Due today!
+                    {% else %}
+                        {{ days_left }} days remaining
+                    {% endif %}
+                {% endwith %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-bolt"></i> Quick Info</h2>
+            </div>
+            <div class="card-body">
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <span class="detail-label">Created</span>
+                    <span class="detail-value">{{ schedule.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% if schedule.created_by %}
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <span class="detail-label">Created By</span>
+                    <span class="detail-value">{{ schedule.created_by.get_full_name|default:schedule.created_by.username }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <span class="detail-label">Last Updated</span>
+                    <span class="detail-value">{{ schedule.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="detail-item" style="margin-bottom: 1rem;">
+                    <span class="detail-label">Reminder</span>
+                    <span class="detail-value">{{ schedule.reminder_days_before }} days before due</span>
+                </div>
+                {% if schedule.regulatory_requirement %}
+                <div class="detail-item">
+                    <span class="detail-label">Regulatory Requirement</span>
+                    <span class="detail-value">{{ schedule.regulatory_requirement.title }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Notification Settings -->
+        <div class="card" style="margin-top: 1rem;">
+            <div class="card-header">
+                <h2><i class="fas fa-bell"></i> Notifications</h2>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span style="font-size: 0.875rem;">Notify Responsible</span>
+                    <span style="color: {% if schedule.notify_responsible %}var(--success-green){% else %}var(--text-secondary){% endif %};">
+                        <i class="fas fa-{% if schedule.notify_responsible %}check-circle{% else %}times-circle{% endif %}"></i>
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span style="font-size: 0.875rem;">Notify Lab Incharge</span>
+                    <span style="color: {% if schedule.notify_lab_incharge %}var(--success-green){% else %}var(--text-secondary){% endif %};">
+                        <i class="fas fa-{% if schedule.notify_lab_incharge %}check-circle{% else %}times-circle{% endif %}"></i>
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                    <span style="font-size: 0.875rem;">Escalate if Overdue</span>
+                    <span style="color: {% if schedule.escalate_if_overdue %}var(--success-green){% else %}var(--text-secondary){% endif %};">
+                        <i class="fas fa-{% if schedule.escalate_if_overdue %}check-circle{% else %}times-circle{% endif %}"></i>
+                        {% if schedule.escalate_if_overdue %}<small>(+{{ schedule.escalation_days }} days)</small>{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        {% if schedule.notes %}
+        <div class="card" style="margin-top: 1rem;">
+            <div class="card-header">
+                <h2><i class="fas fa-sticky-note"></i> Notes</h2>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+                    {{ schedule.notes|linebreaks }}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+<script>
+// Auto-close alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-20px)';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,410 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Inventory Alerts - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #e74c3c;
+        --primary-dark: #c0392b;
+        --primary-light: #fde2e2;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .dashboard-container { max-width: 1600px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 50%, #962d22 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(231, 76, 60, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%; right: -10%; width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+
+    .page-header h1 i {
+        font-size: 1.5rem; background: rgba(255,255,255,0.2);
+        padding: 0.75rem; border-radius: 14px;
+    }
+
+    .page-header .subtitle { font-size: 1rem; opacity: 0.9; margin-top: 0.5rem; }
+
+    .header-actions { display: flex; gap: 0.75rem; position: relative; z-index: 1; align-items: center; flex-wrap: wrap; }
+
+    .header-actions form { display: flex; margin: 0; }
+
+    .header-actions .btn {
+        padding: 0.65rem 1.25rem; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+        border: 2px solid rgba(255,255,255,0.3); color: white;
+        background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.3s;
+        text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .header-actions .btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+    /* Stats */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white; border-radius: 16px; padding: 1.5rem;
+        box-shadow: var(--card-shadow); display: flex;
+        align-items: center; gap: 1rem; border: 1px solid var(--border-color);
+    }
+
+    .stat-card .icon-box {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+    }
+
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+    .stat-card .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
+
+    /* Filter */
+    .filter-bar {
+        background: white; border-radius: 16px; padding: 1.25rem;
+        margin-bottom: 1.5rem; box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .filter-bar form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; }
+
+    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+    .filter-group select {
+        padding: 0.5rem 0.75rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.85rem; background: var(--bg-light); min-width: 140px;
+    }
+
+    .btn-filter { padding: 0.5rem 1rem; border-radius: 10px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+    .btn-filter-primary { background: var(--primary); color: white; }
+
+    /* Alert Cards */
+    .alerts-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .alert-card {
+        background: white; border-radius: 16px; padding: 1.25rem 1.5rem;
+        box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 1rem; transition: all 0.2s;
+    }
+
+    .alert-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    .alert-card.severity-critical { border-left: 4px solid #ef4444; }
+    .alert-card.severity-warning { border-left: 4px solid #f59e0b; }
+    .alert-card.severity-info { border-left: 4px solid #3b82f6; }
+
+    .alert-main { display: flex; align-items: center; gap: 1rem; flex: 1; }
+
+    .alert-icon {
+        width: 44px; height: 44px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .alert-icon.critical { background: #fde2e2; color: #ef4444; }
+    .alert-icon.warning { background: #fef3c7; color: #d97706; }
+    .alert-icon.info { background: #dbeafe; color: #3b82f6; }
+
+    .alert-info-content h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+    .alert-info-content p { font-size: 0.82rem; color: var(--text-secondary); margin: 0.15rem 0 0; }
+
+    .alert-meta {
+        display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;
+        min-width: 150px;
+    }
+
+    .alert-meta .time { font-size: 0.78rem; color: var(--text-secondary); }
+
+    .alert-status {
+        padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.72rem;
+        font-weight: 700; text-transform: uppercase;
+    }
+
+    .status-active { background: #fde2e2; color: #c53030; }
+    .status-acknowledged { background: #fef3c7; color: #92400e; }
+    .status-resolved { background: #dcfce7; color: #166534; }
+
+    .alert-actions { display: flex; gap: 0.5rem; }
+
+    .btn-action {
+        padding: 0.4rem 0.85rem; border-radius: 8px; border: none;
+        font-weight: 600; font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+    }
+
+    .btn-acknowledge { background: #fef3c7; color: #92400e; }
+    .btn-acknowledge:hover { background: #fde68a; }
+    .btn-resolve { background: #dcfce7; color: #166534; }
+    .btn-resolve:hover { background: #bbf7d0; }
+
+    .quantity-info {
+        display: flex; gap: 1.5rem; align-items: center;
+        font-size: 0.82rem; color: var(--text-secondary);
+        padding-top: 0.25rem;
+    }
+
+    .quantity-info strong { color: var(--text-primary); }
+
+    .empty-state { text-align: center; padding: 4rem; color: var(--text-secondary); }
+    .empty-state i { font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; }
+
+    .pagination-bar {
+        display: flex; justify-content: center; gap: 0.25rem; margin-top: 1.5rem;
+    }
+
+    .pagination-bar a, .pagination-bar span {
+        padding: 0.4rem 0.75rem; border-radius: 8px; font-size: 0.85rem;
+        font-weight: 600; border: 1px solid var(--border-color); color: var(--text-secondary);
+        text-decoration: none;
+    }
+
+    .pagination-bar a:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .pagination-bar .current { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Messages */
+    .alert-msg { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-weight: 500; }
+    .alert-msg-success { background: #dcfce7; color: #166534; }
+    .alert-msg-warning { background: #fef3c7; color: #92400e; }
+    .alert-msg-error { background: #fde2e2; color: #c53030; }
+
+    /* Resolve Modal */
+    .modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+        background: white; border-radius: 20px; padding: 2rem; width: 90%; max-width: 480px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-box h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
+
+    .modal-box textarea {
+        width: 100%; padding: 0.75rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.9rem; min-height: 120px; resize: vertical;
+        font-family: inherit;
+    }
+
+    .modal-box textarea:focus { border-color: var(--primary); outline: none; }
+
+    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
+
+    .modal-actions button {
+        padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600;
+        font-size: 0.9rem; border: none; cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .alert-card { flex-direction: column; align-items: flex-start; }
+        .alert-meta { align-items: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% for message in messages %}
+    <div class="alert-msg alert-msg-{{ message.tags }}">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}exclamation-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-bell"></i> Inventory Alerts</h1>
+            <p class="subtitle">Monitor stock levels and receive automated alerts for {{ stream }}</p>
+        </div>
+        <div class="header-actions">
+            <form method="post" action="{% url 'inventory_check_all_thresholds' stream=stream %}">
+                {% csrf_token %}
+                <button type="submit" class="btn"><i class="fas fa-sync-alt"></i> Check All</button>
+            </form>
+            <a href="{% url 'inventory_thresholds_list' stream=stream %}" class="btn">
+                <i class="fas fa-sliders-h"></i> Thresholds
+            </a>
+            <a href="{% url 'feature_hub' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fde2e2; color: #ef4444;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ active_count|default:"0" }}</div>
+                <div class="stat-label">Active Alerts</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fef3c7; color: #d97706;">
+                <i class="fas fa-radiation-alt"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ critical_count|default:"0" }}</div>
+                <div class="stat-label">Critical</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+        <form method="get" action="">
+            <div class="filter-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="">All</option>
+                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="acknowledged" {% if selected_status == 'acknowledged' %}selected{% endif %}>Acknowledged</option>
+                    <option value="resolved" {% if selected_status == 'resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Severity</label>
+                <select name="severity">
+                    <option value="">All</option>
+                    <option value="critical" {% if selected_severity == 'critical' %}selected{% endif %}>Critical</option>
+                    <option value="warning" {% if selected_severity == 'warning' %}selected{% endif %}>Warning</option>
+                    <option value="info" {% if selected_severity == 'info' %}selected{% endif %}>Info</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-filter btn-filter-primary"><i class="fas fa-filter"></i> Filter</button>
+        </form>
+    </div>
+
+    <!-- Alert Cards -->
+    <div class="alerts-list">
+        {% for alert in page_obj %}
+        <div class="alert-card severity-{{ alert.severity }}">
+            <div class="alert-main">
+                <div class="alert-icon {{ alert.severity }}">
+                    <i class="fas fa-{% if alert.severity == 'critical' %}radiation-alt{% elif alert.severity == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                </div>
+                <div class="alert-info-content">
+                    <h4>{{ alert.title }}</h4>
+                    <p>{{ alert.message }}</p>
+                    <div class="quantity-info">
+                        <span>Item: <strong>{{ alert.item_name }}</strong></span>
+                        <span>Current: <strong>{{ alert.current_quantity }}</strong></span>
+                        <span>Threshold: <strong>{{ alert.threshold_value }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-meta">
+                <span class="alert-status status-{{ alert.status }}">{{ alert.status }}</span>
+                <span class="time">{{ alert.created_at|timesince }} ago</span>
+                <div class="alert-actions">
+                    {% if alert.status == 'active' %}
+                    <form method="post" action="{% url 'inventory_alert_acknowledge' stream=stream pk=alert.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-acknowledge"><i class="fas fa-check"></i> Ack</button>
+                    </form>
+                    {% endif %}
+                    {% if alert.status != 'resolved' %}
+                    <button class="btn-action btn-resolve" onclick="openResolveModal({{ alert.pk }})">
+                        <i class="fas fa-check-double"></i> Resolve
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No Alerts</h3>
+            <p>{% if selected_status or selected_severity %}No alerts match your filters.{% else %}All inventory levels are within thresholds. Great job!{% endif %}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-bar">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">&lsaquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">&rsaquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Resolve Modal -->
+<div class="modal-overlay" id="resolveModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-check-double" style="color: #16a34a;"></i> Resolve Alert</h3>
+        <form method="post" id="resolveForm">
+            {% csrf_token %}
+            <textarea name="resolution_notes" placeholder="Describe the resolution taken (e.g., restocked, PO created, manual override)..."></textarea>
+            <div class="modal-actions">
+                <button type="button" onclick="closeResolveModal()" style="background: #f1f5f9; color: var(--text-secondary);">Cancel</button>
+                <button type="submit" style="background: #16a34a; color: white;">Resolve</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openResolveModal(alertPk) {
+    const form = document.getElementById('resolveForm');
+    form.action = "{% url 'inventory_alert_resolve' stream=stream pk=0 %}".replace('/0/', '/' + alertPk + '/');
+    document.getElementById('resolveModal').classList.add('show');
+}
+
+function closeResolveModal() {
+    document.getElementById('resolveModal').classList.remove('show');
+}
+
+document.getElementById('resolveModal').addEventListener('click', function(e) {
+    if (e.target === this) closeResolveModal();
+});
+</script>
+{% endblock %}

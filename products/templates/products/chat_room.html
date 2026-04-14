@@ -1,0 +1,975 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{{ room.name }} — Chat{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --philips-blue: #0B5FFF;
+        --philips-blue-dark: #0047AB;
+        --philips-blue-light: #4D8FFF;
+        --philips-teal: #00C4B4;
+        --gradient-primary: linear-gradient(135deg, #0B5FFF 0%, #00C4B4 100%);
+        --gradient-global: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        --gradient-stream: linear-gradient(135deg, #00C4B4, #06b6d4);
+        --gradient-group: linear-gradient(135deg, #0B5FFF, #0B5FFF);
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #EEF2F7;
+        --bg-chat: #F1F5F9;
+        --surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-tertiary: #94A3B8;
+        --border-color: #E2E8F0;
+        --success: #10B981;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+        background: var(--bg-primary); margin: 0; overflow: hidden;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .chat-layout { display: flex; height: calc(100vh - 46px); max-height: calc(100vh - 46px); }
+
+    /* ===== Left Sidebar — Channels ===== */
+    .chat-sidebar {
+        width: 270px; background: var(--surface); border-right: 1px solid var(--border-color);
+        display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+    }
+    .sidebar-brand { padding: 1.15rem 1.15rem 0.85rem; border-bottom: 1px solid var(--border-color); }
+    .sidebar-brand h2 { font-size: 1rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.6rem; letter-spacing: -0.02em; }
+    .sidebar-brand h2 .brand-icon { width: 32px; height: 32px; background: var(--gradient-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(11,95,255,0.2); }
+    .sidebar-brand h2 .brand-icon i { color: #fff; font-size: 0.8rem; }
+    .sidebar-back { font-size: 0.75rem; color: var(--text-tertiary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; font-weight: 500; transition: color 0.2s; }
+    .sidebar-back:hover { color: var(--philips-blue); }
+
+    .room-list { flex: 1; overflow-y: auto; padding: 0.45rem 0.5rem; }
+    .room-label { font-size: 0.62rem; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; padding: 0.7rem 0.6rem 0.3rem; }
+    .room-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--text-primary); font-size: 0.82rem; font-weight: 500; transition: all 0.15s; margin-bottom: 1px; }
+    .room-item:hover { background: var(--bg-secondary); }
+    .room-item.active { background: rgba(11,95,255,0.08); color: var(--philips-blue); font-weight: 700; }
+    .room-item i { font-size: 0.9rem; width: 18px; text-align: center; opacity: 0.7; }
+    .room-item.active i { opacity: 1; }
+
+    /* ===== Main Chat Area ===== */
+    .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-chat); }
+
+    /* Header */
+    .chat-header {
+        padding: 0.85rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border-color);
+        display: flex; align-items: center; gap: 0.85rem;
+    }
+    .chat-header .room-badge {
+        width: 38px; height: 38px; border-radius: var(--radius-md);
+        display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.12); flex-shrink: 0;
+    }
+    .chat-header .room-badge.global { background: var(--gradient-global); }
+    .chat-header .room-badge.stream { background: var(--gradient-stream); }
+    .chat-header .room-badge.group { background: var(--gradient-group); }
+    .chat-header .room-info { flex: 1; min-width: 0; }
+    .chat-header .room-info h3 { font-size: 1rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-header .room-info p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; font-weight: 500; }
+    .header-actions { display: flex; gap: 0.4rem; align-items: center; }
+    .header-btn { background: none; border: 1px solid var(--border-color); color: var(--text-tertiary); width: 34px; height: 34px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all 0.2s; position: relative; }
+    .header-btn:hover { background: var(--bg-secondary); color: var(--philips-blue); border-color: var(--philips-blue); }
+    .header-btn.active { background: rgba(11,95,255,0.08); color: var(--philips-blue); border-color: var(--philips-blue); }
+    .header-btn .dot { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; background: #EF4444; border-radius: 50%; border: 1.5px solid var(--surface); }
+
+    /* Pinned banner */
+    .pinned-banner { display: none; background: rgba(11,95,255,0.04); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1.25rem; }
+    .pinned-banner.show { display: block; }
+    .pinned-banner .pinned-label { font-size: 0.72rem; font-weight: 700; color: var(--philips-blue); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.35rem; }
+    .pinned-msg-item { font-size: 0.8rem; color: var(--text-secondary); padding: 0.2rem 0; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pinned-msg-item:hover { color: var(--philips-blue); }
+    .pinned-msg-item strong { color: var(--text-primary); font-weight: 600; }
+
+    /* Typing indicator */
+    .typing-indicator { display: none; padding: 0.3rem 1.5rem; font-size: 0.75rem; color: var(--text-tertiary); font-style: italic; }
+    .typing-indicator.show { display: flex; align-items: center; gap: 0.4rem; }
+    .typing-dots { display: flex; gap: 3px; }
+    .typing-dots span { width: 5px; height: 5px; background: var(--text-tertiary); border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+    /* ===== Messages ===== */
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .msg-group { margin-bottom: 0.35rem; position: relative; }
+    .msg-author { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.15rem; display: flex; align-items: center; gap: 0.45rem; }
+    .msg-author .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.62rem; font-weight: 700; }
+    .msg-author .time { font-weight: 400; color: var(--text-tertiary); font-size: 0.68rem; }
+
+    .msg-bubble {
+        background: var(--surface); padding: 0.6rem 0.9rem; border-radius: 4px 14px 14px 14px;
+        box-shadow: var(--shadow-sm); font-size: 0.86rem; color: var(--text-primary);
+        max-width: 70%; line-height: 1.5; position: relative; word-wrap: break-word;
+        border: 1px solid var(--border-color);
+    }
+    .msg-bubble.own { background: rgba(11,95,255,0.06); border-color: rgba(11,95,255,0.15); border-radius: 14px 4px 14px 14px; margin-left: auto; }
+    .msg-bubble.pinned-msg { border-left: 3px solid var(--philips-blue); }
+
+    /* System messages */
+    .msg-system { text-align: center; padding: 0.5rem 0; }
+    .msg-system-text { display: inline-block; background: var(--bg-secondary); color: var(--text-tertiary); font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 12px; font-weight: 500; }
+
+    /* Hover actions toolbar */
+    .msg-toolbar {
+        display: none; position: absolute; top: -10px; right: 10px;
+        background: var(--surface); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+        padding: 2px; gap: 1px; z-index: 5;
+    }
+    .msg-group:hover .msg-toolbar { display: flex; }
+    .msg-toolbar button {
+        background: none; border: none; color: var(--text-tertiary); cursor: pointer;
+        font-size: 0.75rem; padding: 4px 7px; border-radius: 4px; transition: all 0.15s;
+    }
+    .msg-toolbar button:hover { background: var(--bg-secondary); color: var(--philips-blue); }
+    .msg-toolbar button.reacted { color: var(--philips-blue); }
+
+    /* Reactions row */
+    .msg-reactions { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .reaction-chip {
+        display: inline-flex; align-items: center; gap: 3px; background: var(--bg-secondary);
+        border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 7px;
+        font-size: 0.75rem; cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .reaction-chip:hover { border-color: var(--philips-blue); background: rgba(11,95,255,0.06); }
+    .reaction-chip.user-reacted { border-color: var(--philips-blue); background: rgba(11,95,255,0.1); }
+    .reaction-chip .count { font-weight: 700; color: var(--text-secondary); font-size: 0.72rem; }
+
+    /* Emoji picker */
+    .emoji-picker-popup {
+        display: none; position: absolute; top: -45px; right: 45px; z-index: 10;
+        background: var(--surface); border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+        padding: 6px 8px; gap: 2px; flex-wrap: wrap; width: 210px;
+    }
+    .emoji-picker-popup.show { display: flex; }
+    .emoji-btn { background: none; border: none; font-size: 1.15rem; cursor: pointer; padding: 3px 5px; border-radius: 4px; transition: background 0.12s; }
+    .emoji-btn:hover { background: var(--bg-secondary); }
+
+    .msg-attachment { margin-top: 0.35rem; }
+    .msg-attachment a { color: var(--philips-blue); font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 500; }
+    .msg-attachment a:hover { text-decoration: underline; }
+    .msg-attachment img { max-width: 280px; max-height: 180px; border-radius: var(--radius-sm); margin-top: 0.25rem; cursor: pointer; border: 1px solid var(--border-color); }
+
+    /* Reply-to quoted block inside bubble */
+    .reply-quote {
+        background: var(--bg-secondary); border-left: 3px solid var(--philips-blue);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        padding: 0.3rem 0.6rem; margin-bottom: 0.4rem; cursor: pointer;
+        font-size: 0.78rem; line-height: 1.35; max-height: 3.2em; overflow: hidden;
+        transition: background 0.15s;
+    }
+    .reply-quote:hover { background: rgba(11,95,255,0.08); }
+    .reply-quote .rq-user { font-weight: 700; color: var(--philips-blue); margin-right: 0.3rem; }
+    .reply-quote .rq-text { color: var(--text-secondary); }
+
+    /* Reply banner above input */
+    .reply-banner {
+        display: none; padding: 0.45rem 1.25rem; background: rgba(11,95,255,0.04);
+        border-top: 1px solid var(--border-color); align-items: center; gap: 0.6rem;
+        font-size: 0.82rem; animation: slideDown 0.15s ease;
+    }
+    .reply-banner.show { display: flex; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .reply-banner .rb-icon { color: var(--philips-blue); font-size: 0.85rem; flex-shrink: 0; }
+    .reply-banner .rb-body { flex: 1; min-width: 0; }
+    .reply-banner .rb-user { font-weight: 700; color: var(--philips-blue); }
+    .reply-banner .rb-text { color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-size: 0.78rem; }
+    .reply-banner .rb-close { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 0.9rem; padding: 4px; border-radius: 4px; flex-shrink: 0; }
+    .reply-banner .rb-close:hover { color: #EF4444; background: #FEF2F2; }
+
+    /* Attachment preview strip */
+    .attach-preview {
+        display: none; padding: 0.4rem 1.25rem; background: var(--surface);
+        border-top: 1px solid var(--border-color); align-items: center; gap: 0.5rem; font-size: 0.82rem;
+    }
+    .attach-preview.show { display: flex; }
+    .attach-preview .ap-icon { color: var(--philips-blue); }
+    .attach-preview .ap-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; color: var(--text-primary); }
+    .attach-preview .ap-size { color: var(--text-tertiary); font-size: 0.75rem; }
+    .attach-preview .ap-remove { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 0.85rem; padding: 4px; }
+    .attach-preview .ap-remove:hover { color: #EF4444; }
+
+    /* ===== Input Area ===== */
+    .chat-input-area {
+        padding: 0.8rem 1.25rem; background: var(--surface); border-top: 1px solid var(--border-color);
+        display: flex; gap: 0.5rem; align-items: flex-end;
+    }
+    .chat-input-area textarea {
+        flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid var(--border-color);
+        border-radius: var(--radius-md); font-size: 0.86rem; resize: none;
+        max-height: 120px; min-height: 42px; font-family: inherit; line-height: 1.45;
+        background: var(--bg-primary); color: var(--text-primary); transition: border-color 0.2s;
+    }
+    .chat-input-area textarea:focus { border-color: var(--philips-blue); outline: none; }
+    .chat-input-area textarea::placeholder { color: var(--text-tertiary); }
+    .chat-input-area button {
+        width: 42px; height: 42px; border-radius: var(--radius-md); border: none;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        font-size: 1.05rem; transition: all 0.2s; flex-shrink: 0;
+    }
+    .chat-input-area .btn-send { background: var(--gradient-primary); color: #fff; box-shadow: 0 2px 8px rgba(11,95,255,0.25); }
+    .chat-input-area .btn-send:hover { box-shadow: 0 4px 14px rgba(11,95,255,0.35); transform: translateY(-1px); }
+    .chat-input-area .btn-attach { background: var(--bg-secondary); color: var(--text-tertiary); }
+    .chat-input-area .btn-attach:hover { background: rgba(11,95,255,0.08); color: var(--philips-blue); }
+    .chat-input-area input[type="file"] { display: none; }
+
+    /* ===== Right Sidebar — Group Members ===== */
+    .members-panel {
+        width: 0; overflow: hidden; background: var(--surface); border-left: 1px solid var(--border-color);
+        display: flex; flex-direction: column; transition: width 0.3s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0;
+    }
+    .members-panel.open { width: 280px; }
+    .panel-header { padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+    .panel-header h3 { font-size: 0.9rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.4rem; }
+    .panel-header .close-panel { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 0.9rem; padding: 4px; }
+    .panel-header .close-panel:hover { color: var(--text-primary); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 0.5rem; }
+
+    .member-card { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); transition: background 0.15s; }
+    .member-card:hover { background: var(--bg-secondary); }
+    .member-card .m-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+    .member-card .m-info { flex: 1; min-width: 0; }
+    .member-card .m-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-card .m-role { font-size: 0.68rem; color: var(--text-tertiary); font-weight: 500; }
+    .member-card .m-action { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 0.75rem; padding: 4px; opacity: 0; transition: all 0.15s; }
+    .member-card:hover .m-action { opacity: 1; }
+    .member-card .m-action:hover { color: #EF4444; }
+
+    .add-member-section { padding: 0.6rem 0.65rem; border-top: 1px solid var(--border-color); }
+    .add-member-section .add-btn { width: 100%; padding: 0.45rem; background: var(--bg-secondary); border: 1.5px dashed var(--border-color); border-radius: var(--radius-sm); color: var(--text-tertiary); cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.35rem; transition: all 0.2s; font-family: inherit; }
+    .add-member-section .add-btn:hover { border-color: var(--philips-blue); color: var(--philips-blue); background: rgba(11,95,255,0.04); }
+    .leave-btn { width: 100%; padding: 0.5rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-sm); color: #DC2626; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.35rem; transition: all 0.2s; font-family: inherit; margin-top: 0.35rem; }
+    .leave-btn:hover { background: #FEE2E2; }
+
+    /* Add Member Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: var(--surface); border-radius: 20px; padding: 1.75rem; max-width: 440px; width: 92%; box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid var(--border-color); animation: modalIn 0.25s ease; max-height: 80vh; overflow-y: auto; }
+    @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal-box h2 { font-size: 1.05rem; font-weight: 800; margin: 0 0 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-box h2 .mi { width: 32px; height: 32px; background: var(--gradient-group); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+    .modal-box h2 .mi i { color: #fff; font-size: 0.8rem; }
+    .ppl-search { width: 100%; padding: 0.55rem 0.8rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: inherit; background: var(--bg-primary); color: var(--text-primary); margin-bottom: 0.5rem; }
+    .ppl-search:focus { border-color: var(--philips-blue); outline: none; }
+    .ppl-list { max-height: 250px; overflow-y: auto; }
+    .ppl-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.5rem; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.12s; }
+    .ppl-item:hover { background: var(--bg-secondary); }
+    .ppl-item input { accent-color: var(--philips-blue); width: 16px; height: 16px; }
+    .ppl-item .pa { width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.6rem; font-weight: 700; }
+    .ppl-item .pn { font-size: 0.82rem; font-weight: 600; }
+    .modal-btns { display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+    .mbtn { padding: 0.5rem 1.1rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.82rem; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+    .mbtn-cancel { background: var(--bg-secondary); color: var(--text-secondary); }
+    .mbtn-cancel:hover { background: var(--border-color); }
+    .mbtn-add { background: var(--gradient-group); color: #fff; box-shadow: 0 2px 8px rgba(139,92,246,0.25); }
+
+    /* Empty chat */
+    .empty-chat { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .empty-chat .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+    .empty-chat .empty-icon i { font-size: 1.8rem; color: var(--text-tertiary); }
+    .empty-chat h3 { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .empty-chat p { font-size: 0.85rem; }
+
+    @media (max-width: 768px) {
+        .chat-sidebar { display: none; }
+        .members-panel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; }
+        .chat-layout { flex-direction: column; }
+    }
+</style>
+
+<div class="chat-layout">
+    <!-- Left Sidebar — Channels -->
+    <div class="chat-sidebar">
+        <div class="sidebar-brand">
+            <h2><span class="brand-icon"><i class="fas fa-comments"></i></span> Channels</h2>
+            <a href="{% url 'team_chat' %}" class="sidebar-back"><i class="fas fa-arrow-left"></i> Back to Hub</a>
+        </div>
+        <div class="room-list">
+            <div class="room-label">Global</div>
+            {% for r in all_rooms %}
+            {% if r.room_type == 'global' %}
+            <a href="{% url 'chat_room_view' room_id=r.pk %}" class="room-item {% if r.pk == room.pk %}active{% endif %}">
+                <i class="fas fa-globe"></i><span>{{ r.name }}</span>
+            </a>
+            {% endif %}
+            {% endfor %}
+            <div class="room-label" style="margin-top:0.4rem;">Streams</div>
+            {% for r in all_rooms %}
+            {% if r.room_type == 'stream' %}
+            <a href="{% url 'chat_room_view' room_id=r.pk %}" class="room-item {% if r.pk == room.pk %}active{% endif %}">
+                <i class="fas fa-code-branch"></i><span>{{ r.name }}</span>
+            </a>
+            {% endif %}
+            {% endfor %}
+            <div class="room-label" style="margin-top:0.4rem;">Groups</div>
+            {% for r in all_rooms %}
+            {% if r.room_type == 'group' %}
+            <a href="{% url 'chat_room_view' room_id=r.pk %}" class="room-item {% if r.pk == room.pk %}active{% endif %}">
+                <i class="fas fa-user-friends"></i><span>{{ r.name }}</span>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Chat -->
+    <div class="chat-main">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="room-badge {% if room.room_type == 'global' %}global{% elif room.room_type == 'stream' %}stream{% else %}group{% endif %}">
+                <i class="fas fa-{% if room.room_type == 'global' %}globe{% elif room.room_type == 'stream' %}code-branch{% else %}user-friends{% endif %}"></i>
+            </div>
+            <div class="room-info">
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.description|default:"Team collaboration channel" }}{% if room.room_type == 'group' %} &middot; {{ group_members.count }} member{{ group_members.count|pluralize }}{% endif %}</p>
+            </div>
+            <div class="header-actions">
+                {% if pinned_messages %}
+                <button class="header-btn" onclick="togglePinnedBanner()" title="Pinned messages">
+                    <i class="fas fa-thumbtack"></i><span class="dot"></span>
+                </button>
+                {% endif %}
+                {% if room.room_type == 'group' %}
+                <button class="header-btn" onclick="toggleMembersPanel()" title="Members" id="membersToggle">
+                    <i class="fas fa-users"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pinned messages banner -->
+        <div class="pinned-banner" id="pinnedBanner">
+            <div class="pinned-label"><i class="fas fa-thumbtack"></i> Pinned Messages</div>
+            {% for pm in pinned_messages %}
+            <div class="pinned-msg-item" onclick="scrollToMsg({{ pm.id }})"><strong>{{ pm.user.username }}:</strong> {{ pm.message|truncatechars:80 }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+            <span id="typingText"></span>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+            {% if chat_messages %}
+                {% for msg in chat_messages %}
+                    {% if msg.message_type == 'system' %}
+                    <div class="msg-system" data-msg-id="{{ msg.id }}">
+                        <span class="msg-system-text">{{ msg.message }}</span>
+                    </div>
+                    {% else %}
+                    <div class="msg-group" data-msg-id="{{ msg.id }}">
+                        <div class="msg-author">
+                            <span class="avatar">{{ msg.user.username|make_list|first|upper }}</span>
+                            {{ msg.user.username }}
+                            <span class="time">{{ msg.created_at|date:"M d, H:i" }}</span>
+                            {% if msg.is_pinned %}<i class="fas fa-thumbtack" style="color:var(--philips-blue);font-size:0.65rem;" title="Pinned"></i>{% endif %}
+                        </div>
+                        <div class="msg-bubble {% if msg.user.id == request.user.id %}own{% endif %} {% if msg.is_pinned %}pinned-msg{% endif %}">
+                            {% if msg.parent and not msg.parent.is_deleted %}
+                            <div class="reply-quote" onclick="scrollToMsg({{ msg.parent.id }})">
+                                <span class="rq-user">{{ msg.parent.user.username }}</span>
+                                <span class="rq-text">{{ msg.parent.message|truncatechars:120 }}</span>
+                            </div>
+                            {% endif %}
+                            {{ msg.message|linebreaksbr }}
+                            {% for att in msg.attachments.all %}
+                            <div class="msg-attachment">
+                                {% if att.is_image %}
+                                <img src="{{ att.file.url }}" alt="{{ att.original_filename }}" onclick="window.open(this.src)">
+                                {% else %}
+                                <a href="{{ att.file.url }}" target="_blank"><i class="fas fa-paperclip"></i> {{ att.original_filename }} ({{ att.file_size_formatted }})</a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <!-- Reactions row (server-rendered for initial load) -->
+                            {% if msg.reactions.all %}
+                            <div class="msg-reactions" id="reactions-{{ msg.id }}">
+                                {# reactions are rendered client-side after first poll #}
+                            </div>
+                            {% else %}
+                            <div class="msg-reactions" id="reactions-{{ msg.id }}"></div>
+                            {% endif %}
+                        </div>
+                        <!-- Hover toolbar -->
+                        <div class="msg-toolbar">
+                            <button onclick="setReply({{ msg.id }}, '{{ msg.user.username|escapejs }}', '{{ msg.message|truncatechars:120|escapejs }}')" title="Reply"><i class="fas fa-reply"></i></button>
+                            <button onclick="openEmojiPicker({{ msg.id }}, this)" title="React"><i class="fas fa-face-smile"></i></button>
+                            <button onclick="pinMsg({{ msg.id }})" title="{% if msg.is_pinned %}Unpin{% else %}Pin{% endif %}"><i class="fas fa-thumbtack"></i></button>
+                            {% if msg.user.id == request.user.id %}
+                            <button onclick="editMsg({{ msg.id }})" title="Edit"><i class="fas fa-pen"></i></button>
+                            <button onclick="deleteMsg({{ msg.id }})" title="Delete"><i class="fas fa-trash"></i></button>
+                            {% endif %}
+                        </div>
+                        <!-- Emoji picker popup (per message) -->
+                        <div class="emoji-picker-popup" id="emoji-picker-{{ msg.id }}"></div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="empty-chat">
+                    <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
+                    <h3>No messages yet</h3>
+                    <p>Start the conversation!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Reply banner -->
+        <div class="reply-banner" id="replyBanner">
+            <i class="fas fa-reply rb-icon"></i>
+            <div class="rb-body">
+                <span class="rb-user" id="replyUser"></span>
+                <span class="rb-text" id="replyText"></span>
+            </div>
+            <button class="rb-close" onclick="clearReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Attachment preview -->
+        <div class="attach-preview" id="attachPreview">
+            <i class="fas fa-paperclip ap-icon"></i>
+            <span class="ap-name" id="attachName"></span>
+            <span class="ap-size" id="attachSize"></span>
+            <button class="ap-remove" onclick="clearAttachment()" title="Remove attachment"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+            <button class="btn-attach" onclick="document.getElementById('fileInput').click();" title="Attach file"><i class="fas fa-paperclip"></i></button>
+            <input type="file" id="fileInput" onchange="stageFile(this)">
+            <textarea id="msgInput" placeholder="Type a message..." rows="1"
+                onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"
+                oninput="signalTyping()"></textarea>
+            <button class="btn-send" onclick="sendMessage()" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Right Sidebar — Group Members -->
+    {% if room.room_type == 'group' %}
+    <div class="members-panel" id="membersPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-users" style="color:var(--philips-blue);"></i> Members ({{ group_members.count }})</h3>
+            <button class="close-panel" onclick="toggleMembersPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body" id="memberListBody">
+            {% for m in group_members %}
+            <div class="member-card" id="member-{{ m.user.id }}">
+                <div class="m-avatar" style="background: {% if m.role == 'admin' %}var(--gradient-group){% else %}var(--gradient-primary){% endif %};">{{ m.user.username|make_list|first|upper }}</div>
+                <div class="m-info">
+                    <div class="m-name">{{ m.user.get_full_name|default:m.user.username }}{% if m.user.id == request.user.id %} (You){% endif %}</div>
+                    <div class="m-role">{% if m.role == 'admin' %}Admin{% else %}Member{% endif %}</div>
+                </div>
+                {% if is_group_admin and m.user.id != request.user.id %}
+                <button class="m-action" onclick="removeMember({{ m.user.id }}, '{{ m.user.username }}')" title="Remove"><i class="fas fa-user-minus"></i></button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if is_group_admin %}
+        <div class="add-member-section">
+            <button class="add-btn" onclick="document.getElementById('addMemberModal').classList.add('show');"><i class="fas fa-user-plus"></i> Add Members</button>
+        </div>
+        {% endif %}
+        <div class="add-member-section" style="border-top:none;padding-top:0;">
+            <button class="leave-btn" onclick="leaveGroup()"><i class="fas fa-sign-out-alt"></i> Leave Group</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Member Modal -->
+{% if room.room_type == 'group' and is_group_admin %}
+<div class="modal-overlay" id="addMemberModal">
+    <div class="modal-box">
+        <h2><span class="mi"><i class="fas fa-user-plus"></i></span> Add Members</h2>
+        <input type="text" class="ppl-search" placeholder="Search people..." oninput="filterAddPeople(this.value)">
+        <div class="ppl-list" id="addPeopleList">
+            {% for u in bu_users %}
+            <label class="ppl-item" data-name="{{ u.username|lower }} {{ u.first_name|lower }} {{ u.last_name|lower }}">
+                <input type="checkbox" value="{{ u.id }}" class="add-member-cb">
+                <span class="pa">{{ u.username|make_list|first|upper }}</span>
+                <span class="pn">{{ u.get_full_name|default:u.username }}</span>
+            </label>
+            {% endfor %}
+            {% if not bu_users %}
+            <div style="text-align:center;padding:1rem;color:var(--text-tertiary);font-size:0.85rem;">All BU users are already members.</div>
+            {% endif %}
+        </div>
+        <div style="margin-top:0.75rem;padding:0.6rem 0.75rem;background:var(--bg-secondary);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;">
+            <input type="checkbox" id="shareHistoryCb" checked style="accent-color:var(--philips-blue);width:16px;height:16px;">
+            <label for="shareHistoryCb" style="font-size:0.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;">Allow new members to see previous chat history</label>
+        </div>
+        <div class="modal-btns">
+            <button class="mbtn mbtn-cancel" onclick="document.getElementById('addMemberModal').classList.remove('show');">Cancel</button>
+            <button class="mbtn mbtn-add" onclick="addMembers()"><i class="fas fa-user-plus"></i> Add</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+const ROOM_ID = {{ room.pk }};
+const ROOM_TYPE = '{{ room.room_type }}';
+const CURRENT_USER = '{{ request.user.username }}';
+const CURRENT_USER_ID = {{ request.user.id }};
+const API_URL = '{% url "chat_api" room_id=room.pk %}';
+const UPLOAD_URL = '{% url "chat_upload_attachment" room_id=room.pk %}';
+const REACT_URL_BASE = '{% url "chat_react" room_id=room.pk message_id=0 %}'.replace('/0/', '/');
+const PIN_URL_BASE = '{% url "chat_pin_message" room_id=room.pk message_id=0 %}'.replace('/0/', '/');
+const TYPING_URL = '{% url "chat_typing_indicator" room_id=room.pk %}';
+{% if room.room_type == 'group' %}
+const ADD_MEMBER_URL = '{% url "group_chat_add_member" room_id=room.pk %}';
+const REMOVE_MEMBER_URL_BASE = '{% url "group_chat_remove_member" room_id=room.pk user_id=0 %}'.replace('/0/', '/');
+{% endif %}
+const CSRF = '{{ csrf_token }}';
+const EMOJIS = ['👍','❤️','😂','😮','😢','🎉','🔥','👏','💯','✅'];
+let lastMsgId = 0;
+let typingTimeout = null;
+let _replyTo = null;   // { id, user, text }
+let _stagedFile = null; // File object
+
+// Init: find last msg id
+document.querySelectorAll('[data-msg-id]').forEach(el => {
+    const id = parseInt(el.dataset.msgId);
+    if (id > lastMsgId) lastMsgId = id;
+});
+
+const messagesDiv = document.getElementById('chatMessages');
+messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+// ===== Reply helpers =====
+function setReply(msgId, user, text) {
+    _replyTo = { id: msgId, user: user, text: text };
+    document.getElementById('replyUser').textContent = user;
+    document.getElementById('replyText').textContent = text;
+    document.getElementById('replyBanner').classList.add('show');
+    document.getElementById('msgInput').focus();
+}
+function clearReply() {
+    _replyTo = null;
+    document.getElementById('replyBanner').classList.remove('show');
+}
+
+// ===== Attachment staging =====
+function stageFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    _stagedFile = file;
+    document.getElementById('attachName').textContent = file.name;
+    document.getElementById('attachSize').textContent = formatFileSize(file.size);
+    document.getElementById('attachPreview').classList.add('show');
+    input.value = ''; // allow re-select
+}
+function clearAttachment() {
+    _stagedFile = null;
+    document.getElementById('attachPreview').classList.remove('show');
+}
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ===== Send Message (text only, or text + attachment) =====
+function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    const hasFile = !!_stagedFile;
+
+    if (!text && !hasFile) return;
+
+    if (hasFile) {
+        // Upload file with optional text and parent_id
+        const fd = new FormData();
+        fd.append('file', _stagedFile);
+        if (text) fd.append('message', text);
+        if (_replyTo) fd.append('parent_id', _replyTo.id);
+        fd.append('csrfmiddlewaretoken', CSRF);
+
+        fetch(UPLOAD_URL, { method: 'POST', body: fd, headers: { 'X-CSRFToken': CSRF } })
+        .then(r => r.json())
+        .then(data => {
+            if (data.message_id) {
+                pollMessages();
+                input.value = '';
+                input.style.height = 'auto';
+                clearReply();
+                clearAttachment();
+            } else if (data.error) {
+                alert('Upload failed: ' + data.error);
+            }
+        })
+        .catch(err => { console.error('Upload error:', err); alert('Upload failed'); });
+    } else {
+        // Text-only message
+        const payload = { message: text };
+        if (_replyTo) payload.parent_id = _replyTo.id;
+
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify(payload),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.id) {
+                appendMessage(data);
+                input.value = '';
+                input.style.height = 'auto';
+                clearReply();
+            }
+        })
+        .catch(err => console.error('Send error:', err));
+    }
+}
+
+// ===== Append Message =====
+function appendMessage(msg) {
+    if (msg.id <= lastMsgId) return;
+    lastMsgId = msg.id;
+
+    const empty = messagesDiv.querySelector('.empty-chat');
+    if (empty) empty.remove();
+
+    // System messages
+    if (msg.message_type === 'system') {
+        const div = document.createElement('div');
+        div.className = 'msg-system';
+        div.dataset.msgId = msg.id;
+        const span = document.createElement('span');
+        span.className = 'msg-system-text';
+        span.textContent = msg.message;
+        div.appendChild(span);
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return;
+    }
+
+    const isOwn = msg.user_id === CURRENT_USER_ID || msg.user === CURRENT_USER;
+    const initial = (msg.user || 'U').charAt(0).toUpperCase();
+
+    const group = document.createElement('div');
+    group.className = 'msg-group';
+    group.dataset.msgId = msg.id;
+
+    let actionsHtml = '';
+    if (isOwn) {
+        actionsHtml = `<button onclick="editMsg(${msg.id})" title="Edit"><i class="fas fa-pen"></i></button>
+            <button onclick="deleteMsg(${msg.id})" title="Delete"><i class="fas fa-trash"></i></button>`;
+    }
+
+    // Helper: escape HTML to prevent XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Quoted reply block
+    let replyHtml = '';
+    if (msg.parent_id && msg.parent_user) {
+        replyHtml = `<div class="reply-quote" onclick="scrollToMsg(${msg.parent_id})">
+            <span class="rq-user">${escapeHtml(msg.parent_user)}</span>
+            <span class="rq-text">${escapeHtml(msg.parent_text || '')}</span>
+        </div>`;
+    }
+
+    let attachHtml = '';
+    if (msg.attachments && msg.attachments.length) {
+        msg.attachments.forEach(a => {
+            attachHtml += a.is_image
+                ? `<div class="msg-attachment"><img src="${encodeURI(a.url)}" alt="${escapeHtml(a.filename)}" onclick="window.open(this.src)"></div>`
+                : `<div class="msg-attachment"><a href="${encodeURI(a.url)}" target="_blank"><i class="fas fa-paperclip"></i> ${escapeHtml(a.filename)} (${escapeHtml(a.size)})</a></div>`;
+        });
+    }
+
+    let reactionsHtml = renderReactions(msg.id, msg.reactions || []);
+    let pinnedIcon = msg.is_pinned ? `<i class="fas fa-thumbtack" style="color:var(--philips-blue);font-size:0.65rem;" title="Pinned"></i>` : '';
+    let pinnedClass = msg.is_pinned ? ' pinned-msg' : '';
+
+    group.innerHTML = `
+        <div class="msg-author"><span class="avatar">${escapeHtml(initial)}</span> ${escapeHtml(msg.user)} <span class="time">${escapeHtml(msg.created_at)}</span>${pinnedIcon}</div>
+        <div class="msg-bubble ${isOwn ? 'own' : ''}${pinnedClass}">
+            ${replyHtml}
+            ${escapeHtml(msg.message).replace(/\n/g, '<br>')}${attachHtml}
+            <div class="msg-reactions" id="reactions-${msg.id}">${reactionsHtml}</div>
+        </div>
+        <div class="msg-toolbar">
+            <button onclick="setReply(${msg.id}, '${escapeHtml(msg.user)}', '${escapeHtml(msg.message).replace(/'/g, "\\'").substring(0,120)}')" title="Reply"><i class="fas fa-reply"></i></button>
+            <button onclick="openEmojiPicker(${msg.id}, this)" title="React"><i class="fas fa-face-smile"></i></button>
+            <button onclick="pinMsg(${msg.id})" title="Pin"><i class="fas fa-thumbtack"></i></button>
+            ${actionsHtml}
+        </div>
+        <div class="emoji-picker-popup" id="emoji-picker-${msg.id}">
+            ${EMOJIS.map(e => `<button class="emoji-btn" onclick="reactMsg(${msg.id}, '${e}')">${e}</button>`).join('')}
+        </div>
+    `;
+    messagesDiv.appendChild(group);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function renderReactions(msgId, reactions) {
+    if (!reactions || !reactions.length) return '';
+    return reactions.map(r =>
+        `<span class="reaction-chip ${r.user_reacted ? 'user-reacted' : ''}"
+              onclick="reactMsg(${msgId}, '${r.emoji}')"
+              title="${r.users.join(', ')}">${r.emoji} <span class="count">${r.count}</span></span>`
+    ).join('');
+}
+
+// ===== Edit / Delete =====
+function editMsg(id) {
+    const group = document.querySelector(`[data-msg-id="${id}"]`);
+    const bubble = group.querySelector('.msg-bubble');
+    const currentText = bubble.childNodes[0].textContent.trim();
+    const newText = prompt('Edit message:', currentText);
+    if (newText === null || !newText.trim()) return;
+    fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ id: id, message: newText.trim() }),
+    }).then(r => r.json()).then(data => {
+        if (data.id) bubble.childNodes[0].textContent = data.message;
+        else { console.error('Edit failed:', data.error); alert('Edit failed.'); }
+    });
+}
+
+function deleteMsg(id) {
+    if (!confirm('Delete this message?')) return;
+    fetch(API_URL, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ id: id }),
+    }).then(r => r.json()).then(data => {
+        if (data.deleted) { const g = document.querySelector(`[data-msg-id="${id}"]`); if (g) g.remove(); }
+    });
+}
+
+// ===== Upload is now handled in sendMessage() =====
+
+// ===== Reactions =====
+function openEmojiPicker(msgId, btn) {
+    // Close all other pickers
+    document.querySelectorAll('.emoji-picker-popup.show').forEach(p => p.classList.remove('show'));
+    const picker = document.getElementById(`emoji-picker-${msgId}`);
+    if (picker) picker.classList.toggle('show');
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function handler(e) {
+            if (!picker.contains(e.target) && e.target !== btn) {
+                picker.classList.remove('show');
+                document.removeEventListener('click', handler);
+            }
+        });
+    }, 10);
+}
+
+function reactMsg(msgId, emoji) {
+    // Close picker
+    const picker = document.getElementById(`emoji-picker-${msgId}`);
+    if (picker) picker.classList.remove('show');
+
+    fetch(`${REACT_URL_BASE}${msgId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ emoji: emoji }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        const container = document.getElementById(`reactions-${msgId}`);
+        if (container) container.innerHTML = renderReactions(msgId, data.reactions || []);
+    });
+}
+
+// ===== Pin =====
+function pinMsg(msgId) {
+    fetch(`${PIN_URL_BASE}${msgId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.pinned !== undefined) {
+            // Refresh to get updated pinned list
+            location.reload();
+        }
+    });
+}
+
+// ===== Typing Indicator =====
+let lastTypingSignal = 0;
+function signalTyping() {
+    const now = Date.now();
+    if (now - lastTypingSignal < 2000) return; // throttle to every 2s
+    lastTypingSignal = now;
+    fetch(TYPING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({}),
+    }).catch(() => {});
+}
+
+function pollTyping() {
+    fetch(TYPING_URL)
+    .then(r => r.json())
+    .then(data => {
+        const indicator = document.getElementById('typingIndicator');
+        const textEl = document.getElementById('typingText');
+        if (data.typing && data.typing.length > 0) {
+            const names = data.typing;
+            if (names.length === 1) textEl.textContent = names[0] + ' is typing...';
+            else if (names.length === 2) textEl.textContent = names.join(' and ') + ' are typing...';
+            else textEl.textContent = names.slice(0, 2).join(', ') + ` and ${names.length - 2} more are typing...`;
+            indicator.classList.add('show');
+        } else {
+            indicator.classList.remove('show');
+        }
+    })
+    .catch(() => {});
+}
+
+// ===== Pinned banner =====
+function togglePinnedBanner() {
+    document.getElementById('pinnedBanner').classList.toggle('show');
+}
+function scrollToMsg(msgId) {
+    const el = document.querySelector(`[data-msg-id="${msgId}"]`);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.background = 'rgba(11,95,255,0.08)';
+        setTimeout(() => el.style.background = '', 2000);
+    }
+}
+
+// ===== Members Panel =====
+function toggleMembersPanel() {
+    const panel = document.getElementById('membersPanel');
+    const btn = document.getElementById('membersToggle');
+    if (panel) { panel.classList.toggle('open'); if (btn) btn.classList.toggle('active'); }
+}
+
+// ===== Add / Remove Members =====
+{% if room.room_type == 'group' %}
+function addMembers() {
+    const checked = document.querySelectorAll('.add-member-cb:checked');
+    const ids = Array.from(checked).map(c => c.value);
+    if (!ids.length) return alert('Select at least one member');
+    const shareHistory = document.getElementById('shareHistoryCb').checked;
+    fetch(ADD_MEMBER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ user_ids: ids, share_history: shareHistory }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.added && data.added.length) location.reload();
+        else alert('No members added');
+    });
+}
+
+function removeMember(userId, username) {
+    if (!confirm(`Remove ${username} from the group?`)) return;
+    fetch(`${REMOVE_MEMBER_URL_BASE}${userId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.removed) {
+            const card = document.getElementById(`member-${userId}`);
+            if (card) card.remove();
+        }
+    });
+}
+
+function leaveGroup() {
+    if (!confirm('Leave this group chat?')) return;
+    fetch(`${REMOVE_MEMBER_URL_BASE}${CURRENT_USER_ID}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.left) window.location.href = '{% url "team_chat" %}';
+    });
+}
+
+function filterAddPeople(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#addPeopleList .ppl-item').forEach(item => {
+        item.style.display = item.dataset.name.includes(q) ? 'flex' : 'none';
+    });
+}
+{% endif %}
+
+// ===== Polling =====
+function pollMessages() {
+    fetch(`${API_URL}?after=${lastMsgId}`)
+    .then(r => r.json())
+    .then(data => {
+        if (data.messages) {
+            data.messages.forEach(msg => {
+                appendMessage(msg);
+                // Also update reactions on existing messages
+                if (msg.reactions) {
+                    const container = document.getElementById(`reactions-${msg.id}`);
+                    if (container) container.innerHTML = renderReactions(msg.id, msg.reactions);
+                }
+            });
+        }
+    })
+    .catch(() => {});
+}
+
+// Poll messages every 5s, typing every 2s
+setInterval(pollMessages, 5000);
+setInterval(pollTyping, 2000);
+
+// Textarea auto-resize
+const textarea = document.getElementById('msgInput');
+textarea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// Close modals on backdrop
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+});
+
+// Init emoji pickers for server-rendered messages
+document.querySelectorAll('.emoji-picker-popup').forEach(picker => {
+    if (picker.children.length === 0) {
+        const msgId = picker.id.replace('emoji-picker-', '');
+        picker.innerHTML = EMOJIS.map(e => `<button class="emoji-btn" onclick="reactMsg(${msgId}, '${e}')">${e}</button>`).join('');
+    }
+});
+
+// Close emoji pickers on Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.emoji-picker-popup.show').forEach(p => p.classList.remove('show'));
+        document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+    }
+});
+</script>
+{% endblock %}

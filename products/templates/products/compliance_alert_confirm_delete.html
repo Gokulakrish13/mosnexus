@@ -1,0 +1,278 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Delete Compliance Alert - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --danger-red: #dc2626;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--danger-red) 0%, #b91c1c 50%, #991b1b 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(220, 38, 38, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header .icon-wrapper i { font-size: 2rem; }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .warning-banner {
+        background: #fef2f2;
+        border-bottom: 1px solid #fecaca;
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .warning-banner i {
+        color: var(--danger-red);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .warning-banner p {
+        color: #991b1b;
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .item-details {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .item-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 1.25rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .detail-item {
+        padding: 0.75rem 1rem;
+        background: var(--bg-light);
+        border-radius: 10px;
+    }
+
+    .detail-item .label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-item .value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .severity-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .severity-badge.critical { background: #fee2e2; color: #b91c1c; }
+    .severity-badge.urgent { background: #fef3c7; color: #b45309; }
+    .severity-badge.warning { background: #fff7ed; color: #c2410c; }
+    .severity-badge.info { background: #dbeafe; color: #1e40af; }
+
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-cancel:hover { background: var(--border-color); }
+
+    .btn-delete {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, var(--danger-red), #b91c1c);
+        color: white;
+        border: none;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+    }
+
+    @media (max-width: 640px) {
+        .detail-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="page-header">
+        <div class="icon-wrapper">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1>Delete Compliance Alert</h1>
+        <p class="subtitle">This action is permanent and cannot be undone</p>
+    </div>
+
+    <div class="delete-card">
+        <div class="warning-banner">
+            <i class="fas fa-shield-alt"></i>
+            <p><strong>Warning:</strong> You are about to permanently delete this compliance alert. All associated data including acknowledgement and resolution history will be lost.</p>
+        </div>
+
+        <div class="item-details">
+            <h3 class="item-title">
+                <i class="fas fa-bell" style="color: var(--danger-red);"></i>
+                {{ alert.title }}
+            </h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="label">Alert Type</div>
+                    <div class="value">{{ alert.get_alert_type_display }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Severity</div>
+                    <div class="value">
+                        <span class="severity-badge {{ alert.severity }}">{{ alert.get_severity_display }}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Status</div>
+                    <div class="value">{{ alert.get_status_display }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Created</div>
+                    <div class="value">{{ alert.created_at|date:"M d, Y" }}</div>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="label">Stream</div>
+                    <div class="value">{{ alert.stream }}</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'compliance_alerts_list' stream=stream %}" class="btn-cancel">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash"></i> Delete Permanently
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

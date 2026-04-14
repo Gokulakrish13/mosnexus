@@ -1,0 +1,775 @@
+{% load static %}
+{% load product_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Allocation Configuration - {{ BU_TITLE|default:'NexusOps' }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+        /* ── Top Nav ── */
+        .top-nav {
+            background: white; border-bottom: 1px solid #e0e0e0; padding: 0 2rem;
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-back {
+            display: flex; align-items: center; gap: 0.5rem; color: #333;
+            text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            padding: 0.5rem 1rem; border-radius: 6px; transition: background 0.2s;
+        }
+        .nav-back:hover { background: #f0f0f0; color: #333; }
+        .nav-title { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-logo { height: 32px; width: auto; }
+
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        /* ── Page Header ── */
+        .page-header {
+            background: linear-gradient(135deg, #0066cc, #004fa3);
+            border-radius: 14px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .page-header h1 { color: white; font-size: 1.5rem; font-weight: 600; margin: 0; }
+        .page-header p { color: rgba(255,255,255,0.85); font-size: 0.88rem; margin: 0.25rem 0 0; }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white; border: 1px solid #e0e0e0; border-radius: 12px;
+            padding: 1.15rem 1.25rem; display: flex; align-items: center; gap: 1rem;
+        }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .stat-icon.blue { background: #e8f0fe; color: #0066cc; }
+        .stat-icon.green { background: #e8f5e9; color: #2e7d32; }
+        .stat-icon.orange { background: #fff3e0; color: #e65100; }
+        .stat-icon.purple { background: #f3e5f5; color: #7b1fa2; }
+        .stat-icon.teal { background: #e0f7fa; color: #00838f; }
+        .stat-info h4 { font-size: 0.75rem; color: #888; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .stat-info .val { font-size: 1.5rem; font-weight: 700; color: #1a1a1a; }
+
+        /* ── Tabs ── */
+        .cfg-tabs {
+            display: flex; gap: 0; margin-bottom: 1.5rem; background: white;
+            border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;
+        }
+        .cfg-tab {
+            flex: 1; padding: 0.85rem 1.25rem; font-size: 0.88rem; font-weight: 500;
+            cursor: pointer; text-align: center; color: #666; background: white;
+            border: none; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 0.5rem; border-right: 1px solid #e0e0e0;
+        }
+        .cfg-tab:last-child { border-right: none; }
+        .cfg-tab:hover { background: #f0f7ff; color: #0066cc; }
+        .cfg-tab.active { background: #0066cc; color: white; font-weight: 600; }
+        .cfg-tab .tab-count {
+            font-size: 0.72rem; background: rgba(0,0,0,0.1); padding: 0.1rem 0.45rem;
+            border-radius: 10px; font-weight: 600;
+        }
+        .cfg-tab.active .tab-count { background: rgba(255,255,255,0.25); }
+
+        .cfg-panel { display: none; }
+        .cfg-panel.active { display: block; }
+
+        /* ── Config Section ── */
+        .config-section {
+            background: white; border: 1px solid #e0e0e0; border-radius: 12px;
+            padding: 1.5rem; margin-bottom: 1.25rem;
+        }
+        .config-section h2 {
+            font-size: 1.1rem; font-weight: 600; margin: 0 0 0.25rem; color: #1a1a1a;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .config-section .section-desc { font-size: 0.83rem; color: #888; margin-bottom: 1rem; }
+
+        /* ── Toolbar ── */
+        .config-toolbar {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;
+        }
+        .config-toolbar input[type="text"],
+        .config-toolbar input[type="number"] {
+            padding: 0.45rem 0.75rem; border: 1px solid #d0d5dd; border-radius: 8px;
+            font-size: 0.85rem; width: 240px;
+        }
+        .btn-action, .config-toolbar button {
+            padding: 0.45rem 0.9rem; border-radius: 8px; font-size: 0.83rem;
+            border: 1px solid #d0d5dd; cursor: pointer; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.15s;
+        }
+        .btn-primary { background: #0066cc; color: #fff; border-color: #0066cc; }
+        .btn-primary:hover { background: #004fa3; }
+        .btn-danger { background: #dc3545; color: #fff; border-color: #dc3545; }
+        .btn-danger:hover { background: #b02a37; }
+        .btn-secondary { background: #fff; color: #333; }
+        .btn-secondary:hover { background: #f5f5f5; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.78rem; }
+
+        /* ── Data Table ── */
+        .data-table {
+            width: 100%; border-collapse: collapse; font-size: 0.84rem;
+        }
+        .data-table th, .data-table td {
+            padding: 0.55rem 0.75rem; border-bottom: 1px solid #f0f0f0; text-align: left;
+        }
+        .data-table th {
+            background: #fafbfc; font-weight: 600; color: #666; font-size: 0.76rem;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .data-table tbody tr { transition: background 0.15s; }
+        .data-table tbody tr:hover { background: #f8fafc; }
+
+        .badge-comp {
+            display: inline-block; padding: 0.18rem 0.55rem; border-radius: 12px;
+            font-size: 0.76rem; font-weight: 600; background: #e8f0fe; color: #0066cc;
+        }
+        .badge-tag {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 10px;
+            font-size: 0.74rem; font-weight: 600;
+        }
+        .badge-tag.blue { background: #e8f0fe; color: #0066cc; }
+        .badge-tag.orange { background: #fff3e0; color: #e65100; }
+        .badge-tag.green { background: #e8f5e9; color: #2e7d32; }
+        .badge-tag.purple { background: #f3e5f5; color: #7b1fa2; }
+
+        /* ── Lookup Grid ── */
+        .lookup-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+        }
+        @media (max-width: 900px) { .lookup-grid { grid-template-columns: 1fr; } }
+
+        .lookup-card {
+            background: white; border: 1px solid #e0e0e0; border-radius: 12px;
+            padding: 1.25rem; display: flex; flex-direction: column;
+        }
+        .lookup-card h3 {
+            font-size: 0.95rem; font-weight: 600; margin: 0 0 0.75rem; color: #1a1a1a;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .lookup-add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .lookup-add-row input {
+            flex: 1; padding: 0.4rem 0.65rem; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 0.83rem;
+        }
+        .lookup-list { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+        .lookup-list li {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.4rem 0.55rem; border-radius: 6px; font-size: 0.84rem;
+            transition: background 0.15s; border-bottom: 1px solid #f5f5f5;
+        }
+        .lookup-list li:hover { background: #f8fafc; }
+        .lookup-list li .lk-name { flex: 1; color: #333; }
+        .lookup-list li .lk-actions { display: flex; gap: 0.3rem; opacity: 0; transition: opacity 0.15s; }
+        .lookup-list li:hover .lk-actions { opacity: 1; }
+        .lookup-list li .lk-actions button {
+            background: none; border: none; cursor: pointer; font-size: 0.82rem; padding: 0.15rem;
+        }
+        .lookup-list li .lk-actions .edit-btn { color: #0066cc; }
+        .lookup-list li .lk-actions .del-btn { color: #dc3545; }
+        .lookup-list .empty-msg { color: #aaa; font-size: 0.82rem; padding: 0.75rem 0; text-align: center; }
+
+        /* ── Year Chips ── */
+        .year-chip {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 0.75rem; background: #e8f0fe; border: 1px solid #b3d4fc;
+            border-radius: 20px; font-size: 0.88rem; font-weight: 600; color: #0066cc;
+        }
+        .year-chip button {
+            background: none; border: none; cursor: pointer; font-size: 1.1rem;
+            color: #999; line-height: 1; padding: 0 0.15rem; transition: color 0.15s;
+        }
+        .year-chip button:hover { color: #dc3545; }
+
+        /* ── Modal ── */
+        .cfg-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1500; justify-content: center; align-items: center;
+        }
+        .cfg-modal-overlay.show { display: flex; }
+        .cfg-modal {
+            background: #fff; border-radius: 14px; width: 560px; max-width: 95vw; max-height: 90vh;
+            overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .cfg-modal-header {
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid #e0e0e0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .cfg-modal-header h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+        .cfg-modal-close {
+            background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666;
+            width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center;
+            justify-content: center; transition: background 0.15s;
+        }
+        .cfg-modal-close:hover { background: #f0f0f0; }
+        .cfg-modal-body { padding: 1.5rem; }
+        .cfg-modal-body .form-group { margin-bottom: 1rem; }
+        .cfg-modal-body .form-group label {
+            display: block; font-weight: 600; font-size: 0.83rem; margin-bottom: 0.25rem; color: #444;
+        }
+        .cfg-modal-body .form-group input,
+        .cfg-modal-body .form-group select {
+            width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d0d5dd;
+            border-radius: 8px; font-size: 0.88rem; transition: border-color 0.15s;
+        }
+        .cfg-modal-body .form-group input:focus,
+        .cfg-modal-body .form-group select:focus {
+            border-color: #0066cc; outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+        .cfg-modal-body .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .cfg-modal-footer {
+            padding: 1rem 1.5rem; border-top: 1px solid #e0e0e0;
+            display: flex; justify-content: flex-end; gap: 0.5rem;
+        }
+        .cfg-modal-footer button {
+            padding: 0.5rem 1.25rem; border-radius: 8px; font-size: 0.88rem;
+            border: 1px solid #d0d5dd; cursor: pointer;
+        }
+
+        /* Toast */
+        .toast-notification {
+            position: fixed; bottom: 2rem; right: 2rem; background: white; padding: 1rem 1.5rem;
+            border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex;
+            align-items: center; gap: 0.75rem; z-index: 2000; transform: translateX(120%);
+            transition: transform 0.3s ease; font-size: 0.88rem; font-weight: 500;
+        }
+        .toast-notification.show { transform: translateX(0); }
+        .toast-notification.success { border-left: 4px solid #1e7e34; }
+        .toast-notification.error { border-left: 4px solid #c62828; }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 1rem; }
+            .cfg-tabs { flex-direction: column; }
+            .lookup-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'project_status' %}" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Projects</a>
+            <span class="nav-title">Resource Allocation Configuration</span>
+        </div>
+        <div class="nav-right">
+            <img src="{% static 'products/philips.png' %}" alt="Philips" class="nav-logo">
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1><i class="fas fa-cog"></i> Resource Configuration</h1>
+                <p>Manage components, persons, lookup lists, and allocation years</p>
+            </div>
+            <div>
+                <a href="{% url 'project_status' %}" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);padding:0.5rem 1rem;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:500;display:inline-flex;align-items:center;gap:0.35rem;">
+                    <i class="fas fa-th"></i> Allocation Grid
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                <div class="stat-info"><h4>Persons</h4><div class="val">{{ persons|length }}</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-puzzle-piece"></i></div>
+                <div class="stat-info"><h4>Components</h4><div class="val">{{ components|length }}</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-user-tie"></i></div>
+                <div class="stat-info"><h4>Managers</h4><div class="val">{{ managers|length }}</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="stat-info"><h4>Locations</h4><div class="val">{{ locations|length }}</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon teal"><i class="fas fa-id-badge"></i></div>
+                <div class="stat-info"><h4>Roles</h4><div class="val">{{ roles|length }}</div></div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="cfg-tabs">
+            <button class="cfg-tab active" onclick="switchTab('persons')">
+                <i class="fas fa-users"></i> Persons <span class="tab-count">{{ persons|length }}</span>
+            </button>
+            <button class="cfg-tab" onclick="switchTab('components')">
+                <i class="fas fa-puzzle-piece"></i> Components <span class="tab-count">{{ components|length }}</span>
+            </button>
+            <button class="cfg-tab" onclick="switchTab('lookups')">
+                <i class="fas fa-list-ul"></i> Lookups
+            </button>
+            <button class="cfg-tab" onclick="switchTab('years')">
+                <i class="fas fa-calendar-alt"></i> Years <span class="tab-count">{{ years|length }}</span>
+            </button>
+        </div>
+
+        <!-- ═══ TAB: Persons ═══ -->
+        <div class="cfg-panel active" id="panel-persons">
+            <div class="config-section">
+                <h2><i class="fas fa-users" style="color:#0066cc;"></i> Resource Persons</h2>
+                <p class="section-desc">Pre-configure persons here. They can be quickly added to the allocation grid.</p>
+                <div class="config-toolbar">
+                    <input type="text" id="personSearchInput" placeholder="Search by name, emp ID, role, manager..." oninput="filterPersonTable()">
+                    <button class="btn-primary" onclick="openPersonModal()"><i class="fas fa-user-plus"></i> Add Person</button>
+                </div>
+                <div style="overflow-x:auto;">
+                <table class="data-table" id="personTable">
+                    <thead>
+                        <tr>
+                            <th>Component</th><th>Employee Type</th><th>Name</th><th>Emp ID</th>
+                            <th>Manager</th><th>Location</th><th>Role</th><th style="width:100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personTableBody">
+                        {% for p in persons %}
+                        <tr data-id="{{ p.id }}" class="person-row">
+                            <td>{% if p.component %}<span class="badge-comp">{{ p.component.name }}</span>{% else %}<span style="color:#ccc;">—</span>{% endif %}</td>
+                            <td><span class="badge-tag {% if p.fte_type == 'FTE' %}blue{% elif p.fte_type == 'Contractor' %}orange{% elif p.fte_type == 'Intern' %}green{% else %}purple{% endif %}">{{ p.fte_type }}</span></td>
+                            <td><strong>{{ p.name }}</strong></td>
+                            <td style="font-family:monospace;font-size:0.82rem;">{{ p.emp_id|default:"—" }}</td>
+                            <td>{{ p.manager|default:"—" }}</td>
+                            <td>{{ p.location|default:"—" }}</td>
+                            <td>{{ p.role|default:"—" }}</td>
+                            <td>
+                                <button class="btn-action btn-secondary btn-sm"
+                                    onclick="editPerson({{ p.id }}, '{{ p.name|escapejs }}', '{{ p.emp_id|escapejs }}', '{{ p.fte_type }}', '{{ p.role|default:''|escapejs }}', '{{ p.manager|default:''|escapejs }}', '{{ p.location|default:''|escapejs }}', '{{ p.component_id|default:'' }}')">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="btn-action btn-danger btn-sm" onclick="deletePerson({{ p.id }}, '{{ p.name|escapejs }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="personEmptyRow"><td colspan="8" style="text-align:center;padding:2.5rem;color:#aaa;">
+                            <i class="fas fa-user-slash" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No resource persons configured yet.
+                        </td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: Components ═══ -->
+        <div class="cfg-panel" id="panel-components">
+            <div class="config-section">
+                <h2><i class="fas fa-puzzle-piece" style="color:#0066cc;"></i> Component Types</h2>
+                <p class="section-desc">Define component/user types like FE, CBE, SW, HW. These appear as a column in the allocation grid.</p>
+                <div class="config-toolbar">
+                    <button class="btn-primary" onclick="openCompModal()"><i class="fas fa-plus"></i> Add Component Type</button>
+                </div>
+                <table class="data-table" id="compTable">
+                    <thead><tr><th>Name</th><th>Description</th><th>Sort Order</th><th style="width:100px;">Actions</th></tr></thead>
+                    <tbody id="compTableBody">
+                        {% for c in components %}
+                        <tr data-id="{{ c.id }}">
+                            <td><span class="badge-comp">{{ c.name }}</span></td>
+                            <td>{{ c.description|default:"—" }}</td>
+                            <td>{{ c.sort_order }}</td>
+                            <td>
+                                <button class="btn-action btn-secondary btn-sm" onclick="editComp({{ c.id }}, '{{ c.name|escapejs }}', '{{ c.description|default:''|escapejs }}', {{ c.sort_order }})"><i class="fas fa-pen"></i></button>
+                                <button class="btn-action btn-danger btn-sm" onclick="deleteComp({{ c.id }}, '{{ c.name|escapejs }}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="compEmptyRow"><td colspan="4" style="text-align:center;padding:2.5rem;color:#aaa;">
+                            <i class="fas fa-puzzle-piece" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No component types configured yet.
+                        </td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: Lookups (Manager, Location, Role) ═══ -->
+        <div class="cfg-panel" id="panel-lookups">
+            <div class="lookup-grid">
+                <!-- Managers -->
+                <div class="lookup-card">
+                    <h3><i class="fas fa-user-tie" style="color:#e65100;"></i> Managers / Depts</h3>
+                    <div class="lookup-add-row">
+                        <input type="text" id="addManagerInput" placeholder="Add manager name..." onkeydown="if(event.key==='Enter')addLookup('manager')">
+                        <button class="btn-primary btn-sm" onclick="addLookup('manager')"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <ul class="lookup-list" id="managerList">
+                        {% for m in managers %}
+                        <li data-id="{{ m.id }}">
+                            <span class="lk-name">{{ m.name }}</span>
+                            <span class="lk-actions">
+                                <button class="edit-btn" onclick="editLookup('manager', {{ m.id }}, '{{ m.name|escapejs }}')" title="Edit"><i class="fas fa-pen"></i></button>
+                                <button class="del-btn" onclick="deleteLookup('manager', {{ m.id }}, '{{ m.name|escapejs }}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="empty-msg">No managers configured yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Locations -->
+                <div class="lookup-card">
+                    <h3><i class="fas fa-map-marker-alt" style="color:#7b1fa2;"></i> Locations</h3>
+                    <div class="lookup-add-row">
+                        <input type="text" id="addLocationInput" placeholder="Add location..." onkeydown="if(event.key==='Enter')addLookup('location')">
+                        <button class="btn-primary btn-sm" onclick="addLookup('location')"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <ul class="lookup-list" id="locationList">
+                        {% for l in locations %}
+                        <li data-id="{{ l.id }}">
+                            <span class="lk-name">{{ l.name }}</span>
+                            <span class="lk-actions">
+                                <button class="edit-btn" onclick="editLookup('location', {{ l.id }}, '{{ l.name|escapejs }}')" title="Edit"><i class="fas fa-pen"></i></button>
+                                <button class="del-btn" onclick="deleteLookup('location', {{ l.id }}, '{{ l.name|escapejs }}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="empty-msg">No locations configured yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Roles -->
+                <div class="lookup-card">
+                    <h3><i class="fas fa-id-badge" style="color:#00838f;"></i> Roles</h3>
+                    <div class="lookup-add-row">
+                        <input type="text" id="addRoleInput" placeholder="Add role title..." onkeydown="if(event.key==='Enter')addLookup('role')">
+                        <button class="btn-primary btn-sm" onclick="addLookup('role')"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <ul class="lookup-list" id="roleList">
+                        {% for r in roles %}
+                        <li data-id="{{ r.id }}">
+                            <span class="lk-name">{{ r.name }}</span>
+                            <span class="lk-actions">
+                                <button class="edit-btn" onclick="editLookup('role', {{ r.id }}, '{{ r.name|escapejs }}')" title="Edit"><i class="fas fa-pen"></i></button>
+                                <button class="del-btn" onclick="deleteLookup('role', {{ r.id }}, '{{ r.name|escapejs }}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="empty-msg">No roles configured yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: Years ═══ -->
+        <div class="cfg-panel" id="panel-years">
+            <div class="config-section">
+                <h2><i class="fas fa-calendar-alt" style="color:#0066cc;"></i> Allocation Years</h2>
+                <p class="section-desc">Manage which years are available in the allocation grid's year dropdown.</p>
+                <div class="config-toolbar">
+                    <input type="number" id="newYearInput" placeholder="e.g. 2027" min="2000" max="2100" style="width:130px;" onkeydown="if(event.key==='Enter')addYear()">
+                    <button class="btn-primary" onclick="addYear()"><i class="fas fa-plus"></i> Add Year</button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:0.5rem;padding-top:0.5rem;" id="yearChipsContainer">
+                    {% for y in years %}
+                    <div class="year-chip">
+                        <span>{{ y }}</span>
+                        <button onclick="removeYear({{ y }})" title="Remove year">&times;</button>
+                    </div>
+                    {% empty %}
+                    <p style="color:#aaa;font-size:0.85rem;">No years configured yet. Add a year above.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Component Type Modal ═══ -->
+    <div class="cfg-modal-overlay" id="compModal">
+        <div class="cfg-modal">
+            <div class="cfg-modal-header">
+                <h3 id="compModalTitle"><i class="fas fa-puzzle-piece"></i> Add Component Type</h3>
+                <button class="cfg-modal-close" onclick="closeCompModal()">&times;</button>
+            </div>
+            <div class="cfg-modal-body">
+                <input type="hidden" id="compId">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="compName" placeholder="e.g. FE, CBE, SW, HW" maxlength="50">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="compDesc" placeholder="Optional description">
+                    </div>
+                    <div class="form-group">
+                        <label>Sort Order</label>
+                        <input type="number" id="compSort" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="cfg-modal-footer">
+                <button class="btn-secondary" onclick="closeCompModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveComp()"><i class="fas fa-check"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Person Modal ═══ -->
+    <div class="cfg-modal-overlay" id="personModal">
+        <div class="cfg-modal">
+            <div class="cfg-modal-header">
+                <h3 id="personModalTitle"><i class="fas fa-user-plus"></i> Add Resource Person</h3>
+                <button class="cfg-modal-close" onclick="closePersonModal()">&times;</button>
+            </div>
+            <div class="cfg-modal-body">
+                <input type="hidden" id="personId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="personName" placeholder="e.g. Gokulakrishnan">
+                    </div>
+                    <div class="form-group">
+                        <label>Employee ID</label>
+                        <input type="text" id="personEmpId" placeholder="e.g. 320211678">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Component</label>
+                        <select id="personComponent">
+                            <option value="">— None —</option>
+                            {% for c in components %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Employee Type</label>
+                        <select id="personFteType">
+                            <option value="FTE">FTE</option>
+                            <option value="Contractor">Contractor</option>
+                            <option value="Intern">Intern</option>
+                            <option value="Vendor">Vendor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Manager / Dept</label>
+                        <select id="personManager">
+                            <option value="">— Select —</option>
+                            {% for m in managers %}
+                            <option value="{{ m.name }}">{{ m.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <select id="personLocation">
+                            <option value="">— Select —</option>
+                            {% for l in locations %}
+                            <option value="{{ l.name }}">{{ l.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="personRole">
+                        <option value="">— Select —</option>
+                        {% for r in roles %}
+                        <option value="{{ r.name }}">{{ r.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="cfg-modal-footer">
+                <button class="btn-secondary" onclick="closePersonModal()">Cancel</button>
+                <button class="btn-primary" onclick="savePerson()"><i class="fas fa-check"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        /* ── Helpers ── */
+        function getCookie(name) {
+            let v = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach(c => {
+                    c = c.trim();
+                    if (c.substring(0, name.length + 1) === (name + '='))
+                        v = decodeURIComponent(c.substring(name.length + 1));
+                });
+            }
+            return v;
+        }
+
+        function showToast(msg, type) {
+            const t = document.createElement('div');
+            t.className = `toast-notification ${type || 'success'}`;
+            t.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${msg}`;
+            document.body.appendChild(t);
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+        }
+
+        /* ── Tab Switch ── */
+        const TAB_NAMES = ['persons','components','lookups','years'];
+        function switchTab(name) {
+            document.querySelectorAll('.cfg-tab').forEach((t, i) => t.classList.toggle('active', TAB_NAMES[i] === name));
+            document.querySelectorAll('.cfg-panel').forEach(p => p.classList.remove('active'));
+            const el = document.getElementById('panel-' + name);
+            if (el) el.classList.add('active');
+            history.replaceState(null, '', '#' + name);
+        }
+        /* Restore active tab from URL hash on page load */
+        (function() {
+            const h = (location.hash || '').replace('#', '');
+            if (TAB_NAMES.includes(h)) switchTab(h);
+        })();
+
+        /* ══════════════════════════════════════════════════════════
+         *  COMPONENT TYPE CRUD
+         * ══════════════════════════════════════════════════════════ */
+        function openCompModal() {
+            document.getElementById('compId').value = '';
+            document.getElementById('compName').value = '';
+            document.getElementById('compDesc').value = '';
+            document.getElementById('compSort').value = '0';
+            document.getElementById('compModalTitle').innerHTML = '<i class="fas fa-puzzle-piece"></i> Add Component Type';
+            document.getElementById('compModal').classList.add('show');
+        }
+        function editComp(id, name, desc, sort) {
+            document.getElementById('compId').value = id;
+            document.getElementById('compName').value = name;
+            document.getElementById('compDesc').value = desc;
+            document.getElementById('compSort').value = sort;
+            document.getElementById('compModalTitle').innerHTML = '<i class="fas fa-puzzle-piece"></i> Edit Component Type';
+            document.getElementById('compModal').classList.add('show');
+        }
+        function closeCompModal() { document.getElementById('compModal').classList.remove('show'); }
+        function saveComp() {
+            const name = document.getElementById('compName').value.trim();
+            if (!name) { showToast('Name is required', 'error'); return; }
+            fetch('{% url "resource_component_api" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ id: document.getElementById('compId').value || null, name, description: document.getElementById('compDesc').value.trim(), sort_order: parseInt(document.getElementById('compSort').value) || 0 })
+            }).then(r => r.json()).then(d => { if (d.success) { showToast(d.message); closeCompModal(); setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function deleteComp(id, name) {
+            if (!confirm(`Delete component type "${name}"?`)) return;
+            fetch('{% url "resource_component_api" %}', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+
+        /* ══════════════════════════════════════════════════════════
+         *  PERSON CRUD
+         * ══════════════════════════════════════════════════════════ */
+        function openPersonModal() {
+            document.getElementById('personId').value = '';
+            document.getElementById('personName').value = '';
+            document.getElementById('personEmpId').value = '';
+            document.getElementById('personComponent').value = '';
+            document.getElementById('personFteType').value = 'FTE';
+            document.getElementById('personRole').value = '';
+            document.getElementById('personManager').value = '';
+            document.getElementById('personLocation').value = '';
+            document.getElementById('personModalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Add Resource Person';
+            document.getElementById('personModal').classList.add('show');
+        }
+        function editPerson(id, name, empId, fteType, role, manager, location, componentId) {
+            document.getElementById('personId').value = id;
+            document.getElementById('personName').value = name;
+            document.getElementById('personEmpId').value = empId;
+            document.getElementById('personFteType').value = fteType;
+            setDropdownOrAdd('personRole', role);
+            setDropdownOrAdd('personManager', manager);
+            setDropdownOrAdd('personLocation', location);
+            document.getElementById('personComponent').value = componentId || '';
+            document.getElementById('personModalTitle').innerHTML = '<i class="fas fa-user-edit"></i> Edit Resource Person';
+            document.getElementById('personModal').classList.add('show');
+        }
+        function setDropdownOrAdd(selectId, value) {
+            const sel = document.getElementById(selectId);
+            if (!value) { sel.value = ''; return; }
+            for (let o of sel.options) { if (o.value === value) { sel.value = value; return; } }
+            const o = document.createElement('option');
+            o.value = value; o.text = value + ' (unlisted)'; sel.appendChild(o); sel.value = value;
+        }
+        function closePersonModal() { document.getElementById('personModal').classList.remove('show'); }
+        function savePerson() {
+            const name = document.getElementById('personName').value.trim();
+            if (!name) { showToast('Name is required', 'error'); return; }
+            fetch('{% url "resource_person_api" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ id: document.getElementById('personId').value || null, name, emp_id: document.getElementById('personEmpId').value.trim(), fte_type: document.getElementById('personFteType').value, role: document.getElementById('personRole').value, manager: document.getElementById('personManager').value, location: document.getElementById('personLocation').value, component_id: document.getElementById('personComponent').value || null })
+            }).then(r => r.json()).then(d => { if (d.success) { showToast(d.message); closePersonModal(); setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function deletePerson(id, name) {
+            if (!confirm(`Remove "${name}" from the resource persons pool?`)) return;
+            fetch('{% url "resource_person_api" %}', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id, deactivate: true }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function filterPersonTable() {
+            const q = document.getElementById('personSearchInput').value.toLowerCase();
+            document.querySelectorAll('#personTableBody .person-row').forEach(r => { r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+        }
+
+        /* ══════════════════════════════════════════════════════════
+         *  LOOKUP CRUD (Manager, Location, Role)
+         * ══════════════════════════════════════════════════════════ */
+        function getLookupUrl(type) {
+            return '{% url "resource_lookup_api" "manager" %}'.replace('/manager/', '/' + type + '/');
+        }
+        function addLookup(type) {
+            const inp = document.getElementById('add' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input');
+            const name = (inp.value || '').trim();
+            if (!name) { showToast('Enter a name first', 'error'); return; }
+            fetch(getLookupUrl(type), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ name }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); inp.value = ''; location.hash = 'lookups'; setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function editLookup(type, id, currentName) {
+            const n = prompt(`Rename "${currentName}" to:`, currentName);
+            if (!n || n.trim() === currentName) return;
+            fetch(getLookupUrl(type), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id, name: n.trim() }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); location.hash = 'lookups'; setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function deleteLookup(type, id, name) {
+            if (!confirm(`Remove "${name}"?`)) return;
+            fetch(getLookupUrl(type), { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ id }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); location.hash = 'lookups'; setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+
+        /* ══════════════════════════════════════════════════════════
+         *  YEAR MANAGEMENT
+         * ══════════════════════════════════════════════════════════ */
+        function addYear() {
+            const inp = document.getElementById('newYearInput');
+            const y = parseInt(inp.value);
+            if (isNaN(y) || y < 2000 || y > 2100) { showToast('Enter a valid year (2000–2100)', 'error'); return; }
+            fetch('{% url "resource_year_api" %}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ year: y }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); inp.value = ''; setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+        function removeYear(year) {
+            if (!confirm('Remove year ' + year + '?')) return;
+            fetch('{% url "resource_year_api" %}', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify({ year }) })
+            .then(r => r.json()).then(d => { if (d.success) { showToast(d.message); setTimeout(() => location.reload(), 500); } else showToast(d.error||'Error','error'); }).catch(() => showToast('Network error','error'));
+        }
+    </script>
+</body>
+</html>

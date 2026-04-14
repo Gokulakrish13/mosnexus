@@ -1,0 +1,903 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}Public Requests — {{ BU_TITLE|default:'NexusOps' }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0B5FFF;
+        --primary-dark: #0747A6;
+        --primary-light: #deebff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+        --danger-red: #ef4444;
+        --warning-orange: #f59e0b;
+        --info-blue: #3b82f6;
+        --success-green: #10b981;
+    }
+
+    .dashboard-container { max-width: 1500px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #0747A6 50%, #003380 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; }
+    .page-header p { font-size: .9rem; opacity: .85; margin: .25rem 0 0; }
+
+    /* Tabs */
+    .tab-bar {
+        display: flex; gap: 0; margin-bottom: 1.75rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .tab-btn {
+        padding: .85rem 1.5rem;
+        font-size: .92rem; font-weight: 700;
+        color: var(--text-secondary);
+        background: none; border: none; cursor: pointer;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: all .15s;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn .tab-count {
+        font-size: .72rem; font-weight: 800;
+        background: var(--border-color); color: var(--text-secondary);
+        border-radius: 10px; padding: 2px 8px; min-width: 22px; text-align: center;
+    }
+    .tab-btn.active .tab-count { background: var(--primary-light); color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Stats */
+    .stats-row {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .stat-card {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: 14px; padding: 1.15rem;
+        display: flex; align-items: center; gap: .85rem;
+        box-shadow: var(--card-shadow);
+    }
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 11px;
+        display: grid; place-items: center; font-size: 1rem;
+    }
+    .stat-icon.blue   { background: #dbeafe; color: #2563eb; }
+    .stat-icon.green  { background: #d1fae5; color: #059669; }
+    .stat-icon.orange { background: #fef3c7; color: #d97706; }
+    .stat-icon.purple { background: #ede9fe; color: #7c3aed; }
+    .stat-icon.red    { background: #fee2e2; color: #dc2626; }
+    .stat-icon.rose   { background: #ffe4e6; color: #e11d48; }
+    .stat-icon.amber  { background: #fef3c7; color: #b45309; }
+    .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+    .stat-label { font-size: .76rem; color: var(--text-secondary); }
+
+    /* Filters */
+    .filters-bar {
+        display: flex; gap: .75rem; margin-bottom: 1.5rem;
+        flex-wrap: wrap; align-items: center;
+    }
+    .filters-bar input,
+    .filters-bar select {
+        padding: 9px 14px; border: 1px solid var(--border-color);
+        border-radius: 10px; font-size: .88rem;
+        background: #fff; outline: none; transition: border-color .15s;
+    }
+    .filters-bar input:focus,
+    .filters-bar select:focus { border-color: var(--primary); }
+    .filters-bar input { min-width: 240px; }
+    .btn-filter {
+        padding: 9px 18px; border-radius: 10px; font-size: .85rem; font-weight: 600;
+        border: none; cursor: pointer; transition: all .15s;
+    }
+    .btn-filter.primary { background: var(--primary); color: #fff; }
+    .btn-filter.primary:hover { background: var(--primary-dark); }
+    .btn-filter.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+    .btn-filter.ghost:hover { background: var(--bg-light); }
+
+    /* Table */
+    .table-wrap {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg-light); }
+    th {
+        padding: .85rem 1rem; font-size: .76rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .03em;
+        color: var(--text-secondary); text-align: left;
+        border-bottom: 2px solid var(--border-color);
+    }
+    td {
+        padding: .85rem 1rem; font-size: .87rem; color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color); vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* Badges */
+    .badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 4px 10px; border-radius: 6px;
+        font-size: .73rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .02em;
+    }
+    .badge-new           { background: #dbeafe; color: #1d4ed8; }
+    .badge-contacted     { background: #fef3c7; color: #92400e; }
+    .badge-scheduled     { background: #ede9fe; color: #5b21b6; }
+    .badge-completed     { background: #d1fae5; color: #065f46; }
+    .badge-declined      { background: #fee2e2; color: #991b1b; }
+    .badge-investigating { background: #fef3c7; color: #92400e; }
+    .badge-confirmed     { background: #ede9fe; color: #5b21b6; }
+    .badge-resolved      { background: #d1fae5; color: #065f46; }
+    .badge-dismissed     { background: #f1f5f9; color: #64748b; }
+
+    .badge-low      { background: #d1fae5; color: #065f46; }
+    .badge-medium   { background: #fef3c7; color: #92400e; }
+    .badge-high     { background: #fed7aa; color: #9a3412; }
+    .badge-critical { background: #fee2e2; color: #991b1b; }
+
+    /* Actions */
+    .action-cell { position: relative; }
+    .action-btn {
+        padding: 6px 12px; border-radius: 8px;
+        border: 1px solid var(--border-color); background: #fff;
+        cursor: pointer; font-size: .82rem;
+        display: flex; align-items: center; gap: 4px; transition: all .15s;
+    }
+    .action-btn:hover { background: var(--bg-light); }
+    .action-dropdown {
+        display: none; position: fixed;
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.12);
+        min-width: 180px; z-index: 9999; padding: 6px;
+    }
+    .action-dropdown.open { display: block; }
+    .action-dropdown button {
+        width: 100%; padding: 8px 12px; border: none; background: none;
+        text-align: left; font-size: .84rem; border-radius: 8px;
+        cursor: pointer; display: flex; align-items: center; gap: 8px;
+        color: var(--text-primary); transition: background .1s;
+    }
+    .action-dropdown button:hover { background: var(--bg-light); }
+    .action-dropdown button i { width: 16px; text-align: center; }
+
+    .notes-cell textarea {
+        width: 100%; min-width: 140px; padding: 6px 10px;
+        border: 1px solid var(--border-color); border-radius: 8px;
+        font-size: .82rem; resize: vertical; min-height: 36px; max-height: 90px;
+        font-family: inherit; transition: border-color .15s;
+    }
+    .notes-cell textarea:focus { border-color: var(--primary); outline: none; }
+
+    .empty-state {
+        text-align: center; padding: 3.5rem 2rem; color: var(--text-secondary);
+    }
+    .empty-state i { font-size: 2.5rem; opacity: .3; margin-bottom: .75rem; display: block; }
+
+    .toast {
+        position: fixed; bottom: 2rem; right: 2rem;
+        padding: .75rem 1.25rem; border-radius: 10px;
+        color: #fff; font-size: .88rem; font-weight: 600;
+        z-index: 9999; opacity: 0; transform: translateY(10px);
+        transition: all .3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--success-green); }
+    .toast.error { background: var(--danger-red); }
+
+    /* Email Modal */
+    .email-overlay {
+        display: none; position: fixed; inset: 0; z-index: 10000;
+        background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
+        justify-content: center; align-items: center;
+    }
+    .email-overlay.open { display: flex; }
+    .email-modal {
+        background: #fff; border-radius: 20px; width: 600px; max-width: 95vw;
+        max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 25px 60px rgba(0,0,0,.25);
+        animation: emailSlideIn .25s ease-out;
+    }
+    @keyframes emailSlideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .email-modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-light); border-radius: 20px 20px 0 0;
+    }
+    .email-modal-header h3 { margin: 0; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .email-modal-close {
+        background: none; border: none; font-size: 1.2rem; cursor: pointer;
+        color: var(--text-secondary); padding: 4px; border-radius: 6px; transition: all .15s;
+    }
+    .email-modal-close:hover { background: var(--border-color); color: var(--text-primary); }
+    .email-modal-body { padding: 1.5rem; }
+    .email-field { margin-bottom: 1rem; }
+    .email-field label {
+        display: block; font-size: .78rem; font-weight: 700;
+        color: var(--text-secondary); text-transform: uppercase;
+        letter-spacing: .03em; margin-bottom: 6px;
+    }
+    .email-field input,
+    .email-field select,
+    .email-field textarea {
+        width: 100%; padding: 10px 14px;
+        border: 1px solid var(--border-color); border-radius: 10px;
+        font-size: .88rem; font-family: inherit;
+        transition: border-color .15s; outline: none; box-sizing: border-box;
+    }
+    .email-field input:focus,
+    .email-field select:focus,
+    .email-field textarea:focus { border-color: var(--primary); }
+    .email-field input[readonly] { background: var(--bg-light); color: var(--text-secondary); }
+    .email-field textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+    .email-template-bar {
+        display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .tpl-chip {
+        padding: 6px 14px; border-radius: 8px; font-size: .8rem; font-weight: 600;
+        border: 1px solid var(--border-color); background: #fff;
+        cursor: pointer; transition: all .15s;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .tpl-chip:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .tpl-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .email-modal-footer {
+        display: flex; justify-content: flex-end; gap: .75rem;
+        padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);
+    }
+    .btn-email {
+        padding: 10px 22px; border-radius: 10px; font-size: .88rem; font-weight: 600;
+        border: none; cursor: pointer; transition: all .15s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .btn-email.cancel { background: var(--bg-light); color: var(--text-secondary); }
+    .btn-email.cancel:hover { background: var(--border-color); }
+    .btn-email.send { background: var(--primary); color: #fff; }
+    .btn-email.send:hover { background: var(--primary-dark); }
+    .btn-email:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Email Mode Toggle (main page) */
+    .email-mode-bar {
+        display: flex; align-items: center; gap: 14px;
+        background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+        border-radius: 10px; padding: .5rem 1rem;
+    }
+    .email-mode-toggle {
+        display: flex; align-items: center; gap: 10px;
+    }
+    .email-mode-toggle .toggle-label {
+        font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.85);
+        display: flex; align-items: center; gap: 6px;
+    }
+    .email-mode-toggle .toggle-label i { font-size: .9rem; }
+    .toggle-switch {
+        position: relative; width: 44px; height: 24px;
+        background: rgba(255,255,255,.25); border-radius: 12px;
+        cursor: pointer; transition: background .2s; flex-shrink: 0;
+    }
+    .toggle-switch.active { background: #34d399; }
+    .toggle-switch .toggle-knob {
+        position: absolute; top: 3px; left: 3px;
+        width: 18px; height: 18px; border-radius: 50%;
+        background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+        transition: transform .2s;
+    }
+    .toggle-switch.active .toggle-knob { transform: translateX(20px); }
+    .email-mode-hint {
+        font-size: .72rem; color: rgba(255,255,255,.6);
+        font-style: italic; white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container { padding: 1rem; }
+        .page-header { padding: 1.5rem; flex-direction: column; align-items: flex-start; gap: .75rem; }
+        .email-mode-bar { flex-direction: column; gap: 4px; }
+        .email-mode-hint { white-space: normal; }
+        .filters-bar { flex-direction: column; }
+        .filters-bar input { min-width: auto; width: 100%; }
+        .table-wrap { overflow-x: auto; }
+        table { min-width: 800px; }
+        .tab-btn { padding: .7rem 1rem; font-size: .84rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-inbox"></i> Public Requests</h1>
+            <p>Demo requests & vulnerability reports from the public home page</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <!-- Email Mode Toggle -->
+            <div class="email-mode-bar">
+                <div class="email-mode-toggle">
+                    <span class="toggle-label" id="emailModeLabel">
+                        <i class="fas fa-desktop" id="emailModeIcon"></i>
+                        <span id="emailModeText">Open in Outlook</span>
+                    </span>
+                    <div class="toggle-switch {% if email_configured %}active{% endif %}" id="emailModeSwitch" onclick="toggleEmailMode()">
+                        <div class="toggle-knob"></div>
+                    </div>
+                    <span class="toggle-label">
+                        <i class="fas fa-server"></i>
+                        <span>Send from App</span>
+                    </span>
+                </div>
+                <div class="email-mode-hint" id="emailModeHint">
+                    {% if email_configured %}
+                    Emails sent from application server
+                    {% else %}
+                    SMTP not configured — opens in Outlook
+                    {% endif %}
+                </div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn-filter ghost" style="color:#fff;border-color:rgba(255,255,255,.3);text-decoration:none">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn {% if active_tab == 'demo' %}active{% endif %}" onclick="switchTab('demo')">
+            <i class="fas fa-calendar-check"></i> Demo Requests
+            <span class="tab-count">{{ demo_requests.count }}</span>
+        </button>
+        <button class="tab-btn {% if active_tab == 'vuln' %}active{% endif %}" onclick="switchTab('vuln')">
+            <i class="fas fa-bug"></i> Vulnerability Reports
+            <span class="tab-count">{{ vuln_reports.count }}</span>
+        </button>
+    </div>
+
+    <!-- ═══════════════ DEMO REQUESTS TAB ═══════════════ -->
+    <div class="tab-panel {% if active_tab == 'demo' %}active{% endif %}" id="tab-demo">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-inbox"></i></div>
+                <div><div class="stat-value">{{ demo_requests.count }}</div><div class="stat-label">Total</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-star"></i></div>
+                <div><div class="stat-value" id="dStatNew">0</div><div class="stat-label">New</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-calendar"></i></div>
+                <div><div class="stat-value" id="dStatScheduled">0</div><div class="stat-label">Scheduled</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-check-circle"></i></div>
+                <div><div class="stat-value" id="dStatCompleted">0</div><div class="stat-label">Completed</div></div>
+            </div>
+        </div>
+
+        <form method="get" class="filters-bar">
+            <input type="hidden" name="tab" value="demo">
+            <input type="text" name="demo_q" placeholder="Search name, email, org..." value="{{ demo_search_q }}">
+            <select name="demo_status">
+                <option value="">All Statuses</option>
+                {% for val, label in demo_status_choices %}
+                <option value="{{ val }}" {% if current_demo_status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filter primary"><i class="fas fa-search"></i> Filter</button>
+            {% if demo_search_q or current_demo_status %}
+            <a href="{% url 'public_requests_list' %}?tab=demo" class="btn-filter ghost" style="text-decoration:none"><i class="fas fa-times"></i> Clear</a>
+            {% endif %}
+        </form>
+
+        <div class="table-wrap">
+            {% if demo_requests %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Name</th><th>Email</th><th>Organization</th>
+                        <th>Preferred Date</th><th>Status</th><th>Admin Notes</th>
+                        <th>Submitted</th><th style="width:90px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="demoBody">
+                    {% for dr in demo_requests %}
+                    <tr id="d-row-{{ dr.pk }}" data-status="{{ dr.status }}">
+                        <td style="font-weight:600;color:var(--text-secondary)">{{ forloop.counter }}</td>
+                        <td style="font-weight:600">{{ dr.full_name }}</td>
+                        <td><a href="mailto:{{ dr.email }}" style="color:var(--primary)">{{ dr.email }}</a></td>
+                        <td>{{ dr.organization }}</td>
+                        <td>{{ dr.preferred_date|date:"M d, Y" }}</td>
+                        <td><span class="badge badge-{{ dr.status }}" id="d-badge-{{ dr.pk }}">{{ dr.get_status_display }}</span></td>
+                        <td class="notes-cell"><textarea id="d-notes-{{ dr.pk }}" placeholder="Add notes..." onchange="saveNotes('demo',{{ dr.pk }})">{{ dr.admin_notes }}</textarea></td>
+                        <td>{{ dr.created_at|date:"M d, Y" }}</td>
+                        <td class="action-cell">
+                            <button class="action-btn" onclick="toggleDD('d-dd-{{ dr.pk }}')"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="action-dropdown" id="d-dd-{{ dr.pk }}">
+                                <button onclick="updateStatus('demo',{{ dr.pk }},'new')" title="Mark as New"><i class="fas fa-star" style="color:#2563eb"></i> New</button>
+                                <button onclick="updateStatus('demo',{{ dr.pk }},'contacted')" title="Mark as Contacted"><i class="fas fa-phone" style="color:#d97706"></i> Contacted</button>
+                                <button onclick="updateStatus('demo',{{ dr.pk }},'scheduled')" title="Mark as Scheduled"><i class="fas fa-calendar" style="color:#7c3aed"></i> Scheduled</button>
+                                <button onclick="updateStatus('demo',{{ dr.pk }},'completed')" title="Mark as Completed"><i class="fas fa-check-circle" style="color:#059669"></i> Completed</button>
+                                <button onclick="updateStatus('demo',{{ dr.pk }},'declined')" title="Mark as Declined"><i class="fas fa-times-circle" style="color:#dc2626"></i> Declined</button>
+                                <hr style="margin:4px 0;border:none;border-top:1px solid var(--border-color)">
+                                <button onclick="openEmailModal('demo',{{ dr.pk }},'{{ dr.full_name|escapejs }}','{{ dr.email|escapejs }}','{{ dr.organization|escapejs }}')" title="Send email to requester"><i class="fas fa-envelope" style="color:var(--primary)"></i> Send Email</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-xmark"></i>
+                <h3>No demo requests found</h3>
+                <p>Requests submitted from the home page will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ═══════════════ VULNERABILITY REPORTS TAB ═══════════════ -->
+    <div class="tab-panel {% if active_tab == 'vuln' %}active{% endif %}" id="tab-vuln">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-bug"></i></div>
+                <div><div class="stat-value">{{ vuln_reports.count }}</div><div class="stat-label">Total</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-star"></i></div>
+                <div><div class="stat-value" id="vStatNew">0</div><div class="stat-label">New</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber"><i class="fas fa-search"></i></div>
+                <div><div class="stat-value" id="vStatInvestigating">0</div><div class="stat-label">Investigating</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rose"><i class="fas fa-exclamation-triangle"></i></div>
+                <div><div class="stat-value" id="vStatCritical">0</div><div class="stat-label">Critical</div></div>
+            </div>
+        </div>
+
+        <form method="get" class="filters-bar">
+            <input type="hidden" name="tab" value="vuln">
+            <input type="text" name="vuln_q" placeholder="Search name, email, description..." value="{{ vuln_search_q }}">
+            <select name="vuln_status">
+                <option value="">All Statuses</option>
+                {% for val, label in vuln_status_choices %}
+                <option value="{{ val }}" {% if current_vuln_status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="vuln_severity">
+                <option value="">All Severities</option>
+                {% for val, label in vuln_severity_choices %}
+                <option value="{{ val }}" {% if current_vuln_severity == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filter primary"><i class="fas fa-search"></i> Filter</button>
+            {% if vuln_search_q or current_vuln_status or current_vuln_severity %}
+            <a href="{% url 'public_requests_list' %}?tab=vuln" class="btn-filter ghost" style="text-decoration:none"><i class="fas fa-times"></i> Clear</a>
+            {% endif %}
+        </form>
+
+        <div class="table-wrap">
+            {% if vuln_reports %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Reporter</th><th>Email</th>
+                        <th>Severity</th><th>Description</th><th>Status</th>
+                        <th>Admin Notes</th><th>Submitted</th><th style="width:90px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vulnBody">
+                    {% for vr in vuln_reports %}
+                    <tr id="v-row-{{ vr.pk }}" data-status="{{ vr.status }}" data-severity="{{ vr.severity }}">
+                        <td style="font-weight:600;color:var(--text-secondary)">{{ forloop.counter }}</td>
+                        <td style="font-weight:600">{{ vr.reporter_name }}</td>
+                        <td><a href="mailto:{{ vr.reporter_email }}" style="color:var(--primary)">{{ vr.reporter_email }}</a></td>
+                        <td><span class="badge badge-{{ vr.severity }}">{{ vr.get_severity_display }}</span></td>
+                        <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ vr.description }}">{{ vr.description }}</td>
+                        <td><span class="badge badge-{{ vr.status }}" id="v-badge-{{ vr.pk }}">{{ vr.get_status_display }}</span></td>
+                        <td class="notes-cell"><textarea id="v-notes-{{ vr.pk }}" placeholder="Add notes..." onchange="saveNotes('vuln',{{ vr.pk }})">{{ vr.admin_notes }}</textarea></td>
+                        <td>{{ vr.created_at|date:"M d, Y" }}</td>
+                        <td class="action-cell">
+                            <button class="action-btn" onclick="toggleDD('v-dd-{{ vr.pk }}')"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="action-dropdown" id="v-dd-{{ vr.pk }}">
+                                <button onclick="updateStatus('vuln',{{ vr.pk }},'new')" title="Mark as New"><i class="fas fa-star" style="color:#2563eb"></i> New</button>
+                                <button onclick="updateStatus('vuln',{{ vr.pk }},'investigating')" title="Mark as Investigating"><i class="fas fa-search" style="color:#d97706"></i> Investigating</button>
+                                <button onclick="updateStatus('vuln',{{ vr.pk }},'confirmed')" title="Mark as Confirmed"><i class="fas fa-check" style="color:#7c3aed"></i> Confirmed</button>
+                                <button onclick="updateStatus('vuln',{{ vr.pk }},'resolved')" title="Mark as Resolved"><i class="fas fa-check-circle" style="color:#059669"></i> Resolved</button>
+                                <button onclick="updateStatus('vuln',{{ vr.pk }},'dismissed')" title="Mark as Dismissed"><i class="fas fa-ban" style="color:#64748b"></i> Dismissed</button>
+                                <hr style="margin:4px 0;border:none;border-top:1px solid var(--border-color)">
+                                <button onclick="openEmailModal('vuln',{{ vr.pk }},'{{ vr.reporter_name|escapejs }}','{{ vr.reporter_email|escapejs }}','')" title="Send email to reporter"><i class="fas fa-envelope" style="color:var(--primary)"></i> Send Email</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shield-halved"></i>
+                <h3>No vulnerability reports found</h3>
+                <p>Reports submitted from the Security modal will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Email Compose Modal -->
+<div class="email-overlay" id="emailOverlay">
+    <div class="email-modal">
+        <div class="email-modal-header">
+            <h3><i class="fas fa-paper-plane" style="color:var(--primary)"></i> <span id="emailModalTitle">Send Email</span></h3>
+            <button class="email-modal-close" onclick="closeEmailModal()">&times;</button>
+        </div>
+        <div class="email-modal-body">
+            <div class="email-field">
+                <label>To</label>
+                <input type="text" id="emailTo" readonly>
+            </div>
+            <div class="email-field">
+                <label>Template</label>
+                <div class="email-template-bar" id="emailTemplateBar"></div>
+            </div>
+            <div class="email-field">
+                <label>Subject</label>
+                <input type="text" id="emailSubject" placeholder="Email subject...">
+            </div>
+            <div class="email-field">
+                <label>Body</label>
+                <textarea id="emailBody" placeholder="Compose your email..."></textarea>
+            </div>
+        </div>
+        <div class="email-modal-footer">
+            <button class="btn-email cancel" onclick="closeEmailModal()">Cancel</button>
+            <button class="btn-email send" id="emailSendBtn" onclick="sendEmail()">
+                <i class="fas fa-paper-plane" id="emailSendIcon"></i> <span id="emailSendLabel">Send Email</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    'use strict';
+    const csrfToken = '{{ csrf_token }}';
+    let _emailMode = {{ email_configured|yesno:"true,false" }};  // true = app server, false = outlook
+
+    /* Extract BU prefix from current URL (e.g. /bu/mybu) */
+    const buPrefix = (function() {
+        const p = window.location.pathname;
+        const idx = p.indexOf('/public-requests');
+        return idx > 0 ? p.substring(0, idx) : '';
+    })();
+
+    /* Tab switching */
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        event.target.closest('.tab-btn').classList.add('active');
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        history.replaceState(null, '', url);
+    };
+
+    /* Stats */
+    function updateDemoStats() {
+        const rows = document.querySelectorAll('#demoBody tr[data-status]');
+        const c = { new: 0, scheduled: 0, completed: 0 };
+        rows.forEach(r => { const s = r.dataset.status; if (c[s] !== undefined) c[s]++; });
+        document.getElementById('dStatNew').textContent = c.new;
+        document.getElementById('dStatScheduled').textContent = c.scheduled;
+        document.getElementById('dStatCompleted').textContent = c.completed;
+    }
+    function updateVulnStats() {
+        const rows = document.querySelectorAll('#vulnBody tr[data-status]');
+        let newC = 0, invC = 0;
+        rows.forEach(r => { if (r.dataset.status === 'new') newC++; if (r.dataset.status === 'investigating') invC++; });
+        document.getElementById('vStatNew').textContent = newC;
+        document.getElementById('vStatInvestigating').textContent = invC;
+        const critRows = document.querySelectorAll('#vulnBody tr[data-severity="critical"]');
+        document.getElementById('vStatCritical').textContent = critRows.length;
+    }
+    updateDemoStats();
+    updateVulnStats();
+
+    /* Toast */
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast ' + type + ' show';
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    /* Dropdown */
+    window.toggleDD = function(id) {
+        document.querySelectorAll('.action-dropdown.open').forEach(d => {
+            if (d.id !== id) d.classList.remove('open');
+        });
+        const dd = document.getElementById(id);
+        if (!dd.classList.contains('open')) {
+            const btn = dd.previousElementSibling;
+            const rect = btn.getBoundingClientRect();
+            dd.style.top = (rect.bottom + 4) + 'px';
+            dd.style.left = Math.max(0, rect.right - 180) + 'px';
+        }
+        dd.classList.toggle('open');
+    };
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.action-cell'))
+            document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+    window.addEventListener('scroll', () => {
+        document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+    }, true);
+
+    /* Update status */
+    window.updateStatus = function(type, pk, status) {
+        const prefix = type === 'demo' ? 'd' : 'v';
+        const url = type === 'demo'
+            ? buPrefix + `/api/demo-request/${pk}/update/`
+            : buPrefix + `/api/vulnerability-report/${pk}/update/`;
+        const notes = document.getElementById(prefix + '-notes-' + pk).value;
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ status, admin_notes: notes })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                const badge = document.getElementById(prefix + '-badge-' + pk);
+                badge.textContent = data.status;
+                badge.className = 'badge badge-' + status;
+                document.getElementById(prefix + '-row-' + pk).dataset.status = status;
+                if (type === 'demo') updateDemoStats(); else updateVulnStats();
+                showToast('Status → ' + data.status, 'success');
+            } else {
+                showToast(data.error || 'Update failed', 'error');
+            }
+        })
+        .catch(() => showToast('Network error', 'error'));
+
+        document.getElementById(prefix + '-dd-' + pk).classList.remove('open');
+    };
+
+    /* Save notes */
+    window.saveNotes = function(type, pk) {
+        const prefix = type === 'demo' ? 'd' : 'v';
+        const url = type === 'demo'
+            ? buPrefix + `/api/demo-request/${pk}/update/`
+            : buPrefix + `/api/vulnerability-report/${pk}/update/`;
+        const notes = document.getElementById(prefix + '-notes-' + pk).value;
+        const row = document.getElementById(prefix + '-row-' + pk);
+        const status = row ? row.dataset.status : '';
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ status, admin_notes: notes })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) showToast('Notes saved', 'success');
+            else showToast('Failed to save', 'error');
+        })
+        .catch(() => showToast('Network error', 'error'));
+    };
+
+    /* ═══════════════ EMAIL COMPOSE ═══════════════ */
+    let _emailCtx = {};   // { type, pk, name, email, org }
+
+    /* Predefined templates per type — Philips Corporate Standard */
+    const _userName = '{{ request.user.get_full_name|default:request.user.username|escapejs }}';
+    const _userRole = '{{ request.user.custom_profile.get_roles_display|default:"Administrator"|escapejs }}';
+    const SIG = `With kind regards,\n\n${_userName}\n${_userRole}\nNexusOps — Unified Operations & Resource Management\nRoyal Philips | Philips Healthcare\n\nEmail: mostestautomation_2@philips.com\nWeb: https://philipsnexus.com\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPhilips Healthcare — Innovation & You\nThis email and any attachments are intended solely for the\nrecipient(s) named above. If you have received this in error,\nplease notify the sender and delete all copies.\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+    const DEMO_TEMPLATES = {
+        acknowledge: {
+            label: 'Acknowledge',
+            icon: 'fa-hand-wave',
+            subject: 'Demo Request Received — NexusOps | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nThank you for expressing your interest in NexusOps, Philips Healthcare's unified operations and resource management platform${c.org ? ', on behalf of ' + c.org : ''}.\n\nWe are pleased to confirm that your demo request has been successfully received and logged in our system. Our dedicated product specialists are currently reviewing your submission.\n\nWhat happens next:\n\n  1. Review — Our team will assess your requirements and identify the most relevant demo configuration for your needs.\n  2. Outreach — A product specialist will contact you within 1–2 business days to discuss scheduling and any specific areas of interest.\n  3. Demo Session — A personalized walkthrough of NexusOps tailored to your organization's operational requirements.\n\nIn the meantime, we encourage you to explore our product overview at https://philipsnexus.com for an introduction to the platform's capabilities.\n\nShould you have any immediate questions or wish to share specific requirements ahead of the demo, please do not hesitate to reply to this email.\n\n${SIG}`
+        },
+        schedule: {
+            label: 'Schedule',
+            icon: 'fa-calendar-check',
+            subject: 'Demo Session Confirmed — NexusOps | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nWe are pleased to confirm that your NexusOps demo session has been scheduled. Please find the details below:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  DEMO SESSION DETAILS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  Date:      [PLEASE FILL IN]\n  Time:      [PLEASE FILL IN] (CET / Your Local Time)\n  Duration:  Approximately 45 minutes\n  Format:    [Microsoft Teams / On-site]\n  Link:      [PLEASE FILL IN]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nAgenda:\n  • Platform Overview & Architecture (10 min)\n  • Live Demonstration of Key Features (20 min)\n  • Q&A and Discussion (10 min)\n  • Next Steps & Follow-up Actions (5 min)\n\nTo ensure we deliver the most relevant experience, we kindly request that you:\n  • Share any specific use cases or workflows you would like us to address\n  • Confirm the number of attendees from your organization\n  • Let us know if there are particular integrations or compliance requirements to discuss\n\nShould this time not be convenient, please respond to this email and we will gladly arrange an alternative slot.\n\n${SIG}`
+        },
+        followup: {
+            label: 'Follow Up',
+            icon: 'fa-reply',
+            subject: 'Follow-Up: Your NexusOps Demo Session — Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nThank you for taking the time to attend the NexusOps demonstration. We hope you found the session informative and that it provided a clear picture of how our platform can support ${c.org ? c.org + "'s" : 'your'} operational needs.\n\nWe would greatly value your feedback on the session. Please let us know:\n  • Which features resonated most with your team?\n  • Are there specific workflows or processes you would like to explore further?\n  • Do you have any questions or concerns we can address?\n\nAs a next step, we would be happy to offer:\n\n  1. Deep-Dive Technical Session — A focused walkthrough of specific modules (e.g., asset management, calibration tracking, compliance workflows) relevant to your operations.\n\n  2. Trial Environment Access — A 30-day guided trial environment configured for your organization, complete with onboarding support.\n\n  3. Business Case Discussion — A meeting with our solutions team to discuss implementation scope, timeline, and investment considerations.\n\n  4. Reference Conversations — Introductions to existing Philips Healthcare customers who have successfully deployed NexusOps in similar environments.\n\nPlease let us know which of these options would be most helpful, or if there is anything else we can assist with. We are committed to supporting you through every step of the evaluation process.\n\n${SIG}`
+        },
+        decline: {
+            label: 'Decline',
+            icon: 'fa-times-circle',
+            subject: 'Regarding Your Demo Request — NexusOps | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nThank you for your interest in NexusOps and for submitting your demo request${c.org ? ' on behalf of ' + c.org : ''}.\n\nAfter careful review, we regret to inform you that we are unable to accommodate a demo session at this time due to:\n\n  Reason: [PLEASE FILL IN — e.g., scheduling constraints, regional availability, product alignment]\n\nWe understand this may be disappointing and want to assure you that this does not reflect on the value of your inquiry. We would like to offer the following alternatives:\n\n  • Self-Guided Resources — Access our comprehensive product documentation and video walkthroughs at https://philipsnexus.com\n  • Future Scheduling — We would be happy to revisit this request at a later date. Please feel free to submit a new request when convenient.\n  • Direct Consultation — If you have specific questions, our team is available via email at mostestautomation_2@philips.com\n\nWe sincerely appreciate your interest in Philips Healthcare solutions and look forward to the opportunity to connect in the future.\n\n${SIG}`
+        }
+    };
+
+    const VULN_TEMPLATES = {
+        acknowledge: {
+            label: 'Acknowledge',
+            icon: 'fa-hand-wave',
+            subject: 'Vulnerability Report Acknowledged — NexusOps Security | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nThank you for submitting a security vulnerability report for the NexusOps platform. Philips Healthcare is committed to maintaining the highest standards of security and data protection, and we greatly appreciate contributions from the security community.\n\nYour report has been assigned the following reference for tracking purposes:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  REPORT REFERENCE: NEXOPS-VR-${String(c.pk).padStart(4, '0')}\n  Status: Received & Under Initial Review\n  Date Received: ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nOur security team will conduct an initial triage within 3–5 business days. During this period:\n\n  1. Assessment — We will evaluate the reported vulnerability for severity, impact, and reproducibility.\n  2. Communication — You will receive a follow-up notification with our initial assessment findings.\n  3. Remediation — If confirmed, our engineering team will prioritize and develop a fix.\n\nResponsible Disclosure Guidelines:\nWe kindly request that you:\n  • Refrain from publicly disclosing the vulnerability until we have had the opportunity to investigate and remediate\n  • Do not exploit the vulnerability beyond what is necessary to demonstrate the issue\n  • Delete any sensitive data obtained during your research\n\nPlease reference NEXOPS-VR-${String(c.pk).padStart(4, '0')} in all future correspondence regarding this report.\n\n${SIG}`
+        },
+        investigating: {
+            label: 'Investigating',
+            icon: 'fa-search',
+            subject: 'Status Update: Vulnerability Under Investigation — NEXOPS-VR-' + 'ID',
+            body: (c) => `Dear ${c.name},\n\nWe are writing to provide you with an update on your vulnerability report.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  REPORT REFERENCE: NEXOPS-VR-${String(c.pk).padStart(4, '0')}\n  Previous Status: Received\n  Current Status: Under Active Investigation\n  Updated: ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nOur security engineering team has completed the initial triage and is now conducting a thorough investigation of the reported vulnerability. This includes:\n\n  • Reproducing the reported behavior in our isolated test environment\n  • Assessing the potential impact and attack surface\n  • Evaluating affected components and downstream dependencies\n  • Reviewing related code paths and configurations\n\nPreliminary Assessment:\n  Severity: [PLEASE FILL IN — Critical / High / Medium / Low]\n  Impact Area: [PLEASE FILL IN — e.g., Authentication, Data Exposure, etc.]\n\nWe may contact you for additional technical details or clarification. In the meantime, we remind you of our responsible disclosure policy and kindly request continued confidentiality.\n\nYou can expect our next update within [PLEASE FILL IN] business days.\n\n${SIG}`
+        },
+        resolved: {
+            label: 'Resolved',
+            icon: 'fa-check-circle',
+            subject: 'Vulnerability Resolved — NEXOPS-VR-' + 'ID' + ' | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nWe are pleased to inform you that the security vulnerability you reported has been successfully resolved.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  REPORT REFERENCE: NEXOPS-VR-${String(c.pk).padStart(4, '0')}\n  Final Status: Resolved\n  Resolution Date: ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nResolution Summary:\n  Vulnerability Type: [PLEASE FILL IN]\n  Severity Classification: [PLEASE FILL IN]\n  Root Cause: [PLEASE DESCRIBE THE ROOT CAUSE]\n  Remediation Applied: [PLEASE DESCRIBE THE FIX]\n  Deployment Status: [PLEASE FILL IN — e.g., Deployed to production on DD/MM/YYYY]\n\nYour contribution to the security of the NexusOps platform is sincerely valued. Responsible disclosure from security researchers and community members is essential to our mission of protecting patient data and healthcare operations.\n\nAcknowledgment:\nWith your permission, we would like to acknowledge your contribution in our security advisories. Please let us know if you would prefer to remain anonymous.\n\nWe encourage you to continue reporting any potential security concerns you may discover. Thank you for helping us maintain the trust our customers place in Philips Healthcare.\n\n${SIG}`
+        },
+        dismissed: {
+            label: 'Not Applicable',
+            icon: 'fa-info-circle',
+            subject: 'Assessment Complete: Vulnerability Report — NEXOPS-VR-' + 'ID' + ' | Philips Healthcare',
+            body: (c) => `Dear ${c.name},\n\nThank you for your vulnerability report regarding the NexusOps platform. Our security team has completed a thorough assessment.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  REPORT REFERENCE: NEXOPS-VR-${String(c.pk).padStart(4, '0')}\n  Final Status: Reviewed — Not Applicable\n  Assessment Date: ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nAssessment Findings:\n\nAfter careful analysis, our security engineering team has determined that the reported behavior:\n\n  Classification: [PLEASE SELECT ONE]\n  — Does not constitute a security vulnerability in the current context\n  — Is functioning as designed with appropriate security controls\n  — Falls outside the scope of our vulnerability disclosure program\n  — Has been previously identified and addressed\n\n  Detailed Explanation:\n  [PLEASE PROVIDE A CLEAR EXPLANATION OF THE ASSESSMENT]\n\nWe understand this may not be the outcome you expected. If you have additional information, a different reproduction scenario, or believe our assessment may have overlooked a critical aspect, we strongly encourage you to respond to this email with the additional context. We will gladly re-evaluate.\n\nYour vigilance and commitment to security are greatly appreciated. We value every report we receive, as each one helps us strengthen our security posture.\n\n${SIG}`
+        }
+    };
+
+    window.openEmailModal = function(type, pk, name, email, org) {
+        // Close any open dropdown
+        document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+
+        _emailCtx = { type, pk, name, email, org };
+        document.getElementById('emailTo').value = `${name} <${email}>`;
+        document.getElementById('emailModalTitle').textContent =
+            type === 'demo' ? 'Email Demo Requester' : 'Email Vulnerability Reporter';
+
+        // Build template chips
+        const templates = type === 'demo' ? DEMO_TEMPLATES : VULN_TEMPLATES;
+        const bar = document.getElementById('emailTemplateBar');
+        bar.innerHTML = '';
+        for (const [key, tpl] of Object.entries(templates)) {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'tpl-chip';
+            chip.dataset.key = key;
+            chip.innerHTML = `<i class="fas ${tpl.icon}"></i> ${tpl.label}`;
+            chip.onclick = () => selectTemplate(type, key);
+            bar.appendChild(chip);
+        }
+
+        // Pre-select first template
+        const first = Object.keys(templates)[0];
+        selectTemplate(type, first);
+
+        document.getElementById('emailOverlay').classList.add('open');
+    };
+
+    function selectTemplate(type, key) {
+        const templates = type === 'demo' ? DEMO_TEMPLATES : VULN_TEMPLATES;
+        const tpl = templates[key];
+        if (!tpl) return;
+
+        document.getElementById('emailSubject').value = tpl.subject;
+        document.getElementById('emailBody').value = tpl.body(_emailCtx);
+
+        // Highlight active chip
+        document.querySelectorAll('#emailTemplateBar .tpl-chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.key === key);
+        });
+    }
+
+    window.closeEmailModal = function() {
+        document.getElementById('emailOverlay').classList.remove('open');
+        _emailCtx = {};
+    };
+
+    // Close on overlay click or Escape
+    document.getElementById('emailOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeEmailModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeEmailModal();
+    });
+
+    window.sendEmail = function() {
+        const subject = document.getElementById('emailSubject').value.trim();
+        const body = document.getElementById('emailBody').value.trim();
+        if (!subject || !body) { showToast('Subject and body are required', 'error'); return; }
+
+        if (_emailMode) {
+            /* ── Send via application server (SMTP) ── */
+            const btn = document.getElementById('emailSendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            fetch(buPrefix + '/api/public-request/send-email/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({
+                    type: _emailCtx.type,
+                    pk: _emailCtx.pk,
+                    subject,
+                    body
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+                if (data.ok) {
+                    showToast(data.message || 'Email sent!', 'success');
+                    closeEmailModal();
+                } else {
+                    showToast(data.error || 'Failed to send', 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+                showToast('Network error', 'error');
+            });
+        } else {
+            /* ── Open in Outlook / default mail client (mailto:) ── */
+            const to = _emailCtx.email;
+            const mailtoUrl = 'mailto:' + encodeURIComponent(to)
+                + '?subject=' + encodeURIComponent(subject)
+                + '&body=' + encodeURIComponent(body);
+            window.open(mailtoUrl, '_blank');
+            showToast('Email opened in your mail client', 'success');
+            closeEmailModal();
+        }
+    };
+
+    /* Email mode toggle */
+    window.toggleEmailMode = function() {
+        _emailMode = !_emailMode;
+        const sw = document.getElementById('emailModeSwitch');
+        sw.classList.toggle('active', _emailMode);
+        document.getElementById('emailModeHint').textContent = _emailMode
+            ? 'Email will be sent directly from the application server.'
+            : 'Email will open in your default mail client (Outlook).';
+        // Update send button label
+        document.getElementById('emailSendIcon').className = _emailMode
+            ? 'fas fa-paper-plane' : 'fas fa-external-link-alt';
+        document.getElementById('emailSendLabel').textContent = _emailMode
+            ? 'Send Email' : 'Open in Outlook';
+    };
+    // Initialize button state on load
+    (function initEmailMode() {
+        document.getElementById('emailSendIcon').className = _emailMode
+            ? 'fas fa-paper-plane' : 'fas fa-external-link-alt';
+        document.getElementById('emailSendLabel').textContent = _emailMode
+            ? 'Send Email' : 'Open in Outlook';
+    })();
+})();
+</script>
+{% endblock %}

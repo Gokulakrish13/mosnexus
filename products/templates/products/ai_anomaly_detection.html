@@ -1,0 +1,351 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}AI Anomaly Detection | {{ stream_obj.name }} | NexusOps{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+<style>
+    :root { --primary: #0B5FFF; --primary-light: #eef2ff; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --purple: #0B5FFF; --text: #1e293b; --text2: #64748b; --border: #e2e8f0; }
+    .page-container { max-width: 1900px; margin: 0 auto; padding: 2rem; }
+    .page-header { background: linear-gradient(135deg, #e53e3e 0%, #9b2c2c 100%); border-radius: 16px; padding: 2rem 2.5rem; color: #fff; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+    .page-header .subtitle { opacity: 0.85; font-size: 0.88rem; margin-top: 0.25rem; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-outline-w { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-outline-w:hover { background: rgba(255,255,255,0.1); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-primary { background: var(--primary); color: #fff; }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1.75rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card-title i { color: var(--primary); }
+
+    .controls { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text2); }
+    .form-group select { padding: 0.6rem 1rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.88rem; outline: none; }
+    .form-group select:focus { border-color: var(--primary); }
+
+    /* Risk score gauge */
+    .risk-gauge { text-align: center; margin-bottom: 2rem; }
+    .risk-circle { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1rem; position: relative; }
+    .risk-circle::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #fff; }
+    .risk-circle > * { position: relative; z-index: 1; }
+    .risk-score { font-size: 2.5rem; font-weight: 900; }
+    .risk-grade { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .risk-label { font-size: 1rem; font-weight: 600; color: var(--text); }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-box { padding: 1.25rem; background: linear-gradient(135deg, #f8fafc, #fff); border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 1.6rem; font-weight: 800; }
+    .stat-label { font-size: 0.72rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+
+    /* Issue cards */
+    .issue-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .issue-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border-left: 4px solid var(--border); background: #fafbfc; transition: all 0.2s; }
+    .issue-item:hover { background: #f1f5f9; }
+    .issue-item.critical { border-left-color: var(--danger); }
+    .issue-item.warning { border-left-color: var(--warning); }
+    .issue-item.info { border-left-color: var(--primary); }
+    .issue-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 0.9rem; }
+    .issue-icon.critical { background: var(--danger); }
+    .issue-icon.warning { background: var(--warning); }
+    .issue-icon.info { background: var(--primary); }
+    .issue-body h4 { font-size: 0.88rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
+    .issue-body p { font-size: 0.8rem; color: var(--text2); margin: 0; line-height: 1.5; }
+    .severity-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 0.5rem; }
+
+    /* Duplicate groups */
+    .dup-group { border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+    .dup-group-title { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .dup-items { display: flex; flex-direction: column ; gap: 0.4rem; }
+    .dup-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 6px; font-size: 0.82rem; }
+    .dup-sim { font-size: 0.72rem; font-weight: 700; color: var(--danger); background: #fef2f2; padding: 2px 6px; border-radius: 4px; }
+
+    /* Data quality checks */
+    .dq-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .dq-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; }
+    .dq-item.pass { background: #f0fdf4; color: #166534; }
+    .dq-item.fail { background: #fef2f2; color: #991b1b; }
+    .dq-item.warning { background: #fffbeb; color: #92400e; }
+    .dq-icon { font-size: 1rem; }
+
+    /* Past scans table */
+    .scans-table { width: 100%; border-collapse: collapse; }
+    .scans-table th { font-size: 0.75rem; text-transform: uppercase; color: var(--text2); padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border); }
+    .scans-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .scans-table tr:hover { background: #f8fafc; }
+    .grade-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; color: #fff; }
+
+    .spinner { width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: var(--danger); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #scanLoading { display: none; text-align: center; padding: 3rem; }
+    #resultSection { display: none; }
+
+    .tab-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab-btn { padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer; border: 2px solid var(--border); background: #fff; color: var(--text); transition: all 0.2s; }
+    .tab-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .tab-btn:hover:not(.active) { border-color: var(--primary); background: var(--primary-light); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .empty-state { text-align: center; padding: 2rem; color: #94a3b8; }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+
+    @media (max-width: 600px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-shield-alt"></i> AI Anomaly & Duplicate Detection</h1>
+            <div class="subtitle">{{ stream_obj.name }} — Data quality guardian powered by AI</div>
+        </div>
+        <a href="{% url 'feature_hub' %}" class="btn btn-outline-w"><i class="fas fa-arrow-left"></i> Feature Hub</a>
+    </div>
+
+    <!-- Controls -->
+    <div class="card">
+        <div class="card-title"><i class="fas fa-search"></i> Scan Configuration</div>
+        <div class="controls">
+            <div class="form-group">
+                <label>Scan Period</label>
+                <select id="periodSelect">
+                    <option value="30">Last 30 Days</option>
+                    <option value="60">Last 60 Days</option>
+                    <option value="90" selected>Last 90 Days</option>
+                    <option value="180">Last 6 Months</option>
+                </select>
+            </div>
+            <button id="scanBtn" class="btn btn-danger"><i class="fas fa-radar"></i> Run AI Scan</button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="scanLoading">
+        <div class="spinner"></div>
+        <p style="margin-top: 0.75rem; color: var(--text2);">Scanning for duplicates, anomalies, and data quality issues...</p>
+    </div>
+
+    <!-- Results -->
+    <div id="resultSection">
+        <!-- Risk Score -->
+        <div class="card" style="text-align: center;">
+            <div class="risk-gauge">
+                <div class="risk-circle" id="riskCircle">
+                    <div class="risk-score" id="riskScoreVal">—</div>
+                    <div class="risk-grade" id="riskGradeVal"></div>
+                </div>
+                <div class="risk-label" id="riskLabelVal">Data Health Score</div>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="showTab('duplicates')"><i class="fas fa-clone"></i> Duplicates</button>
+            <button class="tab-btn" onclick="showTab('serials')"><i class="fas fa-barcode"></i> Serial Issues</button>
+            <button class="tab-btn" onclick="showTab('inventory')"><i class="fas fa-box"></i> Inventory Anomalies</button>
+            <button class="tab-btn" onclick="showTab('audit')"><i class="fas fa-user-secret"></i> Audit Anomalies</button>
+            <button class="tab-btn" onclick="showTab('quality')"><i class="fas fa-check-double"></i> Data Quality</button>
+        </div>
+
+        <div class="tab-content active" id="tab-duplicates"></div>
+        <div class="tab-content" id="tab-serials"></div>
+        <div class="tab-content" id="tab-inventory"></div>
+        <div class="tab-content" id="tab-audit"></div>
+        <div class="tab-content" id="tab-quality"></div>
+    </div>
+
+    <!-- Past Scans -->
+    {% if past_scans %}
+    <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Past Scans</div>
+        <table class="scans-table">
+            <thead><tr><th>Date</th><th>Grade</th><th>Score</th><th>Duplicates</th><th>Serial Issues</th><th>Anomalies</th><th>DQ Score</th><th></th></tr></thead>
+            <tbody>
+                {% for s in past_scans %}
+                <tr>
+                    <td>{{ s.scanned_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <span class="grade-badge" style="background:{% if s.risk_grade == 'A' %}#10b981{% elif s.risk_grade == 'B' %}#0B5FFF{% elif s.risk_grade == 'C' %}#f59e0b{% else %}#ef4444{% endif %}">{{ s.risk_grade }}</span>
+                    </td>
+                    <td>{{ s.risk_score }}/100</td>
+                    <td>{{ s.duplicate_groups }}</td>
+                    <td>{{ s.serial_issues }}</td>
+                    <td>{{ s.inventory_anomalies_count }}</td>
+                    <td>{{ s.data_quality_score }}/100</td>
+                    <td><a href="{% url 'ai_anomaly_detection_view' stream=stream pk=s.pk %}" class="btn btn-primary" style="padding: 0.3rem 0.75rem; font-size: 0.78rem;"><i class="fas fa-eye"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scanBtn = document.getElementById('scanBtn');
+    const periodSelect = document.getElementById('periodSelect');
+    const loading = document.getElementById('scanLoading');
+    const resultSection = document.getElementById('resultSection');
+    const csrfToken = '{{ csrf_token }}';
+
+    scanBtn.addEventListener('click', function() {
+        loading.style.display = 'block';
+        resultSection.style.display = 'none';
+        scanBtn.disabled = true;
+
+        fetch('{% url "ai_anomaly_detection_scan" stream=stream %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ days_back: parseInt(periodSelect.value) })
+        })
+        .then(r => r.json())
+        .then(data => {
+            loading.style.display = 'none';
+            scanBtn.disabled = false;
+            if (!data.success) {
+                console.error('Scan error:', data.error);
+                alert('Scan failed. Please try again.');
+                return;
+            }
+            renderResults(data);
+        })
+        .catch(err => {
+            loading.style.display = 'none';
+            scanBtn.disabled = false;
+            console.error('Scan fetch error:', err);
+            alert('An error occurred while running the scan. Please try again.');
+        });
+    });
+
+    function showTab(name) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        document.getElementById('tab-' + name).classList.add('active');
+    }
+    window.showTab = showTab;
+
+    function renderResults(data) {
+        resultSection.style.display = 'block';
+
+        const risk = data.risk_score || {};
+        const dupes = data.duplicate_products || {};
+        const serials = data.serial_anomalies || {};
+        const inv = data.inventory_anomalies || {};
+        const audit = data.audit_anomalies || {};
+        const dq = data.data_quality || {};
+
+        // Risk gauge
+        const score = risk.overall || 0;
+        const color = score >= 90 ? '#10b981' : score >= 75 ? '#0B5FFF' : score >= 60 ? '#f59e0b' : '#ef4444';
+        const circle = document.getElementById('riskCircle');
+        circle.style.background = `conic-gradient(${color} ${score * 3.6}deg, #e2e8f0 0deg)`;
+        document.getElementById('riskScoreVal').textContent = score;
+        document.getElementById('riskScoreVal').style.color = color;
+        document.getElementById('riskGradeVal').textContent = 'Grade ' + (risk.grade || '?');
+        document.getElementById('riskGradeVal').style.color = color;
+        document.getElementById('riskLabelVal').textContent = risk.label || 'Data Health Score';
+
+        // Stats
+        document.getElementById('statsRow').innerHTML = `
+            <div class="stat-box"><div class="stat-val" style="color:${dupes.total_duplicate_groups > 0 ? 'var(--danger)' : 'var(--success)'}">${dupes.total_duplicate_groups || 0}</div><div class="stat-label">Duplicate Groups</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:${serials.critical_count > 0 ? 'var(--danger)' : 'var(--success)'}">${serials.total_issues || 0}</div><div class="stat-label">Serial Issues</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:${inv.critical_count > 0 ? 'var(--danger)' : 'var(--success)'}">${inv.total_anomalies || 0}</div><div class="stat-label">Inventory Anomalies</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:${audit.total_anomalies > 0 ? 'var(--warning)' : 'var(--success)'}">${audit.total_anomalies || 0}</div><div class="stat-label">Audit Anomalies</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:${dq.score >= 80 ? 'var(--success)' : dq.score >= 60 ? 'var(--warning)' : 'var(--danger)'}">${dq.score || 0}/100</div><div class="stat-label">Data Quality</div></div>
+        `;
+
+        // Duplicates tab
+        const groups = dupes.groups || [];
+        let dupHtml = '';
+        if (groups.length === 0) {
+            dupHtml = '<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success)"></i><p>No duplicate products detected!</p></div>';
+        } else {
+            groups.forEach(g => {
+                dupHtml += `<div class="dup-group"><div class="dup-group-title"><i class="fas fa-clone" style="color:var(--danger)"></i> ${g.count} similar products</div><div class="dup-items">`;
+                dupHtml += `<div class="dup-item"><strong>Anchor:</strong> ${escapeHtml(g.anchor.name)} <span style="color:var(--text2);font-size:0.75rem">SN: ${escapeHtml(g.anchor.serial_number || '—')} | 12NC: ${escapeHtml(g.anchor.twelve_nc || '—')}</span></div>`;
+                g.matches.forEach(m => {
+                    dupHtml += `<div class="dup-item">${escapeHtml(m.name)} <span style="color:var(--text2);font-size:0.75rem">SN: ${escapeHtml(m.serial_number || '—')} | 12NC: ${escapeHtml(m.twelve_nc || '—')}</span> <span class="dup-sim">${m.similarity}% match</span></div>`;
+                });
+                dupHtml += '</div></div>';
+            });
+        }
+        document.getElementById('tab-duplicates').innerHTML = '<div class="card"><div class="card-title"><i class="fas fa-clone"></i> Duplicate Products (' + groups.length + ' groups)</div>' + dupHtml + '</div>';
+
+        // Serial issues tab
+        const serialIssues = serials.issues || [];
+        let serialHtml = '';
+        if (serialIssues.length === 0) {
+            serialHtml = '<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success)"></i><p>No serial number issues detected!</p></div>';
+        } else {
+            serialHtml = '<div class="issue-list">';
+            serialIssues.forEach(iss => {
+                const sev = iss.severity || 'info';
+                const icon = sev === 'critical' ? 'fa-exclamation-triangle' : sev === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+                const sevColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#0B5FFF';
+                serialHtml += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas ${icon}"></i></div><div class="issue-body"><h4>${escapeHtml(iss.product_name || iss.serial_number || 'Issue')} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(iss.detail)}</p></div></div>`;
+            });
+            serialHtml += '</div>';
+        }
+        document.getElementById('tab-serials').innerHTML = '<div class="card"><div class="card-title"><i class="fas fa-barcode"></i> Serial Number Issues (' + serialIssues.length + ')</div>' + serialHtml + '</div>';
+
+        // Inventory anomalies tab
+        const invAnomalies = inv.anomalies || [];
+        let invHtml = '';
+        if (invAnomalies.length === 0) {
+            invHtml = '<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success)"></i><p>No inventory anomalies detected!</p></div>';
+        } else {
+            invHtml = '<div class="issue-list">';
+            invAnomalies.forEach(a => {
+                const sev = a.severity || 'info';
+                const icon = sev === 'critical' ? 'fa-exclamation-triangle' : sev === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+                const sevColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#0B5FFF';
+                invHtml += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas ${icon}"></i></div><div class="issue-body"><h4>${escapeHtml(a.product_name || a.anomaly_type || 'Anomaly')} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(a.detail)}</p></div></div>`;
+            });
+            invHtml += '</div>';
+        }
+        document.getElementById('tab-inventory').innerHTML = '<div class="card"><div class="card-title"><i class="fas fa-box"></i> Inventory Anomalies (' + invAnomalies.length + ')</div>' + invHtml + '</div>';
+
+        // Audit anomalies tab
+        const auditAnomalies = audit.anomalies || [];
+        let auditHtml = '';
+        if (auditAnomalies.length === 0) {
+            auditHtml = '<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success)"></i><p>No audit anomalies detected!</p></div>';
+        } else {
+            auditHtml = '<div class="issue-list">';
+            auditAnomalies.forEach(a => {
+                const sev = a.severity || 'info';
+                const icon = sev === 'critical' ? 'fa-exclamation-triangle' : sev === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+                const sevColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#0B5FFF';
+                auditHtml += `<div class="issue-item ${sev}"><div class="issue-icon ${sev}"><i class="fas ${icon}"></i></div><div class="issue-body"><h4>${escapeHtml(a.username || a.anomaly_type)} <span class="severity-badge" style="background:${sevColor}">${sev}</span></h4><p>${escapeHtml(a.detail)}</p></div></div>`;
+            });
+            auditHtml += '</div>';
+        }
+        document.getElementById('tab-audit').innerHTML = '<div class="card"><div class="card-title"><i class="fas fa-user-secret"></i> Audit Anomalies (' + auditAnomalies.length + ')</div>' + auditHtml + '</div>';
+
+        // Data quality tab
+        const checks = dq.checks || [];
+        let dqHtml = '<div class="dq-list">';
+        checks.forEach(c => {
+            const icon = c.status === 'pass' ? 'fa-check-circle' : c.status === 'fail' ? 'fa-times-circle' : 'fa-exclamation-circle';
+            dqHtml += `<div class="dq-item ${c.status}"><i class="fas ${icon} dq-icon"></i> ${escapeHtml(c.detail)}</div>`;
+        });
+        dqHtml += '</div>';
+        document.getElementById('tab-quality').innerHTML = '<div class="card"><div class="card-title"><i class="fas fa-check-double"></i> Data Quality Checks (' + dq.passed + '/' + dq.total_checks + ' passed)</div>' + dqHtml + '</div>';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Threshold - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #0B5FFF;
+        --primary-dark: #0747A6;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .form-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .form-header {
+        background: linear-gradient(135deg, #0B5FFF 0%, #0747A6 100%);
+        color: white; padding: 2rem; border-radius: 20px;
+        margin-bottom: 2rem; box-shadow: 0 10px 40px rgba(11, 95, 255, 0.3);
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem; font-weight: 800; margin: 0;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+
+    .form-header h1 i { background: rgba(255,255,255,0.2); padding: 0.6rem; border-radius: 12px; }
+    .form-header .subtitle { opacity: 0.9; margin-top: 0.4rem; font-size: 0.95rem; }
+
+    .form-card {
+        background: white; border-radius: 16px; box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color); padding: 2rem; margin-bottom: 1.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem; font-weight: 700; color: var(--text-primary);
+        margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary);
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .form-section-title i { color: var(--primary); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group.full-width { grid-column: 1 / -1; }
+
+    .form-group label {
+        font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);
+        text-transform: uppercase; letter-spacing: 0.04em;
+    }
+
+    .form-group label .required { color: #ef4444; }
+
+    .form-group input, .form-group select {
+        padding: 0.6rem 0.85rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; font-size: 0.9rem; background: var(--bg-light);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+        border-color: var(--primary); outline: none;
+        box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.75rem; border: 1.5px solid var(--border-color);
+        border-radius: 10px; background: var(--bg-light);
+    }
+
+    .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+    .checkbox-group label { text-transform: none; font-size: 0.88rem; cursor: pointer; }
+
+    .form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
+
+    .btn-submit {
+        padding: 0.75rem 2rem; border-radius: 12px; font-weight: 700;
+        font-size: 0.95rem; border: none; cursor: pointer; transition: all 0.3s;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: white; color: var(--text-secondary); border: 1.5px solid var(--border-color); text-decoration: none; }
+
+    .target-fields { display: none; }
+    .target-fields.visible { display: block; }
+
+    .alert { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; font-weight: 500; }
+    .alert-error { background: #fde2e2; color: #c53030; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <div class="form-header">
+        <h1><i class="fas fa-sliders-h"></i> {% if is_edit %}Edit{% else %}Create{% endif %} Threshold</h1>
+        <p class="subtitle">{% if is_edit %}Update threshold configuration{% else %}Define inventory level rules and alert triggers{% endif %}</p>
+    </div>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <h3 class="form-section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Threshold Name <span class="required">*</span></label>
+                    <input type="text" name="name" value="{% if is_edit %}{{ threshold.name }}{% endif %}" required placeholder="e.g., Low Connectors Alert">
+                </div>
+                {% if not is_edit %}
+                <div class="form-group">
+                    <label>Applies To <span class="required">*</span></label>
+                    <select name="applies_to" id="appliesTo" onchange="showTarget(this.value)" required>
+                        <option value="">Select Type</option>
+                        <option value="sublevel">Sub Level</option>
+                        <option value="sublevel_tool">Sub Level Tool</option>
+                        <option value="category">Category</option>
+                        <option value="global">Global</option>
+                    </select>
+                </div>
+                <div class="form-group target-fields" id="target-sublevel">
+                    <label>Sub Level</label>
+                    <select name="sublevel_id">
+                        <option value="">Select</option>
+                        {% for sl in sublevels %}
+                        <option value="{{ sl.id }}">{{ sl }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group target-fields" id="target-sublevel_tool">
+                    <label>Sub Level Tool</label>
+                    <select name="sublevel_tool_id">
+                        <option value="">Select</option>
+                        {% for slt in sublevel_tools %}
+                        <option value="{{ slt.id }}">{{ slt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group target-fields" id="target-category">
+                    <label>Category</label>
+                    <select name="category_id">
+                        <option value="">Select</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h3 class="form-section-title"><i class="fas fa-chart-line"></i> Threshold Values</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Minimum Quantity <span class="required">*</span></label>
+                    <input type="number" name="minimum_quantity" value="{% if is_edit %}{{ threshold.minimum_quantity }}{% else %}5{% endif %}" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Critical Quantity <span class="required">*</span></label>
+                    <input type="number" name="critical_quantity" value="{% if is_edit %}{{ threshold.critical_quantity }}{% else %}2{% endif %}" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Maximum Quantity</label>
+                    <input type="number" name="maximum_quantity" value="{% if is_edit %}{{ threshold.maximum_quantity }}{% endif %}" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Reorder Point</label>
+                    <input type="number" name="reorder_point" value="{% if is_edit %}{{ threshold.reorder_point }}{% endif %}" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Reorder Quantity</label>
+                    <input type="number" name="reorder_quantity" value="{% if is_edit %}{{ threshold.reorder_quantity }}{% endif %}" min="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h3 class="form-section-title"><i class="fas fa-bell"></i> Notification Settings</h3>
+            <div class="form-grid">
+                <div class="checkbox-group">
+                    <input type="checkbox" name="notify_lab_incharge" id="notifyLab" {% if is_edit and threshold.notify_lab_incharge %}checked{% endif %}>
+                    <label for="notifyLab">Notify Lab In-Charge</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="notify_admin" id="notifyAdmin" {% if is_edit and threshold.notify_admin %}checked{% endif %}>
+                    <label for="notifyAdmin">Notify Admin</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="auto_create_alert" id="autoAlert" {% if not is_edit or threshold.auto_create_alert %}checked{% endif %}>
+                    <label for="autoAlert">Auto-create Alerts</label>
+                </div>
+                {% if is_edit %}
+                <div class="checkbox-group">
+                    <input type="checkbox" name="is_active" id="isActive" {% if threshold.is_active %}checked{% endif %}>
+                    <label for="isActive">Active</label>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'inventory_thresholds_list' stream=stream %}" class="btn-submit btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn-submit btn-primary">
+                <i class="fas fa-{% if is_edit %}save{% else %}plus{% endif %}"></i>
+                {% if is_edit %}Save Changes{% else %}Create Threshold{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function showTarget(val) {
+    document.querySelectorAll('.target-fields').forEach(el => el.classList.remove('visible'));
+    if (val && val !== 'global') {
+        const el = document.getElementById('target-' + val);
+        if (el) el.classList.add('visible');
+    }
+}
+</script>
+{% endblock %}

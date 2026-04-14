@@ -1,0 +1,691 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+
+{% block title %}{% if requirement %}Edit{% else %}Create{% endif %} Regulatory Requirement - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .page-header .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        margin-top: 0.75rem;
+        max-width: 700px;
+        line-height: 1.5;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+        height: 44px;
+        box-sizing: border-box;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child { border-bottom: none; }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.125rem 0 0 0;
+    }
+
+    /* Form Elements */
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-label .required { color: #ef4444; }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    textarea.form-control { resize: vertical; }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Checkbox Cards */
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .checkbox-card {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: var(--bg-light);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex: 1;
+        min-width: 160px;
+    }
+
+    .checkbox-card:hover {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .checkbox-card.checked {
+        border-color: var(--emerald);
+        background: #f0fdf4;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--emerald);
+        flex-shrink: 0;
+    }
+
+    .checkbox-card .checkbox-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    /* Streams Select */
+    .streams-select {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.5rem;
+    }
+
+    .stream-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .stream-option:hover { background: #f0fdf4; }
+
+    .stream-option input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--emerald);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        border: none;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    /* Grid Layout */
+    .form-grid { display: grid; gap: 1rem; }
+    .form-grid-2 { grid-template-columns: 1fr 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid-4-8 { grid-template-columns: 1fr 2fr; }
+    .span-full { grid-column: 1 / -1; }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.5rem;
+        }
+        .form-section { padding: 1.5rem; }
+        .form-grid-2, .form-grid-3, .form-grid-4-8 { grid-template-columns: 1fr; }
+        .checkbox-group { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-balance-scale"></i>
+                {% if requirement %}Edit Requirement{% else %}Create Requirement{% endif %}
+            </h1>
+            <p class="subtitle">
+                {% if requirement %}
+                    Update regulatory requirement details and compliance status
+                {% else %}
+                    Add a new regulatory requirement to track compliance for {{ stream }} stream
+                {% endif %}
+            </p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'regulatory_requirements_list' stream %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Requirements
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" id="requirementForm">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #d1fae5; color: #047857;">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Basic Information</h5>
+                        <p class="section-subtitle">Core details about the regulatory requirement</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-4-8">
+                    <div>
+                        <label class="form-label">Requirement ID <span class="required">*</span></label>
+                        <input type="text" name="requirement_id" class="form-control" required
+                               value="{{ requirement.requirement_id|default:'' }}"
+                               placeholder="e.g., REG-2026-001">
+                        <small class="form-text">Unique identifier for tracking</small>
+                    </div>
+                    <div>
+                        <label class="form-label">Title <span class="required">*</span></label>
+                        <input type="text" name="title" class="form-control" required
+                               value="{{ requirement.title|default:'' }}"
+                               placeholder="Enter requirement title">
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label">Description <span class="required">*</span></label>
+                        <textarea name="description" class="form-control" rows="4" required
+                                  placeholder="Detailed description of the requirement">{{ requirement.description|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regulatory Source -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #dbeafe; color: #1e40af;">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Regulatory Source</h5>
+                        <p class="section-subtitle">Authority and regulation details</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Regulatory Body/Authority <span class="required">*</span></label>
+                        <input type="text" name="regulatory_body" class="form-control" required
+                               value="{{ requirement.regulatory_body|default:'' }}"
+                               placeholder="e.g., FDA, ISO, OSHA">
+                    </div>
+                    <div>
+                        <label class="form-label">Regulation/Standard Name <span class="required">*</span></label>
+                        <input type="text" name="regulation_name" class="form-control" required
+                               value="{{ requirement.regulation_name|default:'' }}"
+                               placeholder="e.g., ISO 13485, 21 CFR Part 820">
+                    </div>
+                    <div>
+                        <label class="form-label">Section/Clause Reference</label>
+                        <input type="text" name="regulation_section" class="form-control"
+                               value="{{ requirement.regulation_section|default:'' }}"
+                               placeholder="e.g., Section 4.2.1">
+                    </div>
+                    <div>
+                        <label class="form-label">External Reference URL</label>
+                        <input type="url" name="external_url" class="form-control"
+                               value="{{ requirement.external_url|default:'' }}"
+                               placeholder="https://...">
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label">Interpretation</label>
+                        <textarea name="interpretation" class="form-control" rows="3"
+                                  placeholder="Organization's interpretation of the requirement">{{ requirement.interpretation|default:'' }}</textarea>
+                        <small class="form-text">How your organization interprets and applies this requirement</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applicability -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e8f0fe; color: #0044CC;">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Applicability</h5>
+                        <p class="section-subtitle">Define what this requirement applies to</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Applies To</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="applies_to_products"
+                                       {% if requirement.applies_to_products or not requirement %}checked{% endif %}>
+                                <span class="checkbox-label"><i class="fas fa-box" style="margin-right:0.35rem;"></i> Products</span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="applies_to_systems"
+                                       {% if requirement.applies_to_systems or not requirement %}checked{% endif %}>
+                                <span class="checkbox-label"><i class="fas fa-server" style="margin-right:0.35rem;"></i> Systems</span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="applies_to_processes"
+                                       {% if requirement.applies_to_processes %}checked{% endif %}>
+                                <span class="checkbox-label"><i class="fas fa-cogs" style="margin-right:0.35rem;"></i> Processes</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Applicable Streams</label>
+                        <div class="streams-select">
+                            {% for s in streams %}
+                            <label class="stream-option">
+                                <input type="checkbox" name="applicable_streams" value="{{ s.pk }}"
+                                       {% if stream == s.name or s in requirement.applicable_streams.all %}checked{% endif %}>
+                                <span>{{ s.name }}</span>
+                            </label>
+                            {% empty %}
+                            <p style="text-align:center; color:var(--text-secondary); padding:0.75rem;">No streams available</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance Status -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #d1fae5; color: #047857;">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Compliance Status</h5>
+                        <p class="section-subtitle">Current compliance tracking information</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Compliance Status</label>
+                        <select name="compliance_status" class="form-select">
+                            {% for value, label in compliance_statuses %}
+                            <option value="{{ value }}" {% if requirement.compliance_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Priority</label>
+                        <select name="priority" class="form-select">
+                            {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if requirement.priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Compliance Evidence</label>
+                        <textarea name="compliance_evidence" class="form-control" rows="3"
+                                  placeholder="Document evidence of compliance">{{ requirement.compliance_evidence|default:'' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="form-label">Compliance Gap</label>
+                        <textarea name="compliance_gap" class="form-control" rows="3"
+                                  placeholder="Identify gaps in compliance">{{ requirement.compliance_gap|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Dates -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fef3c7; color: #b45309;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Important Dates</h5>
+                        <p class="section-subtitle">Track key dates for compliance lifecycle</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-3">
+                    <div>
+                        <label class="form-label">Effective Date</label>
+                        <input type="date" name="effective_date" class="form-control"
+                               value="{{ requirement.effective_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Compliance Deadline</label>
+                        <input type="date" name="compliance_deadline" class="form-control"
+                               value="{{ requirement.compliance_deadline|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Next Audit Date</label>
+                        <input type="date" name="next_audit_date" class="form-control"
+                               value="{{ requirement.next_audit_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control & Verification -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #fee2e2; color: #b91c1c;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Control & Verification</h5>
+                        <p class="section-subtitle">Measures to ensure and verify compliance</p>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid-2">
+                    <div>
+                        <label class="form-label">Responsible Person</label>
+                        <select name="responsible_person" class="form-select">
+                            <option value="">Select Person</option>
+                            {% for user in users %}
+                            <option value="{{ user.pk }}" {% if requirement.responsible_person_id == user.pk %}selected{% endif %}>
+                                {{ user.get_full_name|default:user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text">Person accountable for compliance with this requirement</small>
+                    </div>
+                    <div>
+                        <label class="form-label">Verification Method</label>
+                        <textarea name="verification_method" class="form-control" rows="3"
+                                  placeholder="Methods used to verify compliance">{{ requirement.verification_method|default:'' }}</textarea>
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label">Control Measures</label>
+                        <textarea name="control_measures" class="form-control" rows="3"
+                                  placeholder="Control measures implemented to ensure compliance">{{ requirement.control_measures|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon" style="background: #e0f2fe; color: #0891b2;">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <div>
+                        <h5 class="section-title">Additional Notes</h5>
+                        <p class="section-subtitle">Any additional information or comments</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Notes</label>
+                    <textarea name="notes" class="form-control" rows="3"
+                              placeholder="Additional notes or comments">{{ requirement.notes|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'regulatory_requirements_list' stream %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i>
+                    {% if requirement %}Update Requirement{% else %}Create Requirement{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle checkbox card styling
+    document.querySelectorAll('.checkbox-card').forEach(function(card) {
+        var checkbox = card.querySelector('input[type="checkbox"]');
+        if (checkbox.checked) card.classList.add('checked');
+        checkbox.addEventListener('change', function() {
+            card.classList.toggle('checked', this.checked);
+        });
+    });
+
+    // Auto-generate requirement ID
+    var titleInput = document.querySelector('input[name="title"]');
+    var reqIdInput = document.querySelector('input[name="requirement_id"]');
+    if (titleInput && reqIdInput) {
+        titleInput.addEventListener('blur', function() {
+            if (!reqIdInput.value && titleInput.value) {
+                var year = new Date().getFullYear();
+                var random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                reqIdInput.value = 'REG-' + year + '-' + random;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

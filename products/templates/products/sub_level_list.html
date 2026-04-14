@@ -1,1934 +1,846 @@
 {% extends 'products/base.html' %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sub Items Management</title>
-    <link rel="stylesheet" href="/static/products/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        :root {
-            --primary-color: #005fa3;
-            --primary-dark: #003e6b;
-            --primary-light: #e3f2fd;
-            --primary-gradient: linear-gradient(135deg, #005fa3 0%, #0077cc 50%, #00a0e4 100%);
-            --success-color: #10b981;
-            --success-light: #d1fae5;
-            --warning-color: #f59e0b;
-            --warning-light: #fef3c7;
-            --danger-color: #ef4444;
-            --danger-light: #fee2e2;
-            --info-color: #06b6d4;
-            --text-dark: #1e293b;
-            --text-muted: #475569;
-            --text-light: #94a3b8;
-            --border-color: #e2e8f0;
-            --bg-light: #f8fafc;
-            --white: #fff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
-            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        /* Keyframe Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.95); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes ripple {
-            0% { transform: scale(0); opacity: 0.6; }
-            100% { transform: scale(4); opacity: 0; }
-        }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(0, 95, 163, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(0, 95, 163, 0.5); }
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body, html {
-            color: var(--text-dark);
-            font-size: 1rem;
-            background: var(--white);
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-
-        .sublevel-bg {
-            padding-top: 5rem;
-            min-height: 100vh;
-            background: var(--white);
-            position: relative;
-        }
-
-        .sublevel-list-container {
-            max-width: 90rem;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Hero Header Section */
-        .page-header {
-            background: linear-gradient(135deg, #005fa3 0%, #0077cc 50%, #00a0e4 100%);
-            background-size: 200% 200%;
-            animation: gradientShift 8s ease infinite;
-            border-radius: 1.5rem;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -20%;
-            width: 50%;
-            height: 150%;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 50%);
-            animation: float 8s ease-in-out infinite reverse;
-        }
-
-        .header-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .page-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .title-icon {
-            width: 3.5rem;
-            height: 3.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.5rem;
-            font-weight: bold;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            animation: bounceIn 0.6s ease-out;
-        }
-
-        .page-title {
-            font-size: clamp(1.5rem, 4vw, 2.25rem);
-            color: var(--white);
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        .add-form {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: nowrap;
-            flex-shrink: 0;
-            animation: slideInRight 0.5s ease-out;
-        }
-
-        .add-form .form-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 0.75rem;
-            padding: 0.875rem 1.25rem;
-            font-size: 1rem;
-            min-width: 15rem;
-            transition: all 0.3s ease;
-        }
-        
-        .add-form .form-input:focus {
-            outline: none;
-            border-color: white;
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .add-form .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .add-form .btn {
-            white-space: nowrap;
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.95);
-            color: var(--primary-color);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            font-weight: 700;
-            padding: 0.875rem 1.5rem;
-            border-radius: 0.75rem;
-            transition: all 0.3s ease;
-            margin-top: -0.3rem;
-        }
-        
-        .add-form .btn:hover {
-            background: var(--white);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Stats Cards */
-        .stats-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        .stat-card {
-            background: var(--white);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-md);
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, transparent 50%, rgba(0, 95, 163, 0.05) 50%);
-            border-radius: 0 1rem 0 0;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .stat-card.stock { border-left-color: var(--success-color); }
-        .stat-card.use { border-left-color: var(--warning-color); }
-        .stat-card.scraped { border-left-color: var(--danger-color); }
-        .stat-card.total { border-left-color: var(--info-color); }
-        
-        .stat-icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-card.stock .stat-icon { background: var(--success-light); color: var(--success-color); }
-        .stat-card.use .stat-icon { background: var(--warning-light); color: var(--warning-color); }
-        .stat-card.scraped .stat-icon { background: var(--danger-light); color: var(--danger-color); }
-        .stat-card.total .stat-icon { background: var(--primary-light); color: var(--primary-color); }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Control Panel */
-        .control-panel {
-            background: var(--white);
-            border-radius: 1.25rem;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-            animation: fadeInUp 0.7s ease-out;
-        }
-
-        .control-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            align-items: flex-end;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-            min-width: 12rem;
-        }
-        
-        .control-group .form-input {
-            height: 3rem;
-        }
-        
-        .control-group .btn {
-            height: 3rem;
-            margin-top: 0;
-        }
-
-        .control-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .control-label i {
-            color: var(--primary-color);
-        }
-
-        /* Bulk Actions */
-        .bulk-actions-section {
-            background: linear-gradient(135deg, var(--primary-light), rgba(255, 255, 255, 0.8));
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 2px solid var(--primary-color);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .bulk-actions-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, rgba(0, 95, 163, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            transform: translate(30%, -30%);
-        }
-
-        .bulk-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .select-all-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            line-height: 1;
-        }
-
-        .custom-checkbox {
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-            accent-color: var(--primary-color);
-            margin: 0;
-            flex-shrink: 0;
-        }
-
-        .select-all-label {
-            font-weight: 600;
-            color: var(--text-dark);
-            cursor: pointer;
-            user-select: none;
-            line-height: 1.25rem;
-            margin: 0;
-        }
-
-        .bulk-actions-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.5s ease, height 0.5s ease;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(0, 95, 163, 0.3);
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(0, 95, 163, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color), #059669);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-success:hover {
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger-color), #dc2626);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        
-        .btn-danger:hover {
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, var(--info-color), #0891b2);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-        }
-        
-        .btn-info:hover {
-            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn:disabled:hover {
-            transform: none;
-        }
-
-        /* Form Inputs */
-        .form-input {
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: 0.125rem solid var(--border-color);
-            font-size: 0.9375rem;
-            transition: all 0.3s ease;
-            outline: none;
-            background: var(--white);
-            width: 100%;
-            height: 3rem;
-            line-height: 1.5;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-        }
-
-        .form-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 95, 163, 0.1);
-            transform: translateY(-1px);
-        }
-
-        select.form-input {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1.25rem;
-            padding-right: 2.5rem;
-            cursor: pointer;
-            border: 2px solid var(--border-color) !important;
-            border-radius: 0.75rem !important;
-        }
-        
-        input.form-input {
-            border: 2px solid var(--border-color) !important;
-            border-radius: 0.75rem !important;
-        }
-
-        /* Items Grid */
-        .sublevel-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .sublevel-card {
-            background: var(--white);
-            box-shadow: var(--shadow-md);
-            border-radius: 1.25rem;
-            padding: 1.75rem;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            border: 2px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        .sublevel-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-            background-size: 200% 100%;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .sublevel-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, rgba(0, 95, 163, 0.03) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .sublevel-card:hover {
-            box-shadow: var(--shadow-xl);
-            transform: translateY(-8px);
-            border-color: var(--primary-color);
-        }
-
-        .sublevel-card:hover::before {
-            opacity: 1;
-            animation: shimmer 2s infinite;
-        }
-        
-        .sublevel-card:hover::after {
-            opacity: 1;
-        }
-
-        .card-checkbox-wrapper {
-            position: absolute;
-            top: 1.25rem;
-            left: 1.25rem;
-            z-index: 10;
-        }
-
-        .sublevel-checkbox {
-            width: 1.25rem;
-            height: 1.125rem;
-            cursor: pointer;
-            accent-color: var(--primary-color);
-        }
-
-        .sublevel-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            background: linear-gradient(135deg, var(--primary-light), rgba(255, 255, 255, 0.5));
-            border-radius: 1rem;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-            transition: all 0.3s ease;
-        }
-        
-        .sublevel-card:hover .sublevel-icon {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-md);
-        }
-
-        .sublevel-icon img {
-            height: 3rem;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .sublevel-name {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 1.25rem;
-            text-align: center;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .status-badges {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .status-badge {
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.2;
-            transition: all 0.3s ease;
-        }
-        
-        .status-badge:hover {
-            transform: translateY(-2px);
-        }
-
-        .badge-label {
-            font-size: 0.7rem;
-            opacity: 0.8;
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .badge-stock {
-            background: linear-gradient(135deg, var(--success-light), #ecfdf5);
-            color: #047857;
-            border: 2px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .badge-use {
-            background: linear-gradient(135deg, var(--warning-light), #fffbeb);
-            color: #b45309;
-            border: 2px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .badge-scraped {
-            background: linear-gradient(135deg, var(--danger-light), #fef2f2);
-            color: #dc2626;
-            border: 2px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .sublevel-note {
-            width: 100%;
-            min-height: 4rem;
-            border-radius: 0.75rem;
-            border: 2px solid var(--border-color);
-            font-size: 0.875rem;
-            padding: 0.875rem;
-            resize: vertical;
-            margin-bottom: 0;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            background: var(--bg-light);
-        }
-
-        .sublevel-note:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 95, 163, 0.1);
-            background: var(--white);
-        }
-
-        .sublevel-note::placeholder {
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        .card-actions {
-            position: absolute;
-            top: 1.25rem;
-            right: 1.25rem;
-            display: flex;
-            gap: 0.5rem;
-            opacity: 0;
-            transition: all 0.3s ease;
-            transform: translateY(-5px);
-        }
-
-        .sublevel-card:hover .card-actions {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .action-btn {
-            background: var(--white);
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            padding: 0;
-            border-radius: 0.6rem;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            width: 2.25rem;
-            height: 2.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .action-btn:hover {
-            transform: scale(1.15) rotate(5deg);
-            box-shadow: var(--shadow-md);
-        }
-
-        .edit-btn {
-            color: var(--primary-color);
-        }
-
-        .edit-btn:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
-        }
-
-        .delete-btn {
-            color: var(--danger-color);
-        }
-
-        .delete-btn:hover {
-            background: var(--danger-light);
-            border-color: var(--danger-color);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 5rem 2rem;
-            background: linear-gradient(135deg, var(--white), var(--bg-light));
-            border-radius: 1.5rem;
-            box-shadow: var(--shadow-lg);
-            grid-column: 1 / -1;
-            border: 2px dashed var(--border-color);
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .empty-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.4;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .empty-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-text {
-            color: var(--text-light);
-            font-size: 1rem;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--white);
-            border-radius: 1rem;
-            box-shadow: var(--shadow-md);
-            flex-wrap: wrap;
-        }
-
-        .pagination a, .pagination .page-info {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .pagination a {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: var(--white);
-            text-decoration: none;
-            box-shadow: 0 0.25rem 0.75rem rgba(0, 95, 163, 0.3);
-        }
-
-        .pagination a:hover {
-            box-shadow: 0 0.375rem 1rem rgba(0, 95, 163, 0.4);
-            transform: translateY(-0.125rem);
-        }
-
-        .page-info {
-            color: var(--text-muted);
-            background: var(--bg-light);
-        }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(0.25rem);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: 1rem;
-            padding: 2rem;
-            min-width: min(25rem, 95vw);
-            max-width: 95vw;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-1.25rem);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.75rem;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 2rem;
-            height: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.375rem;
-        }
-
-        .modal-close:hover {
-            background: var(--bg-light);
-            color: var(--text-dark);
-            transform: rotate(90deg);
-        }
-
-        .modal-header {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .modal-icon {
-            width: 4rem;
-            height: 4rem;
-            background: var(--primary-light);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .modal-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        .status-input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            gap: 1rem;
-        }
-
-        .status-input-label {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .status-input {
-            width: 6.25rem;
-            padding: 0.625rem;
-            border-radius: 0.375rem;
-            border: 0.125rem solid;
-            font-size: 1rem;
-            text-align: center;
-            font-weight: 600;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .status-input:focus {
-            transform: scale(1.05);
-        }
-
-        .stock-input-group {
-            background: var(--success-light);
-        }
-
-        .stock-input-label {
-            color: #1a7f37;
-        }
-
-        .stock-input {
-            background: #f7fff7;
-            border-color: #b6e2b6;
-            color: #1a7f37;
-        }
-
-        .use-input-group {
-            background: var(--warning-light);
-        }
-
-        .use-input-label {
-            color: #856404;
-        }
-
-        .use-input {
-            background: #fffde7;
-            border-color: #ffe9a6;
-            color: #856404;
-        }
-
-        .scraped-input-group {
-            background: var(--danger-light);
-        }
-
-        .scraped-input-label {
-            color: var(--danger-color);
-        }
-
-        .scraped-input {
-            background: #fff7f8;
-            border-color: #ffc2c7;
-            color: var(--danger-color);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 75rem) {
-            .sublevel-grid {
-                grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-            }
-        }
-
-        @media (max-width: 64rem) {
-            .control-grid {
-                flex-wrap: wrap;
-            }
-            
-            .control-group {
-                min-width: 10rem;
-            }
-            
-            .sublevel-grid {
-                grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-            }
-        }
-
-        @media (max-width: 48rem) {
-            .sublevel-list-container {
-                padding: 1rem;
-            }
-
-            .page-header {
-                padding: 1.5rem;
-            }
-
-            .header-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .add-form {
-                flex-direction: row;
-                width: 100%;
-            }
-            
-            .add-form .form-input {
-                min-width: auto;
-                flex: 1;
-            }
-            
-            .control-grid {
-                flex-direction: column;
-            }
-            
-            .control-group {
-                width: 100%;
-            }
-
-            .control-panel {
-                padding: 1rem;
-            }
-
-            .bulk-actions-buttons {
-                flex-direction: column;
-            }
-
-            .sublevel-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .modal-content {
-                padding: 1.5rem;
-            }
-
-            .status-input-group {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-
-            .status-input {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 30rem) {
-            .page-title {
-                font-size: 1.5rem;
-            }
-
-            .title-icon {
-                width: 2.5rem;
-                height: 2.5rem;
-                font-size: 1.25rem;
-            }
-
-            .btn {
-                padding: 0.625rem 1rem;
-                font-size: 0.875rem;
-            }
-        }
+        /* ===== DESIGN TOKENS ===== */
+        :root{--sl-primary:#0f172a;--sl-primary-600:#1e293b;--sl-accent:#3b82f6;--sl-accent-dark:#2563eb;--sl-accent-light:#dbeafe;--sl-accent-glow:rgba(59,130,246,.18);--sl-success:#10b981;--sl-success-light:#d1fae5;--sl-success-dark:#059669;--sl-warning:#f59e0b;--sl-warning-light:#fef3c7;--sl-warning-dark:#d97706;--sl-danger:#ef4444;--sl-danger-light:#fee2e2;--sl-danger-dark:#dc2626;--sl-info:#06b6d4;--sl-info-light:#cffafe;--sl-text:#0f172a;--sl-text-secondary:#475569;--sl-text-muted:#94a3b8;--sl-border:#e2e8f0;--sl-bg:#f8fafc;--sl-surface:#ffffff;--sl-shadow-xs:0 1px 2px rgba(0,0,0,.04);--sl-shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--sl-shadow-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);--sl-shadow-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -4px rgba(0,0,0,.04);--sl-shadow-xl:0 20px 25px -5px rgba(0,0,0,.08),0 8px 10px -6px rgba(0,0,0,.04);--sl-radius-sm:6px;--sl-radius:10px;--sl-radius-lg:14px;--sl-radius-xl:20px;--sl-transition:.2s cubic-bezier(.4,0,.2,1)}
+        @keyframes slFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slSlideUp{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes slCountUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slModalIn{from{opacity:0;transform:translateY(-20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes slOverlayIn{from{opacity:0}to{opacity:1}}
+        @keyframes slCheckPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+        @keyframes slFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        @keyframes slGradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+        .sl-page *,.sl-page *::before,.sl-page *::after{box-sizing:border-box;margin:0;padding:0}
+
+        /* ===== PAGE WRAPPER ===== */
+        .sl-page{padding-top:1.25rem;max-width:1900px;margin:0 auto;padding-left:2rem;padding-right:2rem;padding-bottom:3rem;min-height:calc(100vh - 106px)}
+
+        /* ===== BREADCRUMBS ===== */
+        .sl-breadcrumb{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.85rem;color:var(--sl-text-muted)}
+        .sl-breadcrumb a{color:var(--sl-text-secondary);text-decoration:none;transition:color var(--sl-transition)}
+        .sl-breadcrumb a:hover{color:var(--sl-accent)}
+        .sl-breadcrumb .sep{font-size:.7rem;opacity:.5}
+        .sl-breadcrumb .bc-current{color:var(--sl-accent);font-weight:600}
+
+        /* ===== GRADIENT HEADER ===== */
+        .sl-header{background:linear-gradient(135deg,#0066cc 0%,#0891b2 50%,#0d9488 100%);border-radius:var(--sl-radius-xl);padding:2rem 2.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;box-shadow:var(--sl-shadow-lg);position:relative;overflow:hidden;min-height:100px}
+        .sl-header::before{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:rgba(255,255,255,.05);border-radius:50%}
+        .sl-header::after{content:'';position:absolute;bottom:-40%;left:20%;width:200px;height:200px;background:rgba(255,255,255,.03);border-radius:50%}
+        .sl-header-left{display:flex;align-items:center;gap:1rem;position:relative;z-index:2}
+        .sl-header-left h1{font-size:1.75rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.75rem;color:#fff !important}
+        .sl-header-left .subtitle{font-size:.92rem;opacity:.85;margin-top:.15rem}
+        .sl-header-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;position:relative;z-index:2}
+        .sl-header-btn{background:rgba(255,255,255,.15);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:#fff;padding:.45rem 1rem;border-radius:var(--sl-radius);font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.45rem;transition:all var(--sl-transition);font-family:inherit}
+        .sl-header-btn:hover{background:rgba(255,255,255,.28);color:#fff;text-decoration:none}
+        .sl-header-btn.primary{background:#fff;color:var(--sl-primary);font-weight:700;border:none;box-shadow:var(--sl-shadow-md)}
+        .sl-header-btn.primary:hover{background:#f0f4ff;transform:translateY(-2px);box-shadow:var(--sl-shadow-lg)}
+
+        /* ===== STATS ===== */
+        .sl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;position:relative;z-index:10;animation:slFadeIn .6s ease .1s both}
+        .sl-stat-card{background:var(--sl-surface);border-radius:var(--sl-radius-lg);padding:1.25rem 1.35rem;box-shadow:var(--sl-shadow-md);border:1px solid var(--sl-border);display:flex;align-items:center;gap:1rem;position:relative;overflow:hidden;transition:all var(--sl-transition)}
+        .sl-stat-card:hover{transform:translateY(-3px);box-shadow:var(--sl-shadow-lg)}
+        .sl-stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--sl-radius-lg) var(--sl-radius-lg)}
+        .sl-stat-card.stat-total::after{background:var(--sl-accent)}
+        .sl-stat-card.stat-stock::after{background:var(--sl-success)}
+        .sl-stat-card.stat-use::after{background:var(--sl-warning)}
+        .sl-stat-card.stat-scraped::after{background:var(--sl-danger)}
+        .sl-stat-icon{width:48px;height:48px;border-radius:var(--sl-radius);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+        .stat-total .sl-stat-icon{background:var(--sl-accent-light);color:var(--sl-accent)}
+        .stat-stock .sl-stat-icon{background:var(--sl-success-light);color:var(--sl-success)}
+        .stat-use .sl-stat-icon{background:var(--sl-warning-light);color:var(--sl-warning)}
+        .stat-scraped .sl-stat-icon{background:var(--sl-danger-light);color:var(--sl-danger)}
+        .sl-stat-info{flex:1;min-width:0}
+        .sl-stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--sl-text-muted);font-weight:600;margin-bottom:.15rem}
+        .sl-stat-value{font-size:1.65rem;font-weight:800;color:var(--sl-text);line-height:1;animation:slCountUp .5s ease both}
+        .sl-stat-sub{font-size:.72rem;color:var(--sl-text-muted);margin-top:.25rem}
+
+        /* ===== WORKSPACE ===== */
+        .sl-workspace{animation:slFadeIn .6s ease .2s both}
+
+        /* ===== TOOLBAR ===== */
+        .sl-toolbar{background:var(--sl-surface);border:1px solid var(--sl-border);border-radius:var(--sl-radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;box-shadow:var(--sl-shadow-xs);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+        .sl-search-box{flex:1;min-width:220px;position:relative;display:flex;align-items:center}
+        .sl-search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--sl-text-muted);font-size:14px;pointer-events:none;z-index:2;width:16px;text-align:center;line-height:1}
+        .sl-search-box input[type="text"].sl-search-input{width:100%;padding:10px 14px 10px 38px !important;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:14px;font-family:inherit;color:var(--sl-text);background:var(--sl-bg);transition:all var(--sl-transition);outline:none;box-sizing:border-box}
+        .sl-search-box input[type="text"].sl-search-input:focus{border-color:var(--sl-accent);box-shadow:0 0 0 3px var(--sl-accent-glow);background:#fff}
+        .sl-search-box input[type="text"].sl-search-input::placeholder{color:var(--sl-text-muted)}
+        .sl-toolbar-select{padding:.6rem .85rem;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:.85rem;font-family:inherit;color:var(--sl-text);background:var(--sl-bg);outline:none;cursor:pointer;transition:all var(--sl-transition);min-width:160px}
+        .sl-toolbar-select:focus{border-color:var(--sl-accent);box-shadow:0 0 0 3px var(--sl-accent-glow)}
+        .sl-toolbar-divider{width:1px;height:28px;background:var(--sl-border);flex-shrink:0}
+        .sl-toolbar-btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem .9rem;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer;background:var(--sl-surface);color:var(--sl-text-secondary);transition:all var(--sl-transition);white-space:nowrap}
+        .sl-toolbar-btn:hover{border-color:var(--sl-accent);color:var(--sl-accent);background:var(--sl-accent-light)}
+        .sl-toolbar-btn.active{border-color:var(--sl-accent);color:var(--sl-accent);background:var(--sl-accent-light)}
+        .sl-toolbar-btn i{font-size:.8rem}
+        .sl-toolbar-count{font-size:.78rem;color:var(--sl-text-muted);font-weight:500;margin-left:auto;white-space:nowrap}
+        .sl-toolbar-count strong{color:var(--sl-text);font-weight:700}
+
+        /* ===== BULK BAR ===== */
+        .sl-bulk-bar{background:var(--sl-primary);color:#fff;border-radius:var(--sl-radius-lg);padding:.75rem 1.25rem;margin-bottom:1.25rem;display:none;align-items:center;gap:1rem;box-shadow:var(--sl-shadow-lg);animation:slSlideUp .25s ease}
+        .sl-bulk-bar.visible{display:flex}
+        .sl-bulk-bar-count{font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:.4rem}
+        .sl-bulk-bar-count .count-num{background:var(--sl-accent);color:#fff;padding:.1rem .55rem;border-radius:12px;font-size:.82rem;font-weight:700}
+        .sl-bulk-bar-actions{display:flex;gap:.5rem;margin-left:auto}
+        .sl-bulk-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .85rem;border:1.5px solid rgba(255,255,255,.2);border-radius:var(--sl-radius);font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.08);color:#fff;transition:all var(--sl-transition)}
+        .sl-bulk-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35)}
+        .sl-bulk-btn.danger:hover{background:var(--sl-danger);border-color:var(--sl-danger)}
+        .sl-bulk-btn.info:hover{background:var(--sl-accent);border-color:var(--sl-accent)}
+        .sl-bulk-btn i{font-size:.78rem}
+        .sl-bulk-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;padding:.25rem;transition:color var(--sl-transition)}
+        .sl-bulk-close:hover{color:#fff}
+
+        /* ===== CARD GRID ===== */
+        .sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+
+        /* ===== TABLE VIEW ===== */
+        .sl-table-wrapper{display:none;background:var(--sl-surface);border:1px solid var(--sl-border);border-radius:var(--sl-radius-lg);overflow:hidden;box-shadow:var(--sl-shadow-sm)}
+        .sl-table-wrapper.active{display:block}
+        .sl-table{width:100%;border-collapse:collapse;font-size:.85rem}
+        .sl-table thead{background:var(--sl-bg)}
+        .sl-table th{padding:.75rem 1rem;text-align:left;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--sl-text-muted);border-bottom:2px solid var(--sl-border);white-space:nowrap}
+        .sl-table td{padding:.7rem 1rem;border-bottom:1px solid var(--sl-border);color:var(--sl-text);vertical-align:middle}
+        .sl-table tbody tr{transition:background var(--sl-transition)}
+        .sl-table tbody tr:hover{background:var(--sl-bg)}
+        .sl-table tbody tr:last-child td{border-bottom:none}
+        .sl-table .tbl-name{font-weight:700;color:var(--sl-text);cursor:pointer}
+        .sl-table .tbl-name:hover{color:var(--sl-accent)}
+        .sl-table .tbl-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:6px;font-size:.75rem;font-weight:700}
+        .sl-table .tbl-badge.stock{background:var(--sl-success-light);color:var(--sl-success-dark)}
+        .sl-table .tbl-badge.use{background:var(--sl-warning-light);color:var(--sl-warning-dark)}
+        .sl-table .tbl-badge.scraped{background:var(--sl-danger-light);color:var(--sl-danger-dark)}
+        .sl-table .tbl-actions{display:flex;gap:.35rem}
+        .sl-table .tbl-action-btn{width:30px;height:30px;border-radius:var(--sl-radius-sm);border:1px solid var(--sl-border);background:var(--sl-surface);color:var(--sl-text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all var(--sl-transition)}
+        .sl-table .tbl-action-btn:hover{background:var(--sl-accent-light);color:var(--sl-accent);border-color:var(--sl-accent)}
+        .sl-table .tbl-action-btn.danger:hover{background:var(--sl-danger-light);color:var(--sl-danger);border-color:var(--sl-danger)}
+        .sl-table .tbl-checkbox-cell{width:40px;text-align:center}
+
+        /* ===== CARD ===== */
+        .sl-card{background:var(--sl-surface);border:1px solid var(--sl-border);border-radius:var(--sl-radius-lg);padding:0;position:relative;overflow:hidden;transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer;animation:slFadeIn .4s ease both}
+        .sl-card:hover{border-color:var(--sl-accent);box-shadow:0 8px 25px -5px var(--sl-accent-glow),var(--sl-shadow-md);transform:translateY(-4px)}
+        .sl-card-header{background:var(--sl-bg);padding:.85rem 1rem;display:flex;align-items:center;gap:.65rem;border-bottom:1px solid var(--sl-border);position:relative}
+        .sl-card-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--sl-border);cursor:pointer;appearance:none;-webkit-appearance:none;position:relative;flex-shrink:0;transition:all var(--sl-transition);background:#fff}
+        .sl-card-checkbox:checked{background:var(--sl-accent);border-color:var(--sl-accent)}
+        .sl-card-checkbox:checked::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.6rem;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:slCheckPop .2s ease}
+        .sl-card-icon{width:36px;height:36px;border-radius:var(--sl-radius);background:linear-gradient(135deg,var(--sl-accent-light),#eff6ff);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .sl-card-icon img{width:22px;height:22px;object-fit:contain}
+        .sl-card-title{font-size:.88rem;font-weight:700;color:var(--sl-text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .sl-card-menu{display:flex;gap:.25rem;flex-shrink:0}
+        .sl-card-menu-btn{width:28px;height:28px;border-radius:var(--sl-radius-sm);border:none;background:transparent;color:var(--sl-text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all var(--sl-transition)}
+        .sl-card-menu-btn:hover{background:var(--sl-accent-light);color:var(--sl-accent)}
+        .sl-card-menu-btn.danger:hover{background:var(--sl-danger-light);color:var(--sl-danger)}
+        .sl-card-body{padding:1rem}
+        .sl-card-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem}
+        .sl-metric{text-align:center;padding:.55rem .35rem;border-radius:var(--sl-radius);position:relative}
+        .sl-metric.stock{background:var(--sl-success-light)}
+        .sl-metric.use{background:var(--sl-warning-light)}
+        .sl-metric.scraped{background:var(--sl-danger-light)}
+        .sl-metric-value{font-size:1.25rem;font-weight:800;line-height:1}
+        .sl-metric.stock .sl-metric-value{color:var(--sl-success-dark)}
+        .sl-metric.use .sl-metric-value{color:var(--sl-warning-dark)}
+        .sl-metric.scraped .sl-metric-value{color:var(--sl-danger-dark)}
+        .sl-metric-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.2rem}
+        .sl-metric.stock .sl-metric-label{color:var(--sl-success)}
+        .sl-metric.use .sl-metric-label{color:var(--sl-warning-dark)}
+        .sl-metric.scraped .sl-metric-label{color:var(--sl-danger)}
+        .sl-card-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--sl-bg);margin-bottom:.75rem}
+        .sl-card-bar-seg{transition:width .4s ease;min-width:2px}
+        .sl-card-bar-seg.stock{background:var(--sl-success)}
+        .sl-card-bar-seg.use{background:var(--sl-warning)}
+        .sl-card-bar-seg.scraped{background:var(--sl-danger)}
+        .sl-card-note{width:100%;min-height:52px;max-height:100px;padding:.5rem .65rem;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:.78rem;font-family:inherit;color:var(--sl-text);background:var(--sl-bg);resize:vertical;outline:none;transition:all var(--sl-transition)}
+        .sl-card-note:focus{border-color:var(--sl-accent);background:#fff;box-shadow:0 0 0 3px var(--sl-accent-glow)}
+        .sl-card-note::placeholder{color:var(--sl-text-muted);font-style:italic}
+        .sl-card-footer{background:var(--sl-bg);padding:.55rem 1rem;border-top:1px solid var(--sl-border);display:flex;align-items:center;justify-content:space-between}
+        .sl-card-total{font-size:.72rem;color:var(--sl-text-muted);font-weight:500}
+        .sl-card-total strong{color:var(--sl-text);font-weight:700}
+        .sl-card-history-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .55rem;background:transparent;border:1px solid var(--sl-border);border-radius:var(--sl-radius-sm);color:var(--sl-text-muted);font-size:.7rem;font-family:inherit;font-weight:600;cursor:pointer;transition:all var(--sl-transition)}
+        .sl-card-history-btn:hover{background:var(--sl-accent-light);color:var(--sl-accent);border-color:var(--sl-accent)}
+
+        /* ===== EMPTY STATE ===== */
+        .sl-empty{grid-column:1/-1;text-align:center;padding:4rem 2rem;background:var(--sl-surface);border:2px dashed var(--sl-border);border-radius:var(--sl-radius-xl)}
+        .sl-empty-icon{font-size:3rem;color:var(--sl-text-muted);margin-bottom:1rem;animation:slFloat 3s ease-in-out infinite}
+        .sl-empty h3{font-size:1.2rem;font-weight:700;color:var(--sl-text);margin-bottom:.4rem}
+        .sl-empty p{font-size:.9rem;color:var(--sl-text-muted)}
+
+        /* ===== MODALS ===== */
+        .sl-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem;animation:slOverlayIn .2s ease}
+        .sl-overlay.open{display:flex}
+        .sl-modal{background:var(--sl-surface);border-radius:var(--sl-radius-xl);box-shadow:var(--sl-shadow-xl);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slModalIn .3s cubic-bezier(.16,1,.3,1);position:relative}
+        .sl-modal.wide{max-width:720px}
+        .sl-modal-close{position:absolute;top:.85rem;right:.85rem;width:32px;height:32px;border-radius:50%;border:none;background:var(--sl-bg);color:var(--sl-text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--sl-transition);z-index:10}
+        .sl-modal-close:hover{background:var(--sl-danger-light);color:var(--sl-danger)}
+        .sl-modal-head{padding:1.5rem 1.5rem 0;text-align:center}
+        .sl-modal-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.3rem}
+        .sl-modal-icon.primary{background:var(--sl-accent-light);color:var(--sl-accent)}
+        .sl-modal-icon.danger{background:var(--sl-danger-light);color:var(--sl-danger)}
+        .sl-modal-icon.success{background:var(--sl-success-light);color:var(--sl-success)}
+        .sl-modal-icon.info{background:var(--sl-info-light);color:var(--sl-info)}
+        .sl-modal-title{font-size:1.15rem;font-weight:800;color:var(--sl-text);margin-bottom:.3rem}
+        .sl-modal-desc{font-size:.85rem;color:var(--sl-text-muted)}
+        .sl-modal-body{padding:1.25rem 1.5rem 1.5rem}
+
+        /* ===== FORM ELEMENTS ===== */
+        .sl-form-group{margin-bottom:1rem}
+        .sl-form-label{display:flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sl-text-secondary);margin-bottom:.4rem}
+        .sl-form-label i{font-size:.72rem}
+        .sl-form-input{width:100%;padding:.65rem .85rem;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:.9rem;font-family:inherit;color:var(--sl-text);background:var(--sl-bg);outline:none;transition:all var(--sl-transition)}
+        .sl-form-input:focus{border-color:var(--sl-accent);box-shadow:0 0 0 3px var(--sl-accent-glow);background:#fff}
+        .sl-metric-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
+        .sl-metric-input-card{text-align:center;padding:.85rem .5rem;border-radius:var(--sl-radius);border:1.5px solid var(--sl-border);transition:all var(--sl-transition);overflow:hidden;box-sizing:border-box}
+        .sl-metric-input-card:focus-within{border-color:var(--sl-accent);box-shadow:0 0 0 3px var(--sl-accent-glow)}
+        .sl-metric-input-card.stock{background:var(--sl-success-light);border-color:rgba(16,185,129,.2)}
+        .sl-metric-input-card.use{background:var(--sl-warning-light);border-color:rgba(245,158,11,.2)}
+        .sl-metric-input-card.scraped{background:var(--sl-danger-light);border-color:rgba(239,68,68,.2)}
+        .sl-metric-input-card.stock:focus-within{border-color:var(--sl-success);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+        .sl-metric-input-card.use:focus-within{border-color:var(--sl-warning);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+        .sl-metric-input-card.scraped:focus-within{border-color:var(--sl-danger);box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+        .sl-metric-input-icon{font-size:.85rem;margin-bottom:.35rem}
+        .sl-metric-input-card.stock .sl-metric-input-icon{color:var(--sl-success-dark)}
+        .sl-metric-input-card.use .sl-metric-input-icon{color:var(--sl-warning-dark)}
+        .sl-metric-input-card.scraped .sl-metric-input-icon{color:var(--sl-danger-dark)}
+        .sl-metric-input-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+        .sl-metric-input-card.stock .sl-metric-input-label{color:var(--sl-success-dark)}
+        .sl-metric-input-card.use .sl-metric-input-label{color:var(--sl-warning-dark)}
+        .sl-metric-input-card.scraped .sl-metric-input-label{color:var(--sl-danger-dark)}
+        .sl-metric-number-input{width:100%;max-width:100%;text-align:center;padding:.45rem .25rem;border:1.5px solid transparent;border-radius:var(--sl-radius-sm);font-size:1.3rem;font-weight:800;font-family:inherit;background:rgba(255,255,255,.7);color:var(--sl-text);outline:none;transition:all var(--sl-transition);box-sizing:border-box;-moz-appearance:textfield}
+        .sl-metric-number-input::-webkit-outer-spin-button,.sl-metric-number-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+        .sl-metric-number-input:focus{background:#fff;border-color:var(--sl-accent)}
+
+        /* ===== BUTTONS ===== */
+        .sl-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.65rem 1.25rem;border:none;border-radius:var(--sl-radius);font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all var(--sl-transition);position:relative;overflow:hidden}
+        .sl-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.1);opacity:0;transition:opacity var(--sl-transition)}
+        .sl-btn:hover::after{opacity:1}
+        .sl-btn-primary{background:var(--sl-accent);color:#fff}
+        .sl-btn-primary:hover{background:var(--sl-accent-dark);transform:translateY(-1px);box-shadow:var(--sl-shadow-md)}
+        .sl-btn-danger{background:var(--sl-danger);color:#fff}
+        .sl-btn-danger:hover{background:var(--sl-danger-dark);transform:translateY(-1px);box-shadow:var(--sl-shadow-md)}
+        .sl-btn-ghost{background:var(--sl-bg);color:var(--sl-text-secondary);border:1.5px solid var(--sl-border)}
+        .sl-btn-ghost:hover{background:var(--sl-surface);border-color:var(--sl-text-muted)}
+        .sl-btn-block{width:100%}
+        .sl-btn i{font-size:.8rem}
+
+        /* ===== ADD INLINE ===== */
+        .sl-add-inline{display:none;background:var(--sl-surface);border:1.5px solid var(--sl-accent);border-radius:var(--sl-radius-lg);padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 0 0 4px var(--sl-accent-glow),var(--sl-shadow-md);animation:slSlideUp .25s ease}
+        .sl-add-inline.open{display:block}
+        .sl-add-inline-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+        .sl-add-inline-title{font-size:.95rem;font-weight:800;color:var(--sl-text);display:flex;align-items:center;gap:.4rem}
+        .sl-add-inline-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--sl-bg);color:var(--sl-text-muted);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--sl-transition)}
+        .sl-add-inline-close:hover{background:var(--sl-danger-light);color:var(--sl-danger)}
+        .sl-add-form-row{display:flex;gap:.65rem}
+        .sl-add-form-row .sl-form-input{flex:1}
+
+        /* ===== HISTORY ===== */
+        .sl-history-list{max-height:350px;overflow-y:auto;padding-right:.5rem}
+        .sl-history-list::-webkit-scrollbar{width:5px}
+        .sl-history-list::-webkit-scrollbar-track{background:var(--sl-bg);border-radius:3px}
+        .sl-history-list::-webkit-scrollbar-thumb{background:var(--sl-border);border-radius:3px}
+        .sl-history-entry{display:flex;gap:.75rem;padding:.75rem;border-radius:var(--sl-radius);margin-bottom:.5rem;background:var(--sl-bg);transition:background var(--sl-transition)}
+        .sl-history-entry:hover{background:#f1f5f9}
+        .sl-history-dot{width:8px;height:8px;border-radius:50%;background:var(--sl-accent);margin-top:.4rem;flex-shrink:0}
+        .sl-history-entry.created .sl-history-dot{background:var(--sl-success)}
+        .sl-history-entry.edited .sl-history-dot{background:var(--sl-warning)}
+        .sl-history-entry.deleted .sl-history-dot{background:var(--sl-danger)}
+        .sl-history-content{flex:1;min-width:0}
+        .sl-history-action{font-size:.8rem;font-weight:700;color:var(--sl-text);margin-bottom:.15rem}
+        .sl-history-meta{font-size:.72rem;color:var(--sl-text-muted)}
+        .sl-history-meta strong{color:var(--sl-accent)}
+        .sl-history-details{font-size:.78rem;color:var(--sl-text-secondary);margin-top:.25rem}
+        .sl-graph-wrap{background:var(--sl-bg);border-radius:var(--sl-radius);padding:1rem;margin-bottom:1rem;display:flex;justify-content:center}
+        .sl-graph-wrap canvas{cursor:zoom-in}
+        .sl-history-filters{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+        .sl-history-filters select{flex:1;min-width:130px;padding:.45rem .65rem;border:1.5px solid var(--sl-border);border-radius:var(--sl-radius);font-size:.8rem;font-family:inherit;color:var(--sl-text);background:var(--sl-bg);outline:none}
+
+        /* ===== TOAST ===== */
+        .sl-toast{position:fixed;top:80px;right:1.5rem;background:var(--sl-surface);border:1px solid var(--sl-border);border-left:4px solid var(--sl-danger);border-radius:var(--sl-radius);padding:1rem 1.25rem;box-shadow:var(--sl-shadow-lg);z-index:3000;display:none;align-items:center;gap:.75rem;max-width:400px;animation:slSlideUp .3s ease}
+        .sl-toast.visible{display:flex}
+        .sl-toast-icon{font-size:1.2rem;color:var(--sl-danger);flex-shrink:0}
+        .sl-toast-msg{font-size:.85rem;color:var(--sl-text);font-weight:500}
+        .sl-toast-close{background:none;border:none;color:var(--sl-text-muted);cursor:pointer;font-size:1rem;padding:.25rem;flex-shrink:0}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:1024px){.sl-stats{grid-template-columns:repeat(2,1fr)}.sl-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.sl-page{padding-left:1rem;padding-right:1rem}.sl-header{padding:1.25rem 1.5rem;flex-direction:column;gap:.75rem;align-items:flex-start}}
+        @media(max-width:768px){.sl-stats{gap:.65rem}.sl-toolbar{flex-direction:column;align-items:stretch}.sl-search-box{min-width:100%}.sl-bulk-bar{flex-wrap:wrap}.sl-metric-inputs{grid-template-columns:1fr}.sl-header-right{display:none}}
+        @media(max-width:640px){.sl-stats{grid-template-columns:repeat(2,1fr)}.sl-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <!-- Error Messages Modal -->
-    {% if messages %}
-    <div id="errorModal" class="modal-overlay">
-        <div class="modal-content">
-            <button onclick="closeErrorModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon" style="background: var(--danger-light); color: var(--danger-color);">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h3 class="modal-title" style="color: var(--danger-color);">Error</h3>
+
+    <div class="sl-page">
+    <!-- Gradient Header -->
+    <header class="sl-header">
+        <div class="sl-header-left">
+            <div>
+                <h1><i class="fas fa-layer-group"></i> {{ selected_stream }} Sub Items</h1>
+                <div class="subtitle">Manage sub-level inventory items, track stock levels, and monitor usage patterns</div>
             </div>
-            <div id="errorModalMsg" style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
-                {% for message in messages %}
-                    {% if 'already exists' in message or message.tags == 'error' %}
-                        {{ message }}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <button onclick="closeErrorModal()" class="btn btn-danger" style="width: 100%;"><i class="fas fa-check"></i> OK</button>
         </div>
-    </div>
-    {% endif %}
-
-    <div class="sublevel-bg">
-        <div class="sublevel-list-container">
-            <!-- Page Header -->
-            <div class="page-header">
-                <div class="header-content">
-                    <div class="page-title-wrapper">
-                        <div class="title-icon"><i class="fas fa-layer-group"></i></div>
-                        <h1 class="page-title">Sub Items Management</h1>
-                    </div>
-                    <form method="post" class="add-form">
-                        {% csrf_token %}
-                        <input type="text" name="subitem_name" placeholder="Enter new sub item name..." class="form-input" required>
-                        <button type="submit" class="btn">
-                            <i class="fas fa-plus"></i>
-                            <span>Add Sub Item</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Stats Section -->
-            <div class="stats-section">
-                <div class="stat-card total">
-                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
-                    <div class="stat-value" id="total-items">{{ subitems|length }}</div>
-                    <div class="stat-label">Total Items</div>
-                </div>
-                <div class="stat-card stock">
-                    <div class="stat-icon"><i class="fas fa-warehouse"></i></div>
-                    <div class="stat-value" id="total-stock">0</div>
-                    <div class="stat-label">Total In Stock</div>
-                </div>
-                <div class="stat-card use">
-                    <div class="stat-icon"><i class="fas fa-cogs"></i></div>
-                    <div class="stat-value" id="total-use">0</div>
-                    <div class="stat-label">Total In Use</div>
-                </div>
-                <div class="stat-card scraped">
-                    <div class="stat-icon"><i class="fas fa-recycle"></i></div>
-                    <div class="stat-value" id="total-scraped">0</div>
-                    <div class="stat-label">Total Scraped</div>
-                </div>
-            </div>
-
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="control-grid">
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-search"></i> Search</label>
-                        <input type="text" id="sublevel-search-input" placeholder="Search sub items..." class="form-input">
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-sort"></i> Sort By</label>
-                        <select id="sublevel-sort-select" class="form-input">
-                            <option value="name">Name (A-Z)</option>
-                            <option value="in_stock">In Stock (High to Low)</option>
-                            <option value="in_use">In Use (High to Low)</option>
-                            <option value="scraped">Scraped (High to Low)</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label"><i class="fas fa-download"></i> Export</label>
-                        <button id="export-sublevels-btn" class="btn btn-success" style="width: 100%;">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Export CSV/Excel</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Bulk Actions -->
-                <div class="bulk-actions-section">
-                    <div class="bulk-header">
-                        <div class="select-all-wrapper">
-                            <input type="checkbox" id="select-all-sublevels" class="custom-checkbox">
-                            <label for="select-all-sublevels" class="select-all-label">Select All Items</label>
-                        </div>
-                    </div>
-                    <div class="bulk-actions-buttons">
-                        <button id="bulk-delete-sublevels-btn" class="btn btn-danger" disabled>
-                            <i class="fas fa-trash-alt"></i>
-                            <span>Bulk Delete</span>
-                        </button>
-                        <button id="bulk-update-sublevels-btn" class="btn btn-info" disabled>
-                            <i class="fas fa-edit"></i>
-                            <span>Update Comments</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Items Grid -->
-            <div class="sublevel-grid" id="sublevel-grid">
-                {% for subitem in subitems %}
-                <div class="sublevel-card" data-name="{{ subitem.name|lower }}" data-id="{{ subitem.id }}" data-in-stock="{{ subitem.in_stock|default_if_none:0 }}" data-in-use="{{ subitem.in_use|default_if_none:0 }}" data-scraped="{{ subitem.scraped|default_if_none:0 }}">
-                    <div class="card-checkbox-wrapper">
-                        <input type="checkbox" class="sublevel-checkbox" value="{{ subitem.id }}">
-                    </div>
-                    
-                    <div class="card-actions" onclick="event.stopPropagation();">
-                        <button type="button" onclick="event.stopPropagation(); editSublevel({{ subitem.id }}, '{{ subitem.name|escapejs }}');" title="Edit" class="action-btn edit-btn"><i class="fas fa-pen"></i></button>
-                        <button type="button" onclick="event.stopPropagation(); openDeleteSublevel({{ subitem.id }});" class="action-btn delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                    
-                    <div class="sublevel-icon">
-                        <img src="/static/products/philips.png" alt="Philips Logo">
-                    </div>
-                    
-                    <div class="sublevel-name">{{ subitem.name }}</div>
-                    
-                    <div class="status-badges">
-                        <div class="status-badge badge-stock">
-                            <div class="badge-label">Stock</div>
-                            <div>{{ subitem.in_stock }}</div>
-                        </div>
-                        <div class="status-badge badge-use">
-                            <div class="badge-label">In Use</div>
-                            <div>{{ subitem.in_use }}</div>
-                        </div>
-                        <div class="status-badge badge-scraped">
-                            <div class="badge-label">Scraped</div>
-                            <div>{{ subitem.scraped }}</div>
-                        </div>
-                    </div>
-                    
-                    <textarea class="sublevel-note" data-id="{{ subitem.id }}" placeholder="Add a note or comment...">{{ subitem.note|default_if_none:'' }}</textarea>
-                </div>
-                {% empty %}
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-box-open"></i></div>
-                    <h3 class="empty-title">No Sub Items Found</h3>
-                    <p class="empty-text">Get started by adding your first sub item using the form above!</p>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Pagination -->
-            {% if page_obj %}
-            <div class="pagination">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
-                    ← Previous
-                </a>
-                {% endif %}
-                <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
-                    Next →
-                </a>
-                {% endif %}
-            </div>
-            {% endif %}
+        <div class="sl-header-right">
+            <button class="sl-header-btn" id="restartTourBtn" title="Page Tour"><i class="fas fa-question-circle"></i></button>
+            <button class="sl-header-btn primary" id="addItemToggle" type="button"><i class="fas fa-plus"></i> Add Sub Item</button>
+            <button class="sl-header-btn" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
         </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="sl-stats">
+        <div class="sl-stat-card stat-total"><div class="sl-stat-icon"><i class="fas fa-cubes"></i></div><div class="sl-stat-info"><div class="sl-stat-label">Total Items</div><div class="sl-stat-value" id="statTotal">{{ subitems|length }}</div><div class="sl-stat-sub">All sub-level items</div></div></div>
+        <div class="sl-stat-card stat-stock"><div class="sl-stat-icon"><i class="fas fa-warehouse"></i></div><div class="sl-stat-info"><div class="sl-stat-label">In Stock</div><div class="sl-stat-value" id="statStock">0</div><div class="sl-stat-sub">Available units</div></div></div>
+        <div class="sl-stat-card stat-use"><div class="sl-stat-icon"><i class="fas fa-cogs"></i></div><div class="sl-stat-info"><div class="sl-stat-label">In Use</div><div class="sl-stat-value" id="statUse">0</div><div class="sl-stat-sub">Currently deployed</div></div></div>
+        <div class="sl-stat-card stat-scraped"><div class="sl-stat-icon"><i class="fas fa-recycle"></i></div><div class="sl-stat-info"><div class="sl-stat-label">Scraped</div><div class="sl-stat-value" id="statScraped">0</div><div class="sl-stat-sub">Decommissioned</div></div></div>
     </div>
 
-    <!-- Sublevel Popup Modal -->
-    <div id="sublevelPopup" class="modal-overlay">
-        <div class="modal-content" style="max-width: min(28rem, 95vw);">
-            <button onclick="closeSublevelPopup()" class="modal-close">&times;</button>
-            <button type="button" onclick="showSublevelInfo()" title="View History" style="position: absolute; top: 1rem; left: 1rem; background: var(--primary-light); border: 2px solid var(--primary-color); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--primary-color); cursor: pointer; transition: all 0.3s ease;"><i class="fas fa-history"></i></button>
-            
-            <div class="modal-header">
-                <div class="modal-icon">
-                    <img src="/static/products/Philips_NoBG.png" alt="Philips Logo" style="height: 2.25rem; width: auto;">
-                </div>
-                <h2 id="popupSublevelName" class="modal-title"></h2>
+    <div class="sl-workspace">
+        <div class="sl-add-inline" id="addItemPanel">
+            <div class="sl-add-inline-head">
+                <div class="sl-add-inline-title"><i class="fas fa-plus-circle" style="color:var(--sl-accent);"></i> Add New Sub Item</div>
+                <button class="sl-add-inline-close" id="addItemClose" type="button">&times;</button>
             </div>
-            
-            <form id="sublevelCountForm" method="post" class="modal-form">
+            <form method="post">
                 {% csrf_token %}
-                <input type="hidden" name="sublevel_id" id="popupSublevelId">
-                
-                <div class="status-input-group stock-input-group">
-                    <label for="popupInStock" class="status-input-label stock-input-label"><i class="fas fa-warehouse"></i> In Stock</label>
-                    <input type="number" name="in_stock" id="popupInStock" min="0" class="status-input stock-input">
+                <div class="sl-add-form-row">
+                    <input type="text" name="subitem_name" class="sl-form-input" placeholder="Enter sub item name..." required autocomplete="off">
+                    <button type="submit" class="sl-btn sl-btn-primary"><i class="fas fa-plus"></i> Add</button>
                 </div>
-                
-                <div class="status-input-group use-input-group">
-                    <label for="popupInUse" class="status-input-label use-input-label"><i class="fas fa-cogs"></i> In Use</label>
-                    <input type="number" name="in_use" id="popupInUse" min="0" class="status-input use-input">
-                </div>
-                
-                <div class="status-input-group scraped-input-group">
-                    <label for="popupScraped" class="status-input-label scraped-input-label"><i class="fas fa-recycle"></i> Scraped</label>
-                    <input type="number" name="scraped" id="popupScraped" min="0" class="status-input scraped-input">
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.125rem;">
-                    <i class="fas fa-save"></i>
-                    <span>Save Changes</span>
-                </button>
             </form>
+        </div>
+
+        <div class="sl-toolbar">
+            <div class="sl-search-box"><i class="fas fa-search"></i><input type="text" class="sl-search-input" id="slSearch" placeholder="Search sub items by name..."></div>
+            <select class="sl-toolbar-select" id="slSort">
+                <option value="name">Sort: Name A-Z</option>
+                <option value="name_desc">Sort: Name Z-A</option>
+                <option value="in_stock">Sort: Stock (High)</option>
+                <option value="in_use">Sort: In Use (High)</option>
+                <option value="scraped">Sort: Scraped (High)</option>
+                <option value="total">Sort: Total (High)</option>
+            </select>
+            <div class="sl-toolbar-divider"></div>
+            <button class="sl-toolbar-btn active" id="viewGrid" title="Grid View"><i class="fas fa-th-large"></i></button>
+            <button class="sl-toolbar-btn" id="viewTable" title="Table View"><i class="fas fa-list"></i></button>
+            <div class="sl-toolbar-divider"></div>
+            <button class="sl-toolbar-btn" id="selectAllToggle" title="Select All"><i class="far fa-check-square"></i> Select</button>
+            <button class="sl-toolbar-btn" id="exportBtn" title="Export"><i class="fas fa-download"></i> Export</button>
+            <div class="sl-toolbar-divider"></div>
+            <button class="sl-toolbar-btn" id="saveAllNotesBtn" title="Save all notes" style="background:var(--sl-accent-light);color:var(--sl-accent);border-color:var(--sl-accent);font-weight:700"><i class="fas fa-save"></i> Save Notes</button>
+            <span class="sl-toolbar-count">Showing <strong id="visibleCount">{{ subitems|length }}</strong> of <strong>{{ subitems|length }}</strong> items</span>
+        </div>
+
+        <div class="sl-bulk-bar" id="bulkBar">
+            <div class="sl-bulk-bar-count"><span class="count-num" id="bulkCount">0</span> items selected</div>
+            <div class="sl-bulk-bar-actions">
+                <button class="sl-bulk-btn info" id="bulkUpdateBtn"><i class="fas fa-save"></i> Save Notes</button>
+                <button class="sl-bulk-btn danger" id="bulkDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+            </div>
+            <button class="sl-bulk-close" id="bulkClearBtn" title="Clear selection">&times;</button>
+        </div>
+
+        <div class="sl-grid" id="slGrid">
+            {% for subitem in subitems %}
+            <div class="sl-card" data-id="{{ subitem.id }}" data-name="{{ subitem.name|lower }}" data-in-stock="{{ subitem.in_stock|default_if_none:0 }}" data-in-use="{{ subitem.in_use|default_if_none:0 }}" data-scraped="{{ subitem.scraped|default_if_none:0 }}">
+                <div class="sl-card-header">
+                    <input type="checkbox" class="sl-card-checkbox sl-item-check" value="{{ subitem.id }}">
+                    <div class="sl-card-icon"><img src="/static/products/philips.png" alt="Logo"></div>
+                    <div class="sl-card-title" title="{{ subitem.name }}">{{ subitem.name }}</div>
+                    <div class="sl-card-menu" onclick="event.stopPropagation();">
+                        <button type="button" class="sl-card-menu-btn" onclick="event.stopPropagation(); slEditItem({{ subitem.id }}, '{{ subitem.name|escapejs }}');" title="Rename"><i class="fas fa-pen"></i></button>
+                        <button type="button" class="sl-card-menu-btn danger" onclick="event.stopPropagation(); slDeleteItem({{ subitem.id }}, '{{ subitem.name|escapejs }}');" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="sl-card-body">
+                    <div class="sl-card-metrics">
+                        <div class="sl-metric stock"><div class="sl-metric-value">{{ subitem.in_stock|default_if_none:0 }}</div><div class="sl-metric-label">In Stock</div></div>
+                        <div class="sl-metric use"><div class="sl-metric-value">{{ subitem.in_use|default_if_none:0 }}</div><div class="sl-metric-label">In Use</div></div>
+                        <div class="sl-metric scraped"><div class="sl-metric-value">{{ subitem.scraped|default_if_none:0 }}</div><div class="sl-metric-label">Scraped</div></div>
+                    </div>
+                    <div class="sl-card-bar"><div class="sl-card-bar-seg stock"></div><div class="sl-card-bar-seg use"></div><div class="sl-card-bar-seg scraped"></div></div>
+                    <textarea class="sl-card-note" data-id="{{ subitem.id }}" placeholder="Add a note..." onclick="event.stopPropagation();">{{ subitem.note|default_if_none:'' }}</textarea>
+                </div>
+                <div class="sl-card-footer">
+                    <span class="sl-card-total">Total: <strong>{{ subitem.in_stock|default_if_none:0|add:subitem.in_use|add:subitem.scraped }}</strong></span>
+                    <button class="sl-card-history-btn" onclick="event.stopPropagation(); slShowHistory({{ subitem.id }}, '{{ subitem.name|escapejs }}');" type="button"><i class="fas fa-clock-rotate-left"></i> History</button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="sl-empty"><div class="sl-empty-icon"><i class="fas fa-box-open"></i></div><h3>No Sub Items Found</h3><p>Get started by adding your first sub item using the button above.</p></div>
+            {% endfor %}
+        </div>
+
+        <div class="sl-table-wrapper" id="slTableWrapper">
+            <table class="sl-table">
+                <thead><tr>
+                    <th class="tbl-checkbox-cell"><input type="checkbox" class="sl-card-checkbox" id="tblSelectAll"></th>
+                    <th>Name</th><th>In Stock</th><th>In Use</th><th>Scraped</th><th>Total</th><th>Note</th><th style="width:100px;">Actions</th>
+                </tr></thead>
+                <tbody id="slTableBody">
+                    {% for subitem in subitems %}
+                    <tr data-id="{{ subitem.id }}" data-name="{{ subitem.name|lower }}" data-in-stock="{{ subitem.in_stock|default_if_none:0 }}" data-in-use="{{ subitem.in_use|default_if_none:0 }}" data-scraped="{{ subitem.scraped|default_if_none:0 }}">
+                        <td class="tbl-checkbox-cell"><input type="checkbox" class="sl-item-check" value="{{ subitem.id }}"></td>
+                        <td><span class="tbl-name" onclick="slOpenPopup({{ subitem.id }},'{{ subitem.name|escapejs }}',{{ subitem.in_stock|default_if_none:0 }},{{ subitem.in_use|default_if_none:0 }},{{ subitem.scraped|default_if_none:0 }})">{{ subitem.name }}</span></td>
+                        <td><span class="tbl-badge stock"><i class="fas fa-warehouse"></i> {{ subitem.in_stock|default_if_none:0 }}</span></td>
+                        <td><span class="tbl-badge use"><i class="fas fa-cogs"></i> {{ subitem.in_use|default_if_none:0 }}</span></td>
+                        <td><span class="tbl-badge scraped"><i class="fas fa-recycle"></i> {{ subitem.scraped|default_if_none:0 }}</span></td>
+                        <td><strong>{{ subitem.in_stock|default_if_none:0|add:subitem.in_use|add:subitem.scraped }}</strong></td>
+                        <td><span style="font-size:.8rem;color:var(--sl-text-muted);">{{ subitem.note|default_if_none:"\u2014"|truncatewords:8 }}</span></td>
+                        <td><div class="tbl-actions">
+                            <button class="tbl-action-btn" onclick="slOpenPopup({{ subitem.id }},'{{ subitem.name|escapejs }}',{{ subitem.in_stock|default_if_none:0 }},{{ subitem.in_use|default_if_none:0 }},{{ subitem.scraped|default_if_none:0 }})" title="Update Counts"><i class="fas fa-sliders-h"></i></button>
+                            <button class="tbl-action-btn" onclick="slEditItem({{ subitem.id }},'{{ subitem.name|escapejs }}')" title="Rename"><i class="fas fa-pen"></i></button>
+                            <button class="tbl-action-btn danger" onclick="slDeleteItem({{ subitem.id }},'{{ subitem.name|escapejs }}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Edit Sub Item Modal -->
-    <div id="editSubItemModal" class="modal-overlay">
-        <div class="modal-content">
-            <button onclick="closeEditSubItemModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon"><i class="fas fa-edit" style="color: var(--primary-color);"></i></div>
-                <h3 class="modal-title">Edit Sub Item</h3>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;"><strong id="editSubItemTitle"></strong></p>
+    </div><!-- /.sl-page -->
+
+    <!-- COUNTS MODAL -->
+    <div class="sl-overlay" id="countsModal">
+        <div class="sl-modal">
+            <button class="sl-modal-close" onclick="slCloseModal('countsModal')">&times;</button>
+            <div class="sl-modal-head">
+                <div class="sl-modal-icon primary"><img src="/static/products/Philips_NoBG.png" alt="Logo" style="height:1.8rem;width:auto;"></div>
+                <div class="sl-modal-title" id="countsName"></div>
+                <div class="sl-modal-desc">Update inventory counts for this sub item</div>
             </div>
-            <form id="editSubItemForm" class="modal-form">
-                <input type="hidden" name="edit_id" id="editSubItemId">
-                <div class="form-group">
-                    <label for="editSubItemName">New Name</label>
-                    <input type="text" name="new_name" id="editSubItemName" class="form-input" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-save"></i>
-                    <span>Save Changes</span>
-                </button>
-            </form>
+            <div class="sl-modal-body">
+                <form method="post" id="countsForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="sublevel_id" id="countsId">
+                    <div class="sl-metric-inputs">
+                        <div class="sl-metric-input-card stock"><div class="sl-metric-input-icon"><i class="fas fa-warehouse"></i></div><div class="sl-metric-input-label">In Stock</div><input type="number" name="in_stock" id="countsStock" min="0" class="sl-metric-number-input"></div>
+                        <div class="sl-metric-input-card use"><div class="sl-metric-input-icon"><i class="fas fa-cogs"></i></div><div class="sl-metric-input-label">In Use</div><input type="number" name="in_use" id="countsUse" min="0" class="sl-metric-number-input"></div>
+                        <div class="sl-metric-input-card scraped"><div class="sl-metric-input-icon"><i class="fas fa-recycle"></i></div><div class="sl-metric-input-label">Scraped</div><input type="number" name="scraped" id="countsScraped" min="0" class="sl-metric-number-input"></div>
+                    </div>
+                    <div style="margin-top:1.25rem;display:flex;gap:.65rem;">
+                        <button type="button" class="sl-btn sl-btn-ghost" style="flex:1;" onclick="slShowHistory(document.getElementById('countsId').value,document.getElementById('countsName').textContent)"><i class="fas fa-clock-rotate-left"></i> History</button>
+                        <button type="submit" class="sl-btn sl-btn-primary" style="flex:2;"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Delete Sub Item Modal -->
-    <div id="deleteSubItemModal" class="modal-overlay">
-        <div class="modal-content">
-            <button onclick="closeDeleteSubItemModal()" class="modal-close">&times;</button>
-            <div class="modal-header">
-                <div class="modal-icon" style="background: var(--danger-light); color: var(--danger-color);"><i class="fas fa-trash-alt"></i></div>
-                <h3 class="modal-title" style="color: var(--danger-color);">Delete Sub Item</h3>
+    <!-- EDIT MODAL -->
+    <div class="sl-overlay" id="editModal">
+        <div class="sl-modal">
+            <button class="sl-modal-close" onclick="slCloseModal('editModal')">&times;</button>
+            <div class="sl-modal-head">
+                <div class="sl-modal-icon primary"><i class="fas fa-pen-to-square"></i></div>
+                <div class="sl-modal-title">Rename Sub Item</div>
+                <div class="sl-modal-desc">Editing: <strong id="editCurrentName"></strong></div>
             </div>
-            <p style="font-size: 1rem; color: var(--text-dark); margin-bottom: 1.5rem; text-align: center;">
-                Are you sure you want to delete <strong id="deleteSubItemName"></strong>? This action cannot be undone.
-            </p>
-            <form id="deleteSubItemForm" method="post" action="/stream/{{ selected_stream }}/subleveldata/" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                {% csrf_token %}
-                <input type="hidden" name="delete_id" id="deleteSubItemId">
-                <button type="submit" class="btn btn-danger" style="width: 100%;">
-                    <i class="fas fa-trash-alt"></i>
-                    <span>Delete Item</span>
-                </button>
-                <button type="button" onclick="closeDeleteSubItemModal()" class="btn" style="width: 100%; background: var(--text-muted); color: white;">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </button>
-            </form>
+            <div class="sl-modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <div class="sl-form-group"><label class="sl-form-label"><i class="fas fa-tag"></i> New Name</label><input type="text" id="editName" class="sl-form-input" placeholder="Enter new name..." required></div>
+                    <button type="submit" class="sl-btn sl-btn-primary sl-btn-block"><i class="fas fa-check"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE MODAL -->
+    <div class="sl-overlay" id="deleteModal">
+        <div class="sl-modal">
+            <button class="sl-modal-close" onclick="slCloseModal('deleteModal')">&times;</button>
+            <div class="sl-modal-head">
+                <div class="sl-modal-icon danger"><i class="fas fa-trash-alt"></i></div>
+                <div class="sl-modal-title" style="color:var(--sl-danger);">Delete Sub Item</div>
+                <div class="sl-modal-desc">Are you sure you want to delete <strong id="deleteName"></strong>? This action cannot be undone.</div>
+            </div>
+            <div class="sl-modal-body">
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_id" id="deleteId">
+                    <div style="display:flex;gap:.65rem;">
+                        <button type="button" class="sl-btn sl-btn-ghost" style="flex:1;" onclick="slCloseModal('deleteModal')"><i class="fas fa-times"></i> Cancel</button>
+                        <button type="submit" class="sl-btn sl-btn-danger" style="flex:1;"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div class="sl-overlay" id="historyModal">
+        <div class="sl-modal wide">
+            <button class="sl-modal-close" onclick="slCloseModal('historyModal')">&times;</button>
+            <div class="sl-modal-head">
+                <div class="sl-modal-icon info"><i class="fas fa-clock-rotate-left"></i></div>
+                <div class="sl-modal-title" id="historyTitle">Change History</div>
+                <div class="sl-modal-desc" id="historySubtitle"></div>
+            </div>
+            <div class="sl-modal-body">
+                <div class="sl-history-filters" id="historyFilters"></div>
+                <div class="sl-graph-wrap" id="historyGraphWrap"><canvas id="historyCanvas" width="400" height="140"></canvas></div>
+                <div class="sl-history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRAPH MODAL -->
+    <div class="sl-overlay" id="graphModal">
+        <div class="sl-modal wide" style="max-width:900px;">
+            <button class="sl-modal-close" onclick="slCloseModal('graphModal')">&times;</button>
+            <div class="sl-modal-head">
+                <div class="sl-modal-icon info"><i class="fas fa-chart-line"></i></div>
+                <div class="sl-modal-title">Trend Graph</div>
+            </div>
+            <div class="sl-modal-body">
+                <div class="sl-graph-wrap"><canvas id="graphMaxCanvas" width="800" height="350"></canvas></div>
+                <div style="text-align:center;"><button class="sl-btn sl-btn-ghost" onclick="slCloseModal('graphModal')"><i class="fas fa-times"></i> Close</button></div>
+            </div>
         </div>
     </div>
 
     <script>
-    // Modal Management Functions
-    function openSublevelPopup(id, name, inStock, inUse, scraped) {
-        document.getElementById('sublevelPopup').style.display = 'flex';
-        document.getElementById('popupSublevelName').textContent = name;
-        document.getElementById('popupSublevelId').value = id;
-        document.getElementById('popupInStock').value = inStock || 0;
-        document.getElementById('popupInUse').value = inUse || 0;
-        document.getElementById('popupScraped').value = scraped || 0;
-    }
-
-    function closeSublevelPopup() {
-        document.getElementById('sublevelPopup').style.display = 'none';
-    }
-
-    function editSublevel(id, name) {
-        event.stopPropagation();
-        document.getElementById('editSubItemId').value = id;
-        document.getElementById('editSubItemName').value = name;
-        document.getElementById('editSubItemTitle').textContent = name;
-        document.getElementById('editSubItemModal').style.display = 'flex';
-        setTimeout(() => {
-            document.getElementById('editSubItemName').focus();
-            document.getElementById('editSubItemName').select();
-        }, 100);
-    }
-
-    function closeEditSubItemModal() {
-        document.getElementById('editSubItemModal').style.display = 'none';
-    }
-
-    function openDeleteSublevel(id) {
-        event.stopPropagation();
-        const card = document.querySelector('.sublevel-card[data-id="' + id + '"]');
-        const name = card ? card.querySelector('.sublevel-name').textContent.trim() : '';
-        document.getElementById('deleteSubItemId').value = id;
-        document.getElementById('deleteSubItemName').textContent = name;
-        document.getElementById('deleteSubItemModal').style.display = 'flex';
-    }
-
-    function closeDeleteSubItemModal() {
-        document.getElementById('deleteSubItemModal').style.display = 'none';
-    }
-
-    function closeErrorModal() {
-        document.getElementById('errorModal').style.display = 'none';
-    }
-
-    // History Information Display
-    function showSublevelInfo() {
-      var sublevelId = document.getElementById('popupSublevelId').value;
-      var history = (window.sublevelHistoryData && window.sublevelHistoryData[sublevelId]) || [];
-      let html = '<div style="font-size:1.125rem; font-weight:700; color:var(--primary-color); margin-bottom:1rem; text-align:center;">📊 Sublevel History</div>';
-      
-      // Week filter
-      function getISOWeek(d) {
-        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        var dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        var weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-        return {week: weekNum, year: d.getUTCFullYear()};
-      }
-      
-      let weekSet = new Set();
-      for (const h of history) {
-        let d = new Date(h.at);
-        let w = getISOWeek(d);
-        weekSet.add(`W${w.week}, ${w.year}`);
-        h._week = `W${w.week}, ${w.year}`;
-      }
-      
-      let weekList = Array.from(weekSet).sort((a,b)=>{
-        let [wa, ya] = a.match(/W(\d+), (\d+)/).slice(1).map(Number);
-        let [wb, yb] = b.match(/W(\d+), (\d+)/).slice(1).map(Number);
-        return yb-ya || wb-wa;
-      });
-      
-      html += '<div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;">';
-      html += '<select id="historyWeekFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Weeks</option>';
-      for (const w of weekList) html += `<option value="${w}">${w}</option>`;
-      html += '</select>';
-      
-      // User filter
-      let users = Array.from(new Set(history.map(h => h.by)));
-      if (users.length > 1) {
-        html += '<select id="historyUserFilter" class="form-input" style="flex:1; min-width:10rem;"><option value="">All Users</option>';
-        for (const u of users) html += `<option value="${u}">${u}</option>`;
-        html += '</select>';
-      }
-      html += '</div>';
-      
-      // Graph
-      html += '<div style="display:flex; justify-content:center; margin-bottom:1.5rem; background:var(--bg-light); padding:1rem; border-radius:0.75rem;"><canvas id="historyGraph" width="320" height="120" style="cursor:zoom-in;"></canvas></div>';
-      
-      if (history.length === 0) {
-        html += '<div style="text-align:center; color:var(--text-light); padding:2rem; background:var(--bg-light); border-radius:0.75rem;">📭 No history found.</div>';
-      } else {
-        html += '<div style="max-height:15rem; overflow-y:auto; background:var(--bg-light); border-radius:0.75rem; padding:1rem;"><ul id="historyList" style="list-style:none; padding:0; margin:0;">';
-        for (const entry of history.slice().reverse()) {
-          const dateStr = new Date(entry.at).toLocaleString();
-          html += `<li data-by="${entry.by}" data-week="${entry._week}" style="margin-bottom:1rem; padding:0.75rem; background:var(--white); border-radius:0.5rem; border-left:0.25rem solid var(--primary-color);">
-            <div style="font-weight:700; color:var(--primary-color); margin-bottom:0.25rem;">${entry.action}</div>
-            <div style="font-size:0.875rem; color:var(--text-muted);">by <strong style="color:var(--primary-color);">${entry.by}</strong> • ${dateStr}</div>
-            <div style="font-size:0.9rem; color:var(--text-dark); margin-top:0.375rem;">${entry.details}</div>
-          </li>`;
-        }
-        html += '</ul></div>';
-      }
-      
-      const popup = document.createElement('div');
-      popup.className = 'modal-overlay';
-      popup.style.display = 'flex';
-      popup.style.zIndex = '3000';
-      
-      const content = document.createElement('div');
-      content.className = 'modal-content';
-      content.style.maxWidth = 'min(50rem, 95vw)';
-      content.innerHTML = html + '<div style="text-align:center; margin-top:1.5rem;"><button onclick="closeInfoPopup(this)" class="btn btn-primary">Close</button></div>';
-      popup.appendChild(content);
-      document.body.appendChild(popup);
-
-      // Filter logic
-      const weekFilter = content.querySelector('#historyWeekFilter');
-      const userFilter = content.querySelector('#historyUserFilter');
-      function applyFilters() {
-        const weekVal = weekFilter ? weekFilter.value : '';
-        const userVal = userFilter ? userFilter.value : '';
-        content.querySelectorAll('#historyList li').forEach(li => {
-          let show = true;
-          if (weekVal && li.getAttribute('data-week') !== weekVal) show = false;
-          if (userVal && li.getAttribute('data-by') !== userVal) show = false;
-          li.style.display = show ? '' : 'none';
-        });
-      }
-      if (weekFilter) weekFilter.addEventListener('change', applyFilters);
-      if (userFilter) userFilter.addEventListener('change', applyFilters);
-      
-      // Draw graph
-      const canvas = content.querySelector('#historyGraph');
-      const ctx = canvas.getContext('2d');
-      let points = [];
-      let last = {in_stock: null, in_use: null, scraped: null};
-      for (const entry of history) {
-        let m = entry.details.match(/In Stock from (\d+) to (\d+)/);
-        if (m) last.in_stock = +m[2];
-        m = entry.details.match(/In Use from (\d+) to (\d+)/);
-        if (m) last.in_use = +m[2];
-        m = entry.details.match(/Scraped from (\d+) to (\d+)/);
-        if (m) last.scraped = +m[2];
-        points.push({t: new Date(entry.at), ...last});
-      }
-      
-      if (points.length > 1) {
-        if (points.length > 5) points = points.slice(-5);
-        let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
-        let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
-        if (min === Infinity) min = 0;
-        if (max === -Infinity) max = 1;
-        const t0 = points[0].t.getTime();
-        const t1 = points[points.length-1].t.getTime();
-        function tx(t) { return 50 + 220 * (t.getTime()-t0)/(t1-t0||1); }
-        function ty(val) { return 100 - 80 * ((val-min)/(max-min||1)); }
-        
-        ctx.clearRect(0,0,320,120);
-        ctx.strokeStyle = '#ddd'; 
-        ctx.beginPath(); 
-        ctx.moveTo(50,10); 
-        ctx.lineTo(50,110); 
-        ctx.lineTo(300,110); 
-        ctx.stroke();
-        
-        // X axis dates
-        ctx.font = '11px sans-serif'; 
-        ctx.fillStyle = '#888';
-        ctx.textAlign = 'center';
-        let step = Math.max(1, Math.floor(points.length/4));
-        for (let i=0; i<points.length; i+=step) {
-          let d = points[i].t;
-          ctx.fillText(d.toLocaleDateString(), tx(d), 122);
-        }
-        
-        // Draw lines
-        function drawLine(key, color) {
-          ctx.strokeStyle = color; 
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          let started = false;
-          for (const p of points) {
-            if (p[key] == null) continue;
-            const x = tx(p.t), y = ty(p[key]);
-            if (!started) { ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
-          }
-          ctx.stroke();
-        }
-        drawLine('in_stock', '#1a7f37');
-        drawLine('in_use', '#856404');
-        drawLine('scraped', '#dc3545');
-        
-        // Legend
-        ctx.font = '12px sans-serif'; 
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#1a7f37'; 
-        ctx.fillText('● Stock', 220, 22);
-        ctx.fillStyle = '#856404'; 
-        ctx.fillText('● In Use', 220, 38);
-        ctx.fillStyle = '#dc3545'; 
-        ctx.fillText('● Scraped', 220, 54);
-      } else if (ctx) {
-        ctx.clearRect(0,0,320,120);
-        ctx.font = '14px sans-serif';
-        ctx.fillStyle = '#888';
-        ctx.textAlign = 'center';
-        ctx.fillText('Not enough data for graph', 160, 65);
-      }
-      
-      // Add click handler to maximize graph
-      if (canvas && points.length > 1) {
-        canvas.addEventListener('click', function() {
-          maximizeGraph(points);
-        });
-      }
-    }
-
-    function maximizeGraph(points) {
-      const graphPopup = document.createElement('div');
-      graphPopup.className = 'modal-overlay';
-      graphPopup.style.display = 'flex';
-      graphPopup.style.zIndex = '4000';
-      
-      const graphContent = document.createElement('div');
-      graphContent.className = 'modal-content';
-      graphContent.style.maxWidth = 'min(70rem, 95vw)';
-      graphContent.innerHTML = `
-        <button onclick="this.closest('.modal-overlay').remove()" class="modal-close">&times;</button>
-        <div class="modal-header">
-          <div class="modal-icon">📊</div>
-          <h3 class="modal-title">History Graph</h3>
-        </div>
-        <div style="display:flex; justify-content:center; background:var(--bg-light); padding:2rem; border-radius:0.75rem;">
-          <canvas id="maximizedGraph" width="800" height="400"></canvas>
-        </div>
-        <div style="text-align:center; margin-top:1.5rem;">
-          <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-primary">Close</button>
-        </div>
-      `;
-      graphPopup.appendChild(graphContent);
-      document.body.appendChild(graphPopup);
-      
-      // Draw maximized graph
-      const maxCanvas = graphContent.querySelector('#maximizedGraph');
-      const maxCtx = maxCanvas.getContext('2d');
-      
-      let min = Math.min(...points.map(p=>Math.min(p.in_stock??Infinity,p.in_use??Infinity,p.scraped??Infinity)));
-      let max = Math.max(...points.map(p=>Math.max(p.in_stock??-Infinity,p.in_use??-Infinity,p.scraped??-Infinity)));
-      if (min === Infinity) min = 0;
-      if (max === -Infinity) max = 1;
-      const t0 = points[0].t.getTime();
-      const t1 = points[points.length-1].t.getTime();
-      function tx(t) { return 80 + 640 * (t.getTime()-t0)/(t1-t0||1); }
-      function ty(val) { return 350 - 280 * ((val-min)/(max-min||1)); }
-      
-      maxCtx.clearRect(0,0,800,400);
-      maxCtx.strokeStyle = '#ddd'; 
-      maxCtx.lineWidth = 2;
-      maxCtx.beginPath(); 
-      maxCtx.moveTo(80,50); 
-      maxCtx.lineTo(80,360); 
-      maxCtx.lineTo(740,360); 
-      maxCtx.stroke();
-      
-      // Y axis labels
-      maxCtx.font = '14px sans-serif';
-      maxCtx.fillStyle = '#666';
-      maxCtx.textAlign = 'right';
-      for (let i = 0; i <= 5; i++) {
-        const val = min + (max - min) * i / 5;
-        const y = 350 - 280 * i / 5;
-        maxCtx.fillText(Math.round(val), 70, y + 5);
-        maxCtx.strokeStyle = '#eee';
-        maxCtx.beginPath();
-        maxCtx.moveTo(80, y);
-        maxCtx.lineTo(740, y);
-        maxCtx.stroke();
-      }
-      
-      // X axis dates
-      maxCtx.font = '14px sans-serif'; 
-      maxCtx.fillStyle = '#666';
-      maxCtx.textAlign = 'center';
-      let step = Math.max(1, Math.floor(points.length/8));
-      for (let i=0; i<points.length; i+=step) {
-        let d = points[i].t;
-        maxCtx.fillText(d.toLocaleDateString(), tx(d), 380);
-      }
-      
-      // Draw lines
-      function drawLine(key, color) {
-        maxCtx.strokeStyle = color; 
-        maxCtx.lineWidth = 3;
-        maxCtx.beginPath();
-        let started = false;
-        for (const p of points) {
-          if (p[key] == null) continue;
-          const x = tx(p.t), y = ty(p[key]);
-          if (!started) { maxCtx.moveTo(x,y); started=true; } else maxCtx.lineTo(x,y);
-        }
-        maxCtx.stroke();
-        
-        // Draw points
-        maxCtx.fillStyle = color;
-        for (const p of points) {
-          if (p[key] == null) continue;
-          const x = tx(p.t), y = ty(p[key]);
-          maxCtx.beginPath();
-          maxCtx.arc(x, y, 5, 0, 2 * Math.PI);
-          maxCtx.fill();
-        }
-      }
-      drawLine('in_stock', '#1a7f37');
-      drawLine('in_use', '#856404');
-      drawLine('scraped', '#dc3545');
-      
-      // Legend
-      maxCtx.font = '16px sans-serif'; 
-      maxCtx.textAlign = 'left';
-      maxCtx.fillStyle = '#1a7f37'; 
-      maxCtx.fillText('● In Stock', 600, 40);
-      maxCtx.fillStyle = '#856404'; 
-      maxCtx.fillText('● In Use', 600, 65);
-      maxCtx.fillStyle = '#dc3545'; 
-      maxCtx.fillText('● Scraped', 600, 90);
-      
-      // Close on overlay click
-      graphPopup.addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.remove();
-        }
-      });
-    }
-
-    function closeInfoPopup(btn) {
-      let overlay = btn.closest('.modal-overlay');
-      if (overlay && overlay.parentNode === document.body) {
-        document.body.removeChild(overlay);
-      }
-      document.getElementById('sublevelPopup').style.display = 'flex';
-    }
-    
-    // Prepare history data
-    window.sublevelHistoryData = {};
+    window.slHistoryData={};
     {% for sub in subitems %}
-    window.sublevelHistoryData['{{ sub.id }}'] = JSON.parse(`[
-      {% for h in sub.history_list %}
-        {"action": "{{ h.action|escapejs }}", "by": "{{ h.by|escapejs }}", "at": "{{ h.at|date:'c' }}", "details": "{{ h.details|escapejs }}"}{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    ]`);
+    window.slHistoryData['{{ sub.id }}']=JSON.parse(`[{% for h in sub.history_list %}{"action":"{{ h.action|escapejs }}","by":"{{ h.by|escapejs }}","at":"{{ h.at|date:'c' }}","details":"{{ h.details|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]`);
     {% endfor %}
 
-    // Form submissions
-    document.getElementById('editSubItemForm').onsubmit = function(e) {
-      e.preventDefault();
-      var id = document.getElementById('editSubItemId').value;
-      var newName = document.getElementById('editSubItemName').value.trim();
-      if (newName) {
-        window.location.href = `/stream/{{ selected_stream }}/subleveldata/?edit_id=${id}&new_name=${encodeURIComponent(newName)}`;
-      }
-    };
+    const _buPrefix=window.location.pathname.substring(0,window.location.pathname.indexOf('/stream/'));
+    const $=id=>document.getElementById(id);
+    const $$=sel=>document.querySelectorAll(sel);
+    function slOpenModal(id){$(id).classList.add('open')}
+    function slCloseModal(id){$(id).classList.remove('open')}
+    document.addEventListener('click',function(e){if(e.target.classList.contains('sl-overlay')&&e.target.classList.contains('open'))e.target.classList.remove('open')});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')$$('.sl-overlay.open').forEach(m=>m.classList.remove('open'))});
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', function() {
-      // Calculate and display stats
-      let totalStock = 0, totalUse = 0, totalScraped = 0;
-      document.querySelectorAll('.sublevel-card').forEach(card => {
-        totalStock += parseInt(card.dataset.inStock) || 0;
-        totalUse += parseInt(card.dataset.inUse) || 0;
-        totalScraped += parseInt(card.dataset.scraped) || 0;
-      });
-      document.getElementById('total-stock').textContent = totalStock;
-      document.getElementById('total-use').textContent = totalUse;
-      document.getElementById('total-scraped').textContent = totalScraped;
-      
-      // Show error modal if present
-      var errorModal = document.getElementById('errorModal');
-      var errorMsg = document.getElementById('errorModalMsg');
-      if (errorModal && errorMsg && errorMsg.textContent.trim().length > 0) {
-        errorModal.style.display = 'flex';
-      }
-
-      // Add click handlers to cards
-      document.querySelectorAll('.sublevel-card').forEach(card => {
-        card.addEventListener('click', function(e) {
-          if (e.target.classList.contains('sublevel-checkbox') || 
-              e.target.closest('.card-actions') || 
-              e.target.classList.contains('sublevel-note') ||
-              e.target.closest('.card-checkbox-wrapper')) {
-            return;
-          }
-          const id = this.dataset.id;
-          const name = this.querySelector('.sublevel-name').textContent.trim();
-          const inStock = this.dataset.inStock;
-          const inUse = this.dataset.inUse;
-          const scraped = this.dataset.scraped;
-          openSublevelPopup(id, name, inStock, inUse, scraped);
-        });
-      });
-      
-      // Close modals on overlay click
-      document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-          if (e.target === this) {
-            this.style.display = 'none';
-          }
-        });
-      });
-    });
-
-    // Search functionality
-    document.getElementById('sublevel-search-input').addEventListener('input', function() {
-      const q = this.value.trim().toLowerCase();
-      document.querySelectorAll('#sublevel-grid .sublevel-card').forEach(card => {
-        const name = card.dataset.name || '';
-        card.style.display = (!q || name.includes(q)) ? '' : 'none';
-      });
-    });
-
-    // Sort functionality
-    document.getElementById('sublevel-sort-select').addEventListener('change', function() {
-      const sortBy = this.value;
-      const grid = document.getElementById('sublevel-grid');
-      const cards = Array.from(grid.querySelectorAll('.sublevel-card'));
-      const keyMap = {
-        name: 'name',
-        in_stock: 'inStock',
-        in_use: 'inUse',
-        scraped: 'scraped'
-      };
-      const dataKey = keyMap[sortBy] || 'name';
-      
-      cards.sort((a, b) => {
-        if (dataKey === 'name') {
-          return (a.dataset.name || '').localeCompare(b.dataset.name || '');
-        } else {
-          return parseInt(b.dataset[dataKey] || 0) - parseInt(a.dataset[dataKey] || 0);
-        }
-      });
-      
-      cards.forEach(card => grid.appendChild(card));
-    });
-
-    // Bulk selection
-    document.getElementById('select-all-sublevels').addEventListener('change', function() {
-      const checked = this.checked;
-      document.querySelectorAll('.sublevel-card .sublevel-checkbox').forEach(cb => {
-        cb.checked = checked;
-      });
-      updateBulkState();
-    });
-
-    function updateBulkState() {
-      const checked = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).filter(cb => cb.value);
-      document.getElementById('bulk-delete-sublevels-btn').disabled = checked.length === 0;
-      document.getElementById('bulk-update-sublevels-btn').disabled = checked.length === 0;
+    function slComputeStats(){
+        let tS=0,tU=0,tR=0,vis=0;
+        $$('#slGrid .sl-card').forEach(c=>{if(c.style.display!=='none')vis++;tS+=parseInt(c.dataset.inStock)||0;tU+=parseInt(c.dataset.inUse)||0;tR+=parseInt(c.dataset.scraped)||0});
+        $('statStock').textContent=tS;$('statUse').textContent=tU;$('statScraped').textContent=tR;
+        if($('visibleCount'))$('visibleCount').textContent=vis;
+    }
+    function slUpdateBars(){
+        $$('.sl-card-bar').forEach(bar=>{const c=bar.closest('.sl-card');const s=parseInt(c.dataset.inStock)||0;const u=parseInt(c.dataset.inUse)||0;const r=parseInt(c.dataset.scraped)||0;const t=s+u+r||1;bar.querySelector('.stock').style.width=(s/t*100)+'%';bar.querySelector('.use').style.width=(u/t*100)+'%';bar.querySelector('.scraped').style.width=(r/t*100)+'%'});
     }
 
-    document.querySelectorAll('.sublevel-card .sublevel-checkbox').forEach(cb => {
-      cb.addEventListener('change', updateBulkState);
+    $('addItemToggle').addEventListener('click',()=>{const p=$('addItemPanel');p.classList.toggle('open');if(p.classList.contains('open'))p.querySelector('input[name="subitem_name"]').focus()});
+    $('addItemClose').addEventListener('click',()=>$('addItemPanel').classList.remove('open'));
+
+    $('slSearch').addEventListener('input',function(){const q=this.value.trim().toLowerCase();let vis=0;$$('#slGrid .sl-card').forEach(c=>{const m=!q||c.dataset.name.includes(q);c.style.display=m?'':'none';if(m)vis++});$$('#slTableBody tr').forEach(r=>{const m=!q||r.dataset.name.includes(q);r.style.display=m?'':'none'});if($('visibleCount'))$('visibleCount').textContent=vis});
+
+    $('slSort').addEventListener('change',function(){
+        const s=this.value;const g=$('slGrid');const cards=Array.from(g.querySelectorAll('.sl-card'));const tb=$('slTableBody');const rows=Array.from(tb.querySelectorAll('tr'));
+        function cmp(a,b){if(s==='name')return(a.dataset.name||'').localeCompare(b.dataset.name||'');if(s==='name_desc')return(b.dataset.name||'').localeCompare(a.dataset.name||'');if(s==='total'){const tA=(parseInt(a.dataset.inStock)||0)+(parseInt(a.dataset.inUse)||0)+(parseInt(a.dataset.scraped)||0);const tB=(parseInt(b.dataset.inStock)||0)+(parseInt(b.dataset.inUse)||0)+(parseInt(b.dataset.scraped)||0);return tB-tA}const k={in_stock:'inStock',in_use:'inUse',scraped:'scraped'}[s]||'inStock';return(parseInt(b.dataset[k])||0)-(parseInt(a.dataset[k])||0)}
+        cards.sort(cmp).forEach(c=>g.appendChild(c));rows.sort(cmp).forEach(r=>tb.appendChild(r))
     });
 
-    // Bulk delete
-    document.getElementById('bulk-delete-sublevels-btn').addEventListener('click', function() {
-      const ids = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
-      if (!ids.length || !confirm(`Delete ${ids.length} selected sub item(s)? This action cannot be undone.`)) return;
-      
-      fetch('/stream/{{ selected_stream }}/sublevels/bulk-delete/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({ids: ids})
-      }).then(r => r.json()).then(data => {
-        if (data.success) {
-          ids.forEach(id => {
-            const card = document.querySelector('.sublevel-card[data-id="'+id+'"]');
-            if (card) card.remove();
-          });
-          alert(`✅ Successfully deleted ${data.deleted} sub item(s).`);
-          document.getElementById('select-all-sublevels').checked = false;
-          updateBulkState();
-        } else {
-          alert('❌ Error: ' + (data.error || 'Unable to delete'));
-        }
-      }).catch(() => alert('❌ Request failed. Please try again.'));
-    });
+    $('viewGrid').addEventListener('click',function(){$('slGrid').style.display='grid';$('slTableWrapper').classList.remove('active');this.classList.add('active');$('viewTable').classList.remove('active')});
+    $('viewTable').addEventListener('click',function(){$('slGrid').style.display='none';$('slTableWrapper').classList.add('active');this.classList.add('active');$('viewGrid').classList.remove('active')});
 
-    // Bulk update
-    document.getElementById('bulk-update-sublevels-btn').addEventListener('click', function() {
-      const ids = Array.from(document.querySelectorAll('.sublevel-card .sublevel-checkbox:checked')).map(cb => cb.value).filter(id => id);
-      const notes = {};
-      ids.forEach(id => {
-        const note = document.querySelector('.sublevel-note[data-id="'+id+'"]');
-        if (note) notes[id] = note.value;
-      });
-      
-      fetch('/stream/{{ selected_stream }}/sublevels/bulk-update/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-        body: JSON.stringify({notes: notes})
-      }).then(r => r.json()).then(data => {
-        if (data.success) {
-          alert('✅ Successfully updated notes for selected sub items.');
-        } else {
-          alert('❌ Error: ' + (data.error || 'Unable to update'));
-        }
-      }).catch(() => alert('❌ Request failed. Please try again.'));
-    });
+    function slUpdateBulk(){const ch=Array.from($$('.sl-item-check:checked')).map(cb=>cb.value).filter(Boolean);const bar=$('bulkBar');if(ch.length>0){bar.classList.add('visible');$('bulkCount').textContent=ch.length}else{bar.classList.remove('visible')}}
+    $('selectAllToggle').addEventListener('click',function(){const all=$$('.sl-item-check');const allC=Array.from(all).every(cb=>cb.checked);all.forEach(cb=>cb.checked=!allC);slUpdateBulk()});
+    if($('tblSelectAll')){$('tblSelectAll').addEventListener('change',function(){$$('#slTableBody .sl-item-check').forEach(cb=>cb.checked=this.checked);$$('#slGrid .sl-item-check').forEach(cb=>{const t=document.querySelector('#slTableBody .sl-item-check[value="'+cb.value+'"]');if(t)cb.checked=t.checked});slUpdateBulk()})}
+    document.addEventListener('change',function(e){if(e.target.classList.contains('sl-item-check')){const v=e.target.value;$$('.sl-item-check[value="'+v+'"]').forEach(cb=>cb.checked=e.target.checked);slUpdateBulk()}});
+    $('bulkClearBtn').addEventListener('click',function(){$$('.sl-item-check').forEach(cb=>cb.checked=false);if($('tblSelectAll'))$('tblSelectAll').checked=false;slUpdateBulk()});
 
-    // Export functionality
-    document.getElementById('export-sublevels-btn').addEventListener('click', function() {
-      window.location.href = '/stream/{{ selected_stream }}/sublevels/export/';
+    $('bulkDeleteBtn').addEventListener('click',function(){
+        const ids=Array.from($$('.sl-item-check:checked')).map(cb=>cb.value).filter(Boolean);
+        if(!ids.length||!confirm('Delete '+ids.length+' selected sub item(s)? This cannot be undone.'))return;
+        fetch(_buPrefix+'/stream/{{ selected_stream }}/sublevels/bulk-delete/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({ids})}).then(r=>r.json()).then(data=>{if(data.success){ids.forEach(id=>{const c=document.querySelector('.sl-card[data-id="'+id+'"]');if(c)c.remove();const r=document.querySelector('#slTableBody tr[data-id="'+id+'"]');if(r)r.remove()});slComputeStats();slUpdateBulk();$('statTotal').textContent=$$('#slGrid .sl-card').length}else{console.error('Delete failed:',data.error);alert('Unable to delete.')}}).catch(()=>alert('Request failed.'));
     });
+    $('bulkUpdateBtn').addEventListener('click',function(){
+        const ids=Array.from($$('.sl-item-check:checked')).map(cb=>cb.value).filter(Boolean);const notes={};ids.forEach(id=>{const n=document.querySelector('.sl-card-note[data-id="'+id+'"]');if(n)notes[id]=n.value});
+        fetch(_buPrefix+'/stream/{{ selected_stream }}/sublevels/bulk-update/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({notes})}).then(r=>r.json()).then(data=>{if(data.success){alert('Notes updated successfully.');$$('.sl-item-check').forEach(cb=>cb.checked=false);slUpdateBulk()}else{console.error('Update failed:',data.error);alert('Unable to update.')}}).catch(()=>alert('Request failed.'));
+    });
+    $('saveAllNotesBtn').addEventListener('click',function(){
+        const notes={};$$('.sl-card-note').forEach(n=>{const id=n.dataset.id;if(id)notes[id]=n.value});
+        if(!Object.keys(notes).length){alert('No notes to save.');return;}
+        const btn=$('saveAllNotesBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+        fetch(_buPrefix+'/stream/{{ selected_stream }}/sublevels/bulk-update/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},body:JSON.stringify({notes})}).then(r=>r.json()).then(data=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Notes';if(data.success){btn.innerHTML='<i class="fas fa-check"></i> Saved!';btn.style.background='var(--sl-success-light)';btn.style.color='var(--sl-success)';btn.style.borderColor='var(--sl-success)';setTimeout(()=>{btn.innerHTML='<i class="fas fa-save"></i> Save Notes';btn.style.background='var(--sl-accent-light)';btn.style.color='var(--sl-accent)';btn.style.borderColor='var(--sl-accent)'},2000)}else{console.error('Save failed:',data.error);alert('Unable to save.')}}).catch(()=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Notes';alert('Request failed.')});
+    });
+    $('exportBtn').addEventListener('click',()=>{window.location.href=_buPrefix+'/stream/{{ selected_stream }}/sublevels/export/'});
+
+    document.addEventListener('click',function(e){const card=e.target.closest('.sl-card');if(!card)return;if(e.target.classList.contains('sl-item-check')||e.target.closest('.sl-card-menu')||e.target.classList.contains('sl-card-note')||e.target.closest('.sl-card-footer')||e.target.closest('.sl-card-checkbox'))return;const id=card.dataset.id;const name=card.querySelector('.sl-card-title').textContent.trim();slOpenPopup(id,name,card.dataset.inStock,card.dataset.inUse,card.dataset.scraped)});
+
+    function slOpenPopup(id,name,stock,use,scraped){$('countsName').textContent=name;$('countsId').value=id;$('countsStock').value=stock||0;$('countsUse').value=use||0;$('countsScraped').value=scraped||0;slOpenModal('countsModal');setTimeout(()=>$('countsStock').focus(),150)}
+
+    function slEditItem(id,name){$('editId').value=id;$('editName').value=name;$('editCurrentName').textContent=name;slOpenModal('editModal');setTimeout(()=>{$('editName').focus();$('editName').select()},150)}
+    $('editForm').addEventListener('submit',function(e){e.preventDefault();const id=$('editId').value;const n=$('editName').value.trim();if(n)window.location.href=_buPrefix+'/stream/{{ selected_stream }}/subleveldata/?edit_id='+id+'&new_name='+encodeURIComponent(n)});
+
+    function slDeleteItem(id,name){$('deleteId').value=id;$('deleteName').textContent=name;slOpenModal('deleteModal')}
+
+    function slShowHistory(id,name){
+        slCloseModal('countsModal');$('historyTitle').textContent='Change History';$('historySubtitle').textContent=name;
+        const history=(window.slHistoryData&&window.slHistoryData[String(id)])||[];
+        function getISOWeek(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-dn);const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));const wn=Math.ceil(((d-ys)/86400000+1)/7);return{week:wn,year:d.getUTCFullYear()}}
+        const wSet=new Set(),uSet=new Set();
+        history.forEach(h=>{const d=new Date(h.at);const w=getISOWeek(d);h._week='W'+w.week+', '+w.year;wSet.add(h._week);uSet.add(h.by)});
+        const wList=Array.from(wSet).sort((a,b)=>{const[wa,ya]=a.match(/W(\d+), (\d+)/).slice(1).map(Number);const[wb,yb]=b.match(/W(\d+), (\d+)/).slice(1).map(Number);return yb-ya||wb-wa});
+        let fH='<select id="hFilterWeek"><option value="">All Weeks</option>';wList.forEach(w=>fH+='<option value="'+w+'">'+w+'</option>');fH+='</select>';
+        if(uSet.size>1){fH+='<select id="hFilterUser"><option value="">All Users</option>';uSet.forEach(u=>fH+='<option value="'+u+'">'+u+'</option>');fH+='</select>'}
+        $('historyFilters').innerHTML=fH;
+        if(history.length===0){$('historyList').innerHTML='<div style="text-align:center;padding:2rem;color:var(--sl-text-muted);"><i class="fas fa-inbox" style="font-size:2rem;margin-bottom:.5rem;display:block;"></i>No history available</div>';$('historyGraphWrap').style.display='none'}
+        else{let lH='';history.slice().reverse().forEach(entry=>{const ds=new Date(entry.at).toLocaleString();const cls=entry.action.toLowerCase().includes('creat')?'created':entry.action.toLowerCase().includes('delet')?'deleted':'edited';lH+='<div class="sl-history-entry '+cls+'" data-week="'+escapeHtml(entry._week)+'" data-by="'+escapeHtml(entry.by)+'"><div class="sl-history-dot"></div><div class="sl-history-content"><div class="sl-history-action">'+escapeHtml(entry.action)+'</div><div class="sl-history-meta">by <strong>'+escapeHtml(entry.by)+'</strong> &bull; '+ds+'</div><div class="sl-history-details">'+escapeHtml(entry.details)+'</div></div></div>'});$('historyList').innerHTML=lH;$('historyGraphWrap').style.display='flex';slDrawGraph($('historyCanvas'),history,400,140)}
+        const wf=document.querySelector('#hFilterWeek'),uf=document.querySelector('#hFilterUser');
+        function af(){const wv=wf?wf.value:'';const uv=uf?uf.value:'';$$('#historyList .sl-history-entry').forEach(el=>{let s=true;if(wv&&el.dataset.week!==wv)s=false;if(uv&&el.dataset.by!==uv)s=false;el.style.display=s?'':'none'})}
+        if(wf)wf.addEventListener('change',af);if(uf)uf.addEventListener('change',af);
+        $('historyCanvas').onclick=()=>{if(history.length>1){slCloseModal('historyModal');slDrawGraph($('graphMaxCanvas'),history,800,350,true);slOpenModal('graphModal')}};
+        slOpenModal('historyModal');
+    }
+
+    function slDrawGraph(canvas,history,w,h,big){
+        const ctx=canvas.getContext('2d');canvas.width=w;canvas.height=h;ctx.clearRect(0,0,w,h);
+        let pts=[];let last={in_stock:null,in_use:null,scraped:null};
+        history.forEach(e=>{let m=e.details.match(/In Stock from (\d+) to (\d+)/);if(m)last.in_stock=+m[2];m=e.details.match(/In Use from (\d+) to (\d+)/);if(m)last.in_use=+m[2];m=e.details.match(/Scraped from (\d+) to (\d+)/);if(m)last.scraped=+m[2];pts.push({t:new Date(e.at),...last})});
+        if(pts.length<2){ctx.font=(big?16:13)+'px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.fillText('Insufficient data for graph',w/2,h/2);return}
+        if(!big&&pts.length>8)pts=pts.slice(-8);
+        const pad={l:big?70:45,r:big?30:15,t:big?50:20,b:big?45:25};const pw=w-pad.l-pad.r;const ph=h-pad.t-pad.b;
+        const vals=pts.flatMap(p=>[p.in_stock,p.in_use,p.scraped].filter(v=>v!==null));let mn=Math.min(...vals),mx=Math.max(...vals);if(mn===mx){mn-=1;mx+=1}const rn=mx-mn;const t0=pts[0].t.getTime(),t1=pts[pts.length-1].t.getTime();
+        const tx=t=>pad.l+pw*(t.getTime()-t0)/(t1-t0||1);const ty=v=>pad.t+ph*(1-(v-mn)/rn);
+        ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;const gc=big?5:3;
+        for(let i=0;i<=gc;i++){const y=pad.t+ph*i/gc;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();if(big){ctx.font='12px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='right';ctx.fillText(Math.round(mx-rn*i/gc),pad.l-8,y+4)}}
+        ctx.font=(big?12:10)+'px Inter,sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';const step=Math.max(1,Math.floor(pts.length/(big?8:4)));
+        for(let i=0;i<pts.length;i+=step)ctx.fillText(pts[i].t.toLocaleDateString(),tx(pts[i].t),h-(big?10:5));
+        const colors={in_stock:'#10b981',in_use:'#f59e0b',scraped:'#ef4444'};
+        Object.entries(colors).forEach(([key,color])=>{ctx.strokeStyle=color;ctx.lineWidth=big?3:2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();let st=false;pts.forEach(p=>{if(p[key]===null)return;const x=tx(p.t),y=ty(p[key]);if(!st){ctx.moveTo(x,y);st=true}else ctx.lineTo(x,y)});ctx.stroke();if(big){ctx.fillStyle=color;pts.forEach(p=>{if(p[key]===null)return;ctx.beginPath();ctx.arc(tx(p.t),ty(p[key]),4,0,Math.PI*2);ctx.fill()})}});
+        const lY=big?25:12;const lX=big?w-200:w-150;ctx.font=(big?13:10)+'px Inter,sans-serif';ctx.textAlign='left';
+        [['In Stock','#10b981'],['In Use','#f59e0b'],['Scraped','#ef4444']].forEach(([l,c],i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(lX+i*(big?80:55),lY,big?5:3,0,Math.PI*2);ctx.fill();ctx.fillText(l,lX+(big?10:6)+i*(big?80:55),lY+(big?5:3))});
+    }
+
+    setTimeout(()=>{const t=$('slToast');if(t)t.classList.remove('visible')},5000);
+    window.addEventListener('DOMContentLoaded',function(){slComputeStats();slUpdateBars()});
     </script>
-  </body>
+
+<!-- ═══════════ ONBOARDING TOUR ═══════════ -->
+<style>
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10010;display:none;pointer-events:none;transition:opacity .3s}.tour-backdrop.active{opacity:1}
+.tour-highlight{position:fixed;z-index:10011;border-radius:12px;box-shadow:0 0 0 4000px rgba(0,0,0,.5),0 0 0 3px #0066cc,0 0 20px rgba(0,102,204,.4);pointer-events:none;transition:all .35s ease;display:none}
+.tour-tooltip{position:fixed;z-index:10012;width:370px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:0;display:none;opacity:0;transform:translateY(10px);font-family:'Inter','Segoe UI',sans-serif}.tour-tooltip.visible{opacity:1;transform:translateY(0);transition:all .3s ease}
+.tour-tooltip-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:1rem 1.25rem;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:.75rem}
+.tour-tooltip-icon{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem}
+.tour-tooltip-title{color:#fff;font-size:1rem;font-weight:700;flex:1}.tour-tooltip-step{color:rgba(255,255,255,.8);font-size:.75rem;font-weight:500}
+.tour-tooltip-body{padding:1.25rem}.tour-tooltip-desc{font-size:.9rem;color:#334155;line-height:1.6}
+.tour-tooltip-footer{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem 1.25rem;gap:.5rem}
+.tour-progress-dots{display:flex;gap:6px;align-items:center}.tour-progress-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:all .3s}.tour-progress-dot.active{background:#0066cc;transform:scale(1.3)}.tour-progress-dot.completed{background:#0d9488}
+.tour-btn{padding:.55rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:.4rem;transition:all .2s}
+.tour-btn-next{background:linear-gradient(135deg,#0066cc,#0052a3);color:#fff}.tour-btn-next:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,102,204,.4)}
+.tour-btn-prev{background:#f1f5f9;color:#475569}.tour-btn-prev:hover{background:#e2e8f0}
+.tour-btn-skip{background:transparent;color:#94a3b8;font-weight:500}.tour-btn-skip:hover{color:#64748b}
+.tour-welcome-modal{position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .3s}.tour-welcome-modal.active{opacity:1;pointer-events:auto}
+.tour-welcome-card{background:#fff;border-radius:20px;overflow:hidden;width:440px;max-width:92vw;box-shadow:0 25px 60px rgba(0,0,0,.3);transform:scale(.9);transition:transform .3s ease}.tour-welcome-modal.active .tour-welcome-card{transform:scale(1)}
+.tour-welcome-header{background:linear-gradient(135deg,#0066cc 0%,#0d9488 100%);padding:2rem;text-align:center;color:#fff}.tour-welcome-header i{font-size:2.5rem;margin-bottom:.75rem;display:block}
+.tour-welcome-header h2{margin:0;font-size:1.5rem;font-weight:700}.tour-welcome-header p{margin:.5rem 0 0;opacity:.9;font-size:.95rem}
+.tour-welcome-body{padding:1.5rem 2rem 2rem}
+.tour-welcome-features{list-style:none;padding:0;margin:0 0 1.5rem}.tour-welcome-features li{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-size:.9rem;color:#334155}
+.tour-welcome-features li i{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;background:rgba(0,102,204,.1);color:#0066cc}
+.tour-welcome-actions{display:flex;gap:.75rem;justify-content:flex-end}
+.tour-confetti-container{position:fixed;inset:0;z-index:10025;pointer-events:none;overflow:hidden}
+.tour-confetti{position:absolute;width:8px;height:8px;animation:confettiFall 3s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+
+<div class="tour-backdrop" id="tourBackdrop"></div>
+<div class="tour-highlight" id="tourHighlight"></div>
+<div class="tour-tooltip" id="tourTooltip">
+    <div class="tour-tooltip-header">
+        <div class="tour-tooltip-icon" id="tourStepIcon"></div>
+        <div class="tour-tooltip-title" id="tourStepTitle"></div>
+        <div class="tour-tooltip-step" id="tourStepLabel"></div>
+    </div>
+    <div class="tour-tooltip-body"><div class="tour-tooltip-desc" id="tourStepDesc"></div></div>
+    <div class="tour-tooltip-footer">
+        <div class="tour-progress-dots" id="tourProgressDots"></div>
+        <div style="display:flex;gap:.5rem">
+            <button class="tour-btn tour-btn-skip" id="tourSkipBtn">Skip</button>
+            <button class="tour-btn tour-btn-prev" id="tourPrevBtn" style="display:none"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="tour-btn tour-btn-next" id="tourNextBtn">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourWelcomeModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header">
+            <i class="fas fa-layer-group"></i>
+            <h2>Sub Items Inventory</h2>
+            <p>Let's explore how to manage sub-level items</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-cubes"></i> Track stock, in-use, and scraped counts</li>
+                <li><i class="fas fa-search"></i> Search, sort, and filter items</li>
+                <li><i class="fas fa-th-large"></i> Switch between grid and table views</li>
+                <li><i class="fas fa-history"></i> View history and trends per item</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-skip" id="tourWelcomeSkip">Skip Tour</button>
+                <button class="tour-btn tour-btn-next" id="tourWelcomeStart"><i class="fas fa-play"></i> Start Tour</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-welcome-modal" id="tourCompleteModal">
+    <div class="tour-welcome-card">
+        <div class="tour-welcome-header" style="background:linear-gradient(135deg,#059669 0%,#0d9488 100%)">
+            <i class="fas fa-check-circle"></i>
+            <h2>Tour Complete!</h2>
+            <p>You're all set to manage sub-level items</p>
+        </div>
+        <div class="tour-welcome-body">
+            <ul class="tour-welcome-features">
+                <li><i class="fas fa-plus" style="background:rgba(5,150,105,.1);color:#059669"></i> Add items with the <strong>Add Sub Item</strong> button</li>
+                <li><i class="fas fa-mouse-pointer" style="background:rgba(5,150,105,.1);color:#059669"></i> Click any card to update counts</li>
+                <li><i class="fas fa-question-circle" style="background:rgba(0,102,204,.1);color:#0066cc"></i> Click <strong>?</strong> in the header to replay this tour</li>
+            </ul>
+            <div class="tour-welcome-actions">
+                <button class="tour-btn tour-btn-next" id="tourCompleteDone" style="background:linear-gradient(135deg,#059669,#0d9488)"><i class="fas fa-thumbs-up"></i> Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tour-confetti-container" id="tourConfetti"></div>
+
+<script>
+(function() {
+    'use strict';
+    var TOUR_KEY = 'sub_level_data';
+    var TOUR_STEPS = [
+        { target: '.sl-header', icon: 'fas fa-layer-group', title: 'Page Header', desc: 'Welcome to Sub Items! This page manages all sub-level inventory items for the current stream with full stock tracking.', position: 'bottom', padding: 8 },
+        { target: '.sl-stats', icon: 'fas fa-chart-bar', title: 'Inventory Stats', desc: 'Real-time totals at a glance — <strong>Total Items</strong>, <strong>In Stock</strong>, <strong>In Use</strong>, and <strong>Scraped</strong> counts across all sub-items.', position: 'bottom', padding: 8 },
+        { target: '#addItemToggle', icon: 'fas fa-plus', title: 'Add New Items', desc: 'Click here to expand the inline form and quickly add a new sub-item to this stream.', position: 'bottom', padding: 4 },
+        { target: '.sl-toolbar', icon: 'fas fa-sliders-h', title: 'Search, Sort & View', desc: 'Use the toolbar to <strong>search</strong> by name, <strong>sort</strong> by any metric, toggle between <strong>grid</strong> and <strong>table</strong> views, or <strong>export</strong> data.', position: 'bottom', padding: 8 },
+        { target: '.sl-grid .sl-card:first-child', icon: 'fas fa-cube', title: 'Item Cards', desc: 'Each card shows stock/use/scraped counts with a progress bar. Click a card to update counts, or use the <strong>edit</strong>/<strong>delete</strong> buttons.', position: 'bottom', padding: 6, optional: true },
+        { target: '#saveAllNotesBtn', icon: 'fas fa-save', title: 'Save Notes', desc: 'Add notes to any card and click this button to <strong>save them all at once</strong>.', position: 'top', padding: 4 }
+    ];
+
+    var currentStep = 0, activeSteps = [], tourActive = false;
+    var backdrop = document.getElementById('tourBackdrop');
+    var highlight = document.getElementById('tourHighlight');
+    var tooltip = document.getElementById('tourTooltip');
+    var stepIcon = document.getElementById('tourStepIcon');
+    var stepTitle = document.getElementById('tourStepTitle');
+    var stepLabel = document.getElementById('tourStepLabel');
+    var stepDesc = document.getElementById('tourStepDesc');
+    var progressDots = document.getElementById('tourProgressDots');
+    var nextBtn = document.getElementById('tourNextBtn');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var skipBtn = document.getElementById('tourSkipBtn');
+    var welcomeModal = document.getElementById('tourWelcomeModal');
+    var completeModal = document.getElementById('tourCompleteModal');
+    var confettiEl = document.getElementById('tourConfetti');
+
+    var CSRF_TOKEN = '{{ csrf_token }}';
+    var LS_KEY = 'tour_done_' + TOUR_KEY;
+    function markComplete() {
+        try { localStorage.setItem(LS_KEY, '1'); } catch(e) {}
+        fetch(_buPrefix + '/api/onboarding/complete/', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({ tour_key: TOUR_KEY })
+        }).catch(function(){});
+    }
+    function filterSteps() { activeSteps = TOUR_STEPS.filter(function(s) { return !!document.querySelector(s.target); }); }
+    function buildDots() {
+        var h = '';
+        for (var i = 0; i < activeSteps.length; i++) {
+            var c = i < currentStep ? 'completed' : (i === currentStep ? 'active' : '');
+            h += '<div class="tour-progress-dot ' + c + '"></div>';
+        }
+        progressDots.innerHTML = h;
+    }
+    function positionTooltip(el, pos) {
+        var r = el.getBoundingClientRect(), tw = 370, th = tooltip.offsetHeight || 220, m = 16, t, l;
+        if (pos === 'right') { t = r.top + r.height/2 - th/2; l = r.right + m; if (l + tw > window.innerWidth) l = r.left - tw - m; }
+        else if (pos === 'left') { t = r.top + r.height/2 - th/2; l = r.left - tw - m; if (l < 0) l = r.right + m; }
+        else if (pos === 'top') { t = r.top - th - m; l = r.left + r.width/2 - tw/2; if (t < 0) t = r.bottom + m; }
+        else { t = r.bottom + m; l = r.left + r.width/2 - tw/2; if (t + th > window.innerHeight) t = r.top - th - m; }
+        if (l < 8) l = 8; if (l + tw > window.innerWidth - 8) l = window.innerWidth - tw - 8;
+        if (t < 8) t = 8; if (t + th > window.innerHeight - 8) t = window.innerHeight - th - 8;
+        tooltip.style.top = t + 'px'; tooltip.style.left = l + 'px';
+    }
+    function showStep(idx) {
+        currentStep = idx;
+        var step = activeSteps[idx], el = document.querySelector(step.target);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() {
+            var r = el.getBoundingClientRect(), pad = step.padding || 0;
+            highlight.style.display = 'block';
+            highlight.style.top = (r.top - pad) + 'px'; highlight.style.left = (r.left - pad) + 'px';
+            highlight.style.width = (r.width + pad*2) + 'px'; highlight.style.height = (r.height + pad*2) + 'px';
+            stepIcon.innerHTML = '<i class="' + step.icon + '"></i>';
+            stepTitle.textContent = step.title;
+            stepLabel.textContent = 'Step ' + (idx+1) + ' of ' + activeSteps.length;
+            stepDesc.innerHTML = step.desc;
+            buildDots();
+            prevBtn.style.display = idx > 0 ? 'inline-flex' : 'none';
+            nextBtn.innerHTML = idx === activeSteps.length - 1 ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+            tooltip.style.display = 'block'; tooltip.classList.remove('visible');
+            positionTooltip(el, step.position);
+            requestAnimationFrame(function() { tooltip.classList.add('visible'); });
+        }, 350);
+    }
+    function startTour() {
+        welcomeModal.classList.remove('active');
+        filterSteps(); if (!activeSteps.length) return;
+        tourActive = true; currentStep = 0;
+        backdrop.style.display = 'block'; backdrop.style.pointerEvents = 'auto'; backdrop.classList.add('active');
+        showStep(0);
+    }
+    function endTour(completed) {
+        tourActive = false; backdrop.classList.remove('active');
+        highlight.style.display = 'none'; tooltip.style.display = 'none'; tooltip.classList.remove('visible');
+        backdrop.style.display = 'none'; backdrop.style.pointerEvents = 'none';
+        if (completed) { markComplete(); fireConfetti(); completeModal.classList.add('active'); }
+    }
+    function fireConfetti() {
+        var colors = ['#0066cc','#0d9488','#0891b2','#059669','#FFD200','#dc3545','#0B5FFF'];
+        for (var i = 0; i < 80; i++) {
+            var p = document.createElement('div'); p.className = 'tour-confetti';
+            p.style.left = Math.random()*100+'%'; p.style.top = '-10px';
+            p.style.width = (Math.random()*8+5)+'px'; p.style.height = (Math.random()*8+5)+'px';
+            p.style.background = colors[Math.floor(Math.random()*colors.length)];
+            p.style.animationDuration = (Math.random()*2+2)+'s'; p.style.animationDelay = (Math.random()*1)+'s';
+            p.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+            confettiEl.appendChild(p);
+        }
+        setTimeout(function() { confettiEl.innerHTML = ''; }, 5000);
+    }
+
+    nextBtn.addEventListener('click', function() { if (currentStep < activeSteps.length - 1) showStep(currentStep+1); else endTour(true); });
+    prevBtn.addEventListener('click', function() { if (currentStep > 0) showStep(currentStep-1); });
+    skipBtn.addEventListener('click', function() { markComplete(); endTour(false); });
+    document.getElementById('tourWelcomeStart').addEventListener('click', startTour);
+    document.getElementById('tourWelcomeSkip').addEventListener('click', function() { welcomeModal.classList.remove('active'); markComplete(); });
+    document.getElementById('tourCompleteDone').addEventListener('click', function() { completeModal.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (tourActive) { markComplete(); endTour(false); }
+            else if (welcomeModal.classList.contains('active')) { welcomeModal.classList.remove('active'); markComplete(); }
+            else if (completeModal.classList.contains('active')) { completeModal.classList.remove('active'); }
+        }
+    });
+    window.addEventListener('resize', function() { if (tourActive && activeSteps[currentStep]) showStep(currentStep); });
+
+    var restartBtn = document.getElementById('restartTourBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function() {
+            try { localStorage.removeItem(LS_KEY); } catch(e) {}
+            fetch(_buPrefix + '/api/onboarding/reset/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify({ tour_key: TOUR_KEY })
+            }).then(function(){ welcomeModal.classList.add('active'); })
+              .catch(function(){ welcomeModal.classList.add('active'); });
+        });
+    }
+
+    {% if show_onboarding_tour %}
+    document.addEventListener('DOMContentLoaded', function() {
+        var alreadyDone = false;
+        try { alreadyDone = localStorage.getItem(LS_KEY) === '1'; } catch(e) {}
+        if (!alreadyDone) {
+            setTimeout(function() { welcomeModal.classList.add('active'); }, 1200);
+        }
+    });
+    {% endif %}
+})();
+</script>
+</body>
 </html>
 {% endblock %}

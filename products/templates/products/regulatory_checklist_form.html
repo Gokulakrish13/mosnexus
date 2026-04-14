@@ -1,0 +1,765 @@
+{% extends 'products/base_minimal.html' %}
+{% load static %}
+{% load product_filters %}
+
+{% block title %}{% if checklist %}Edit{% else %}Create{% endif %} Regulatory Checklist - {{ stream }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --emerald: #059669;
+        --emerald-dark: #047857;
+        --emerald-light: #d1fae5;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --danger-red: #ef4444;
+        --warning-amber: #f59e0b;
+        --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* ── Page Header ────────────────────────────────────── */
+    .page-header {
+        background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 50%, #065f46 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content { position: relative; z-index: 1; }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 i {
+        font-size: 1.75rem;
+        background: rgba(255,255,255,0.2);
+        padding: 0.75rem;
+        border-radius: 14px;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header .subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+        max-width: 700px;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .breadcrumb-nav a { color: white; text-decoration: none; }
+    .breadcrumb-nav a:hover { text-decoration: underline; }
+    .breadcrumb-nav .separator { opacity: 0.6; font-size: 0.7rem; }
+
+    /* ── Form Card ──────────────────────────────────────── */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child { border-bottom: none; }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header .icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .icon-box.emerald  { background: var(--emerald-light); color: var(--emerald); }
+    .icon-box.amber    { background: #fef3c7; color: #d97706; }
+    .icon-box.blue     { background: #dbeafe; color: #2563eb; }
+    .icon-box.purple   { background: #e8f0fe; color: #0044CC; }
+
+    .section-header .section-title h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-header .section-title p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.15rem 0 0;
+    }
+
+    /* ── Form Grid ──────────────────────────────────────── */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-grid .full-width { grid-column: 1 / -1; }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+    }
+
+    .form-group label .required { color: var(--danger-red); margin-left: 2px; }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        background: white;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--emerald);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    }
+
+    select.form-control { cursor: pointer; }
+    textarea.form-control { min-height: 100px; resize: vertical; }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.35rem;
+    }
+
+    /* ── Checklist Items Builder ─────────────────────────── */
+    .items-builder {
+        background: var(--bg-light);
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .items-builder-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .items-builder-header h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .items-builder-header .item-count {
+        background: var(--emerald);
+        color: white;
+        font-size: 0.72rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 700;
+    }
+
+    .checklist-item-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 0.75rem;
+        position: relative;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .checklist-item-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .item-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .item-card-header .item-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .item-badge .item-number {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .item-badge span:last-child {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .btn-remove-item {
+        background: none;
+        border: 1px solid #fecaca;
+        color: var(--danger-red);
+        border-radius: 8px;
+        padding: 0.35rem 0.6rem;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.15s ease;
+    }
+
+    .btn-remove-item:hover {
+        background: #fef2f2;
+        border-color: var(--danger-red);
+    }
+
+    .item-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .item-fields .full-width { grid-column: 1 / -1; }
+
+    .item-fields label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .item-fields .form-control {
+        padding: 0.6rem 0.85rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    .item-fields textarea.form-control { min-height: 60px; }
+
+    .items-hint {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: var(--emerald-light);
+        border-radius: 8px;
+        font-size: 0.78rem;
+        color: var(--emerald-dark);
+    }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-sm {
+        padding: 0.55rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover { background: var(--bg-light); }
+
+    .btn-outline-primary {
+        background: var(--emerald-light);
+        color: var(--emerald-dark);
+        border: 1.5px solid var(--emerald);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--emerald);
+        color: white;
+    }
+
+    .form-actions {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 768px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .item-fields { grid-template-columns: 1fr; }
+        .form-actions { flex-direction: column; gap: 0.75rem; }
+        .form-actions .btn { width: 100%; justify-content: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="breadcrumb-nav">
+                <a href="{% url 'compliance_dashboard' stream=stream %}">Compliance</a>
+                <i class="fas fa-chevron-right separator"></i>
+                <a href="{% url 'regulatory_checklists_list' stream=stream %}">Checklists</a>
+                <i class="fas fa-chevron-right separator"></i>
+                <span>{% if checklist %}Edit{% else %}Create{% endif %}</span>
+            </div>
+            <h1>
+                <i class="fas fa-tasks"></i>
+                {% if checklist %}Edit{% else %}Create{% endif %} Regulatory Checklist
+            </h1>
+            <p class="subtitle">
+                {% if checklist %}Update checklist details and verification items{% else %}Define a new compliance checklist with verification items for your stream{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" id="checklistForm">
+        {% csrf_token %}
+        {% if form_error %}
+        <div style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ form_error }}
+        </div>
+        {% endif %}
+
+        <!-- Basic Information -->
+        <div class="form-card">
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="icon-box emerald">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="section-title">
+                        <h3>Basic Information</h3>
+                        <p>Title, description and linked requirement</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_title">Checklist Title <span class="required">*</span></label>
+                        <input type="text" name="title" id="id_title" class="form-control"
+                               value="{{ checklist.title|default:'' }}"
+                               placeholder="e.g., ISO 9001 Quality Management Checklist" required>
+                        <p class="help-text">Give this checklist a clear, descriptive name</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_regulatory_requirement">Linked Requirement</label>
+                        <select name="regulatory_requirement" id="id_regulatory_requirement" class="form-control">
+                            <option value="">— None —</option>
+                            {% for req in requirements %}
+                                <option value="{{ req.id }}" {% if checklist.regulatory_requirement_id == req.id %}selected{% endif %}>
+                                    {{ req.title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-text">Optional: link to an existing regulatory requirement</p>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="id_description">Description</label>
+                        <textarea name="description" id="id_description" class="form-control"
+                                  placeholder="Describe the purpose and scope of this checklist…">{{ checklist.description|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment & Schedule -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="icon-box amber">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="section-title">
+                        <h3>Assignment &amp; Schedule</h3>
+                        <p>Who is responsible and when is it due</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_assigned_to">Assigned To</label>
+                        <select name="assigned_to" id="id_assigned_to" class="form-control">
+                            <option value="">— Select Person —</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}" {% if checklist.assigned_to_id == user.id %}selected{% endif %}>
+                                    {{ user.get_full_name|default:user.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-text">Person responsible for completing this checklist</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_target_date">Target Date</label>
+                        <input type="date" name="target_date" id="id_target_date" class="form-control"
+                               value="{{ checklist.target_date|date:'Y-m-d'|default:'' }}">
+                        <p class="help-text">When should this checklist be completed?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="icon-box blue">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <div class="section-title">
+                        <h3>Additional Notes</h3>
+                        <p>Any extra context or instructions</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="id_notes">Notes</label>
+                        <textarea name="notes" id="id_notes" class="form-control"
+                                  placeholder="Add any additional notes or instructions…">{{ checklist.notes|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checklist Items -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="icon-box purple">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <div class="section-title">
+                        <h3>Verification Items</h3>
+                        <p>Define the individual checklist items to verify</p>
+                    </div>
+                </div>
+
+                <div class="items-builder">
+                    <div class="items-builder-header">
+                        <h4>
+                            <i class="fas fa-layer-group"></i>
+                            Items
+                            <span class="item-count" id="itemCountBadge">1</span>
+                        </h4>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addChecklistItem()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+
+                    <div id="checklistItems">
+                        {% if checklist and checklist.items.all %}
+                            {% for item in checklist.items.all %}
+                            <div class="checklist-item-card" data-index="{{ forloop.counter }}">
+                                <div class="item-card-header">
+                                    <div class="item-badge">
+                                        <span class="item-number">{{ forloop.counter }}</span>
+                                        <span>Item {{ forloop.counter }}</span>
+                                    </div>
+                                    <button type="button" class="btn-remove-item" onclick="removeChecklistItem(this)">
+                                        <i class="fas fa-trash-alt"></i> Remove
+                                    </button>
+                                </div>
+                                <div class="item-fields">
+                                    <div class="full-width">
+                                        <label>Description <span class="required">*</span></label>
+                                        <input type="text" name="item_description" class="form-control"
+                                               value="{{ item.description }}" placeholder="What needs to be verified…" required>
+                                    </div>
+                                    <div class="full-width">
+                                        <label>Guidance</label>
+                                        <textarea name="item_guidance" class="form-control"
+                                                  placeholder="Step-by-step guidance for this item…">{{ item.guidance|default:'' }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label>Priority</label>
+                                        <select name="item_priority" class="form-control">
+                                            {% for val, display in priority_choices %}
+                                                <option value="{{ val }}" {% if item.priority == val %}selected{% endif %}>{{ display }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Due Date</label>
+                                        <input type="date" name="item_due_date" class="form-control"
+                                               value="{{ item.due_date|date:'Y-m-d'|default:'' }}">
+                                    </div>
+                                    <div class="full-width">
+                                        <label>Evidence Required</label>
+                                        <input type="text" name="item_evidence_required" class="form-control"
+                                               value="{{ item.evidence_required|default:'' }}" placeholder="What evidence is needed…">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="checklist-item-card" data-index="1">
+                                <div class="item-card-header">
+                                    <div class="item-badge">
+                                        <span class="item-number">1</span>
+                                        <span>Item 1</span>
+                                    </div>
+                                    <button type="button" class="btn-remove-item" onclick="removeChecklistItem(this)">
+                                        <i class="fas fa-trash-alt"></i> Remove
+                                    </button>
+                                </div>
+                                <div class="item-fields">
+                                    <div class="full-width">
+                                        <label>Description <span class="required">*</span></label>
+                                        <input type="text" name="item_description" class="form-control"
+                                               placeholder="What needs to be verified…" required>
+                                    </div>
+                                    <div class="full-width">
+                                        <label>Guidance</label>
+                                        <textarea name="item_guidance" class="form-control"
+                                                  placeholder="Step-by-step guidance for this item…"></textarea>
+                                    </div>
+                                    <div>
+                                        <label>Priority</label>
+                                        <select name="item_priority" class="form-control">
+                                            {% for val, display in priority_choices %}
+                                                <option value="{{ val }}" {% if val == 'medium' %}selected{% endif %}>{{ display }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Due Date</label>
+                                        <input type="date" name="item_due_date" class="form-control">
+                                    </div>
+                                    <div class="full-width">
+                                        <label>Evidence Required</label>
+                                        <input type="text" name="item_evidence_required" class="form-control"
+                                               placeholder="What evidence is needed…">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="items-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Add all items that need to be verified as part of this compliance checklist. Each item can have its own priority, evidence requirement and due date.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'regulatory_checklists_list' stream=stream %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> {% if checklist %}Update{% else %}Create{% endif %} Checklist
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    let itemCount = document.querySelectorAll('.checklist-item-card').length;
+
+    function updateItemCount() {
+        const badge = document.getElementById('itemCountBadge');
+        if (badge) badge.textContent = document.querySelectorAll('.checklist-item-card').length;
+    }
+
+    function getPriorityOptions() {
+        // Build options from the first existing priority select
+        const firstSelect = document.querySelector('select[name="item_priority"]');
+        return firstSelect ? firstSelect.innerHTML : `
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+        `;
+    }
+
+    function addChecklistItem() {
+        itemCount++;
+        const container = document.getElementById('checklistItems');
+        const card = document.createElement('div');
+        card.className = 'checklist-item-card';
+        card.dataset.index = itemCount;
+        card.innerHTML = `
+            <div class="item-card-header">
+                <div class="item-badge">
+                    <span class="item-number">${itemCount}</span>
+                    <span>Item ${itemCount}</span>
+                </div>
+                <button type="button" class="btn-remove-item" onclick="removeChecklistItem(this)">
+                    <i class="fas fa-trash-alt"></i> Remove
+                </button>
+            </div>
+            <div class="item-fields">
+                <div class="full-width">
+                    <label>Description <span class="required">*</span></label>
+                    <input type="text" name="item_description" class="form-control"
+                           placeholder="What needs to be verified…" required>
+                </div>
+                <div class="full-width">
+                    <label>Guidance</label>
+                    <textarea name="item_guidance" class="form-control"
+                              placeholder="Step-by-step guidance for this item…"></textarea>
+                </div>
+                <div>
+                    <label>Priority</label>
+                    <select name="item_priority" class="form-control">
+                        ${getPriorityOptions()}
+                    </select>
+                </div>
+                <div>
+                    <label>Due Date</label>
+                    <input type="date" name="item_due_date" class="form-control">
+                </div>
+                <div class="full-width">
+                    <label>Evidence Required</label>
+                    <input type="text" name="item_evidence_required" class="form-control"
+                           placeholder="What evidence is needed…">
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+        card.querySelector('input[name="item_description"]').focus();
+        updateItemCount();
+    }
+
+    function removeChecklistItem(el) {
+        const items = document.querySelectorAll('.checklist-item-card');
+        if (items.length > 1) {
+            el.closest('.checklist-item-card').remove();
+            renumberItems();
+        } else {
+            alert('At least one checklist item is required.');
+        }
+    }
+
+    function renumberItems() {
+        const items = document.querySelectorAll('.checklist-item-card');
+        items.forEach((card, idx) => {
+            const num = idx + 1;
+            card.dataset.index = num;
+            card.querySelector('.item-number').textContent = num;
+            const label = card.querySelector('.item-badge span:last-child');
+            if (label) label.textContent = 'Item ' + num;
+        });
+        itemCount = items.length;
+        updateItemCount();
+    }
+
+    // Init count on load
+    updateItemCount();
+</script>
+{% endblock %}
